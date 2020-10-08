@@ -1,1 +1,1 @@
-# grobid-clinical-report
+# grobid-medical-report
