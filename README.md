@@ -18,7 +18,10 @@ In general, the model will be placed under `PATH-TO-GROBID/grobid/grobid-home/mo
 
 Try compiling everything with:
 
-> ./gradlew clean build
+> ./gradlew clean install
+
+To build grobid-medical-report under the proxy, the proxy host and port need to be added : 
+>  ./gradlew -DproxySet=true -DproxyHost=[proxy_host] -DproxyPort=[proxy_port] clean install
 
 ## Start the Service
 
