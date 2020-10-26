@@ -77,10 +77,10 @@ public class MedicalReportTrainer extends AbstractTrainer {
                                   double splitRatio) {
         int totalExamples = 0;
         try {
-            System.out.println("sourceTEIPathLabel: " + sourceTEIPathLabel);
-            System.out.println("sourceRawPathLabel: " + sourceRawPathLabel);
-            System.out.println("trainingOutputPath: " + trainingOutputPath);
-            System.out.println("evalOutputPath: " + evalOutputPath);
+            System.out.println("TEI Path Label: " + sourceTEIPathLabel);
+            System.out.println("Raw Path Label: " + sourceRawPathLabel);
+            System.out.println("Training Output Path: " + trainingOutputPath);
+            System.out.println("Eval Output Path: " + evalOutputPath);
 
             // we need first to generate the labeled files from the TEI annotated files
             File input = new File(sourceTEIPathLabel);
@@ -237,7 +237,7 @@ public class MedicalReportTrainer extends AbstractTrainer {
     }
 
     public String splitTrainEvaluate(Double split, boolean random) {
-        System.out.println("PAths :\n" + getCorpusPath() + "\n" + GrobidProperties.getModelPath(model).getAbsolutePath() + "\n" + getTempTrainingDataPath().getAbsolutePath() + "\n" + getTempEvaluationDataPath().getAbsolutePath() + " \nrand " + random);
+        System.out.println("Paths :\n" + getCorpusPath() + "\n" + GrobidProperties.getModelPath(model).getAbsolutePath() + "\n" + getTempTrainingDataPath().getAbsolutePath() + "\n" + getTempEvaluationDataPath().getAbsolutePath() + " \nrand " + random);
 
         File trainDataPath = getTempTrainingDataPath();
         File evalDataPath = getTempEvaluationDataPath();

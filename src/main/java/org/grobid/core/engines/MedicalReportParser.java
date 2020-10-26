@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  *
  * Tanti, 2020
  */
-public class MedicalParser extends AbstractParser {
+public class MedicalReportParser extends AbstractParser {
 
 	/*
         9 labels for this model:
@@ -51,7 +51,23 @@ public class MedicalParser extends AbstractParser {
             other (<other>): other
 	*/
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MedicalParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportParser.class);
+
+    private static volatile MedicalReportParser instance;
+
+    public static MedicalReportParser getInstance() {
+        if (instance == null) {
+            getNewInstance();
+        }
+        return instance;
+    }
+
+    /**
+     * Create a new instance.
+     */
+    private static synchronized void getNewInstance() {
+        instance = new MedicalReportParser();
+    }
 
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
@@ -71,7 +87,7 @@ public class MedicalParser extends AbstractParser {
     /**
      * TODO some documentation...
      */
-    public MedicalParser() {
+    public MedicalReportParser() {
         super(GrobidMedicalReportModel.MEDICAL_REPORT);
     }
 
@@ -595,28 +611,80 @@ public class MedicalParser extends AbstractParser {
         return fulltext.toString();
     }
 
+    /**
+     * Generate training data with the current model using new files located in a given directory.
+     * the generated training data can then be corrected manually to be used for updating the
+     * astro CRF model.
+     */
+    @SuppressWarnings({"UnusedParameters"})
+    public int createTrainingBatch(String inputDirectory,
+                                   String outputDirectory,
+                                   int ind) throws IOException {
+        try {
+            File path = new File(inputDirectory);
+            if (!path.exists()) {
+                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
+            }
+
+            File pathOut = new File(outputDirectory);
+            if (!pathOut.exists()) {
+                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
+            }
+
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+            for (final File file : refFiles) {
+                try {
+                    createTrainingMedical(file.getAbsolutePath(), outputDirectory, n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occured while processing the following pdf: "
+                        + file.getPath() + ": " + exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+        }
+    }
 
     /**
      * Process the content of the specified pdf and format the result as training data.
      *
      * @param inputFile    input file
-     * @param pathFullText path to fulltext
-     * @param pathTEI      path to TEI
+     * @param outputFile path to fulltext
      * @param id           id
      */
-    public void createTrainingMedical(File inputFile,
-                                      String pathFullText,
-                                      String pathTEI,
+    public void createTrainingMedical(String inputFile,
+                                      String outputFile,
                                       int id) {
         DocumentSource documentSource = null;
         try {
-            // File file = new File(inputFile);
+            File file = new File(inputFile);
 
             //documentSource = DocumentSource.fromPdf(file);
-            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
             Document doc = new Document(documentSource);
 
-            String PDFFileName = inputFile.getName();
+            String PDFFileName = file.getName();
             doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
 
             if (doc.getBlocks() == null) {
@@ -629,7 +697,7 @@ public class MedicalParser extends AbstractParser {
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write the full text untagged (but featurized)
-            String outPathFulltext = pathFullText + File.separator +
+            String outPathFulltext = outputFile + File.separator +
                 PDFFileName.replace(".pdf", ".training.medical");
             Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFulltext), false), "UTF-8");
             writer.write(fulltext + "\n");
@@ -640,7 +708,7 @@ public class MedicalParser extends AbstractParser {
             for (LayoutToken txtline : tokenizations) {
                 rawtxt.append(txtline.getText());
             }
-            String outPathRawtext = pathFullText + File.separator +
+            String outPathRawtext = outputFile + File.separator +
                 PDFFileName.replace(".pdf", ".training.medical.rawtxt");
             FileUtils.writeStringToFile(new File(outPathRawtext), rawtxt.toString(), "UTF-8");
 
@@ -649,7 +717,7 @@ public class MedicalParser extends AbstractParser {
                 StringBuffer bufferFulltext = trainingExtraction(rese, tokenizations, doc);
 
                 // write the TEI file to reflect the extact layout of the text as extracted from the pdf
-                writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
+                writer = new OutputStreamWriter(new FileOutputStream(new File(outputFile +
                     File.separator +
                     PDFFileName.replace(".pdf", ".training.medical.tei.xml")), false), "UTF-8");
                 writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
