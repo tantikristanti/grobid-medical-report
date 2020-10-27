@@ -41,6 +41,16 @@ curl -GET --data-urlencode "text=Text to be processed." localhost:8080/service/p
 
 ## Training and Evaluation
 
+
+To train and to evaluate the model under the proxy, the proxy host and port need to be added : 
+Example : 
+```
+> cd PATH-TO-GROBID/grobid/grobid-medical-report
+
+> ./gradlew train_medical_report -DproxySet=true -DproxyHost=
+  [proxy_host] -DproxyPort=[proxy_port]
+```
+
 ### Training Only
 
 For training the medical-report model with all the available training data:
