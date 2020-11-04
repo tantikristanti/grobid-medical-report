@@ -88,7 +88,7 @@ By default, 80% of the available data is for training and the remaining for eval
 To generate new annotated data in TEI format based on the current model : 
 
 ```
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ ~/-dOut path_to_output_directory -exe createTraining
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTraining
 ```
 
 We need to define the path to the input and output directories.
