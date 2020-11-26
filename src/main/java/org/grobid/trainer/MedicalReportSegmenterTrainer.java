@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * This class is taken and adapted from SegmentationTrainer class for the Medical model
+ * A class to train and evaluate medical report segmenter model.
  *
- * Created: Tanti, 2020
+ * Tanti, 2020
  */
-public class MedicalReportTrainer extends AbstractTrainer {
+public class MedicalReportSegmenterTrainer extends AbstractTrainer {
 
-    public MedicalReportTrainer() {
-        super(GrobidMedicalReportModel.MEDICAL_REPORT);
+    public MedicalReportSegmenterTrainer() {
+        super(GrobidMedicalReportModel.MEDICAL_REPORT_SEGMENTER);
 
         // adjusting CRF training parameters for this model (only with Wapiti)
         epsilon = 0.0000001;
@@ -265,11 +265,11 @@ public class MedicalReportTrainer extends AbstractTrainer {
     }
 
     protected final File getCorpusPath() {
-        return new File(MedicalReportProperties.get("grobid.medical.report.corpusPath"));
+        return new File(MedicalReportProperties.get("grobid.medical.report.segmenter.corpusPath"));
     }
 
     protected final File getTemplatePath() {
-        return new File(MedicalReportProperties.get("grobid.medical.report.templatePath"));
+        return new File(MedicalReportProperties.get("grobid.medical.report.segmenter.templatePath"));
     }
 
     /**
@@ -296,7 +296,7 @@ public class MedicalReportTrainer extends AbstractTrainer {
             exp.printStackTrace();
         }
 
-        Trainer trainer = new MedicalReportTrainer();
+        Trainer trainer = new MedicalReportSegmenterTrainer();
         AbstractTrainer.runTraining(trainer);
         AbstractTrainer.runEvaluation(trainer);
     }

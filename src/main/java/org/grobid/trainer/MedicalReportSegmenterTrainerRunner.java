@@ -10,7 +10,7 @@ import java.util.Arrays;
  * A class for training a target model.
  *
  */
-public class MedicalReportTrainerRunner {
+public class MedicalReportSegmenterTrainerRunner {
 
     private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {medical-report} "
             + "-s { [0.0 - 1.0] - split ratio, optional} "
@@ -112,7 +112,7 @@ public class MedicalReportTrainerRunner {
                     USAGE);
         }
 
-        MedicalReportTrainer trainer = new MedicalReportTrainer();
+        MedicalReportSegmenterTrainer trainer = new MedicalReportSegmenterTrainer();
 
         if (breakParams)
             trainer.setParams(epsilon, window, nbMaxIterations);

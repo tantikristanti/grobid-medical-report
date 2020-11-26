@@ -134,8 +134,8 @@ task integration(type: Test) {
 
 def trainerTasks = [
         //Training models
-        "train_medical_report"              : "org.grobid.trainer.MedicalReportTrainer",
-        "trainer"                           : "org.grobid.trainer.MedicalReportTrainerRunner"
+        "train_medical_report_segmenter"    : "org.grobid.trainer.MedicalReportSegmenterTrainer",
+        "train_header_medical_report"       : "org.grobid.trainer.HeaderMedicalReportTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->
@@ -154,23 +154,39 @@ ext.getArg = { propName, defaultVal ->
 task copyModels(type: Copy) {
     from "${rootDir}/resources/models"
     include "*"
-    into "${rootDir}/../grobid-home/models/medical-report/"
+    into "${rootDir}/../grobid-home/models/"
 }
 
 // Evaluation
-// as running this command: $ gradle eval_medical_report -gH /path/to/grobid-home
-task eval_medical_report(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    main = 'org.grobid.trainer.MedicalReportTrainerRunner'
+// as running this command: $ ./gradlew eval_medical_report_segmenter -gH /path/to/grobid-home
+task eval_medical_report_segmenter(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.MedicalReportSegmenterTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 1, 'medical_report', '-gH', getArg('gH', '../grobid-home')
+    args 1, 'medical_report_segmenter', '-gH', getArg('gH', '../grobid-home')
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ gradle eval_medical_report_split -gH /path/to/grobid-home
-task eval_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    main = 'org.grobid.trainer.MedicalReportTrainerRunner'
+// as running this command: $ ./gradlew eval_medical_report_segmenter_split -gH /path/to/grobid-home
+task eval_medical_report_segmenter_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.MedicalReportSegmenterTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 2, 'medical_report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    args 2, 'medical_report_segmenter', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_header_medical_report -gH /path/to/grobid-home
+task eval_header_medical_report(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.HeaderMedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 1, 'header_medical_report', '-gH', getArg('gH', '../grobid-home')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_header_medical_report_split -gH /path/to/grobid-home
+task eval_header_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.HeaderMedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 2, 'header_medical_report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 

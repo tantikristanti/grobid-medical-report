@@ -47,7 +47,7 @@ Example :
 ```
 > cd PATH-TO-GROBID/grobid/grobid-medical-report
 
-> ./gradlew train_medical_report -DproxySet=true -DproxyHost=
+> ./gradlew train_medical_report_segmenter -DproxySet=true -DproxyHost=
   [proxy_host] -DproxyPort=[proxy_port]
 ```
 
@@ -58,22 +58,22 @@ For training the medical-report model with all the available training data:
 ```
 > cd PATH-TO-GROBID/grobid/grobid-medical-report
 
-> ./gradlew train_medical_report
+> ./gradlew train_medical_report_segmenter
 ```
 
-The training data must be under ```grobid-medical-report/resources/dataset/medical-report/corpus```
+The training data must be under ```grobid-medical-report/resources/dataset/medical-report-segmenter/corpus```
 
 ### Evaluating Only
 
-For evaluating under the labeled data under ```grobid-medical-report/resources/dataset/medical-report/evaluation```, use the command:
+For evaluating under the labeled data under ```grobid-medical-report/resources/dataset/medical-report-segmenter/evaluation```, use the command:
 
 ```
->  ./gradlew eval_medical_report
+>  ./gradlew eval_medical_report_segmenter
 ```
 
 ### Automatic Corpus Split
 
-To split automatically and randomly the available annotated data (under ```resources/dataset/medical-report/corpus/```) into a training set and an evaluation set, we use the following commands:
+To split automatically and randomly the available annotated data (under ```resources/dataset/medical-report-segmenter/corpus/```) into a training set and an evaluation set, we use the following commands:
 
 ```
 >  ./gradlew eval_medical_report_split

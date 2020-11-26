@@ -53,7 +53,7 @@ public class MedicalReportParser extends AbstractParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportParser.class);
 
-    private static volatile MedicalReportParser instance;
+    /*private static volatile MedicalReportParser instance;
 
     public static MedicalReportParser getInstance() {
         if (instance == null) {
@@ -62,12 +62,12 @@ public class MedicalReportParser extends AbstractParser {
         return instance;
     }
 
-    /**
+    *//**
      * Create a new instance.
-     */
+     *//*
     private static synchronized void getNewInstance() {
         instance = new MedicalReportParser();
-    }
+    }*/
 
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
@@ -84,11 +84,9 @@ public class MedicalReportParser extends AbstractParser {
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     private FeatureFactory featureFactory = FeatureFactory.getInstance();
 
-    /**
-     * TODO some documentation...
-     */
+
     public MedicalReportParser() {
-        super(GrobidMedicalReportModel.MEDICAL_REPORT);
+        super(GrobidMedicalReportModel.MEDICAL_REPORT_SEGMENTER);
     }
 
     /**
@@ -616,8 +614,8 @@ public class MedicalReportParser extends AbstractParser {
      * the generated training data can then be corrected manually to be used for updating the
      * astro CRF model.
      */
-    @SuppressWarnings({"UnusedParameters"})
-    public int createTrainingBatch(String inputDirectory,
+
+    public int createTrainingMedicalSegmentationBatch(String inputDirectory,
                                    String outputDirectory,
                                    int ind) throws IOException {
         try {
@@ -651,7 +649,7 @@ public class MedicalReportParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    createTrainingMedical(file.getAbsolutePath(), outputDirectory, n);
+                    createTrainingMedicalSegmentation(file.getAbsolutePath(), outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -673,7 +671,7 @@ public class MedicalReportParser extends AbstractParser {
      * @param outputFile path to fulltext
      * @param id           id
      */
-    public void createTrainingMedical(String inputFile,
+    public void createTrainingMedicalSegmentation(String inputFile,
                                       String outputFile,
                                       int id) {
         DocumentSource documentSource = null;
@@ -746,7 +744,7 @@ public class MedicalReportParser extends AbstractParser {
      * @param pathTEI      path to TEI
      * @param id           id
      */
-    public void createBlankMedicalTrainingData(File inputFile,
+    public void createBlankTrainingMedicalSegmentation (File inputFile,
                                                String pathFullText,
                                                String pathTEI,
                                                int id) {
@@ -808,8 +806,8 @@ public class MedicalReportParser extends AbstractParser {
     /**
      * Extract results from a labelled full text in the training format without any string modification.
      *
-     * @param result        reult
-     * @param tokenizations toks
+     * @param result        result
+     * @param tokenizations tokens
      * @return extraction
      */
     public StringBuffer trainingExtraction(String result,
