@@ -10,21 +10,21 @@ For identifying the exact pieces of information to be part of the "header-medica
 
 The following TEI elements are used by the medical report header model:
 
-* `<docNum>` for the document number
-* `<titlePart>` for the document title
+* `<idno>` for the strong identifiers of the document 
+* `<docTitle>` for the document title
+    * `<titlePart>` the title part
+* `<dateline>` for the date containing also the location (e.g., "Paris, le 27 novembre 2020")
+* `<date>` for the date
+* `<affiliation>` for the affiliation information
+* `<address>` for the address elements
 * `<person>` for the person list 
-    * `<medic>` for the medics 
-    * `<patient>` for the patients 
-* `<owner>` for the owner issuing the document
-* `<institution>` for the institution issuing the document
-* `<web>` for the web of the onwer or the institution issuing the document
-* `<location>` for the document location
-* `<affiliation>` for the authors affiliation information
-* `<address>` the address elements
-* `<email>` for the email
+    * `<medic>` for the medic names 
+    * `<patient>` the patient names
+* `<email>` for the email information
 * `<phone>` for the phone number
 * `<fax>` for the fax number
-* `<date>` for the date
+* `<ptr type="web">` for the web information 
+* `<note type="doctype">` for indication on the document type
 
 Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 

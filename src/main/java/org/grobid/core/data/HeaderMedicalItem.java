@@ -48,7 +48,6 @@ public class HeaderMedicalItem {
     private List<LayoutToken> titleLayoutTokens = new ArrayList<>();
     private List<LayoutToken> medicsLayoutTokens = new ArrayList<>();
     private List<LayoutToken> patientsLayoutTokens = new ArrayList<>();
-    private List<LayoutToken> abstractLayoutTokens = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -56,7 +55,7 @@ public class HeaderMedicalItem {
             ", languageUtilities=" + languageUtilities +
             ", language='" + language + '\'' +
             ", title='" + title + '\'' +
-            ", document_owner='" + document_owner + '\'' +
+            ", institution='" + institution + '\'' +
             ", subtitle='" + subtitle + '\'' +
             ", document_date='" + document_date + '\'' +
             ", normalized_publication_date=" + normalized_document_date +
@@ -68,7 +67,6 @@ public class HeaderMedicalItem {
             ", firstMedicSurname='" + firstMedicSurname + '\'' +
             ", location='" + location + '\'' +
             ", pageRange='" + pageRange + '\'' +
-            ", institution='" + institution + '\'' +
             ", affiliation='" + affiliation + '\'' +
             ", address='" + address + '\'' +
             ", country='" + country + '\'' +
@@ -104,9 +102,9 @@ public class HeaderMedicalItem {
     private String docNumGeneral = null;
     private String title = null;
     private String subtitle = null;
-    private String document_owner = null;
     private String owner_website = null;
     private String document_date = null;
+    private String document_dateline = null;
     private Date normalized_document_date = null;
     private String address = null;
     private String country = null;
@@ -165,10 +163,6 @@ public class HeaderMedicalItem {
         return this.title;
     }
 
-    public String getDocumentOwner() {
-        return this.document_owner;
-    }
-
     public String getLanguage() {
         return this.language;
     }
@@ -183,6 +177,10 @@ public class HeaderMedicalItem {
 
     public String getDocumentDate() {
         return this.document_date;
+    }
+
+    public String getDocumentDateLine() {
+        return this.document_dateline;
     }
 
     public Date getNormalizedDocumentDate() {
@@ -313,10 +311,6 @@ public class HeaderMedicalItem {
         this.title = StringUtils.normalizeSpace(theTitle);
     }
 
-    public void setDocumentOwner(String document_owner) {
-        this.document_owner = StringUtils.normalizeSpace(document_owner);
-    }
-
     public void setLanguage(String theLanguage) {
         this.language = StringUtils.normalizeSpace(theLanguage);
     }
@@ -325,8 +319,12 @@ public class HeaderMedicalItem {
         this.subtitle = StringUtils.normalizeSpace(theSubtitle);
     }
 
-    public void setPublicationDate(String theDate) {
+    public void setDocumentDate(String theDate) {
         this.document_date = StringUtils.normalizeSpace(theDate);
+    }
+
+    public void setDocumentDateLine(String theDate) {
+        this.document_dateline = StringUtils.normalizeSpace(theDate);
     }
 
     public void setNormalizedDocumentDate(Date theDate) {
@@ -517,6 +515,10 @@ public class HeaderMedicalItem {
         originalMedics = originalMedics;
     }
 
+    public void setOriginalPatients(String originalPatients) {
+        originalPatients = originalMedics;
+    }
+
     /**
      * General string cleaining for SQL strings. This method might depend on the chosen
      * relational database.
@@ -563,7 +565,6 @@ public class HeaderMedicalItem {
         subtitle = null;
         document_number = null;
         docNumGeneral = null;
-        document_owner = null;
         owner_website = null;
         location = null;
         document_date = null;
@@ -655,11 +656,6 @@ public class HeaderMedicalItem {
             // title
             if (title != null) {
                 bibtex.add("  title = {" + title + "}");
-            }
-
-            // document_owner
-            if (document_owner != null) {
-                bibtex.add("  docOwner = {" + document_owner + "}");
             }
 
             // patients
@@ -855,7 +851,7 @@ public class HeaderMedicalItem {
             for (int i = 0; i < indent + 2; i++) {
                 tei.append("\t");
             }
-            if ((document_date != null) || (pageRange != null) || (location != null) || (document_owner != null)) {
+            if ((document_date != null) || (pageRange != null) || (location != null) || (institution != null)) {
                 tei.append("<imprint>\n");
             } else {
                 tei.append("<imprint/>\n");
@@ -938,13 +934,6 @@ public class HeaderMedicalItem {
                 tei.append("<date>" + TextUtilities.HTMLEncode(document_date) + "</date>\n");
             }
 
-            if (document_owner != null) {
-                for (int i = 0; i < indent + 3; i++) {
-                    tei.append("\t");
-                }
-                tei.append("<docOwner>" + TextUtilities.HTMLEncode(document_owner) + "</docOwner>\n");
-            }
-
             if (pageRange != null) {
                 StringTokenizer st = new StringTokenizer(pageRange, "--");
                 if (st.countTokens() == 2) {
@@ -968,7 +957,7 @@ public class HeaderMedicalItem {
                 tei.append("<pubPlace>" + TextUtilities.HTMLEncode(location) + "</pubPlace>\n");
             }
 
-            if ((document_date != null) || (pageRange != null) || (location != null) || (document_owner != null)) {
+            if ((document_date != null) || (pageRange != null) || (location != null) || (institution != null)) {
                 for (int i = 0; i < indent + 2; i++) {
                     tei.append("\t");
                 }
@@ -1007,7 +996,7 @@ public class HeaderMedicalItem {
         return tei.toString();
     }
 
-    public void buildHeaderSet(HeaderSet bs, String path0) {
+    public void buildHeaderSet(HeaderSet headerSet, String path0) {
         path = path0;
         try {
             // medics
@@ -1018,8 +1007,8 @@ public class HeaderMedicalItem {
                         String medic = st.nextToken();
                         if (medic != null)
                             medic = medic.trim();
-                        //bs.addmedic(TextUtilities.HTMLEncode(medic));
-                        bs.addMedic(medic);
+                        //headerSet.addmedic(TextUtilities.HTMLEncode(medic));
+                        headerSet.addMedics(medic);
                     }
                 }
             }
@@ -1034,16 +1023,16 @@ public class HeaderMedicalItem {
                         String patient = st.nextToken();
                         if (patient != null)
                             patient = patient.trim();
-                        //bs.addPatients(TextUtilities.HTMLEncode(patient));
-                        bs.addPatients(patient);
+                        //headerSet.addPatients(TextUtilities.HTMLEncode(patient));
+                        headerSet.addPatients(patient);
                     }
                 }
             }
 
-            // document_owner
-            if (document_owner != null) {
-                //bs.addPublisher(TextUtilities.HTMLEncode(publisher));
-                bs.addOwners(document_owner);
+            // institution as the document owner
+            if (institution != null) {
+                //headerSet.add(TextUtilities.HTMLEncode(publisher));
+                headerSet.addInstitutions(institution);
             }
         } catch (Exception e) {
             throw new GrobidException("Cannot build a biblioSet, because of nested exception.", e);
@@ -1132,7 +1121,7 @@ public class HeaderMedicalItem {
 
             // a document, not a journal and not something in a book...
             if ((document_date != null) || (pageRange != null) || (location != null)
-                || (document_owner != null)) {
+                || (institution != null)) {
                 tei += "\t\t<imprint>\n";
             }
 
@@ -1140,18 +1129,8 @@ public class HeaderMedicalItem {
             if (document_date != null) {
                 tei += "\t\t\t<date>" + TextUtilities.HTMLEncode(document_date) + "</date>\n";
             }
-            // document_owner
-            if (document_owner != null) {
-                int ind = -1;
-                if (bs.getPublishers() != null)
-                    ind = bs.getPublishers().indexOf(document_owner);
-                if (ind != -1) {
-                    tei += "\t\t\t<docOwner>\n";
-                    tei += "\t\t\t\t<ptr target=\"#docOwner" + ind + "\" />\n";
-                    tei += "\t\t\t</docOwner>\n";
-                } else
-                    tei += "\t\t\t<docOwner>" + TextUtilities.HTMLEncode(document_owner) + "</docOwner>\n";
-            }
+
+            // page range
             if (pageRange != null) {
                 StringTokenizer st = new StringTokenizer(pageRange, "--");
                 if (st.countTokens() == 2) {
@@ -1167,7 +1146,7 @@ public class HeaderMedicalItem {
                 tei += "\t\t\t<pubPlace>" + TextUtilities.HTMLEncode(location) + "</pubPlace>\n";
 
             if ((document_date != null) || (pageRange != null) || (location != null)
-                || (document_owner != null)) {
+                || (institution != null)) {
                 tei += "\t\t</imprint>\n";
             }
 
@@ -1941,7 +1920,7 @@ public class HeaderMedicalItem {
         if (medic.getPageRange() != null)
             med.setPageRange(medic.getPageRange());
         if (medic.getDocumentDate() != null)
-            med.setPublicationDate(medic.getDocumentDate());
+            med.setDocumentDate(medic.getDocumentDate());
         if (medic.getYear() != null)
             med.setYear(medic.getYear());
         if (medic.getNormalizedDocumentDate() != null)
@@ -1950,15 +1929,11 @@ public class HeaderMedicalItem {
             med.setMonth(medic.getMonth());
         if (medic.getDay() != null)
             med.setDay(medic.getDay());
-
         if (medic.getLocation() != null)
             med.setLocation(medic.getLocation());
-        if (medic.getDocumentOwner() != null)
-            med.setDocumentOwner(medic.getDocumentOwner());
         if (medic.getTitle() != null) {
             med.setTitle(medic.getTitle());
         }
-
         if (medic.getDocNum() != null)
             med.setDocNum(medic.getDocNum());
 
@@ -2156,13 +2131,5 @@ public class HeaderMedicalItem {
 
     public void addPatientsTokens(List<LayoutToken> layoutTokens) {
         this.patientsLayoutTokens.addAll(layoutTokens);
-    }
-
-    public void addAbstractTokens(List<LayoutToken> layoutTokens) {
-        this.abstractLayoutTokens.addAll(layoutTokens);
-    }
-
-    public List<LayoutToken> getAbstractTokens() {
-        return this.abstractLayoutTokens;
     }
 }

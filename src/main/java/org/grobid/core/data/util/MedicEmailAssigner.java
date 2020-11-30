@@ -10,5 +10,5 @@ import java.util.List;
 public interface MedicEmailAssigner {
     //embeds emails into medics
     //emails should be sanitized before
-    public void assign(List<PersonMedical> authors, List<String> emails);
+    public void assign(List<PersonMedical> medics, List<String> emails);
 }

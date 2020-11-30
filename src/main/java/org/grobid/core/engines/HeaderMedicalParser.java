@@ -1,33 +1,29 @@
 package org.grobid.core.engines;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModel;
-import org.grobid.core.GrobidModels;
-import org.grobid.core.data.*;
 import org.grobid.core.data.Date;
+import org.grobid.core.data.HeaderMedicalItem;
+import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
-import org.grobid.core.engines.label.SegmentationLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
 import org.grobid.core.features.FeaturesVectorHeader;
 import org.grobid.core.lang.Language;
-import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
+import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
 import org.grobid.core.utilities.counters.CntManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +31,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** A class for parsing header part of medical reports.
  * This class is adapted from the HeaderParser class (@author Patrice Lopez)
@@ -69,6 +63,7 @@ public class HeaderMedicalParser extends AbstractParser {
     public HeaderMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
         super(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
+        tmpPath = GrobidProperties.getTempPath();
         // GrobidProperties.getInstance();
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
@@ -77,6 +72,7 @@ public class HeaderMedicalParser extends AbstractParser {
         super(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
+        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
     /**
@@ -221,7 +217,6 @@ public class HeaderMedicalParser extends AbstractParser {
                         }
                     }
 
-
                     // remove invalid medics (no last name, noise, etc.)
                     resHeader.setFullMedics(PersonMedical.sanityCheck(resHeader.getFullMedics()));
 
@@ -259,16 +254,52 @@ public class HeaderMedicalParser extends AbstractParser {
                     resHeader.setFullMedics(PersonMedical.deduplicate(resHeader.getFullMedics()));
 
                     if (resHeader.getPatients() != null) {
-                        // TBD: consider segments also for editors, like for authors above
-                        //resHeader.setFullEditors(parsers.getAuthorParser().processingHeader(resHeader.getEditors()));
-                    }
 
-                    // below using the reference strings to improve the metadata extraction, it will have to
-                    // be reviewed for something safer as just a straightforward correction
-                    /*if (resHeader.getReference() != null) {
-                        BiblioItem refer = parsers.getCitationParser().processing(resHeader.getReference(), 0);
-                        BiblioItem.correct(resHeader, refer);
-                    }*/
+                        resHeader.setOriginalPatients(resHeader.getPatients());
+                        resHeader.getPatientsTokens();
+
+                        boolean fragmentedPatients = false;
+                        boolean hasMarkerPatient = false;
+                        List<Integer> patientsBlocks = new ArrayList<Integer>();
+                        List<List<LayoutToken>> patientSegments = new ArrayList<>();
+                        if (resHeader.getPatientsTokens() != null) {
+                            // split the list of layout tokens when token "\t" is met
+                            List<LayoutToken> currentSegment = new ArrayList<>();
+                            for(LayoutToken theToken : resHeader.getPatientsTokens()) {
+                                if (theToken.getText() != null && theToken.getText().equals("\t")) {
+                                    if (currentSegment.size() > 0)
+                                        patientSegments.add(currentSegment);
+                                    currentSegment = new ArrayList<>();
+                                } else
+                                    currentSegment.add(theToken);
+                            }
+                            // last segment
+                            if (currentSegment.size() > 0)
+                                patientSegments.add(currentSegment);
+
+                            if (patientSegments.size() > 1) {
+                                fragmentedPatients = true;
+                            }
+                            for (int k = 0; k < patientSegments.size(); k++) {
+                                if (patientSegments.get(k).size() == 0)
+                                    continue;
+                                List<PersonMedical> localPatients = parsers.getPersonParser()
+                                    .processingHeaderWithLayoutTokens(patientSegments.get(k), doc.getPDFAnnotations());
+                                if (localPatients != null) {
+                                    for (PersonMedical pers : localPatients) {
+                                        resHeader.addFullPatient(pers);
+                                        if (pers.getMarkers() != null) {
+                                            hasMarkerPatient = true;
+                                        }
+                                        patientsBlocks.add(k);
+                                    }
+                                }
+                            }
+                        }
+
+                        // remove invalid patients (no last name, noise, etc.)
+                        resHeader.setFullPatients(PersonMedical.sanityCheck(resHeader.getFullPatients()));
+                    }
                 }
 
                 resHeader = consolidateHeader(resHeader, config.getConsolidateHeader());
@@ -802,11 +833,16 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
                 } else
                     medical.setAddress(clusterContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_DATELINE)) {
+                if (medical.getDocumentDateLine() != null && medical.getDocumentDateLine().length() < clusterNonDehypenizedContent.length())
+                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
+                else if (medical.getDocumentDateLine() == null)
+                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_DATE)) {
                 if (medical.getDocumentDate() != null && medical.getDocumentDate().length() < clusterNonDehypenizedContent.length())
-                    medical.setPublicationDate(clusterNonDehypenizedContent);
+                    medical.setDocumentDate(clusterNonDehypenizedContent);
                 else if (medical.getDocumentDate() == null)
-                    medical.setPublicationDate(clusterNonDehypenizedContent);
+                    medical.setDocumentDate(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_PATIENT)) {
                 if (medical.getPatients() != null) {
                     medical.setPatients(medical.getPatients() + "\n" + clusterNonDehypenizedContent);
@@ -838,9 +874,6 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setWeb(medical.getFax() + clusterNonDehypenizedContent);
                 } else
                     medical.setWeb(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_OWNER)) {
-                if (medical.getDocumentOwner() == null)
-                    medical.setDocumentOwner(clusterContent);
             }
         }
         return medical;
@@ -991,31 +1024,31 @@ public class HeaderMedicalParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<title>", "<docTitle>\n\t<titlePart>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<idno>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<dateline>", "<dateline>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<date>", "<date>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<owner>", "<owner>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<person>\n\t<patient>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
@@ -1028,6 +1061,9 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<doctype>", "<note type=\"doctype\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
@@ -1048,27 +1084,27 @@ public class HeaderMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<title>")) {
-                buffer.append("</titlePart>\n\t</docTitle>\n");
-            } else if (lastTag0.equals("<idno>")) {
+            if (lastTag0.equals("<docnum>")) {
                 buffer.append("</idno>\n");
+            } else if (lastTag0.equals("<title>")) {
+                buffer.append("</titlePart>\n\t</docTitle>\n");
+            } else if (lastTag0.equals("<dateline>")) {
+                buffer.append("</dateline>\n");
             } else if (lastTag0.equals("<date>")) {
                 buffer.append("</date>\n");
-            } else if (lastTag0.equals("<owner>")) {
-                buffer.append("</owner>\n");
+            } else if (lastTag0.equals("<affiliation>")) {
+                buffer.append("</affiliation>\n\t</byline>\n");
+            } else if (lastTag0.equals("<institution>")) {
+                buffer.append("</affiliation>\n\t</byline>\n");
+            } else if (lastTag0.equals("<address>")) {
+                buffer.append("</address>\n");
             } else if (lastTag0.equals("<location>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<medic>")) {
                 buffer.append("</medic>\n\t</person>\n");
             } else if (lastTag0.equals("<patient>")) {
                 buffer.append("</patient>\n\t</person>\n");
-            } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</affiliation>\n\t</byline>\n");
-            } else if (lastTag0.equals("<affiliation>")) {
-                buffer.append("</affiliation>\n\t</byline>\n");
-            } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>\n");
-            }else if (lastTag0.equals("<email>")) {
+            } else if (lastTag0.equals("<email>")) {
                 buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {
                 buffer.append("</phone>\n");
@@ -1076,8 +1112,8 @@ public class HeaderMedicalParser extends AbstractParser {
                 buffer.append("</fax>\n");
             } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ptr>\n");
-            } else if (lastTag0.equals("<other>")) {
-                buffer.append("</other>\n");
+            } else if (lastTag0.equals("<doctype>")) {
+                buffer.append("</note>\n");
             }
         }
     }

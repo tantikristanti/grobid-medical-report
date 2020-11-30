@@ -6,23 +6,14 @@ import java.util.List;
 /**
  * Class for representing authority lists for headers.
  *
- * @author Patrice Lopez
+ * Tanti, 2020
  */
 public class HeaderSet {
+    private List<String> institutions = null;
     private List<String> medics = null;
     private List<String> patients = null;
-    private List<String> meetings = null;
-    private List<String> publishers = null;
-    private List<String> owners = null;
+    private List<String> affiliations = null;
     private List<String> locations = null;
-
-    private List<String> journals = null;
-    private List<String> institutions = null;
-    private List<String> affiliations = null; // ??
-    private List<String> keywords = null;
-
-    public HeaderSet() {
-    }
 
     public List<String> getMedics() {
         return medics;
@@ -32,58 +23,52 @@ public class HeaderSet {
         return patients;
     }
 
-    public List<String> getMeetings() {
-        return meetings;
-    }
-
-    public List<String> getPublishers() {
-        return publishers;
-    }
-
     public List<String> getLocations() {
         return locations;
     }
 
-    public void addMedic(String med) {
+    public List<String> getAffiliations() { return affiliations; }
+
+    public void addInstitutions(String institution) {
+        if (institutions == null)
+            institutions = new ArrayList<String>();
+        if (institution != null) {
+            if (institution.length() > 0) {
+                if (institutions.indexOf(institution) == -1)
+                    institutions.add(institution);
+            }
+        }
+    }
+
+    public void addMedics(String medic) {
         if (medics == null)
             medics = new ArrayList<String>();
-        if (med != null) {
-            if (med.length() > 0) {
-                if (medics.indexOf(med) == -1)
-                    medics.add(med);
+        if (medic != null) {
+            if (medic.length() > 0) {
+                if (medics.indexOf(medic) == -1)
+                    medics.add(medic);
             }
         }
     }
 
-    public void addOwners(String own) {
-        if (owners == null)
-            owners = new ArrayList<String>();
-        if (own != null) {
-            if (own.length() > 0) {
-                if (owners.indexOf(own) == -1)
-                    owners.add(own);
-            }
-        }
-    }
-
-    public void addPatients(String pat) {
+    public void addPatients(String patient) {
         if (patients == null)
             patients = new ArrayList<String>();
-        if (pat != null) {
-            if (pat.length() > 0) {
-                if (patients.indexOf(pat) == -1)
-                    patients.add(pat);
+        if (patient != null) {
+            if (patient.length() > 0) {
+                if (patients.indexOf(patient) == -1)
+                    patients.add(patient);
             }
         }
     }
 
-    public void addMeeting(String aut) {
-        if (meetings == null)
-            meetings = new ArrayList<String>();
-        if (aut != null) {
-            if (aut.length() > 0) {
-                if (meetings.indexOf(aut) == -1)
-                    meetings.add(aut);
+    public void addLocations(String location) {
+        if (locations == null)
+            locations = new ArrayList<String>();
+        if (location != null) {
+            if (location.length() > 0) {
+                if (institutions.indexOf(location) == -1)
+                    institutions.add(location);
             }
         }
     }
@@ -143,16 +128,16 @@ public class HeaderSet {
             tei += "</listPerson>\n\n";
         }
 
-        // publishers
-        if (publishers != null) {
-            tei += "<listOrg type=\"publisher\">\n";
+        // institutions
+        if (institutions != null) {
+            tei += "<listOrg type=\"institution\">\n";
 
             int i = 0;
-            for (String aut : publishers) {
-                tei += "\t<org xml:id=\"publisher" + i + "\">\n";
+            for (String institution : institutions) {
+                tei += "\t<org xml:id=\"institution" + i + "\">\n";
                 tei += "\t\t<orgName>";
 
-                tei += aut;
+                tei += institution;
 
                 tei += "</orgName>\n";
                 tei += "\t</org>\n";
@@ -162,19 +147,23 @@ public class HeaderSet {
             tei += "</listOrg>\n\n";
         }
 
-        // meetings
-        if (meetings != null) {
-            tei += "<list type=\"meeting\">\n";
+        // affiliations
+        if (affiliations != null) {
+            tei += "<listOrg type=\"affiliation\">\n";
 
             int i = 0;
-            for (String aut : meetings) {
-                tei += "\t<meeting xml:id=\"meeting" + i + "\">";
-                tei += aut;
-                tei += "</meeting>\n";
+            for (String affiliation : affiliations) {
+                tei += "\t<org xml:id=\"affiliation" + i + "\">\n";
+                tei += "\t\t<orgName>";
+
+                tei += affiliation;
+
+                tei += "</orgName>\n";
+                tei += "\t</org>\n";
                 i++;
             }
 
-            tei += "</list>\n\n";
+            tei += "</listOrg>\n\n";
         }
 
         return tei;

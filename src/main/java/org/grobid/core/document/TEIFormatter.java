@@ -161,19 +161,18 @@ public class TEIFormatter {
         }
 
         tei.append("</title>\n\t\t\t</titleStmt>\n");
-        if ((biblio.getDocumentOwner() != null) ||
+        if ((biblio.getInstitution() != null) ||
             (biblio.getDocumentDate() != null) ||
             (biblio.getNormalizedDocumentDate() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
-            if (biblio.getDocumentOwner() != null) {
-                // publisher and date under <publicationStmt> for better TEI conformance
-                tei.append("\t\t\t\t<docOwner>" + TextUtilities.HTMLEncode(biblio.getDocumentOwner()) +
-                    "</docOwner>\n");
+            if (biblio.getInstitution() != null) {
+                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(biblio.getInstitution()) +
+                    "</institution>\n");
 
                 tei.append("\t\t\t\t<availability status=\"unknown\">");
                 tei.append("<p>Copyright ");
                 //if (biblio.getPublicationDate() != null)
-                tei.append(TextUtilities.HTMLEncode(biblio.getDocumentOwner()) + "</p>\n");
+                tei.append(TextUtilities.HTMLEncode(biblio.getInstitution()) + "</p>\n");
                 tei.append("\t\t\t\t</availability>\n");
             } else {
                 // a dummy publicationStmt is still necessary according to TEI

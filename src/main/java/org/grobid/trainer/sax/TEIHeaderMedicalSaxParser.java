@@ -33,12 +33,12 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "titlePart", "date", "medic", "patient", "affiliation", "address", "email", "phone",
-        "fax", "web", "owner");
+    private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
+        "fax", "web", "note");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person", "docTitle", "p");
 
-    private List<String> ignoredTags = Arrays.asList("page", "location", "title", "institution");
+    private List<String> ignoredTags = Arrays.asList("page", "location", "title");
 
     public TEIHeaderMedicalSaxParser() {
         labeled = new ArrayList<String>();
@@ -110,6 +110,24 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
 
         if (qName.equals("titlePart")) {
             currentTag = "<title>";
+        } else if (qName.equals("idno")) {
+            currentTag = "<docnum>";
+        } else if (qName.equals("dateline")) {
+            currentTag = "<dateline>";
+        } else if (qName.equals("date")) {
+            currentTag = "<date>";
+        } else if (qName.equals("affiliation")) {
+            currentTag = "<affiliation>";
+            accumulator.setLength(0);
+        } else if (qName.equals("institution")) {
+            currentTag = "<institution>";
+        }  else if (qName.equals("address")) {
+            currentTag = "<address>";
+            accumulator.setLength(0);
+        } else if (qName.equals("medic")) {
+            currentTag = "<medic>";
+        } else if (qName.equals("patient")) {
+            currentTag = "<patient>";
         } /*else if (qName.equals("person")) {
             int length = atts.getLength();
             currentTag = "<other>";
@@ -132,24 +150,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
                     }
                 }
             }
-        }*/ else if (qName.equals("idno")) {
-            currentTag = "<idno>";
-            accumulator.setLength(0);
-        } else if (qName.equals("date")) {
-            currentTag = "<date>";
-        } else if (qName.equals("owner")) {
-            currentTag = "<owner>";
-        }  else if (qName.equals("medic")) {
-            currentTag = "<medic>";
-        }  else if (qName.equals("patient")) {
-            currentTag = "<patient>";
-        }  else if (qName.equals("affiliation")) {
-            currentTag = "<affiliation>";
-            accumulator.setLength(0);
-        } else if (qName.equals("address")) {
-            currentTag = "<address>";
-            accumulator.setLength(0);
-        } else if (qName.equals("email")) {
+        }*/ else if (qName.equals("email")) {
             currentTag = "<email>";
         } else if (qName.equals("phone")) {
             currentTag = "<phone>";
@@ -169,6 +170,26 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
                         if (value.equals("web")) {
                             currentTag = "<web>";
                         }
+                    }
+                } else
+                    currentTag = "<other>";
+            }
+        } else if (qName.equals("note")) {
+            int length = atts.getLength();
+            currentTag = "<other>";
+            // Process each attribute
+            for (int i = 0; i < length; i++) {
+                // Get names and values for each attribute
+                String name = atts.getQName(i);
+                String value = atts.getValue(i);
+
+                if (name != null) {
+                    if (name.equals("type")) {
+                       if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
+                            value.equals("documentType") || value.equals("articleType")) {
+                            currentTag = "<doctype>";
+                        } else
+                            currentTag = "<other>";
                     }
                 } else
                     currentTag = "<other>";
