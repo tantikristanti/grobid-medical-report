@@ -1033,6 +1033,9 @@ public class HeaderMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<date>", "<date>", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<time>", "<time>", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
             }
             if (!output) {
@@ -1092,6 +1095,8 @@ public class HeaderMedicalParser extends AbstractParser {
                 buffer.append("</dateline>\n");
             } else if (lastTag0.equals("<date>")) {
                 buffer.append("</date>\n");
+            } else if (lastTag0.equals("<time>")) {
+                buffer.append("</time>\n");
             } else if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
@@ -1250,8 +1255,8 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", "training.header.medical.tei.xml"));
-            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", "training.header.medical"));
+            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
+            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             // segment first with medical report segmenter model
@@ -1314,9 +1319,6 @@ public class HeaderMedicalParser extends AbstractParser {
                     writer.write(bufferHeader.toString());
                     writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
                     writer.close();
-
-                    System.out.println("Training data creation is finished...\n");
-
                 }
             }
 

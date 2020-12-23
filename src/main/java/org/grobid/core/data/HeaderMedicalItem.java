@@ -55,6 +55,7 @@ public class HeaderMedicalItem {
             ", languageUtilities=" + languageUtilities +
             ", language='" + language + '\'' +
             ", title='" + title + '\'' +
+            ", english_title='" + english_title + '\'' +
             ", institution='" + institution + '\'' +
             ", subtitle='" + subtitle + '\'' +
             ", document_date='" + document_date + '\'' +
@@ -101,6 +102,7 @@ public class HeaderMedicalItem {
     private String document_number = null; // print/default
     private String docNumGeneral = null;
     private String title = null;
+    private String english_title = null;
     private String subtitle = null;
     private String owner_website = null;
     private String document_date = null;

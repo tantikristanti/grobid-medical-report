@@ -91,7 +91,7 @@ To generate some training datas from some input pdf:
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
 ```
 
-* by using the medical-report-segmenter model
+* by using the header-medical-report model
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```

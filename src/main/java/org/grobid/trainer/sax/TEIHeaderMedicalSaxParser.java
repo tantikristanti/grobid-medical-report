@@ -33,7 +33,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
+    private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "time", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
         "fax", "web", "note");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person", "docTitle", "p");
@@ -116,6 +116,8 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
             currentTag = "<dateline>";
         } else if (qName.equals("date")) {
             currentTag = "<date>";
+        } else if (qName.equals("time")) {
+            currentTag = "<time>";
         } else if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
