@@ -134,8 +134,8 @@ task integration(type: Test) {
 
 def trainerTasks = [
         //Training models
-        "train_medical_report_segmenter"    : "org.grobid.trainer.MedicalReportSegmenterTrainer",
-        "train_header_medical_report"       : "org.grobid.trainer.HeaderMedicalReportTrainer"
+        "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
+        "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->

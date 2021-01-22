@@ -71,7 +71,7 @@ Evaluate:
 
 The considered evaluation files are located under `grobid/grobid-medical-report/resources/dataset/*MODEL*/evaluation`
 
-Automatically split data, train and evaluate:
+The following commands will split automatically and randomly the available annotated data into a training set and an evaluation set, train a model based on the first set and launch an evaluation based on the second set with a ratio of 80% for training and 20% for evaluation:
 ```bash
 > ./gradlew eval_medical_report_segmenter_split
 ```

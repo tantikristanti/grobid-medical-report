@@ -126,7 +126,7 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
 
             for (File teifile : refFiles) {
                 String name = teifile.getName();
-                System.out.println(name);
+                //System.out.println(name);
 
                 TEIHeaderMedicalSaxParser parser2 = new TEIHeaderMedicalSaxParser();
                 parser2.setFileName(name);

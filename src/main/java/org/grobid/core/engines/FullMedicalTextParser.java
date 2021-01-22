@@ -11,13 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.grobid.core.GrobidMedicalReportModel;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.BibDataSet;
-import org.grobid.core.data.BiblioItem;
-import org.grobid.core.data.Figure;
-import org.grobid.core.data.Table;
-import org.grobid.core.data.Equation;
-import org.grobid.core.data.Metadata;
-import org.grobid.core.data.Person;
+import org.grobid.core.data.*;
 import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentPiece;
 import org.grobid.core.document.DocumentPointer;
@@ -72,11 +66,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 */
 /**
- * @author Patrice Lopez
+ * This class is taken and adapted from FullTextParser class (@author Patrice Lopez)
+ * Tanti, 2021
  *//*
 
-public class FullDocumentParser extends AbstractParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FullDocumentParser.class);
+public class FullMedicalTextParser extends AbstractParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FullTextParser.class);
 
     //private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
 
@@ -98,15 +93,15 @@ public class FullDocumentParser extends AbstractParser {
     // projection scale for line length
     private static final int LINESCALE = 10;
 
-    protected EngineParsers parsers;
+    protected EngineMedicalParsers parsers;
 
     */
 /**
      * TODO some documentation...
      *//*
 
-    public FullDocumentParser(EngineParsers parsers) {
-        super(GrobidMedicalReportModel.FULLDOCUMENT);
+    public FullMedicalTextParser(EngineMedicalParsers parsers) {
+        super(GrobidMedicalReportModel.FULLTEXT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
     }
@@ -139,15 +134,15 @@ public class FullDocumentParser extends AbstractParser {
         }
         try {
             // general segmentation
-            Document doc = parsers.getSegmentationParser().processing(documentSource, config);
+            Document doc = parsers.getMedicalReportParser().processing(documentSource, config);
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(SegmentationLabels.BODY);
 
             // header processing
-            BiblioItem resHeader = new BiblioItem();
+            HeaderMedicalItem resHeader = new HeaderMedicalItem();
             Pair<String, LayoutTokenization> featSeg = null;
 
             // using the segmentation model to identify the header zones
-            parsers.getHeaderParser().processingHeaderSection(config, doc, resHeader, false);
+            parsers.getHeaderMedicalParser().processingHeaderSection(config, doc, resHeader, false);
 
             // The commented part below makes use of the PDF embedded metadata (the so-called XMP) if available
             // as fall back to set author and title if they have not been found.
@@ -194,123 +189,71 @@ public class FullDocumentParser extends AbstractParser {
             }*//*
 
 
-            // structure the abstract using the fulltext model
-            if (isNotBlank(resHeader.getAbstract())) {
-                //List<LayoutToken> abstractTokens = resHeader.getLayoutTokens(TaggingLabels.HEADER_ABSTRACT);
-                List<LayoutToken> abstractTokens = resHeader.getAbstractTokens();
-                if (CollectionUtils.isNotEmpty(abstractTokens)) {
-                    abstractTokens = BiblioItem.cleanAbstractLayoutTokens(abstractTokens);
-                    Pair<String, List<LayoutToken>> abstractProcessed = processShort(abstractTokens, doc);
-                    if (abstractProcessed != null) {
-                        // neutralize figure and table annotations (will be considered as paragraphs)
-                        String labeledAbstract = abstractProcessed.getLeft();
-                        labeledAbstract = postProcessLabeledAbstract(labeledAbstract);
-                        resHeader.setLabeledAbstract(labeledAbstract);
-                        resHeader.setLayoutTokensForLabel(abstractProcessed.getRight(), TaggingLabels.HEADER_ABSTRACT);
-                    }
-                }
-            }
-
-            // citation processing
-            // consolidation, if selected, is not done individually for each citation but
-            // in a second stage for all citations which is much faster
-            List<BibDataSet> resCitations = parsers.getCitationParser().
-                processingReferenceSection(doc, parsers.getReferenceSegmenterParser(), 0);
-
-            // consolidate the set
-            if (config.getConsolidateCitations() != 0) {
-                Consolidation consolidator = Consolidation.getInstance();
-                if (consolidator.getCntManager() == null)
-                    consolidator.setCntManager(Engine.getCntManager());
-                try {
-                    Map<Integer,BiblioItem> resConsolidation = consolidator.consolidate(resCitations);
-                    for(int i=0; i<resCitations.size(); i++) {
-                        BiblioItem resCitation = resCitations.get(i).getResBib();
-                        BiblioItem bibo = resConsolidation.get(i);
-                        if (bibo != null) {
-                            if (config.getConsolidateCitations() == 1)
-                                BiblioItem.correct(resCitation, bibo);
-                            else if (config.getConsolidateCitations() == 2)
-                                BiblioItem.injectDOI(resCitation, bibo);
-                        }
-                    }
-                } catch(Exception e) {
-                    throw new GrobidException(
-                        "An exception occured while running consolidation on bibliographical references.", e);
-                }
-            }
-            doc.setBibDataSets(resCitations);
-
             // full text processing
             featSeg = getBodyTextFeatured(doc, documentBodyParts);
-            String rese = null;
+            String resultBody = null;
             LayoutTokenization layoutTokenization = null;
             List<Figure> figures = null;
             List<Table> tables = null;
             List<Equation> equations = null;
-            if (featSeg != null) {
+            if (featSeg != null && isNotBlank(featSeg.getLeft())) {
                 // if featSeg is null, it usually means that no body segment is found in the
                 // document segmentation
                 String bodytext = featSeg.getLeft();
                 layoutTokenization = featSeg.getRight();
                 //tokenizationsBody = featSeg.getB().getTokenization();
                 //layoutTokensBody = featSeg.getB().getLayoutTokens();
-                if ( (bodytext != null) && (bodytext.trim().length() > 0) ) {
-                    rese = label(bodytext);
-                } else {
-                    LOGGER.debug("Fulltext model: The input to the CRF processing is empty");
-                }
+
+                resultBody = label(bodytext);
 
                 // we apply now the figure and table models based on the fulltext labeled output
-                figures = processFigures(rese, layoutTokenization.getTokenization(), doc);
+                figures = processFigures(resultBody, layoutTokenization.getTokenization(), doc);
                 // further parse the caption
                 for(Figure figure : figures) {
-                    if ((figure.getCaptionLayoutTokens() != null) && (figure.getCaptionLayoutTokens().size() > 0) ) {
+                    if (CollectionUtils.isNotEmpty(figure.getCaptionLayoutTokens()) ) {
                         Pair<String, List<LayoutToken>> captionProcess = processShort(figure.getCaptionLayoutTokens(), doc);
                         figure.setLabeledCaption(captionProcess.getLeft());
                         figure.setCaptionLayoutTokens(captionProcess.getRight());
                     }
                 }
 
-                tables = processTables(rese, layoutTokenization.getTokenization(), doc);
+                tables = processTables(resultBody, layoutTokenization.getTokenization(), doc);
                 // further parse the caption
                 for(Table table : tables) {
-                    if ( (table.getCaptionLayoutTokens() != null) && (table.getCaptionLayoutTokens().size() > 0) ) {
+                    if ( CollectionUtils.isNotEmpty(table.getCaptionLayoutTokens()) ) {
                         Pair<String, List<LayoutToken>> captionProcess = processShort(table.getCaptionLayoutTokens(), doc);
                         table.setLabeledCaption(captionProcess.getLeft());
                         table.setCaptionLayoutTokens(captionProcess.getRight());
                     }
-                    if ( (table.getNoteLayoutTokens() != null) && (table.getNoteLayoutTokens().size() > 0) ) {
+                    if ( CollectionUtils.isNotEmpty(table.getNoteLayoutTokens())) {
                         Pair<String, List<LayoutToken>> noteProcess = processShort(table.getNoteLayoutTokens(), doc);
                         table.setLabeledNote(noteProcess.getLeft());
                         table.setNoteLayoutTokens(noteProcess.getRight());
                     }
                 }
 
-                equations = processEquations(rese, layoutTokenization.getTokenization(), doc);
+                equations = processEquations(resultBody, layoutTokenization.getTokenization(), doc);
             } else {
                 LOGGER.debug("Fulltext model: The featured body is empty");
             }
 
-
             // possible annexes (view as a piece of full text similar to the body)
             documentBodyParts = doc.getDocumentPart(SegmentationLabels.ANNEX);
             featSeg = getBodyTextFeatured(doc, documentBodyParts);
-            String rese2 = null;
+            String resultAnnex = null;
             List<LayoutToken> tokenizationsBody2 = null;
-            if (featSeg != null) {
+            if (featSeg != null && isNotEmpty(trim(featSeg.getLeft()))) {
                 // if featSeg is null, it usually means that no body segment is found in the
                 // document segmentation
                 String bodytext = featSeg.getLeft();
                 tokenizationsBody2 = featSeg.getRight().getTokenization();
-                if (isNotEmpty(trim(bodytext)))
-                    rese2 = label(bodytext);
+                resultAnnex = label(bodytext);
                 //System.out.println(rese);
             }
 
             // final combination
             toTEI(doc, // document
-                rese, rese2, // labeled data for body and annex
+                resultBody, resultAnnex, // labeled data for body and annex
                 layoutTokenization, tokenizationsBody2, // tokenization for body and annex
                 resHeader, // header
                 figures, tables, equations,
@@ -1162,7 +1105,7 @@ public class FullDocumentParser extends AbstractParser {
 
                     for (LabeledReferenceResult ref : references) {
                         if ( (ref.getReferenceText() != null) && (ref.getReferenceText().trim().length() > 0) ) {
-                            BiblioItem bib = parsers.getCitationParser().processing(ref.getReferenceText(), 0);
+                            BiblioItem bib = parsers.getCitationParser().processingString(ref.getReferenceText(), 0);
                             String authorSequence = bib.getAuthors();
                             if ((authorSequence != null) && (authorSequence.trim().length() > 0) ) {
                                 */

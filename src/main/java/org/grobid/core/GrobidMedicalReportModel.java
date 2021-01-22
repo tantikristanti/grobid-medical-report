@@ -17,10 +17,10 @@ import static org.grobid.core.engines.EngineParsers.LOGGER;
 
 public enum GrobidMedicalReportModel implements GrobidModel {
     MEDICAL_REPORT_SEGMENTER("medical-report-segmenter"),
-    FULL_DOCUMENT("full-document"),
     HEADER_MEDICAL_REPORT("header-medical-report"),
     NAME_MEDIC("name/medic"),
-    NAME_PATIENT("name/patient");
+    NAME_PATIENT("name/patient"),
+    FULLTEXT("fulltext"),;
 
     /**
      * Absolute path to the model.

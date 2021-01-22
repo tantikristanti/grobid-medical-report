@@ -34,7 +34,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
     private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "time", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
-        "fax", "web", "note");
+        "fax", "ptr", "note");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person", "docTitle", "p");
 
