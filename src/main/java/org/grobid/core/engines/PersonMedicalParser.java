@@ -88,6 +88,10 @@ public class PersonMedicalParser {
         return processing(inputs, pdfAnnotations, true);
     }
 
+    public List<PersonMedical> processingLeftNoteWithLayoutTokens(List<LayoutToken> inputs, List<PDFAnnotation> pdfAnnotations) {
+        return processing(inputs, pdfAnnotations, true);
+    }
+
     /**
      * Common processing of authors in header or citation
      *

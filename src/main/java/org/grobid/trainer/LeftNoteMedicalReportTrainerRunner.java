@@ -10,9 +10,9 @@ import java.util.Arrays;
  * A class for training a target model.
  *
  */
-public class HeaderMedicalReportTrainerRunner {
+public class LeftNoteMedicalReportTrainerRunner {
 
-    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {_header_medical_report} "
+    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {left-note-medical-report} "
             + "-s { [0.0 - 1.0] - split ratio, optional} "
             + "-b {epsilon, window, nbMax}"
             + "-t NBThreads";
@@ -112,7 +112,7 @@ public class HeaderMedicalReportTrainerRunner {
                     USAGE);
         }
 
-        HeaderMedicalReportTrainer trainer = new HeaderMedicalReportTrainer();
+        LeftNoteMedicalReportTrainer trainer = new LeftNoteMedicalReportTrainer();
 
         if (breakParams)
             trainer.setParams(epsilon, window, nbMaxIterations);

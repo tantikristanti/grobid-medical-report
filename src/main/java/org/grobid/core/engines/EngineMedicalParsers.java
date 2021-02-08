@@ -14,6 +14,7 @@ public class EngineMedicalParsers implements Closeable {
 
     private MedicalReportParser medicalReportParser = null;
     private HeaderMedicalParser headerMedicalParser = null;
+    private LeftNoteMedicalParser leftNoteMedicalParser = null;
     private MedicParser medicParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
     private PersonMedicalParser personParser = null;
@@ -40,6 +41,17 @@ public class EngineMedicalParsers implements Closeable {
             }
         }
         return headerMedicalParser;
+    }
+
+    public LeftNoteMedicalParser getLeftNoteMedicalParser() {
+        if (leftNoteMedicalParser == null) {
+            synchronized (this) {
+                if (leftNoteMedicalParser == null) {
+                    leftNoteMedicalParser = new LeftNoteMedicalParser(this);
+                }
+            }
+        }
+        return leftNoteMedicalParser;
     }
 
     public MedicParser getMedicParser() {
@@ -106,6 +118,7 @@ public class EngineMedicalParsers implements Closeable {
         affiliationAddressParser = getAffiliationAddressParser();
         // personParser = getPersonParser();
         headerMedicalParser = getHeaderMedicalParser();
+        leftNoteMedicalParser = getLeftNoteMedicalParser();
         dateParser = getDateParser();
         // bodyMedicalParser = getBodyMedicaltParser();
     }
@@ -123,6 +136,12 @@ public class EngineMedicalParsers implements Closeable {
         if (headerMedicalParser != null) {
             headerMedicalParser.close();
             headerMedicalParser = null;
+            LOGGER.debug("CLOSING headerMedicalParser");
+        }
+
+        if (leftNoteMedicalParser != null) {
+            leftNoteMedicalParser.close();
+            leftNoteMedicalParser = null;
             LOGGER.debug("CLOSING headerMedicalParser");
         }
 
