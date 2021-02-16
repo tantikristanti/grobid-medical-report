@@ -698,7 +698,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 if (medical.getPlaceName() != null) {
                     medical.setPlaceName(medical.getPlaceName() + " " + clusterContent);
                 } else
-                    medical.setAddress(clusterContent);
+                    medical.setPlaceName(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
                 // affiliation **makers** should be marked SINGLECHAR LINESTART
                 if (medical.getAffiliation() != null) {
