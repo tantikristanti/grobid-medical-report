@@ -82,6 +82,7 @@ public class LeftNoteMedicalItem {
     private String language = null;
     private String website = null;
     private String address = null;
+    private String placeName = null;
     private String country = null;
     private String town = null;
     private String email = null;
@@ -171,6 +172,10 @@ public class LeftNoteMedicalItem {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getPlaceName() {
+        return placeName;
     }
 
     public String getCountry() {
@@ -313,6 +318,10 @@ public class LeftNoteMedicalItem {
 
     public void setAddress(String a) {
         address = a;
+    }
+
+    public void setPlaceName(String place) {
+        placeName = place;
     }
 
     public void setCountry(String a) {

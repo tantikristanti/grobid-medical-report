@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class LeftNoteMedicalReportTrainerRunner {
 
-    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {left-note-medical-report} "
+    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {_left_note_medical_report} "
             + "-s { [0.0 - 1.0] - split ratio, optional} "
             + "-b {epsilon, window, nbMax}"
             + "-t NBThreads";

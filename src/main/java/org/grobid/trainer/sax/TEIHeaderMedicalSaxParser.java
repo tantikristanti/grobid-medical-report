@@ -36,7 +36,8 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
     private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "time", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
         "fax", "ptr", "note");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person", "docTitle", "p");
+    private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person",
+        "docTitle", "p");
 
     private List<String> ignoredTags = Arrays.asList("page", "location", "title");
 

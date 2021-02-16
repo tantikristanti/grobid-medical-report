@@ -32,10 +32,10 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("medic","affiliation", "email", "phone",
-        "fax", "ptr");
+    private List<String> endTags = Arrays.asList("idno", "medic","affiliation", "placeName", "email", "phone", "fax", "ptr");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiLeftNote", "fileDesc", "text", "person", "p");
+    private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "teiLeftNote",
+        "fileDesc", "text", "person", "place", "p");
 
     private List<String> ignoredTags = Arrays.asList("page", "location", "institution", "address");
 
@@ -107,7 +107,9 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         }
 
-        if (qName.equals("affiliation")) {
+        if (qName.equals("idno")) {
+            currentTag = "<docnum>";
+        } else if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {
@@ -115,6 +117,8 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
         }  else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
+        } else if (qName.equals("placeName")) {
+            currentTag = "<placeName>";
         } else if (qName.equals("medic")) {
             currentTag = "<medic>";
         } else if (qName.equals("email")) {

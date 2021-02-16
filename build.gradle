@@ -191,6 +191,22 @@ task eval_header_medical_report_split(dependsOn: 'classes', type: JavaExec, grou
     jvmArgs '-Xmx3072m'
 }
 
+// as running this command: $ ./gradlew eval_left_note_medical_report -gH /path/to/grobid-home
+task eval_left_note_medical_report(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.LeftNoteMedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 1, 'left_note_medical_report', '-gH', getArg('gH', '../grobid-home')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_left_note_medical_report_split -gH /path/to/grobid-home
+task eval_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.LeftNoteMedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 2, 'left_note_medical_report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    jvmArgs '-Xmx3072m'
+}
+
 // One jar configuration
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 

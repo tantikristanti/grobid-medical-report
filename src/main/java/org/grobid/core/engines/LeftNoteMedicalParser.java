@@ -694,6 +694,11 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
                 } else
                     medical.setAddress(clusterContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_PLACE_NAME)) {
+                if (medical.getPlaceName() != null) {
+                    medical.setPlaceName(medical.getPlaceName() + " " + clusterContent);
+                } else
+                    medical.setAddress(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
                 // affiliation **makers** should be marked SINGLECHAR LINESTART
                 if (medical.getAffiliation() != null) {
@@ -869,12 +874,17 @@ public class LeftNoteMedicalParser extends AbstractParser {
             boolean output;
 
             output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
-
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
+            }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<placeName>", "<place>\n\t<placeName>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
@@ -913,10 +923,14 @@ public class LeftNoteMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<affiliation>")) {
+            if (lastTag0.equals("<docnum>")) {
+                buffer.append("</idno>\n");
+            }else if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
+            } else if (lastTag0.equals("<placeName>")) {
+                buffer.append("</placeName>\n\t</place>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<location>")) {

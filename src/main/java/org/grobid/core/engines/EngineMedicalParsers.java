@@ -142,7 +142,7 @@ public class EngineMedicalParsers implements Closeable {
         if (leftNoteMedicalParser != null) {
             leftNoteMedicalParser.close();
             leftNoteMedicalParser = null;
-            LOGGER.debug("CLOSING headerMedicalParser");
+            LOGGER.debug("CLOSING leftNoteMedicalParser");
         }
 
         if (affiliationAddressParser != null) {

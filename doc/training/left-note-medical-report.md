@@ -8,10 +8,11 @@ In __grobid-medical-report__, the document __header-medical-report__ corresponds
 
 For identifying the exact pieces of information to be part of the `header-medical-report` segments, see the [Annotation guidelines of the medical report segmenter model](medical-report-segmenter.md).
 
-For the header medical report model, we use the following TEI elements:
+For the left-note medical report model, we use the following TEI elements:
 
 * `<medic>` for the medics list 
 * `<affiliation>` for the affiliation information
+* `<placeName>` for the place names
 * `<address>` for the address elements
 * `<email>` for the email information
 * `<phone>` for the phone number

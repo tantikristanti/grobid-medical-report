@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class MedicalReportSegmenterTrainerRunner {
 
-    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {medical-report-segmenter} "
+    private static final String USAGE = "Usage: {0 - train, 1 - evaluate, 2 - split, train and evaluate} {_medical_report_segmenter} "
             + "-s { [0.0 - 1.0] - split ratio, optional} "
             + "-b {epsilon, window, nbMax}"
             + "-t NBThreads";

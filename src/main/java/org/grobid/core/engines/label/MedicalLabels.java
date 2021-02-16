@@ -30,6 +30,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String DATELINE_LABEL = "<dateline>";
     public final static String TIME_LABEL = "<time>";
     public final static String LOCATION_LABEL = "<location>";
+    public final static String PLACE_NAME_LABEL = "<placeName>";
     public final static String MEDIC_LABEL = "<medic>";
     public final static String PATIENT_LABEL = "<patient>";
     public final static String INSTITUTION_LABEL = "<institution>";
@@ -93,6 +94,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
+    public static final TaggingLabel LEFT_NOTE_PLACE_NAME = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, PLACE_NAME_LABEL);
     public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel LEFT_NOTE_PHONE = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, PHONE_LABEL);
     public static final TaggingLabel LEFT_NOTE_FAX = new TaggingLabelImpl(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, FAX_LABEL);
