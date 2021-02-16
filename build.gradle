@@ -208,17 +208,17 @@ task eval_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, g
 }
 
 // One jar configuration
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-task mainJar(type: ShadowJar, group: 'test') {
+/*task mainJar(type: ShadowJar, group: 'test') {
     zip64 true
     from sourceSets.main.output
     from {
-        /*project.configurations.compile.collect {
+        *//*project.configurations.compile.collect {
             it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
-        }*/
+        }*//*
     }
-}
+}*/
 
 shadowJar {
     classifier = 'onejar'
@@ -228,10 +228,10 @@ shadowJar {
     }
 }
 
-jar {
+/*jar {
     dependsOn mainJar
     enabled false
-}
+}*/
 
 artifacts {
     archives shadowJar
