@@ -15,8 +15,8 @@ import java.util.StringTokenizer;
  * should be in this unique format (which replaces for instance the CORA format).
  * Segmentation of tokens must be
  * identical as the one from pdf2xml files so that training and online input tokens are aligned.
- *
- *
+ * <p>
+ * <p>
  * Tanti, 2020
  */
 public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
@@ -32,7 +32,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "medic","affiliation", "placeName", "email", "phone", "fax", "ptr");
+    private List<String> endTags = Arrays.asList("idno", "medic", "role", "affiliation", "placeName", "email", "phone", "fax", "ptr");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "teiLeftNote",
         "fileDesc", "text", "person", "place", "p");
@@ -114,13 +114,15 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {
             currentTag = "<institution>";
-        }  else if (qName.equals("address")) {
+        } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
         } else if (qName.equals("placeName")) {
             currentTag = "<placeName>";
         } else if (qName.equals("medic")) {
             currentTag = "<medic>";
+        } else if (qName.equals("role")) {
+            currentTag = "<role>";
         } else if (qName.equals("email")) {
             currentTag = "<email>";
         } else if (qName.equals("phone")) {

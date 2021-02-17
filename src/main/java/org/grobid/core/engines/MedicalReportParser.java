@@ -2,7 +2,7 @@ package org.grobid.core.engines;
 
 import eugfc.imageio.plugins.PNMRegistry;
 import org.apache.commons.io.FileUtils;
-import org.grobid.core.GrobidMedicalReportModel;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.document.BasicStructureBuilder;
 import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentSource;
@@ -86,7 +86,7 @@ public class MedicalReportParser extends AbstractParser {
 
 
     public MedicalReportParser() {
-        super(GrobidMedicalReportModel.MEDICAL_REPORT_SEGMENTER);
+        super(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER);
     }
 
     /**

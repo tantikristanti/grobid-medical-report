@@ -4,23 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class for representing medic and patient lists for header.
+ * Class for representing medic lists for left-note.
  *
  * Tanti, 2020
  */
-public class HeaderSet {
+public class LeftNoteSet {
     private List<String> institutions = null;
     private List<String> medics = null;
-    private List<String> patients = null;
     private List<String> affiliations = null;
     private List<String> locations = null;
 
     public List<String> getMedics() {
         return medics;
-    }
-
-    public List<String> getPatients() {
-        return patients;
     }
 
     public List<String> getLocations() {
@@ -47,17 +42,6 @@ public class HeaderSet {
             if (medic.length() > 0) {
                 if (medics.indexOf(medic) == -1)
                     medics.add(medic);
-            }
-        }
-    }
-
-    public void addPatients(String patient) {
-        if (patients == null)
-            patients = new ArrayList<String>();
-        if (patient != null) {
-            if (patient.length() > 0) {
-                if (patients.indexOf(patient) == -1)
-                    patients.add(patient);
             }
         }
     }
@@ -95,30 +79,6 @@ public class HeaderSet {
                     tei += "\t\t\t<surname>" + med.substring(ind + 1) + "</surname>\n\t\t";
                 } else
                     tei += med;
-
-                tei += "</persName>\n";
-                tei += "\t</person>\n";
-                i++;
-            }
-
-            tei += "</listPerson>\n\n";
-        }
-
-        // patients
-        if (patients != null) {
-            tei += "<listPerson type=\"editor\">\n";
-
-            int i = 0;
-            for (String pat : patients) {
-                tei += "\t<person xml:id=\"editor" + i + "\">\n";
-                tei += "\t\t<persName>";
-
-                int ind = pat.lastIndexOf(" ");
-                if (ind != -1) {
-                    tei += "\n\t\t\t<forename>" + pat.substring(0, ind) + "</forename>\n";
-                    tei += "\t\t\t<surname>" + pat.substring(ind + 1) + "</surname>\n\t\t";
-                } else
-                    tei += pat;
 
                 tei += "</persName>\n";
                 tei += "\t</person>\n";

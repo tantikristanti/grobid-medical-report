@@ -2,7 +2,7 @@ package org.grobid.core.data;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.grobid.core.GrobidModels;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.data.util.ClassicMedicEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
@@ -580,6 +580,7 @@ public class HeaderMedicalItem {
     public void reset() {
         language = null;
         title = null;
+        english_title = null;
         subtitle = null;
         document_number = null;
         docNumGeneral = null;
@@ -587,6 +588,9 @@ public class HeaderMedicalItem {
         location = null;
         document_date = null;
         normalized_document_date = null;
+        document_dateline = null;
+        document_type = null;
+        document_time = null;
         medics = null;
         patients = null;
         day = null;
@@ -596,6 +600,8 @@ public class HeaderMedicalItem {
         institution = null;
         affiliation = null;
         address = null;
+        country = null;
+        town = null;
         email = null;
         phone = null;
         fax = null;
@@ -603,7 +609,24 @@ public class HeaderMedicalItem {
         beginPage = -1;
         endPage = -1;
         fullMedics = null;
+        fullPatients = null;
         fullAffiliations = null;
+        firstMedicSurname = null;
+        locationDocument = null;
+        medicList = null;
+        patientList = null;
+        affiliationList = null;
+        addressList = null;
+        emailList = null;
+        webList = null;
+        phoneList = null;
+        faxList = null;
+        affiliationAddressBlock = null;
+        medicString = null;
+        String path = null;
+        originalAffiliation = null;
+        originalMedics = null;
+        originalPatients = null;
     }
 
     public static void cleanTitles(HeaderMedicalItem bibl) {
@@ -2119,7 +2142,7 @@ public class HeaderMedicalItem {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.HEADER, labeledResult, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, labeledResult, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         for (TaggingTokenCluster cluster : clusters) {
             if (cluster == null) {

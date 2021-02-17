@@ -2,7 +2,7 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.GrobidMedicalReportModel;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.data.Date;
 import org.grobid.core.data.HeaderMedicalItem;
 import org.grobid.core.data.PersonMedical;
@@ -61,7 +61,7 @@ public class HeaderMedicalParser extends AbstractParser {
     protected EngineMedicalParsers parsers;
 
     public HeaderMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT, cntManager);
+        super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         // GrobidProperties.getInstance();
@@ -69,7 +69,7 @@ public class HeaderMedicalParser extends AbstractParser {
     }
 
     public HeaderMedicalParser(EngineMedicalParsers parsers) {
-        super(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT);
+        super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
@@ -773,7 +773,7 @@ public class HeaderMedicalParser extends AbstractParser {
     public HeaderMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, HeaderMedicalItem medical, Document doc) {
 
         TaggingLabel lastClusterLabel = null;
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT, result, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, result, tokenizations);
 
         String tokenLabel = null;
         List<TaggingTokenCluster> clusters = clusteror.cluster();

@@ -1,6 +1,6 @@
 package org.grobid.trainer;
 
-import org.grobid.core.GrobidMedicalReportModel;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
 public class HeaderMedicalReportTrainer extends AbstractTrainer{
 
     public HeaderMedicalReportTrainer() {
-        super(GrobidMedicalReportModel.HEADER_MEDICAL_REPORT);
+        super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT);
 
         // adjusting CRF training parameters for this model (only with Wapiti)
         epsilon = 0.000001;

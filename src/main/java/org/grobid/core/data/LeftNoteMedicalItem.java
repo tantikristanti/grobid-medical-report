@@ -2,7 +2,7 @@ package org.grobid.core.data;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.grobid.core.GrobidModels;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.data.util.ClassicMedicEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
@@ -46,11 +46,11 @@ public class LeftNoteMedicalItem {
 
     @Override
     public String toString() {
-        return "HeaderItem{" +
+        return "LeftNoteItem{" +
             ", languageUtilities=" + languageUtilities +
             ", language='" + language + '\'' +
             ", institution='" + institution + '\'' +
-            ", website='" + website + '\'' +
+            ", website='" + web + '\'' +
             ", medics='" + medics + '\'' +
             ", location='" + location + '\'' +
             ", affiliation='" + affiliation + '\'' +
@@ -59,8 +59,6 @@ public class LeftNoteMedicalItem {
             ", town='" + town + '\'' +
             ", email='" + email + '\'' +
             ", phone='" + phone + '\'' +
-            ", web='" + web + '\'' +
-            ", locationDocument='" + location + '\'' +
             ", medicList=" + medicList +
             ", affiliationList=" + affiliationList +
             ", addressList=" + addressList +
@@ -80,7 +78,6 @@ public class LeftNoteMedicalItem {
     }
 
     private String language = null;
-    private String website = null;
     private String address = null;
     private String placeName = null;
     private String country = null;
@@ -90,14 +87,10 @@ public class LeftNoteMedicalItem {
     private String web = null;
     private String fax = null;
     private String medics = null;
+    private String role = null;
     private String location = null;
     private String institution = null;
     private String affiliation = null;
-
-    private String locationDocument = null;
-
-    // abstract labeled featured sequence (to produce a structured abstract with, in particular, reference callout)
-    private String labeledAbstract = null;
 
     // advanced grobid recognitions
     private List<String> medicList;
@@ -123,7 +116,6 @@ public class LeftNoteMedicalItem {
     // for OCR post-corrections
     private String originalAffiliation = null;
     private String originalMedics = null;
-    private String originalPatients = null;
 
     public LeftNoteMedicalItem() {
     }
@@ -144,23 +136,19 @@ public class LeftNoteMedicalItem {
         return year;
     }
 
-    public String getLabeledAbstract() {
-        return labeledAbstract;
-    }
-
     public String getEmail() {
         return email;
     }
-
 
     public String getMedics() {
         return medics;
     }
 
+    public String getRole() { return role; }
+
     public String getLocation() {
         return location;
     }
-
 
     public String getInstitution() {
         return institution;
@@ -174,9 +162,7 @@ public class LeftNoteMedicalItem {
         return address;
     }
 
-    public String getPlaceName() {
-        return placeName;
-    }
+    public String getPlaceName() { return placeName; }
 
     public String getCountry() {
         return country;
@@ -196,21 +182,6 @@ public class LeftNoteMedicalItem {
 
     public String getFax() {
         return fax;
-    }
-
-    public String getLocationDocument() {
-        return locationDocument;
-    }
-
-    public String getMedicString() {
-        return medicString;
-    }
-
-    public String getOriginalAffiliation() {
-        return originalAffiliation;
-    }
-
-    public String getOriginalMedics() { return originalMedics;
     }
 
     public List<PersonMedical> getFullMedics() {
@@ -237,25 +208,8 @@ public class LeftNoteMedicalItem {
         year = StringUtils.normalizeSpace(y);
     }
 
-    public void setLabeledAbstract(String labeledAbstract) {
-        this.labeledAbstract = labeledAbstract;
-    }
-
-    public void setLocationDocument(String loc) {
-        locationDocument = StringUtils.normalizeSpace(loc);
-    }
-
-
-    public void setMedicString(String s) {
-        medicString = s;
-    }
-
     public void setFullMedics(List<PersonMedical> fullMedics) {
         fullMedics = fullMedics;
-    }
-
-    public void setFullPatients(List<PersonMedical> fullPatients) {
-        fullPatients = fullPatients;
     }
 
     public void setFullAffiliations(List<Affiliation> full) {
@@ -275,6 +229,8 @@ public class LeftNoteMedicalItem {
     public void setMedics(String aut) {
         medics = aut;
     }
+
+    public void setRole(String roles) { role = roles; }
 
     public LeftNoteMedicalItem addMedicsToken(LayoutToken lt) {
         medicsLayoutTokens.add(lt);
@@ -391,21 +347,39 @@ public class LeftNoteMedicalItem {
     public void reset() {
         language = null;
         medics = null;
+        role = null;
         year = null;
         institution = null;
         affiliation = null;
         address = null;
+        location = null;
+        placeName = null;
+        country = null;
+        town = null;
         email = null;
         phone = null;
         fax = null;
         web = null;
         beginPage = -1;
         endPage = -1;
+        year = null;
+        medicString = null;
+        path = null;
+        affiliationAddressBlock = null;
         fullMedics = null;
         fullAffiliations = null;
+        medicList = null;
+        affiliationList = null;
+        addressList = null;
+        emailList = null;
+        webList = null;
+        phoneList = null;
+        faxList = null;
+        originalAffiliation = null;
+        originalMedics = null;
     }
 
-    public void buildLeftNoteSet(HeaderSet headerSet, String path0) {
+    public void buildLeftNoteSet(LeftNoteSet leftNoteSet, String path0) {
         path = path0;
         try {
             // medics
@@ -416,16 +390,16 @@ public class LeftNoteMedicalItem {
                         String medic = st.nextToken();
                         if (medic != null)
                             medic = medic.trim();
-                        //headerSet.addmedic(TextUtilities.HTMLEncode(medic));
-                        headerSet.addMedics(medic);
+                        //leftNoteSet.addmedic(TextUtilities.HTMLEncode(medic));
+                        leftNoteSet.addMedics(medic);
                     }
                 }
             }
 
             // institution as the document owner
             if (institution != null) {
-                //headerSet.add(TextUtilities.HTMLEncode(publisher));
-                headerSet.addInstitutions(institution);
+                //leftNoteSet.add(TextUtilities.HTMLEncode(publisher));
+                leftNoteSet.addInstitutions(institution);
             }
         } catch (Exception e) {
             throw new GrobidException("Cannot build a biblioSet, because of nested exception.", e);
@@ -656,7 +630,7 @@ public class LeftNoteMedicalItem {
             withCoordinates = config.getGenerateTeiCoordinates().contains("persName");
         }
 
-        // uncomment below when collaboration will be concretely added to headers
+        // uncomment below when collaboration will be concretely added to left-notes
         /*
         if ( (collaboration != null) &&
             ( (fullMedics == null) || (fullMedics.size() == 0) ) ) {
@@ -1060,7 +1034,6 @@ public class LeftNoteMedicalItem {
         }
     }
 
-
     public String getTeiId() {
         return teiId;
     }
@@ -1089,29 +1062,29 @@ public class LeftNoteMedicalItem {
         this.labeledTokens = labeledTokens;
     }
 
-    public List<LayoutToken> getLayoutTokens(TaggingLabel headerLabel) {
+    public List<LayoutToken> getLayoutTokens(TaggingLabel leftNoteLabel) {
         if (labeledTokens == null) {
             LOGGER.debug("labeledTokens is null");
             return null;
         }
-        if (headerLabel.getLabel() == null) {
-            LOGGER.debug("headerLabel.getLabel() is null");
+        if (leftNoteLabel.getLabel() == null) {
+            LOGGER.debug("leftNoteLabel.getLabel() is null");
             return null;
         }
-        return labeledTokens.get(headerLabel.getLabel());
+        return labeledTokens.get(leftNoteLabel.getLabel());
     }
 
-    public void setLayoutTokensForLabel(List<LayoutToken> tokens, TaggingLabel headerLabel) {
+    public void setLayoutTokensForLabel(List<LayoutToken> tokens, TaggingLabel leftNoteLabel) {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
-        labeledTokens.put(headerLabel.getLabel(), tokens);
+        labeledTokens.put(leftNoteLabel.getLabel(), tokens);
     }
 
     public void generalResultMapping(Document doc, String labeledResult, List<LayoutToken> tokenizations) {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.HEADER, labeledResult, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, labeledResult, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         for (TaggingTokenCluster cluster : clusters) {
             if (cluster == null) {
@@ -1119,9 +1092,7 @@ public class LeftNoteMedicalItem {
             }
 
             TaggingLabel clusterLabel = cluster.getTaggingLabel();
-            /*if (clusterLabel.equals(TaggingLabels.HEADER_INTRO)) {
-                break;
-            }*/
+
             List<LayoutToken> clusterTokens = cluster.concatTokens();
             List<LayoutToken> theList = labeledTokens.get(clusterLabel.getLabel());
 

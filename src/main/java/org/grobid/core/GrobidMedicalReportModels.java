@@ -15,7 +15,7 @@ import static org.grobid.core.engines.EngineParsers.LOGGER;
  * Tanti, 2020
  */
 
-public enum GrobidMedicalReportModel implements GrobidModel {
+public enum GrobidMedicalReportModels implements GrobidModel {
     MEDICAL_REPORT_SEGMENTER("medical-report-segmenter"),
     HEADER_MEDICAL_REPORT("header-medical-report"),
     LEFT_NOTE_MEDICAL_REPORT("left-note-medical-report"),
@@ -32,7 +32,7 @@ public enum GrobidMedicalReportModel implements GrobidModel {
 
     private static final ConcurrentMap<String, GrobidModel> models = new ConcurrentHashMap<>();
 
-    GrobidMedicalReportModel(String folderName) {
+    GrobidMedicalReportModels(String folderName) {
 
         this.folderName = folderName;
         File path = GrobidProperties.getModelPath(this);

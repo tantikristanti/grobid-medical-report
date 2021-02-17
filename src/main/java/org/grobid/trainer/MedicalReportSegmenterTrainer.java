@@ -1,6 +1,6 @@
 package org.grobid.trainer;
 
-import org.grobid.core.GrobidMedicalReportModel;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
@@ -24,7 +24,7 @@ import java.util.StringTokenizer;
 public class MedicalReportSegmenterTrainer extends AbstractTrainer {
 
     public MedicalReportSegmenterTrainer() {
-        super(GrobidMedicalReportModel.MEDICAL_REPORT_SEGMENTER);
+        super(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER);
 
         // adjusting CRF training parameters for this model (only with Wapiti)
         epsilon = 0.0000001;

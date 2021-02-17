@@ -2,7 +2,7 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.GrobidMedicalReportModel;
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.*;
@@ -59,7 +59,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     protected EngineMedicalParsers parsers;
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, cntManager);
+        super(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         // GrobidProperties.getInstance();
@@ -67,7 +67,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     }
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers) {
-        super(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT);
+        super(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
@@ -663,7 +663,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem medical, Document doc) {
 
         TaggingLabel lastClusterLabel = null;
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModel.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
 
         String tokenLabel = null;
         List<TaggingTokenCluster> clusters = clusteror.cluster();
@@ -689,6 +689,11 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addMedicsTokens(tokens);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ROLE)) {
+                if (medical.getRole() != null) {
+                    medical.setRole(medical.getRole() + " " + clusterContent);
+                } else
+                    medical.setRole(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
                 if (medical.getAddress() != null) {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
@@ -893,6 +898,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<role>", "<role>", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
             }
             if (!output) {
@@ -937,6 +945,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<medic>")) {
                 buffer.append("</medic>\n\t</person>\n");
+            } else if (lastTag0.equals("<role>")) {
+                buffer.append("</role>\n");
             } else if (lastTag0.equals("<email>")) {
                 buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {

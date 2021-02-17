@@ -11,6 +11,7 @@ For identifying the exact pieces of information to be part of the `header-medica
 For the left-note medical report model, we use the following TEI elements:
 
 * `<medic>` for the medics list 
+* `<role>` for the role of medical personnels to be used in deeper extraction (e.g. name extraction)
 * `<affiliation>` for the affiliation information
 * `<placeName>` for the place names
 * `<address>` for the address elements
