@@ -715,10 +715,10 @@ public class HeaderMedicalParser extends AbstractParser {
                     if (token.getFontSize() > averageFontSize)
                         features.largerThanAverageFont = true;
 
-                    if (token.getBold())
+                    if (token.isBold())
                         features.bold = true;
 
-                    if (token.getItalic())
+                    if (token.isItalic())
                         features.italic = true;
 
                     if (features.capitalisation == null)
