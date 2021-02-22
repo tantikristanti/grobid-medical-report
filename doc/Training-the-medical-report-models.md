@@ -112,6 +112,17 @@ An example of a command for generating a new training data for the __header-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
 
+
+<!---Note for developers:
+
+To create new blank training data (files containing the features and the text without any label), we need to uncomment createBlankTrainingFromPDF method in batch processing for each model. For example :
+- uncomment createBlankTrainingFromPDF method in the createTrainingMedicalSegmentationBatch in MedicalReportParser class;
+OR 
+- uncomment createBlankTrainingFromPDF method in the createTrainingMedicalHeaderBatch in HeaderMedicalParser class 
+etc...
+
+--->
+
 ## Training guidelines
 
 Annotation guidelines for creating the training data corresponding to the different GROBID models are available from the [following page](training/General-principles.md).

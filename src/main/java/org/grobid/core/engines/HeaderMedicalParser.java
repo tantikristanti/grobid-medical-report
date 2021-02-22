@@ -1220,6 +1220,8 @@ public class HeaderMedicalParser extends AbstractParser {
             for (final File file : refFiles) {
                 try {
                     createTrainingFromPDF(file, outputDirectory, n);
+
+                    // uncomment this command to create files containing features and blank training without any label
                     //createBlankTrainingFromPDF(file, outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
@@ -1371,7 +1373,7 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
+            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.blank.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1436,7 +1438,7 @@ public class HeaderMedicalParser extends AbstractParser {
         } catch (Exception e) {
             e.printStackTrace();
             throw new GrobidException("An exception occured while running grobid-medical blank training" +
-                " data generation for the header medical report.", e);
+                " data generation for the header-medical-report model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
         }

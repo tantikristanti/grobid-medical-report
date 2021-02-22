@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 /**
  * This class realises a high level segmentation of medical reports into document header, page header,
  * page footer, left note, right note, document body, page, and acknowledgment.
- *
+ * <p>
  * Tanti, 2020
  */
 public class MedicalReportParser extends AbstractParser {
@@ -62,7 +62,8 @@ public class MedicalReportParser extends AbstractParser {
         return instance;
     }
 
-    *//**
+    */
+    /**
      * Create a new instance.
      *//*
     private static synchronized void getNewInstance() {
@@ -616,8 +617,8 @@ public class MedicalReportParser extends AbstractParser {
      */
 
     public int createTrainingMedicalSegmentationBatch(String inputDirectory,
-                                   String outputDirectory,
-                                   int ind) throws IOException {
+                                                      String outputDirectory,
+                                                      int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
             if (!path.exists()) {
@@ -650,6 +651,9 @@ public class MedicalReportParser extends AbstractParser {
             for (final File file : refFiles) {
                 try {
                     createTrainingMedicalSegmentation(file.getAbsolutePath(), outputDirectory, n);
+
+                    // uncomment this command to create files containing features and blank training without any label
+                    // createBlankTrainingFromPDF(file.getAbsolutePath(), outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -667,13 +671,13 @@ public class MedicalReportParser extends AbstractParser {
     /**
      * Process the content of the specified pdf and format the result as training data.
      *
-     * @param inputFile    input file
+     * @param inputFile  input file
      * @param outputFile path to fulltext
-     * @param id           id
+     * @param id         id
      */
     public void createTrainingMedicalSegmentation(String inputFile,
-                                      String outputFile,
-                                      int id) {
+                                                  String outputFile,
+                                                  int id) {
         DocumentSource documentSource = null;
         try {
             File file = new File(inputFile);
@@ -739,24 +743,20 @@ public class MedicalReportParser extends AbstractParser {
      * without any tags. This is usefull to start from scratch the creation of training data at the same
      * level as the segmentation parser.
      *
-     * @param inputFile    input file
-     * @param pathFullText path to fulltext
-     * @param pathTEI      path to TEI
-     * @param id           id
+     * @param inputFile  input file
+     * @param outputFile path to fulltext
+     * @param id         id
      */
-    public void createBlankTrainingMedicalSegmentation (File inputFile,
-                                               String pathFullText,
-                                               String pathTEI,
-                                               int id) {
+    public void createBlankTrainingFromPDF(String inputFile, String outputFile, int id) {
         DocumentSource documentSource = null;
         try {
-            //File file = new File(inputFile);
+            File file = new File(inputFile);
 
             //documentSource = DocumentSource.fromPdf(inputfile);
-            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
             Document doc = new Document(documentSource);
 
-            String PDFFileName = inputFile.getName();
+            String PDFFileName = file.getName();
             doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
 
             if (doc.getBlocks() == null) {
@@ -769,8 +769,8 @@ public class MedicalReportParser extends AbstractParser {
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write the full text untagged (but featurized)
-            String outPathFulltext = pathFullText + File.separator +
-                PDFFileName.replace(".pdf", ".training.blank");
+            String outPathFulltext = outputFile + File.separator +
+                PDFFileName.replace(".pdf", ".training.medical");
             Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFulltext), false), "UTF-8");
             writer.write(fulltext + "\n");
             writer.close();
@@ -784,9 +784,9 @@ public class MedicalReportParser extends AbstractParser {
             fulltext = rawtxt.toString();
             if (isNotBlank(fulltext)) {
                 // write the TEI file to reflect the extact layout of the text as extracted from the pdf
-                writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
+                writer = new OutputStreamWriter(new FileOutputStream(new File(outputFile +
                     File.separator +
-                    PDFFileName.replace(".pdf", ".training.blank.tei.xml")), false), "UTF-8");
+                    PDFFileName.replace(".pdf", ".training.medical.blank.tei.xml")), false), "UTF-8");
                 writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
                     "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"en\">\n");
 
@@ -796,8 +796,8 @@ public class MedicalReportParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running Grobid training" +
-                " data generation for medical model.", e);
+            throw new GrobidException("An exception occured while running grobid-medical blank training" +
+                " data generation for the medical-report-segmenter model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
         }
@@ -1062,7 +1062,7 @@ public class MedicalReportParser extends AbstractParser {
                 buffer.append("</div>\n\n");
             } else if (lastTag0.equals("<other>")) {
                 buffer.append("\n\n");
-            }else {
+            } else {
                 res = false;
             }
 
