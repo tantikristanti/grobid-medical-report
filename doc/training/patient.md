@@ -1,22 +1,22 @@
-# Annotation guidelines for the _medic_ model
+# Annotation guidelines for the _patient_ model
 
 ## Introduction
 
 For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models/#generation-of-training-data).
 
-In __grobid-medical-report__, the document __medic__ corresponds to the information sections about the document. This is typical information that can be found at the beginning of the article (i.e., `front`).
+In __grobid-medical-report__, __patient__ corresponds to the patient information. 
 
-For identifying the exact pieces of information to be part of the `header-medical-report` or `left-note-medical-report`, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
+For identifying the exact pieces of information to be part of the `header-medical-report`, see the [Annotation guidelines of the header-medical-report model](header-medical-report.md).
 
-For the medic model, we use the following TEI elements:
+For the patient model, we use the following TEI elements:
 
-* `<persName>` for the name of medics
+* `<persName>` for the name of patients
 * `<address>` for the address elements of patients  
 * `<email>` for the email information
 * `<phone>` for the phone number
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-medical-report/resources/dataset/medic`) to see some examples of how these elements should be used.
+> It is recommended to study first the existing training documents for the __patient__ model (`grobid/grobid-medical-report/resources/dataset/patient`) to see some examples of how these elements should be used.
 
 
 ## Analysis
@@ -38,7 +38,7 @@ All the mentions of person names are labeled under `<persName>`. [Person name](h
     <persName>Madame Chaterine BELLE</persName>
 ```
 
-As illustrated above, titles and roles (e.g. Madame, Monsieur) must be **included** in the medic field.
+As illustrated above, titles and roles (e.g. Madame, Monsieur) must be **included** in the patient field.
 
 ### Address
 

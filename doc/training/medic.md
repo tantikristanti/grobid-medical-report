@@ -4,7 +4,7 @@
 
 For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models/#generation-of-training-data).
 
-In __grobid-medical-report__, the document __medic__ corresponds to the information sections about the document. This is typical information that can be found at the beginning of the article (i.e., `front`).
+In __grobid-medical-report__, __medic__ corresponds to the medic information. 
 
 For identifying the exact pieces of information to be part of the `header-medical-report` or `left-note-medical-report`, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
 
