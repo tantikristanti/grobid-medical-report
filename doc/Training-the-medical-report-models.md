@@ -11,7 +11,13 @@ The models prepared are :
 
 * left-note-medical-report
 
-* name-medical-personnel
+* organization-medical-report
+
+* medic
+
+* patient
+  
+* name-medic
 
 * name-patient
 

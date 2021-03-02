@@ -4,27 +4,25 @@
 
 For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models/#generation-of-training-data).
 
-In __grobid-medical-report__, the document __header-medical-report__ corresponds to the metadata information sections about the document. This is typical information that can be found at the beginning of the article (i.e., `front`).
+In __grobid-medical-report__, the document __left-note-medical-report__ corresponds to information of hospital organizational structure.
 
-For identifying the exact pieces of information to be part of the `header-medical-report` segments, see the [Annotation guidelines of the medical report segmenter model](medical-report-segmenter.md).
+For identifying the exact pieces of information to be part of the `left-note-medical-report` segments, see the [Annotation guidelines of the medical report segmenter model](medical-report-segmenter.md).
 
-For the left-note medical report model, we use the following TEI elements:
+For the left-note-medical-report model, we use the following TEI elements:
 
-* `<medic>` for the medics list 
-* `<role>` for the role of medical personnels to be used in deeper extraction (e.g. name extraction)
 * `<affiliation>` for the affiliation information
-* `<placeName>` for the place names
-* `<address>` for the address elements
-* `<email>` for the email information
-* `<phone>` for the phone number
-* `<fax>` for the fax number
+* `<address>` for the address elements of affiliations
+* `<medic>` for the list of medics  
+* `<org>` for the information regarding identifiable organization  
+* `<email>` for the email information of affiliations
+* `<phone>` for the phone number of affiliations
+* `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL 
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
-Encoding the header section is challenging because of the variety of information that appears in this section can be in unexpected and overlapped manners. Some information is often redundant (for example, medics, patients, and affiliations can be mentioned several times among different levels of details). These annotation guidelines are thus particularly important to follow to ensure stable encoding practices in the complete training data and to avoid the machine learning models learn contradictory labeling resulting in poorer performance and less valuable training data.
-> Note: It is recommended to study first the existing training documents for the __header-medical-report__ model (`grobid/grobid-medical-report/resources/dataset/header-medical-report`) to see some examples of how these elements should be used.
-
+Encoding the left-note section is challenging because of the variety of information that appears in this section can be in unexpected and overlapped manners (e.g., the overlapped information in affiliation and organization). Some information is often redundant (for example, medics can be mentioned several times among different levels of details). These annotation guidelines are thus particularly important to follow to ensure stable encoding practices in the complete training data and to avoid the machine learning models learn contradictory labeling resulting in poorer performance and less valuable training data.
+> Note: It is recommended to study first the existing training documents for the __left-note-medical-report__ model (`grobid/grobid-medical-report/resources/dataset/left-note-medical-report`) to see some examples of how these elements should be used.
 
 ## Analysis
 
@@ -36,40 +34,11 @@ Spaces and a new line in the XML annotated files are not significant and will be
 
 Similarly, line break tags `<lb/>` are present in the generated XML training data, but they will be considered as a default separator by the XML parser. They are indicated to help the annotator to identify a piece of text in the original PDF if necessary. Actual line breaks are identified in the PDF and added by aligning the XML/TEI with the feature file generated in parallel which contains all the PDF layout information. 
 
-### Medics
-
-All mentions of the medics (i.e. medical practitioners) are labeled with `<medic>`, including possible repetition of the medics in the correspondence section. The medic information might be more detailed in the correspondence part and it will be then part of the job of Grobid to identify repeated medics and to "merge" them.
-
-```xml
-    <person>
-        <medic>Docteur Nathalie DUPONT</medic>
-    </person>
-```
-
-As illustrated above, titles like "Ph.D.", "MD", "Dr.", etc. must be **included** in the medic field. 
-
-The only exception is when the indication of medics is given around an email or a phone number. In this case, we consider that the occurrence of medic names (including abbreviated names) is purely for practical reasons and should be ignored.
-```xml
-    Email: Calum J Maclean* -
-     <email>calum.maclean@ucl.ac.uk</email>; 
-```   
-
-
-Full job names like "Head of...", "Chef de service..." should be excluded when possible (i.e. when it does not break the sequence) from the tagged field.
-
-```xml
-    <person>
-    	<medic>Dr Agnès DUPONT<lb/> Néonatologie</medic>
-    </person> 
-
-    Chef de service <lb/>
-```
-
 ### Affiliation and address
 
 All the mentions of affiliations are labeled, including in the correspondence parts. Grobid will have to merge appropriately redundant affiliations. It's important to keep markers inside the labeled fields because they are used to associate the right affiliations to the medics.
 
-Addresses are labeled with their own tag `<address>`. 
+Addresses are labeled with their own tag `<address>`.
 
 ```xml
     <byline>
@@ -79,13 +48,48 @@ Addresses are labeled with their own tag `<address>`.
     <address>51 Avenue du Maréchal de Lattre de Tassigny <lb/>94010 CRETEIL</address> <lb/>
 ```
 
+### Medics
+
+All mentions of medics (i.e. medical practitioners) are labeled with `<medic>`, including possible repetition of the medics in the correspondence section. The medic information might be more detailed in the correspondence part and it will be then part of the job of Grobid to identify repeated medics and to "merge" them.
+The information contained therein will be extracted further by the [name-medic](medic.md) model.
+
+```xml
+    <person>
+        <medic>
+            Docteur Nathalie DUPONT (MCU-PH) <lb/>
+            Tel. 07.12.12.12.12 <lb/>
+            nathalie.dupont@aphp.fr <lb/>
+            Chef de service <lb/>
+        </medic>
+    </person>
+```
+
+As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), emails, phones must be **included** in the medic field.
+
+### Organization
+
+All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable hospital organizational structure. 
+The information contained therein will be extracted further by the [organization-medical-report](organization-medical-report.md) model.
+
+```xml
+    <byline>
+        <org>
+            Hôpital de jour : <lb/>
+            Pr Daniel DUPONT (PH) <lb/>
+            (Chef du service) <lb/>
+            Accueil Tel : 01.12.34.56.78 <lb/>
+            Sécrétariat Fax : 01.23.34.56.78 <lb/>
+        </org> 
+    </byline>
+```
+
 ### Emails
 
 Email must be tagged in a way that is limited to an actual [\<email\>](https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-email.html), excluding the "Email" word, punctuations, and person name information.
 
 ```xml
-    Email: Ren H Wu -
-    <email>wurh20000@sina.com</email> 
+    Email: Hépatologie : <lb/>
+    <email>hépatologie@aphp.fr</email> 
 ```   
 
 ### Phone numbers
@@ -102,7 +106,7 @@ Phone numbers including international prefix symbols are labeled with `<phone>`.
 
 ### Fax numbers
 
-Fax numbers including international prefix symbols are labeled with `<fax>`. Punctuation and words (e.g., "fax") must be excluded from the label field. 
+Fax numbers including international prefix symbols are labeled with `<fax>`. Punctuation and words (e.g., "fax") must be excluded from the label field.
 
 ```xml
     Secrétariat Général : <lb/>

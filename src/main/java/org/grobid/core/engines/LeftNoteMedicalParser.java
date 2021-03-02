@@ -1030,8 +1030,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    createTrainingFromPDF(file, outputDirectory, n);
-                    //createBlankTrainingFromPDF(file, outputDirectory, n);
+                    //createTrainingFromPDF(file, outputDirectory, n);
+                    createBlankTrainingFromPDF(file, outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);

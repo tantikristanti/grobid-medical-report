@@ -6,24 +6,25 @@ For the following guidelines, we first need to generate the training data as exp
 
 In __grobid-medical-report__, the document __header-medical-report__ corresponds to the metadata information sections about the document. This is typical information that can be found at the beginning of the article (i.e., `front`).
 
-For identifying the exact pieces of information to be part of the `header-medical-report` segments, see the [Annotation guidelines of the medical report segmenter model](medical-report-segmenter.md).
+For identifying the exact pieces of information to be part of the `header-medical-report` segments, see the [Annotation guidelines of the medical-report-segmenter model](medical-report-segmenter.md).
 
-For the header medical report model, we use the following TEI elements:
+For the header-medical-report model, we use the following TEI elements:
 
 * `<idno>` for the strong identifiers of the document 
+* `<note type="doctype">` for indication on the document type
 * `<titlePart>` for the document title
 * `<date>` for the date
 * `<time>` for the time information
 * `<dateline>` for the date containing also the location (e.g., "Paris, le 27 novembre 2020")
-* `<medic>` for the medics list 
-* `<patient>` the patients list
+* `<medic>` for the list of medics 
+* `<patient>` the list of patients
 * `<affiliation>` for the affiliation information
-* `<address>` for the address elements
-* `<email>` for the email information
-* `<phone>` for the phone number
-* `<fax>` for the fax number
+* `<address>` for the address elements of affiliations
+* `<email>` for the email information of affiliations
+* `<phone>` for the phone number of affiliations
+* `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL 
-* `<note type="doctype">` for indication on the document type
+
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
@@ -49,6 +50,15 @@ The identifier name is kept with the identifier value so that Grobid can classif
 
 ```xml
     Concernant examen numéro<idno type="Examen">19A181001</idno>
+```
+
+### Document types
+
+Indication of document types is labeled with `<note>`. These indications depend on the editor, document source, etc. We consider as _document type_ the nature of the document (article, review, editorial, etc.), but also some specific aspects that can be highlighted in the presentation format, for instance, indication of an "Open Access" publication expressed independently form the copyrights to characterize the document.
+
+```xml
+    <note type="doctype">Ordonnance<lb/></note>
+    , Imprimé le <date>10/04/2020</date> <time>18:57</time> <lb/>
 ```
 
 ### Title
@@ -99,40 +109,35 @@ For example:
 
 ### Medics
 
-All mentions of the medics (i.e. medical practitioners) are labeled with `<medic>`, including possible repetition of the medics in the correspondence section. The medic information might be more detailed in the correspondence part and it will be then part of the job of Grobid to identify repeated medics and to "merge" them.
+All mentions of medics (i.e. medical practitioners) are labeled with `<medic>`, including possible repetition of the medics in the correspondence section. The medic information might be more detailed in the correspondence part and it will be then part of the job of Grobid to identify repeated medics and to "merge" them.
+The information contained therein will be extracted further by the [name-medic](medic.md) model.
 
 ```xml
     <person>
-        <medic>Docteur Nathalie DUPONT</medic>
+        <medic>
+            Docteur Nathalie DUPONT (MCU-PH) <lb/>
+            Tel. 07.12.12.12.12 <lb/>
+            nathalie.dupont@aphp.fr <lb/>
+            Chef de service <lb/>
+        </medic>
     </person>
 ```
 
-As illustrated above, titles like "Ph.D.", "MD", "Dr.", etc. must be **included** in the medic field. 
-
-The only exception is when the indication of medics is given around an email or a phone number. In this case, we consider that the occurrence of medic names (including abbreviated names) is purely for practical reasons and should be ignored.
-```xml
-    Email: Calum J Maclean* -
-     <email>calum.maclean@ucl.ac.uk</email>; 
-```   
-
-
-Full job names like "Head of...", "Chef de service..." should be excluded when possible (i.e. when it does not break the sequence) from the tagged field.
-
-```xml
-    <person>
-    	<medic>Dr Agnès DUPONT<lb/> Néonatologie</medic>
-    </person> 
-
-    Chef de service <lb/>
-```
+As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), emails, phones must be **included** in the medic field.
 
 ### Patients
 
-The name of the patients is tagged as `<patient>`. Titles like "Mme.", "Mr." are included in the field.
+All mentions of patients are tagged as `<patient>`. Titles (e.g. Mme., Mr.), emails, addresses of patients are included in the field.
 
 ```xml
     <person>
-    	<patient>Mme Carole MARTIN<lb/></patient>
+    	<patient>
+            Mme Carole MARTIN<lb/>
+            carole.martin@yahoo.fr <lb/>
+            9 boulevard des coquibus <lb/>
+            chez COALLIA <lb/>
+            91000 EVRY <lb/>
+        </patient>
     </person>
 ```
 
@@ -195,11 +200,3 @@ Web URLs are enclosed in [\<ptr\>](https://www.tei-c.org/release/doc/tei-p5-doc/
     <ptr type="web">http://www.oncosat.com</ptr> <lb/>
 ```
 
-### Document types
-
-Indication of document types is labeled with `<note>`. These indications depend on the editor, document source, etc. We consider as _document type_ the nature of the document (article, review, editorial, etc.), but also some specific aspects that can be highlighted in the presentation format, for instance, indication of an "Open Access" publication expressed independently form the copyrights to characterize the document.
-
-```xml
-    <note type="doctype">Ordonnance<lb/></note>
-    , Imprimé le <date>10/04/2020</date> <time>18:57</time> <lb/>
-```
