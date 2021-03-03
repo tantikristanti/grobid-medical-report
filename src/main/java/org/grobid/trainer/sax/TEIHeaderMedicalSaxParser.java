@@ -15,9 +15,9 @@ import java.util.StringTokenizer;
  * should be in this unique format (which replaces for instance the CORA format).
  * Segmentation of tokens must be
  * identical as the one from pdf2xml files so that training and online input tokens are aligned.
- *
+ * <p>
  * This class is adapted from TEIHeaderSaxParser class (@author Patrice Lopez)
- *
+ * <p>
  * Tanti, 2020
  */
 public class TEIHeaderMedicalSaxParser extends DefaultHandler {
@@ -33,13 +33,13 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "time", "medic", "patient", "affiliation", "institution", "address", "email", "phone",
+    private List<String> endTags = Arrays.asList("idno", "titlePart", "dateline", "date", "time", "medic", "patient", "affiliation", "address", "email", "phone",
         "fax", "ptr", "note");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "front", "lb", "tei", "teiHeader", "fileDesc", "text", "person",
         "docTitle", "p");
 
-    private List<String> ignoredTags = Arrays.asList("page", "location", "title");
+    private List<String> ignoredTags = Arrays.asList("page", "institution", "location", "title");
 
     public TEIHeaderMedicalSaxParser() {
         labeled = new ArrayList<String>();
@@ -124,7 +124,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {
             currentTag = "<institution>";
-        }  else if (qName.equals("address")) {
+        } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
         } else if (qName.equals("medic")) {
@@ -188,7 +188,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
 
                 if (name != null) {
                     if (name.equals("type")) {
-                       if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
+                        if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
                             value.equals("documentType") || value.equals("articleType")) {
                             currentTag = "<doctype>";
                         } else

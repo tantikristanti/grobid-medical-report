@@ -32,9 +32,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 
-/** A class for parsing header part of medical reports.
- * This class is adapted from the HeaderParser class (@author Patrice Lopez)
- *
+/**
+ * A class for parsing header part of medical reports.
+ * This class is adapted from the HeaderParser class of Grobid (@author Patrice Lopez)
+ * <p>
  * Tanti, 2020
  */
 public class HeaderMedicalParser extends AbstractParser {
@@ -185,7 +186,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     if (resHeader.getMedicsTokens() != null) {
                         // split the list of layout tokens when token "\t" is met
                         List<LayoutToken> currentSegment = new ArrayList<>();
-                        for(LayoutToken theToken : resHeader.getMedicsTokens()) {
+                        for (LayoutToken theToken : resHeader.getMedicsTokens()) {
                             if (theToken.getText() != null && theToken.getText().equals("\t")) {
                                 if (currentSegment.size() > 0)
                                     medicSegments.add(currentSegment);
@@ -265,7 +266,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         if (resHeader.getPatientsTokens() != null) {
                             // split the list of layout tokens when token "\t" is met
                             List<LayoutToken> currentSegment = new ArrayList<>();
-                            for(LayoutToken theToken : resHeader.getPatientsTokens()) {
+                            for (LayoutToken theToken : resHeader.getPatientsTokens()) {
                                 if (theToken.getText() != null && theToken.getText().equals("\t")) {
                                     if (currentSegment.size() > 0)
                                         patientSegments.add(currentSegment);
@@ -380,7 +381,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     continue;
                 }
 
-                for(LayoutToken token : tokens) {
+                for (LayoutToken token : tokens) {
                     if (token.getFontSize() > largestFontSize) {
                         largestFontSize = token.getFontSize();
                     }
@@ -435,15 +436,15 @@ public class HeaderMedicalParser extends AbstractParser {
 
                 // character density of the block
                 double density = 0.0;
-                if ( (block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
+                if ((block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
                     (block.getText() != null) && (!block.getText().contains("@PAGE")) &&
-                    (!block.getText().contains("@IMAGE")) )
-                    density = (double)block.getText().length() / (block.getHeight() * block.getWidth());
+                    (!block.getText().contains("@IMAGE")))
+                    density = (double) block.getText().length() / (block.getHeight() * block.getWidth());
 
                 String[] lines = localText.split("[\\n\\r]");
                 // set the max length of the lines in the block, in number of characters
                 int maxLineLength = 0;
-                for(int p=0; p<lines.length; p++) {
+                for (int p = 0; p < lines.length; p++) {
                     if (lines[p].length() > maxLineLength)
                         maxLineLength = lines[p].length();
                 }
@@ -511,7 +512,7 @@ public class HeaderMedicalParser extends AbstractParser {
                                 // Otherwise indentation is unchanged
                             }
                         }
-                    } else{
+                    } else {
                         newline = false;
                     }
                     // centered ?
@@ -557,7 +558,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         // beginning of block
                         features.lineStatus = "LINESTART";
                         features.blockStatus = "BLOCKSTART";
-                    } else if ((n == tokens.size() - 1) || (n+1 > dp2.getTokenDocPos() - block.getStartToken())) {
+                    } else if ((n == tokens.size() - 1) || (n + 1 > dp2.getTokenDocPos() - block.getStartToken())) {
                         // end of block
                         features.lineStatus = "LINEEND";
                         previousNewline = true;
@@ -616,8 +617,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
                     if (indented) {
                         features.alignmentStatus = "LINEINDENT";
-                    }
-                    else {
+                    } else {
                         features.alignmentStatus = "ALIGNEDLEFT";
                     }
 
@@ -661,7 +661,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
                     // check token offsets for email and http address, or known location
                     if (locationPositions != null) {
-                        for(OffsetPosition thePosition : locationPositions) {
+                        for (OffsetPosition thePosition : locationPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.locationName = true;
                                 break;
@@ -669,7 +669,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         }
                     }
                     if (emailPositions != null) {
-                        for(OffsetPosition thePosition : emailPositions) {
+                        for (OffsetPosition thePosition : emailPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.email = true;
                                 break;
@@ -677,7 +677,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         }
                     }
                     if (urlPositions != null) {
-                        for(OffsetPosition thePosition : urlPositions) {
+                        for (OffsetPosition thePosition : urlPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.http = true;
                                 break;
@@ -737,7 +737,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
                     if (density != -1.0) {
                         features.characterDensity = featureFactory
-                            .linearScaling(density-doc.getMinCharacterDensity(), doc.getMaxCharacterDensity()-doc.getMinCharacterDensity(), NBBINS_DENSITY);
+                            .linearScaling(density - doc.getMinCharacterDensity(), doc.getMaxCharacterDensity() - doc.getMinCharacterDensity(), NBBINS_DENSITY);
 //System.out.println((density-doc.getMinCharacterDensity()) + " " + (doc.getMaxCharacterDensity()-doc.getMinCharacterDensity()) + " " + NBBINS_DENSITY + " " + features.characterDensity);
                     }
 
@@ -767,7 +767,7 @@ public class HeaderMedicalParser extends AbstractParser {
      *
      * @param result        result
      * @param tokenizations list of tokens
-     * @param medical        medical item
+     * @param medical       medical item
      * @return a medical item
      */
     public HeaderMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, HeaderMedicalItem medical, Document doc) {
@@ -786,13 +786,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.HEADER_TITLE)) {
-                if (medical.getTitle() == null) {
-                    medical.setTitle(clusterContent);
-                    List<LayoutToken> tokens = getLayoutTokens(cluster);
-                    medical.addTitleTokens(tokens);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_DOCNUM)) {
+            if (clusterLabel.equals(MedicalLabels.HEADER_DOCNUM)) {
                 if (medical.getDocNum() != null && isDifferentandNotIncludedContent(medical.getDocNum(), clusterContent)) {
                     String currentDocNum = medical.getDocNum();
                     medical.setDocNum(clusterContent);
@@ -802,6 +796,32 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setDocNum(clusterContent);
                     medical.checkIdentifier();
                 }
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_DOCTYPE)) {
+                if (medical.getDocumentType() != null) {
+                    medical.setDocumentType(medical.getDocumentType() + clusterNonDehypenizedContent);
+                } else
+                    medical.setDocumentType(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_TITLE)) {
+                if (medical.getTitle() == null) {
+                    medical.setTitle(clusterContent);
+                    List<LayoutToken> tokens = getLayoutTokens(cluster);
+                    medical.addTitleTokens(tokens);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_DATE)) {
+                if (medical.getDocumentDate() != null && medical.getDocumentDate().length() < clusterNonDehypenizedContent.length())
+                    medical.setDocumentDate(clusterNonDehypenizedContent);
+                else if (medical.getDocumentDate() == null)
+                    medical.setDocumentDate(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_TIME)) {
+                if (medical.getDocumentTime() != null && medical.getDocumentTime().length() < clusterNonDehypenizedContent.length())
+                    medical.setDocumentTime(clusterNonDehypenizedContent);
+                else if (medical.getDocumentDate() == null)
+                    medical.setDocumentDate(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_DATELINE)) {
+                if (medical.getDocumentDateLine() != null && medical.getDocumentDateLine().length() < clusterNonDehypenizedContent.length())
+                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
+                else if (medical.getDocumentDateLine() == null)
+                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_MEDIC)) {
                 if (medical.getMedics() != null) {
                     medical.setMedics(medical.getMedics() + "\t" + clusterNonDehypenizedContent);
@@ -828,37 +848,17 @@ public class HeaderMedicalParser extends AbstractParser {
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addPatientsTokens(tokens);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_ADDRESS)) {
-                if (medical.getAddress() != null) {
-                    medical.setAddress(medical.getAddress() + " " + clusterContent);
-                } else
-                    medical.setAddress(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_DATELINE)) {
-                if (medical.getDocumentDateLine() != null && medical.getDocumentDateLine().length() < clusterNonDehypenizedContent.length())
-                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDateLine() == null)
-                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_DATE)) {
-                if (medical.getDocumentDate() != null && medical.getDocumentDate().length() < clusterNonDehypenizedContent.length())
-                    medical.setDocumentDate(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDate() == null)
-                    medical.setDocumentDate(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_TIME)) {
-                if (medical.getDocumentTime() != null && medical.getDocumentTime().length() < clusterNonDehypenizedContent.length())
-                    medical.setDocumentTime(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDate() == null)
-                    medical.setDocumentDate(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_PATIENT)) {
-                if (medical.getPatients() != null) {
-                    medical.setPatients(medical.getPatients() + "\n" + clusterNonDehypenizedContent);
-                } else
-                    medical.setPatients(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_AFFILIATION)) {
                 // affiliation **makers** should be marked SINGLECHAR LINESTART
                 if (medical.getAffiliation() != null) {
                     medical.setAffiliation(medical.getAffiliation() + " ; " + clusterContent);
                 } else
                     medical.setAffiliation(clusterContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_ADDRESS)) {
+                if (medical.getAddress() != null) {
+                    medical.setAddress(medical.getAddress() + " " + clusterContent);
+                } else
+                    medical.setAddress(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_EMAIL)) {
                 if (medical.getEmail() != null) {
                     medical.setEmail(medical.getEmail() + "\t" + clusterNonDehypenizedContent);
@@ -869,19 +869,14 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setPhone(medical.getPhone() + clusterNonDehypenizedContent);
                 } else
                     medical.setPhone(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_WEB)) {
-                if (medical.getWeb() != null) {
-                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
-                } else
-                    medical.setWeb(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_DOCTYPE)) {
-                if (medical.getDocumentType() != null) {
-                    medical.setDocumentType(medical.getDocumentType() + clusterNonDehypenizedContent);
-                } else
-                    medical.setDocumentType(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_FAX)) {
                 if (medical.getFax() != null) {
                     medical.setWeb(medical.getFax() + clusterNonDehypenizedContent);
+                } else
+                    medical.setWeb(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_WEB)) {
+                if (medical.getWeb() != null) {
+                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
                 } else
                     medical.setWeb(clusterNonDehypenizedContent);
             }
@@ -1032,12 +1027,12 @@ public class HeaderMedicalParser extends AbstractParser {
 
             boolean output;
 
-            output = writeField(buffer, s1, lastTag0, s2, "<title>", "<docTitle>\n\t<titlePart>", addSpace);
+            output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<doctype>", "<note type=\"doctype\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<dateline>", "<dateline>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<title>", "<docTitle>\n\t<titlePart>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<date>", "<date>", addSpace);
@@ -1046,7 +1041,13 @@ public class HeaderMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<time>", "<time>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<dateline>", "<dateline>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<person>\n\t<patient>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
@@ -1058,10 +1059,7 @@ public class HeaderMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<person>\n\t<patient>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
@@ -1074,9 +1072,6 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<doctype>", "<note type=\"doctype\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
@@ -1099,14 +1094,20 @@ public class HeaderMedicalParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<docnum>")) {
                 buffer.append("</idno>\n");
+            } else if (lastTag0.equals("<doctype>")) {
+                buffer.append("</note>\n");
             } else if (lastTag0.equals("<title>")) {
                 buffer.append("</titlePart>\n\t</docTitle>\n");
-            } else if (lastTag0.equals("<dateline>")) {
-                buffer.append("</dateline>\n");
             } else if (lastTag0.equals("<date>")) {
                 buffer.append("</date>\n");
             } else if (lastTag0.equals("<time>")) {
                 buffer.append("</time>\n");
+            } else if (lastTag0.equals("<dateline>")) {
+                buffer.append("</dateline>\n");
+            } else if (lastTag0.equals("<medic>")) {
+                buffer.append("</medic>\n\t</person>\n");
+            } else if (lastTag0.equals("<patient>")) {
+                buffer.append("</patient>\n\t</person>\n");
             } else if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
@@ -1115,10 +1116,6 @@ public class HeaderMedicalParser extends AbstractParser {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<location>")) {
                 buffer.append("</address>\n");
-            } else if (lastTag0.equals("<medic>")) {
-                buffer.append("</medic>\n\t</person>\n");
-            } else if (lastTag0.equals("<patient>")) {
-                buffer.append("</patient>\n\t</person>\n");
             } else if (lastTag0.equals("<email>")) {
                 buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {
@@ -1127,8 +1124,6 @@ public class HeaderMedicalParser extends AbstractParser {
                 buffer.append("</fax>\n");
             } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ptr>\n");
-            } else if (lastTag0.equals("<doctype>")) {
-                buffer.append("</note>\n");
             }
         }
     }
@@ -1154,7 +1149,7 @@ public class HeaderMedicalParser extends AbstractParser {
      *
      * @param resHeader original biblio item
      * @return consolidated biblio item
-     * 
+     * <p>
      * I need to check this method
      */
     public HeaderMedicalItem consolidateHeader(HeaderMedicalItem resHeader, int consolidate) {
@@ -1176,10 +1171,10 @@ public class HeaderMedicalParser extends AbstractParser {
      * correction. The goal of this method is to help to produce additional
      * traning data based on an existing model.
      *
-     * @param inputDirectory - the path to the directory containing PDF to be processed.
-     * @param outputDirectory    - the path to the directory where the results as XML files
+     * @param inputDirectory  - the path to the directory containing PDF to be processed.
+     * @param outputDirectory - the path to the directory where the results as XML files
      *                        and CRF feature files shall be written.
-     * @param ind           - identifier integer to be included in the resulting files to
+     * @param ind             - identifier integer to be included in the resulting files to
      *                        identify the training case. This is optional: no identifier
      *                        will be included if ind = -1
      * @return the number of processed files.
@@ -1240,10 +1235,10 @@ public class HeaderMedicalParser extends AbstractParser {
     /**
      * Process the specified pdf and format the result as training data for the header model.
      *
-     * @param inputFile input PDF file
+     * @param inputFile  input PDF file
      * @param pathOutput path to raw monograph featured sequence
      * @param pathOutput path to TEI
-     * @param id id
+     * @param id         id
      */
     public Document createTrainingFromPDF(File inputFile,
                                           String pathOutput,
@@ -1268,7 +1263,7 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1347,10 +1342,10 @@ public class HeaderMedicalParser extends AbstractParser {
     /**
      * Process the specified pdf and format the result as blank training data for the header model.
      *
-     * @param inputFile input PDF file
+     * @param inputFile  input PDF file
      * @param pathOutput path to raw monograph featured sequence
      * @param pathOutput path to TEI
-     * @param id id
+     * @param id         id
      */
 
     public Document createBlankTrainingFromPDF(File inputFile,
@@ -1373,7 +1368,7 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.blank.tei.xml"));
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.blank.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1425,7 +1420,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     StringBuilder bufferHeader = new StringBuilder();
 
                     // just write the text without any label
-                    for(LayoutToken token : tokenizationsHeader) {
+                    for (LayoutToken token : tokenizationsHeader) {
                         bufferHeader.append(token.getText());
                     }
 

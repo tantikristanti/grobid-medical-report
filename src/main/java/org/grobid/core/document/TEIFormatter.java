@@ -91,14 +91,14 @@ public class TEIFormatter {
         this.fullTextParser = fullTextParser;
     }
 
-    public StringBuilder toTEIHeader(HeaderMedicalItem biblio,
+    public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      String defaultPublicationStatement,
                                      List<BibDataSet> bds,
                                      GrobidAnalysisConfig config) {
-        return toTEIHeader(biblio, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
+        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
     }
 
-    public StringBuilder toTEIHeader(HeaderMedicalItem biblio,
+    public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      SchemaDeclaration schemaDeclaration,
                                      String defaultPublicationStatement,
                                      List<BibDataSet> bds,
@@ -151,28 +151,29 @@ public class TEIFormatter {
         }
         tei.append(">");
 
-        if (biblio == null) {
-            // if the biblio object is null, we simply create an empty one
-            biblio = new HeaderMedicalItem();
+        if (headerItem == null) {
+            // if the headerItem object is null, we simply create an empty one
+            headerItem = new HeaderMedicalItem();
         }
 
-        if (biblio.getTitle() != null) {
-            tei.append(TextUtilities.HTMLEncode(biblio.getTitle()));
+        if (headerItem.getTitle() != null) {
+            tei.append(TextUtilities.HTMLEncode(headerItem.getTitle()));
         }
 
         tei.append("</title>\n\t\t\t</titleStmt>\n");
-        if ((biblio.getInstitution() != null) ||
-            (biblio.getDocumentDate() != null) ||
-            (biblio.getNormalizedDocumentDate() != null)) {
+        if ((headerItem.getAffiliation() != null) || // fill in institutional information with affiliation
+            (headerItem.getDocumentDate() != null) ||
+            (headerItem.getNormalizedDocumentDate() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
-            if (biblio.getInstitution() != null) {
-                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(biblio.getInstitution()) +
+            if (headerItem.getAffiliation() != null) {
+                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(headerItem.getAffiliation()) +
                     "</institution>\n");
 
                 tei.append("\t\t\t\t<availability status=\"unknown\">");
-                tei.append("<p>Copyright ");
-                //if (biblio.getPublicationDate() != null)
-                tei.append(TextUtilities.HTMLEncode(biblio.getInstitution()) + "</p>\n");
+                tei.append("<p>Copyright : ");
+                //if (headerItem.getPublicationDate() != null)
+                //tei.append(TextUtilities.HTMLEncode(headerItem.getAffiliation()) + "</p>\n");
+                tei.append(TextUtilities.HTMLEncode("Assistance Publique – Hôpitaux de Paris (APHP)") + "</p>\n");
                 tei.append("\t\t\t\t</availability>\n");
             } else {
                 // a dummy publicationStmt is still necessary according to TEI
@@ -186,8 +187,8 @@ public class TEIFormatter {
                 tei.append("\n");
             }
 
-            if (biblio.getNormalizedDocumentDate() != null) {
-                Date date = biblio.getNormalizedDocumentDate();
+            if (headerItem.getNormalizedDocumentDate() != null) {
+                Date date = headerItem.getNormalizedDocumentDate();
                 int year = date.getYear();
                 int month = date.getMonth();
                 int day = date.getDay();
@@ -218,46 +219,46 @@ public class TEIFormatter {
                     tei.append(when + "\">");
                 } else
                     tei.append("\t\t\t\t<date>");
-                if (biblio.getDocumentDate() != null) {
-                    tei.append(TextUtilities.HTMLEncode(biblio.getDocumentDate()));
+                if (headerItem.getDocumentDate() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate()));
                 } else {
                     tei.append(when);
                 }
                 tei.append("</date>\n");
-            } else if ((biblio.getYear() != null) && (biblio.getYear().length() > 0)) {
+            } else if ((headerItem.getYear() != null) && (headerItem.getYear().length() > 0)) {
                 String when = "";
-                if (biblio.getYear().length() == 1)
-                    when += "000" + biblio.getYear();
-                else if (biblio.getYear().length() == 2)
-                    when += "00" + biblio.getYear();
-                else if (biblio.getYear().length() == 3)
-                    when += "0" + biblio.getYear();
-                else if (biblio.getYear().length() == 4)
-                    when += biblio.getYear();
+                if (headerItem.getYear().length() == 1)
+                    when += "000" + headerItem.getYear();
+                else if (headerItem.getYear().length() == 2)
+                    when += "00" + headerItem.getYear();
+                else if (headerItem.getYear().length() == 3)
+                    when += "0" + headerItem.getYear();
+                else if (headerItem.getYear().length() == 4)
+                    when += headerItem.getYear();
 
-                if ((biblio.getMonth() != null) && (biblio.getMonth().length() > 0)) {
-                    if (biblio.getMonth().length() == 1)
-                        when += "-0" + biblio.getMonth();
+                if ((headerItem.getMonth() != null) && (headerItem.getMonth().length() > 0)) {
+                    if (headerItem.getMonth().length() == 1)
+                        when += "-0" + headerItem.getMonth();
                     else
-                        when += "-" + biblio.getMonth();
-                    if ((biblio.getDay() != null) && (biblio.getDay().length() > 0)) {
-                        if (biblio.getDay().length() == 1)
-                            when += "-0" + biblio.getDay();
+                        when += "-" + headerItem.getMonth();
+                    if ((headerItem.getDay() != null) && (headerItem.getDay().length() > 0)) {
+                        if (headerItem.getDay().length() == 1)
+                            when += "-0" + headerItem.getDay();
                         else
-                            when += "-" + biblio.getDay();
+                            when += "-" + headerItem.getDay();
                     }
                 }
                 tei.append("\t\t\t\t<date type=\"issued\" when=\"");
                 tei.append(when + "\">");
-                if (biblio.getDocumentDate() != null) {
-                    tei.append(TextUtilities.HTMLEncode(biblio.getDocumentDate()));
+                if (headerItem.getDocumentDate() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate()));
                 } else {
                     tei.append(when);
                 }
                 tei.append("</date>\n");
-            } else if (biblio.getDocumentDate() != null) {
+            } else if (headerItem.getDocumentDate() != null) {
                 tei.append("\t\t\t\t<date type=\"issued\">");
-                tei.append(TextUtilities.HTMLEncode(biblio.getDocumentDate())
+                tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate())
                     + "</date>");
             }
             tei.append("\t\t\t</publicationStmt>\n");
@@ -274,11 +275,11 @@ public class TEIFormatter {
         //biblio.attachEmails();
         //biblio.attachAffiliations();
 
-        tei.append(biblio.toTEIMedicBlock(6, config));
+        tei.append(headerItem.toTEIMedicBlock(6, config));
 
         // title
-        String title = biblio.getTitle();
-        String language = biblio.getLanguage();
+        String title = headerItem.getTitle();
+        String language = headerItem.getLanguage();
         if (title != null) {
             tei.append("\t\t\t\t\t\t<title");
             /*if ( (bookTitle == null) & (journal == null) )
