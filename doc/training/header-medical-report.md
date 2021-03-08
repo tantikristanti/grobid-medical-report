@@ -16,10 +16,11 @@ For the header-medical-report model, we use the following TEI elements:
 * `<date>` for the date
 * `<time>` for the time information
 * `<dateline>` for the date containing also the location (e.g., "Paris, le 27 novembre 2020")
-* `<medic>` for the list of medics 
+* `<medic>` for the list of medics
 * `<patient>` the list of patients
 * `<affiliation>` for the affiliation information
 * `<address>` for the address elements of affiliations
+* `<org>` for the information regarding identifiable organization
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations
@@ -123,16 +124,18 @@ The information contained therein will be extracted further by the [name-medic](
     </person>
 ```
 
-As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), emails, phones must be **included** in the medic field.
+As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), addresses, emails, phones must be **included** in the medic field.
 
 ### Patients
 
-All mentions of patients are tagged as `<patient>`. Titles (e.g. Mme., Mr.), emails, addresses of patients are included in the field.
+All mentions of patients are tagged as `<patient>`. Titles (e.g. Mme., Mr.), birth date, weight and height, social security numbers and other identifiers (IPP, NDA), emails, addresses of patients are included in the field.
 
 ```xml
     <person>
     	<patient>
             Mme Carole MARTIN<lb/>
+            Poids : 50.0 kg; Taille : 170 cm
+            N°d'immatriculation : 2 00 12 34 56 78 91 01
             carole.martin@yahoo.fr <lb/>
             9 boulevard des coquibus <lb/>
             chez COALLIA <lb/>
@@ -153,6 +156,21 @@ Addresses are labeled with their own tag `<address>`.
     </byline>
 
     <address>51 Avenue du Maréchal de Lattre de Tassigny <lb/>94010 CRETEIL</address> <lb/>
+```
+
+### Organization
+
+All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable organizational structure.
+The information contained therein will be extracted further by the [organization-medical-report](organization-medical-report.md) model.
+
+```xml
+    <org>
+        Hôpital de jour : <lb/>
+        Pr Daniel DUPONT (PH) <lb/>
+        (Chef du service) <lb/>
+        Accueil Tel : 01.12.34.56.78 <lb/>
+        Sécrétariat Fax : 01.23.34.56.78 <lb/>
+    </org>
 ```
 
 ### Emails

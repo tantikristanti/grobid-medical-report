@@ -689,27 +689,22 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addMedicsTokens(tokens);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ROLE)) {
-                if (medical.getRole() != null) {
-                    medical.setRole(medical.getRole() + " " + clusterContent);
-                } else
-                    medical.setRole(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
                 if (medical.getAddress() != null) {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
                 } else
                     medical.setAddress(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_PLACE_NAME)) {
-                if (medical.getPlaceName() != null) {
-                    medical.setPlaceName(medical.getPlaceName() + " " + clusterContent);
-                } else
-                    medical.setPlaceName(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
                 // affiliation **makers** should be marked SINGLECHAR LINESTART
                 if (medical.getAffiliation() != null) {
                     medical.setAffiliation(medical.getAffiliation() + " ; " + clusterContent);
                 } else
                     medical.setAffiliation(clusterContent);
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
+                if (medical.getOrg() != null) {
+                    medical.setOrg(medical.getOrg() + " " + clusterContent);
+                } else
+                    medical.setOrg(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_EMAIL)) {
                 if (medical.getEmail() != null) {
                     medical.setEmail(medical.getEmail() + "\t" + clusterNonDehypenizedContent);

@@ -54,7 +54,7 @@ The information contained therein will be extracted further by the [name-medic](
     </person>
 ```
 
-As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), emails, phones must be **included** in the medic field.
+As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), addresses, emails, phones must be **included** in the medic field.
 
 ### Place names
 

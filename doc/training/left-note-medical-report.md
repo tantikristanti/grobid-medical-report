@@ -64,23 +64,21 @@ The information contained therein will be extracted further by the [name-medic](
     </person>
 ```
 
-As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), emails, phones must be **included** in the medic field.
+As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de service), addresses, emails, phones must be **included** in the medic field.
 
 ### Organization
 
-All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable hospital organizational structure. 
+All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable organizational structure.
 The information contained therein will be extracted further by the [organization-medical-report](organization-medical-report.md) model.
 
 ```xml
-    <byline>
-        <org>
-            Hôpital de jour : <lb/>
-            Pr Daniel DUPONT (PH) <lb/>
-            (Chef du service) <lb/>
-            Accueil Tel : 01.12.34.56.78 <lb/>
-            Sécrétariat Fax : 01.23.34.56.78 <lb/>
-        </org> 
-    </byline>
+    <org>
+        Hôpital de jour : <lb/>
+        Pr Daniel DUPONT (PH) <lb/>
+        (Chef du service) <lb/>
+        Accueil Tel : 01.12.34.56.78 <lb/>
+        Sécrétariat Fax : 01.23.34.56.78 <lb/>
+    </org>
 ```
 
 ### Emails

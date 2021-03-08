@@ -67,6 +67,7 @@ public class HeaderMedicalItem {
             ", address='" + address + '\'' +
             ", fullAffiliations=" + fullAffiliations +
             ", affiliationAddressBlock='" + affiliationAddressBlock + '\'' +
+            ", org='" + org + '\'' +
             ", email='" + email + '\'' +
             ", phone='" + phone + '\'' +
             ", fax='" + fax + '\'' +
@@ -87,7 +88,9 @@ public class HeaderMedicalItem {
     private String document_time = null;
     private String document_type = null;
     private Date normalized_document_date = null;
+    private String affiliation = null;
     private String address = null;
+    private String org = null;
     private String email = null;
     private String phone = null;
     private String web = null;
@@ -99,7 +102,7 @@ public class HeaderMedicalItem {
     private String location = null;
     private String pageRange = null;
     private String institution = null;
-    private String affiliation = null;
+
 
     // advanced grobid recognitions
     private List<String> medicList;
@@ -169,6 +172,8 @@ public class HeaderMedicalItem {
     public String getAddress() {
         return address;
     }
+
+    public String getOrg() { return org; }
 
     public String getEmail() {
         return email;
@@ -334,6 +339,8 @@ public class HeaderMedicalItem {
         address = a;
     }
 
+    public void setOrg(String or) { org = or; }
+
     public void setEmail(String e) {
         email = e;
     }
@@ -406,6 +413,7 @@ public class HeaderMedicalItem {
         institution = null;
         affiliation = null;
         address = null;
+        org = null;
         email = null;
         phone = null;
         fax = null;

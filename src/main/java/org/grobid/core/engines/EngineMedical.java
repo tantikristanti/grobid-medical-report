@@ -2,21 +2,16 @@
 package org.grobid.core.engines;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.data.*;
+import org.grobid.core.data.HeaderMedicalItem;
+import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.Document;
-import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
-import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.factory.GrobidPoolingFactory;
-import org.grobid.core.utilities.counters.CntManager;
 import org.grobid.core.utilities.crossref.CrossrefClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

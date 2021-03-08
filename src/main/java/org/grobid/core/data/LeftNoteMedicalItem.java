@@ -57,6 +57,7 @@ public class LeftNoteMedicalItem {
             ", address='" + address + '\'' +
             ", country='" + country + '\'' +
             ", town='" + town + '\'' +
+            ", org='" + org + '\'' +
             ", email='" + email + '\'' +
             ", phone='" + phone + '\'' +
             ", medicList=" + medicList +
@@ -79,6 +80,7 @@ public class LeftNoteMedicalItem {
 
     private String language = null;
     private String address = null;
+    private String org = null;
     private String placeName = null;
     private String country = null;
     private String town = null;
@@ -96,6 +98,7 @@ public class LeftNoteMedicalItem {
     private List<String> medicList;
     private List<String> affiliationList;
     private List<String> addressList;
+    private List<String> orgList;
     private List<String> emailList;
     private List<String> webList;
     private List<String> phoneList;
@@ -162,7 +165,7 @@ public class LeftNoteMedicalItem {
         return address;
     }
 
-    public String getPlaceName() { return placeName; }
+    public String getOrg() { return org; }
 
     public String getCountry() {
         return country;
@@ -276,10 +279,6 @@ public class LeftNoteMedicalItem {
         address = a;
     }
 
-    public void setPlaceName(String place) {
-        placeName = place;
-    }
-
     public void setCountry(String a) {
         country = a;
     }
@@ -287,6 +286,8 @@ public class LeftNoteMedicalItem {
     public void setTown(String a) {
         town = a;
     }
+
+    public void setOrg(String or) { org = or; }
 
     public void setEmail(String e) {
         email = e;
@@ -353,9 +354,9 @@ public class LeftNoteMedicalItem {
         affiliation = null;
         address = null;
         location = null;
-        placeName = null;
         country = null;
         town = null;
+        org = null;
         email = null;
         phone = null;
         fax = null;
@@ -371,6 +372,7 @@ public class LeftNoteMedicalItem {
         medicList = null;
         affiliationList = null;
         addressList = null;
+        orgList = null;
         emailList = null;
         webList = null;
         phoneList = null;

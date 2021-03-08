@@ -32,12 +32,13 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "medic", "role", "affiliation", "placeName", "email", "phone", "fax", "ptr");
+    private List<String> endTags = Arrays.asList("idno", "medic", "role", "affiliation", "address", "org",
+        "email", "phone", "fax", "ptr");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "teiLeftNote",
-        "fileDesc", "text", "person", "place", "p");
+        "fileDesc", "text", "person", "p");
 
-    private List<String> ignoredTags = Arrays.asList("page", "location", "institution", "address");
+    private List<String> ignoredTags = Arrays.asList("page", "institution", "location");
 
     public TEILeftNoteMedicalSaxParser() {
         labeled = new ArrayList<String>();
@@ -107,9 +108,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         }
 
-        if (qName.equals("idno")) {
-            currentTag = "<docnum>";
-        } else if (qName.equals("affiliation")) {
+        if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {
@@ -117,12 +116,10 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
         } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
-        } else if (qName.equals("placeName")) {
-            currentTag = "<placeName>";
         } else if (qName.equals("medic")) {
             currentTag = "<medic>";
-        } else if (qName.equals("role")) {
-            currentTag = "<role>";
+        } else if (qName.equals("org")) {
+            currentTag = "<org>";
         } else if (qName.equals("email")) {
             currentTag = "<email>";
         } else if (qName.equals("phone")) {

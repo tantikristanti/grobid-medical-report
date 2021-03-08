@@ -1,5 +1,7 @@
 package org.grobid.core.main.batch;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.grobid.core.document.Document;
 import org.grobid.core.engines.EngineMedicalParsers;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
@@ -16,7 +18,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 
 /**
- *
  * A main class of medical report batch processes.
  */
 public class MedicalReportMain {
@@ -24,16 +25,18 @@ public class MedicalReportMain {
 
     private static final String COMMAND_PROCESS_TEXT = "processText";
     private static final String COMMAND_PROCESS_PDF = "processPDF";
-	private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
-    private static final String COMMAND_CREATE_TRAINING_HEADER= "createTrainingHeader";
-    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE= "createTrainingLeftNote";
-	private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
+    private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
+    private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
+    private static final String COMMAND_PROCESS_HEADER = "processHeader";
+    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
+    private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
 
     private static List<String> availableCommands = Arrays.asList(
         COMMAND_PROCESS_TEXT,
         COMMAND_PROCESS_PDF,
         COMMAND_CREATE_TRAINING_SEGMENTATION,
         COMMAND_CREATE_TRAINING_HEADER,
+        COMMAND_PROCESS_HEADER,
         COMMAND_CREATE_TRAINING_LEFT_NOTE,
         COMMAND_BOOTSTRAP_TRAINING_PDF
     );
@@ -63,8 +66,8 @@ public class MedicalReportMain {
 
             if (tmpFilePath == null) {
                 tmpFilePath = new File("grobid-home").getAbsolutePath();
-                System.out.println("No path set for grobid-home. Using: " + tmpFilePath);   
-            } 
+                System.out.println("No path set for grobid-home. Using: " + tmpFilePath);
+            }
 
             gbdArgs.setPath2grobidHome(tmpFilePath);
             gbdArgs.setPath2grobidProperty(new File("grobid.properties").getAbsolutePath());
@@ -188,21 +191,19 @@ public class MedicalReportMain {
                 LOGGER.warn("Grobid home not provided, using default. ");
                 initProcess();
             }
-            
+
             int nb = 0;
             long time = System.currentTimeMillis();
 
             EngineMedicalParsers parsers = new EngineMedicalParsers();
-            //MedicalReportParser medicalReportParser = MedicalReportParser.getInstance();
 
-			if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                //nb = medicalReportParser.createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
                 nb = parsers.getMedicalReportParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            }  else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
-                nb =  parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            }  else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
-                nb =  parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            }  else {
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
+                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            }else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
+                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else {
                 throw new RuntimeException("Command not yet implemented.");
             }
             LOGGER.info(nb + " files processed in " + (System.currentTimeMillis() - time) + " milliseconds");

@@ -66,3 +66,21 @@ Example:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
+
+### processHeader
+'processHeader' batch command will extract, structure and normalise the header part of medical reports in TEI format. The output is a TEI file corresponding to the structured report header.
+The needed parameters for that command are:
+
+* -gH: path to grobid-home directory
+
+* -dIn: path to the input (i.e., Pdf files) directory
+
+* -dOut: path to the output directory where the extracted data will be saved
+
+* -r: recursive processing of files in the sub-directories (by default not recursive)
+
+Example:
+```bash
+> java -Xmx1G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-hom -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -r -exe processHeader 
+```
+

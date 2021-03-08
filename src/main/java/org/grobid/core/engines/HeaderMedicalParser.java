@@ -859,6 +859,11 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
                 } else
                     medical.setAddress(clusterContent);
+            }  else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
+                if (medical.getOrg() != null) {
+                    medical.setOrg(medical.getOrg() + " " + clusterContent);
+                } else
+                    medical.setOrg(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_EMAIL)) {
                 if (medical.getEmail() != null) {
                     medical.setEmail(medical.getEmail() + "\t" + clusterNonDehypenizedContent);
