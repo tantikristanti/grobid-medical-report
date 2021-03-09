@@ -689,18 +689,18 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addMedicsTokens(tokens);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
-                if (medical.getAddress() != null) {
-                    medical.setAddress(medical.getAddress() + " " + clusterContent);
-                } else
-                    medical.setAddress(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
                 // affiliation **makers** should be marked SINGLECHAR LINESTART
                 if (medical.getAffiliation() != null) {
                     medical.setAffiliation(medical.getAffiliation() + " ; " + clusterContent);
                 } else
                     medical.setAffiliation(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
+                if (medical.getAddress() != null) {
+                    medical.setAddress(medical.getAddress() + " " + clusterContent);
+                } else
+                    medical.setAddress(clusterContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
                 if (medical.getOrg() != null) {
                     medical.setOrg(medical.getOrg() + " " + clusterContent);
                 } else
@@ -715,14 +715,14 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     medical.setPhone(medical.getPhone() + clusterNonDehypenizedContent);
                 } else
                     medical.setPhone(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_WEB)) {
-                if (medical.getWeb() != null) {
-                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
-                } else
-                    medical.setWeb(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_FAX)) {
                 if (medical.getFax() != null) {
                     medical.setWeb(medical.getFax() + clusterNonDehypenizedContent);
+                } else
+                    medical.setWeb(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_WEB)) {
+                if (medical.getWeb() != null) {
+                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
                 } else
                     medical.setWeb(clusterNonDehypenizedContent);
             }
@@ -875,16 +875,10 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
-            }
-            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<placeName>", "<place>\n\t<placeName>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
@@ -893,7 +887,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<role>", "<role>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
@@ -926,22 +920,18 @@ public class LeftNoteMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<docnum>")) {
-                buffer.append("</idno>\n");
-            }else if (lastTag0.equals("<affiliation>")) {
+            if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
-            } else if (lastTag0.equals("<placeName>")) {
-                buffer.append("</placeName>\n\t</place>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<location>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<medic>")) {
                 buffer.append("</medic>\n\t</person>\n");
-            } else if (lastTag0.equals("<role>")) {
-                buffer.append("</role>\n");
+            } else if (lastTag0.equals("<org>")) {
+                buffer.append("</org>\n");
             } else if (lastTag0.equals("<email>")) {
                 buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {
@@ -950,8 +940,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 buffer.append("</fax>\n");
             } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ptr>\n");
-            } else if (lastTag0.equals("<doctype>")) {
-                buffer.append("</note>\n");
             }
         }
     }
