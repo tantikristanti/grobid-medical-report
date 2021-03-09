@@ -10,6 +10,7 @@ For identifying the exact pieces of information to be part of the `left-note-med
 
 For the left-note-medical-report model, we use the following TEI elements:
 
+* `<idno>` for the strong identifiers of the document 
 * `<affiliation>` for the affiliation information
 * `<address>` for the address elements of affiliations
 * `<medic>` for the list of medics  
@@ -33,6 +34,16 @@ The following sections provide detailed information and examples on how to handl
 Spaces and a new line in the XML annotated files are not significant and will be all considered by the XML parser as the default separator. So it is possible to add and remove freely space characters and new lines to improve the readability of the annotated document without any impacts. 
 
 Similarly, line break tags `<lb/>` are present in the generated XML training data, but they will be considered as a default separator by the XML parser. They are indicated to help the annotator to identify a piece of text in the original PDF if necessary. Actual line breaks are identified in the PDF and added by aligning the XML/TEI with the feature file generated in parallel which contains all the PDF layout information. 
+
+### Strong identifiers
+
+[\<idno\>](https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-idno.html) is used to identify strong identifiers of the document.
+
+The identifier name is kept with the identifier value so that Grobid can classify more easily the type of identifier:
+
+```xml
+    Concernant examen numéro<idno type="Examen">19A181001</idno>
+```
 
 ### Affiliation and address
 

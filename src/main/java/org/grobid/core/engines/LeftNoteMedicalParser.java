@@ -676,7 +676,17 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_MEDIC)) {
+            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DOCNUM)) {
+                if (medical.getDocNum() != null && isDifferentandNotIncludedContent(medical.getDocNum(), clusterContent)) {
+                    String currentDocNum = medical.getDocNum();
+                    medical.setDocNum(clusterContent);
+                    medical.checkIdentifier();
+                    medical.setDocNum(currentDocNum);
+                } else {
+                    medical.setDocNum(clusterContent);
+                    medical.checkIdentifier();
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_MEDIC)) {
                 if (medical.getMedics() != null) {
                     medical.setMedics(medical.getMedics() + "\t" + clusterNonDehypenizedContent);
                     medical.addMedicsToken(new LayoutToken("\t", MedicalLabels.LEFT_NOTE_MEDIC));
@@ -873,7 +883,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             boolean output;
 
-            output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
+            output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             }
@@ -882,6 +892,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
@@ -920,7 +933,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<affiliation>")) {
+            if (lastTag0.equals("<docnum>")) {
+                buffer.append("</idno>\n");
+            } else if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");

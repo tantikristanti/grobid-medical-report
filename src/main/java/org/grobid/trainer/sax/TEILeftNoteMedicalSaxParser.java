@@ -32,7 +32,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "medic", "role", "affiliation", "address", "org",
+    private List<String> endTags = Arrays.asList("idno", "medic", "affiliation", "address", "org",
         "email", "phone", "fax", "ptr");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "teiLeftNote",
@@ -108,7 +108,9 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         }
 
-        if (qName.equals("affiliation")) {
+        if (qName.equals("idno")) {
+            currentTag = "<docnum>";
+        } if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {

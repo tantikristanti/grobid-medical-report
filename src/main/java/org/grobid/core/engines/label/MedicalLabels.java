@@ -91,6 +91,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER_OTHER = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, OTHER_LABEL);
 
     // Left-Note Medical Report Model
+    public static final TaggingLabel LEFT_NOTE_DOCNUM = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, DOCNUM_LABEL);
     public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);

@@ -79,6 +79,8 @@ public class LeftNoteMedicalItem {
     }
 
     private String language = null;
+    private String docNumGeneral = null;
+    private String document_number = null; // print/default
     private String address = null;
     private String org = null;
     private String placeName = null;
@@ -143,11 +145,9 @@ public class LeftNoteMedicalItem {
         return email;
     }
 
-    public String getMedics() {
-        return medics;
-    }
+    public String getMedics() { return medics; }
 
-    public String getRole() { return role; }
+    public String getDocNum() { return document_number; }
 
     public String getLocation() {
         return location;
@@ -279,6 +279,10 @@ public class LeftNoteMedicalItem {
         address = a;
     }
 
+    public void setDocNum(String docNum1) { document_number = StringUtils.normalizeSpace(docNum1);}
+
+    public void setDocNumGeneral(String docNum2) { docNumGeneral = StringUtils.normalizeSpace(docNum2); }
+
     public void setCountry(String a) {
         country = a;
     }
@@ -348,7 +352,8 @@ public class LeftNoteMedicalItem {
     public void reset() {
         language = null;
         medics = null;
-        role = null;
+        document_number = null;
+        docNumGeneral = null;
         year = null;
         institution = null;
         affiliation = null;
@@ -405,6 +410,19 @@ public class LeftNoteMedicalItem {
             }
         } catch (Exception e) {
             throw new GrobidException("Cannot build a biblioSet, because of nested exception.", e);
+        }
+    }
+
+    /**
+     * Check if the identifier pubnum is a document number. If yes, instanciate
+     * the corresponding field and reset the generic pubnum field.
+     */
+    public void checkIdentifier() {
+        // document number
+        if (!StringUtils.isEmpty(docNumGeneral) && StringUtils.isEmpty(document_number)) {
+            docNumGeneral = TextUtilities.cleanField(docNumGeneral, true);
+            setDocNum(docNumGeneral);
+            setDocNumGeneral(null);
         }
     }
 
