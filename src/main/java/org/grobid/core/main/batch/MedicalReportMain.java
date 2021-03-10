@@ -28,6 +28,7 @@ public class MedicalReportMain {
     private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
     private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
     private static final String COMMAND_PROCESS_HEADER = "processHeader";
+    private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
     private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
     private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
 
@@ -37,6 +38,7 @@ public class MedicalReportMain {
         COMMAND_CREATE_TRAINING_SEGMENTATION,
         COMMAND_CREATE_TRAINING_HEADER,
         COMMAND_PROCESS_HEADER,
+        COMMAND_PROCESS_LEFT_NOTE,
         COMMAND_CREATE_TRAINING_LEFT_NOTE,
         COMMAND_BOOTSTRAP_TRAINING_PDF
     );
@@ -203,6 +205,10 @@ public class MedicalReportMain {
                 nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             }else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
+                nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
+                nb = parsers.getLeftNoteMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");
             }

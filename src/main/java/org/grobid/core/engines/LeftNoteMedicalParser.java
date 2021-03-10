@@ -1252,4 +1252,173 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
         return doc;
     }
+
+    /**
+     * Processing Pdf files with the current models using new files located in a given directory.
+     */
+
+    public int processHighLevelBatch(String inputDirectory,
+                                     String outputDirectory,
+                                     int ind) throws IOException {
+        try {
+            File path = new File(inputDirectory);
+            if (!path.exists()) {
+                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
+            }
+
+            File pathOut = new File(outputDirectory);
+            if (!pathOut.exists()) {
+                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
+            }
+
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+            for (final File file : refFiles) {
+                try {
+                    processing(file, outputDirectory, n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occured while processing the following pdf: "
+                        + file.getPath() + ": " + exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+        }
+    }
+
+    /**
+     * Process the content of the specified pdf and format the result as training data.
+     *
+     * @param inputFile  input file
+     * @param outputFile path to fulltext
+     * @param id         id
+     */
+
+    public void processing(File inputFile,
+                           String outputFile,
+                           int id) {
+        if (tmpPath == null) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        }
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+
+        DocumentSource documentSource = null;
+        Document doc = null;
+        GrobidAnalysisConfig config = null;
+
+        try {
+            config = GrobidAnalysisConfig.defaultInstance();
+
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot process the model, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+
+            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".left.note.high.level.tei.xml"));
+            Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+
+            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            // general segmentation
+            doc = parsers.getMedicalReportParser().processing(documentSource, config);
+
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            // TBD: language identifier here on content text sample
+            Language lang = new Language("fr");
+
+            StringBuilder tei = new StringBuilder();
+
+            tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+            tei.append("<tei xml:space=\"preserve\">\n\t<teiHeader"
+                + " xml:lang=\"" + lang.getLang()
+                + "\">\n\t\t<fileDesc xml:id=\""
+                + pdfFileName.replace(".pdf", "")
+                + "\"/>\n\n\t");
+
+            // header processing
+            tokenizations = doc.getTokenizations();
+            tei.append("\n\t</teiHeader>");
+
+            // the body part
+            if (lang != null) {
+                tei.append("\n\n\t<text xml:lang=\"" + lang.getLang() + "\">\n\t\t");
+            }
+
+            tei.append("\n\t<note place=\"leftnote\">");
+            // left-note processing
+            SortedSet<DocumentPiece> documentParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+            Pair<String, List<LayoutToken>> featuredLeftNote = null;
+            if (documentParts != null) {
+                List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
+
+                for (DocumentPiece docPiece : documentParts) {
+                    DocumentPointer dp1 = docPiece.getLeft();
+                    DocumentPointer dp2 = docPiece.getRight();
+
+                    int tokens = dp1.getTokenDocPos();
+                    int tokene = dp2.getTokenDocPos();
+                    for (int i = tokens; i < tokene; i++) {
+                        tokenizationsLeftNote.add(tokenizations.get(i));
+                    }
+                }
+
+                featuredLeftNote = getSectionLeftNoteFeatured(doc, documentParts);
+                String leftNote = featuredLeftNote.getLeft();
+                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
+                String rese = null;
+
+                if ((leftNote != null) && (leftNote.trim().length() > 0)) {
+                    rese = label(leftNote);
+
+                    // buffer for the left-note block
+                    StringBuilder bufferLeftNote = trainingExtraction(rese, tokenizationsLeftNote);
+
+                    // add the result
+                    tei.append(bufferLeftNote);
+                }
+            }
+
+            tei.append("\n\t</note>");
+            tei.append("\n\t</text>");
+            tei.append("\n</tei>\n");
+
+            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+            writer.write(tei.toString());
+            writer.close();
+
+        } catch (Exception e) {
+            throw new GrobidException("An exception occured while running Grobid training" +
+                " data generation for medical model.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+
+    }
+
+
 }

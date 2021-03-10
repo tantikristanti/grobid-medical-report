@@ -613,7 +613,7 @@ public class MedicalReportParser extends AbstractParser {
     /**
      * Generate training data with the current model using new files located in a given directory.
      * the generated training data can then be corrected manually to be used for updating the
-     * astro CRF model.
+     * medical-report-segmenter CRF model.
      */
 
     public int createTrainingMedicalSegmentationBatch(String inputDirectory,
