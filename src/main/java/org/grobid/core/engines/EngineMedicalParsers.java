@@ -3,23 +3,22 @@ package org.grobid.core.engines;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
  * A list of parser for the grobid-medical-report sub-project
  */
-public class EngineMedicalParsers implements Closeable {
+public class EngineMedicalParsers extends EngineParsers {
     public static final Logger LOGGER = LoggerFactory.getLogger(EngineMedicalParsers.class);
 
     private MedicalReportParser medicalReportParser = null;
     private HeaderMedicalParser headerMedicalParser = null;
     private LeftNoteMedicalParser leftNoteMedicalParser = null;
+    private FullMedicalTextParser fullTextParser = null;
     private MedicParser medicParser = null;
+    private PatientParser patientParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
-    private PersonMedicalParser personParser = null;
     private DateParser dateParser = null;
-    //private BodyMedicalParser bodyMedicalParser = null;
 
     public MedicalReportParser getMedicalReportParser() {
         if (medicalReportParser == null) {
@@ -54,6 +53,17 @@ public class EngineMedicalParsers implements Closeable {
         return leftNoteMedicalParser;
     }
 
+    public FullMedicalTextParser getLFullMedicalTextParser() {
+        if (fullTextParser == null) {
+            synchronized (this) {
+                if (fullTextParser == null) {
+                    fullTextParser = new FullMedicalTextParser(this);
+                }
+            }
+        }
+        return fullTextParser;
+    }
+
     public MedicParser getMedicParser() {
         if (medicParser == null) {
             synchronized (this) {
@@ -65,15 +75,15 @@ public class EngineMedicalParsers implements Closeable {
         return medicParser;
     }
 
-    public PersonMedicalParser getPersonParser() {
-        if (personParser == null) {
+    public PatientParser getPatientParser() {
+        if (patientParser == null) {
             synchronized (this) {
-                if (personParser == null) {
-                    personParser = new PersonMedicalParser();
+                if (patientParser == null) {
+                    patientParser = new PatientParser();
                 }
             }
         }
-        return personParser;
+        return patientParser;
     }
 
     public AffiliationAddressParser getAffiliationAddressParser() {
@@ -115,10 +125,11 @@ public class EngineMedicalParsers implements Closeable {
      */
     public void initAll() {
         medicalReportParser = getMedicalReportParser();
-        affiliationAddressParser = getAffiliationAddressParser();
-        // personParser = getPersonParser();
         headerMedicalParser = getHeaderMedicalParser();
         leftNoteMedicalParser = getLeftNoteMedicalParser();
+        fullTextParser = getLFullMedicalTextParser();
+        affiliationAddressParser = getAffiliationAddressParser();
+        // personParser = getPersonParser();
         dateParser = getDateParser();
         // bodyMedicalParser = getBodyMedicaltParser();
     }
@@ -143,6 +154,12 @@ public class EngineMedicalParsers implements Closeable {
             leftNoteMedicalParser.close();
             leftNoteMedicalParser = null;
             LOGGER.debug("CLOSING leftNoteMedicalParser");
+        }
+
+        if (fullTextParser != null) {
+            fullTextParser.close();
+            fullTextParser = null;
+            LOGGER.debug("CLOSING fullMedicalTextParser");
         }
 
         if (affiliationAddressParser != null) {

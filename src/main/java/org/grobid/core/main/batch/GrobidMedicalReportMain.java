@@ -1,7 +1,5 @@
 package org.grobid.core.main.batch;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.document.Document;
 import org.grobid.core.engines.EngineMedicalParsers;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
@@ -20,14 +18,15 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 /**
  * A main class of medical report batch processes.
  */
-public class MedicalReportMain {
-    private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportMain.class);
+public class GrobidMedicalReportMain {
+    private static Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportMain.class);
 
     private static final String COMMAND_PROCESS_TEXT = "processText";
     private static final String COMMAND_PROCESS_PDF = "processPDF";
     private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
     private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
-    private static final String COMMAND_PROCESS_HEADER = "processHeader";
+    private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
+    private static final String COMMAND_PROCESS_HEADER  = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
     private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
     private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
@@ -37,6 +36,7 @@ public class MedicalReportMain {
         COMMAND_PROCESS_PDF,
         COMMAND_CREATE_TRAINING_SEGMENTATION,
         COMMAND_CREATE_TRAINING_HEADER,
+        COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
         COMMAND_CREATE_TRAINING_LEFT_NOTE,
@@ -203,16 +203,19 @@ public class MedicalReportMain {
                 nb = parsers.getMedicalReportParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
                 nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            }else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER_HIGH_LEVEL)) {
                 nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
+                nb = parsers.getHeaderMedicalParser().processingHeaderUserBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");
             }
             LOGGER.info(nb + " files processed in " + (System.currentTimeMillis() - time) + " milliseconds");
+            parsers.close();
         }
     }
 }

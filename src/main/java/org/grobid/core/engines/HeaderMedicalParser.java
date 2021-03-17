@@ -43,6 +43,8 @@ public class HeaderMedicalParser extends AbstractParser {
 
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
 
+    protected EngineMedicalParsers parsers;
+
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
 
@@ -59,7 +61,12 @@ public class HeaderMedicalParser extends AbstractParser {
 
     private File tmpPath = null;
 
-    protected EngineMedicalParsers parsers;
+    public HeaderMedicalParser(EngineMedicalParsers parsers) {
+        super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT);
+        this.parsers = parsers;
+        tmpPath = GrobidProperties.getTempPath();
+        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
+    }
 
     public HeaderMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
         super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, cntManager);
@@ -69,20 +76,13 @@ public class HeaderMedicalParser extends AbstractParser {
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
-    public HeaderMedicalParser(EngineMedicalParsers parsers) {
-        super(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT);
-        this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
-    }
-
     /**
      * Processing with application of the medical-report segmentation model
      */
     public Pair<String, Document> processing(File input, HeaderMedicalItem resHeader, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
-            documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
+            documentSource = DocumentSource.fromPdf(input, -1, -1, true, true, true);
             Document doc = parsers.getMedicalReportParser().processing(documentSource, config);
 
             String tei = processingHeaderSection(config, doc, resHeader, true);
@@ -99,6 +99,7 @@ public class HeaderMedicalParser extends AbstractParser {
      */
     public String processingHeaderSection(GrobidAnalysisConfig config, Document doc, HeaderMedicalItem resHeader, boolean serialize) {
         try {
+            // retreive only the header (front) part
             SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
@@ -158,14 +159,15 @@ public class HeaderMedicalParser extends AbstractParser {
                     String lang = langu.getLang();
                     doc.setLanguage(lang);
                     resHeader.setLanguage(lang);
+                } else {
+                    resHeader.setLanguage("fr"); // by default it's French as medical reports are in French
                 }
 
                 if (resHeader != null) {
 
+                    // document title
                     HeaderMedicalItem.cleanTitles(resHeader);
                     if (resHeader.getTitle() != null) {
-                        // String temp =
-                        // utilities.dehyphenizeHard(resHeader.getTitle());
                         String temp = TextUtilities.dehyphenize(resHeader.getTitle());
                         temp = temp.trim();
                         if (temp.length() > 1) {
@@ -176,6 +178,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         resHeader.setTitle(temp);
                     }
 
+                    // medics
                     resHeader.setOriginalMedics(resHeader.getMedics());
                     resHeader.getMedicsTokens();
 
@@ -204,7 +207,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         for (int k = 0; k < medicSegments.size(); k++) {
                             if (medicSegments.get(k).size() == 0)
                                 continue;
-                            List<PersonMedical> localMedics = parsers.getPersonParser()
+                            List<PersonMedical> localMedics = parsers.getMedicParser()
                                 .processingHeaderWithLayoutTokens(medicSegments.get(k), doc.getPDFAnnotations());
                             if (localMedics != null) {
                                 for (PersonMedical pers : localMedics) {
@@ -220,7 +223,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
                     // remove invalid medics (no last name, noise, etc.)
                     resHeader.setFullMedics(PersonMedical.sanityCheck(resHeader.getFullMedics()));
-
+                    // affiliation
                     resHeader.setFullAffiliations(
                         parsers.getAffiliationAddressParser().processReflow(res, tokenizations));
                     resHeader.attachEmails();
@@ -254,70 +257,9 @@ public class HeaderMedicalParser extends AbstractParser {
                     // remove duplicated medics
                     resHeader.setFullMedics(PersonMedical.deduplicate(resHeader.getFullMedics()));
 
-                    if (resHeader.getPatients() != null) {
-
-                        resHeader.setOriginalPatients(resHeader.getPatients());
-                        resHeader.getPatientsTokens();
-
-                        boolean fragmentedPatients = false;
-                        boolean hasMarkerPatient = false;
-                        List<Integer> patientsBlocks = new ArrayList<Integer>();
-                        List<List<LayoutToken>> patientSegments = new ArrayList<>();
-                        if (resHeader.getPatientsTokens() != null) {
-                            // split the list of layout tokens when token "\t" is met
-                            List<LayoutToken> currentSegment = new ArrayList<>();
-                            for (LayoutToken theToken : resHeader.getPatientsTokens()) {
-                                if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                    if (currentSegment.size() > 0)
-                                        patientSegments.add(currentSegment);
-                                    currentSegment = new ArrayList<>();
-                                } else
-                                    currentSegment.add(theToken);
-                            }
-                            // last segment
-                            if (currentSegment.size() > 0)
-                                patientSegments.add(currentSegment);
-
-                            if (patientSegments.size() > 1) {
-                                fragmentedPatients = true;
-                            }
-                            for (int k = 0; k < patientSegments.size(); k++) {
-                                if (patientSegments.get(k).size() == 0)
-                                    continue;
-                                List<PersonMedical> localPatients = parsers.getPersonParser()
-                                    .processingHeaderWithLayoutTokens(patientSegments.get(k), doc.getPDFAnnotations());
-                                if (localPatients != null) {
-                                    for (PersonMedical pers : localPatients) {
-                                        resHeader.addFullPatient(pers);
-                                        if (pers.getMarkers() != null) {
-                                            hasMarkerPatient = true;
-                                        }
-                                        patientsBlocks.add(k);
-                                    }
-                                }
-                            }
-                        }
-
-                        // remove invalid patients (no last name, noise, etc.)
-                        resHeader.setFullPatients(PersonMedical.sanityCheck(resHeader.getFullPatients()));
-                    }
                 }
 
                 resHeader = consolidateHeader(resHeader, config.getConsolidateHeader());
-
-                // normalization of dates
-                if (resHeader != null) {
-                    if (resHeader.getDocumentDate() != null) {
-                        List<Date> dates = parsers.getDateParser().processing(resHeader.getDocumentDate());
-                        // most basic heuristic, we take the first date - to be
-                        // revised...
-                        if (dates != null) {
-                            if (dates.size() > 0) {
-                                resHeader.setNormalizedDocumentDate(dates.get(0));
-                            }
-                        }
-                    }
-                }
 
                 // we don't need to serialize if we process the full text (it would be done 2 times)
                 if (serialize) {
@@ -859,7 +801,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     medical.setAddress(medical.getAddress() + " " + clusterContent);
                 } else
                     medical.setAddress(clusterContent);
-            }  else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
+            } else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
                 if (medical.getOrg() != null) {
                     medical.setOrg(medical.getOrg() + " " + clusterContent);
                 } else
@@ -1159,7 +1101,7 @@ public class HeaderMedicalParser extends AbstractParser {
      */
     public HeaderMedicalItem consolidateHeader(HeaderMedicalItem resHeader, int consolidate) {
         if (consolidate == 0) {
-            // not consolidation
+            // there is no consolidation
             return resHeader;
         }
         return resHeader;
@@ -1484,7 +1426,7 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    processing(file, outputDirectory, n);
+                    processingHighLevel(file, outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -1507,9 +1449,9 @@ public class HeaderMedicalParser extends AbstractParser {
      * @param id         id
      */
 
-    public void processing(File inputFile,
-                           String outputFile,
-                           int id) {
+    public void processingHighLevel(File inputFile,
+                                    String outputFile,
+                                    int id) {
         if (tmpPath == null) {
             throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
         }
@@ -1605,6 +1547,116 @@ public class HeaderMedicalParser extends AbstractParser {
         } catch (Exception e) {
             throw new GrobidException("An exception occured while running Grobid training" +
                 " data generation for medical model.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+
+    }
+
+
+    /**
+     * Processing Pdf files with the current models using new files located in a given directory.
+     */
+
+    public int processingHeaderUserBatch(String inputDirectory,
+                                         String outputDirectory,
+                                         int ind) throws IOException {
+        try {
+            File path = new File(inputDirectory);
+            if (!path.exists()) {
+                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
+            }
+
+            File pathOut = new File(outputDirectory);
+            if (!pathOut.exists()) {
+                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
+            }
+
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+            for (final File file : refFiles) {
+                try {
+                    processingHeaderUser(file, outputDirectory, n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occured while processing the following pdf: "
+                        + file.getPath() + ": " + exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+        }
+    }
+
+    /**
+     * Process the content of the specified pdf and format the result as training data.
+     *
+     * @param inputFile  input file
+     * @param outputFile path to fulltext
+     * @param id         id
+     */
+
+    public void processingHeaderUser(File inputFile,
+                                     String outputFile,
+                                     int id) {
+        if (tmpPath == null) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        }
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+
+        DocumentSource documentSource = null;
+        Document doc = null;
+        GrobidAnalysisConfig config = null;
+        HeaderMedicalItem resHeader = null;
+
+        try {
+            config = GrobidAnalysisConfig.defaultInstance();
+
+            resHeader = new HeaderMedicalItem();
+
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot process the model, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+
+            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".header.medical.tei.xml"));
+            Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+
+            Pair<String, Document> resultTEI = processing(inputFile, resHeader, config);
+
+            // TBD: language identifier here on content text sample
+            Language lang = new Language("fr");
+
+            StringBuilder tei = new StringBuilder();
+            tei.append(resultTEI.getLeft());
+            writer.write(tei.toString());
+            writer.close();
+
+        } catch (Exception e) {
+            throw new GrobidException("An exception occured extracting header part of medical reports.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
         }

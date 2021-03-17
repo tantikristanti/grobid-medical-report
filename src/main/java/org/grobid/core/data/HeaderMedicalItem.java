@@ -7,18 +7,23 @@ import org.grobid.core.data.util.ClassicMedicEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
 import org.grobid.core.document.Document;
+import org.grobid.core.document.TEIFormatter;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
+import org.grobid.core.exceptions.GrobidException;
+import org.grobid.core.lang.Language;
 import org.grobid.core.layout.BoundingBox;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
+import org.grobid.core.utilities.KeyGen;
 import org.grobid.core.utilities.LanguageUtilities;
 import org.grobid.core.utilities.TextUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +54,7 @@ public class HeaderMedicalItem {
     @Override
     public String toString() {
         return "HeaderItem{" +
-            ", languageUtilities=" + languageUtilities +
+            "  languageUtilities=" + languageUtilities +
             ", language='" + language + '\'' +
             ", document_number='" + document_number + '\'' +
             ", document_type='" + document_type + '\'' +
@@ -98,6 +103,7 @@ public class HeaderMedicalItem {
     private String day = null;
     private String month = null;
     private String medics = null;
+    private String firstMedicSurname = null;
     private String patients = null;
     private String location = null;
     private String pageRange = null;
@@ -161,9 +167,7 @@ public class HeaderMedicalItem {
         return medics;
     }
 
-    public String getPatients() {
-        return this.patients;
-    }
+    public String getPatients() { return patients; }
 
     public String getAffiliation() { return affiliation; }
 
@@ -281,12 +285,10 @@ public class HeaderMedicalItem {
         endPage = p;
     }
 
-    public void setFullMedics(List<PersonMedical> fullMedics) {
-        fullMedics = fullMedics;
-    }
+    public void setFullMedics(List<PersonMedical> fMedics) { fullMedics = fMedics; }
 
-    public void setFullPatients(List<PersonMedical> fullPatients) {
-        fullPatients = fullPatients;
+    public void setFullPatients(List<PersonMedical> fPatients) {
+        fullPatients = fPatients;
     }
 
     public void setFullAffiliations(List<Affiliation> full) {
@@ -458,6 +460,55 @@ public class HeaderMedicalItem {
         }
     }
 
+    public void setFirstAuthorSurname(String firstMedicSurname) {
+        this.firstMedicSurname = firstMedicSurname;
+    }
+
+    /**
+     * Return the surname of the first author.
+     */
+    public String getFirstAuthorSurname() {
+        if (this.firstMedicSurname != null) {
+            return this.firstMedicSurname;
+        }
+
+        if (fullMedics != null) {
+            if (fullMedics.size() > 0) {
+                PersonMedical aut = fullMedics.get(0);
+                String sur = aut.getLastName();
+                if (sur != null) {
+                    if (sur.length() > 0) {
+                        this.firstMedicSurname = sur;
+                        return sur;
+                    }
+                }
+            }
+        }
+
+        if (medics != null) {
+            StringTokenizer st = new StringTokenizer(medics, ";");
+            if (st.countTokens() > 0) {
+                if (st.hasMoreTokens()) { // we take just the first author
+                    String author = st.nextToken();
+                    if (author != null)
+                        author = author.trim();
+                    int ind = author.lastIndexOf(" ");
+                    if (ind != -1) {
+                        this.firstMedicSurname = author.substring(ind + 1);
+                        //return TextUtilities.HTMLEncode(author.substring(ind + 1));
+                        return author.substring(ind + 1);
+                    } else {
+                        this.firstMedicSurname = author;
+                        //return TextUtilities.HTMLEncode(author);
+                        return author;
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+
     /**
      * Attach existing recognized emails to medics (default) or patients
      */
@@ -483,6 +534,13 @@ public class HeaderMedicalItem {
         if (sanitizedEmails != null) {
             medicEmailAssigner.assign(folks, sanitizedEmails);
         }
+    }
+
+    /**
+     * Attach existing recognized emails to authors
+     */
+    public void attachMedicEmails() {
+        attachEmails(fullMedics);
     }
 
     /**

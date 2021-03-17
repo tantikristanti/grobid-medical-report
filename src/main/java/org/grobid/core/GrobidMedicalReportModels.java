@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentMap;
 import static org.grobid.core.engines.EngineParsers.LOGGER;
 
 /**
- * This enum class extend the Grobid-Model class.
+ * This enum class extend the GrobidModel class.
  *
  * Tanti, 2020
  */
@@ -21,7 +21,7 @@ public enum GrobidMedicalReportModels implements GrobidModel {
     LEFT_NOTE_MEDICAL_REPORT("left-note-medical-report"),
     NAME_MEDIC("name/medic"),
     NAME_PATIENT("name/patient"),
-    FULLTEXT("fulltext"),;
+    FULL_MEDICAL_TEXT("full-medical-text");
 
     /**
      * Absolute path to the model.

@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * A class for managing the extraction of medical information from PDF documents or raw text.
- *
+ * This class extends the Engine class of Grobid (@author Patrice Lopez)
  */
 public class EngineMedical extends Engine {
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineMedical.class);
@@ -29,7 +29,7 @@ public class EngineMedical extends Engine {
     private List<String> acceptedLanguages = null;
 
     /**
-     * Constructor for the Grobid Engine instance.
+     * Constructor for the grobid-medical-report engine instance.
      *
      * @param loadModels
      */
@@ -59,7 +59,7 @@ public class EngineMedical extends Engine {
      *                    metadata) or 2 (consolidate the citation and inject DOI only)
      * @param result      bib result
      * @return the TEI representation of the extracted bibliographical
-     *         information
+     * information
      */
     public String processHeaderMedicalReport(
         String inputFile,
@@ -80,18 +80,17 @@ public class EngineMedical extends Engine {
      * Apply a parsing model for the header of a PDF file based on CRF, using
      * dynamic range of pages as header
      *
-     * @param inputFile   : the path of the PDF file to be processed
-     * @param result      bib result
-     *
+     * @param inputFile : the path of the PDF file to be processed
+     * @param result    : header item result
      * @return the TEI representation of the extracted bibliographical
-     *         information
+     * information
      */
     public String processHeaderMedicalReport(String inputFile, int consolidate, HeaderMedicalItem result) {
         return processHeaderMedicalReport(inputFile, GrobidAnalysisConfig.defaultInstance(), result);
     }
 
     public String processHeaderMedicalReport(String inputFile, GrobidAnalysisConfig config, HeaderMedicalItem result) {
-        // normally the medical items reference must not be null, but if it is the
+        // normally the medical items must not be null, but if it is the
         // case, we still continue
         // with a new instance, so that the resulting TEI string is still
         // delivered

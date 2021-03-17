@@ -2,8 +2,6 @@ package org.grobid.core.document;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.StringUtils;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -15,14 +13,11 @@ import org.grobid.core.data.*;
 import org.grobid.core.data.Date;
 import org.grobid.core.document.xml.XmlBuilderUtils;
 import org.grobid.core.engines.Engine;
-import org.grobid.core.engines.FullTextParser;
+import org.grobid.core.engines.FullMedicalTextParser;
 import org.grobid.core.engines.label.SegmentationLabels;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
-import org.grobid.core.engines.counters.ReferenceMarkerMatcherCounters;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.engines.label.TaggingLabels;
-import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.lang.Language;
 import org.grobid.core.layout.BoundingBox;
 import org.grobid.core.layout.GraphicObject;
 import org.grobid.core.layout.LayoutToken;
@@ -31,7 +26,6 @@ import org.grobid.core.layout.Page;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
-import org.grobid.core.utilities.counters.CntManager;
 import org.grobid.core.utilities.matching.EntityMatcherException;
 import org.grobid.core.utilities.matching.ReferenceMarkerMatcher;
 
@@ -54,11 +48,12 @@ import static org.grobid.core.document.xml.XmlBuilderUtils.textNode;
  * @author Patrice Lopez
  */
 
+
 public class TEIFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TEIFormatter.class);
 
     private Document doc = null;
-    private FullTextParser fullTextParser = null;
+    private FullMedicalTextParser fullTextParser = null;
     public static final Set<TaggingLabel> MARKER_LABELS = Sets.newHashSet(
         TaggingLabels.CITATION_MARKER,
         TaggingLabels.FIGURE_MARKER,
@@ -86,7 +81,7 @@ public class TEIFormatter {
 
     private static Pattern startNum = Pattern.compile("^(\\d+)(.*)");
 
-    public TEIFormatter(Document document, FullTextParser fullTextParser) {
+    public TEIFormatter(Document document, FullMedicalTextParser fullTextParser) {
         this.doc = document;
         this.fullTextParser = fullTextParser;
     }
@@ -115,12 +110,9 @@ public class TEIFormatter {
             // XML schema
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                //"\n xsi:noNamespaceSchemaLocation=\"" +
-                //GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/xsd/Grobid.xsd\""	+
                 "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
                 GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/xsd/Grobid.xsd\"" +
                 "\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
-//				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
             tei.append("<?xml-model href=\"file://" +
@@ -173,7 +165,7 @@ public class TEIFormatter {
                 tei.append("<p>Copyright : ");
                 //if (headerItem.getPublicationDate() != null)
                 //tei.append(TextUtilities.HTMLEncode(headerItem.getAffiliation()) + "</p>\n");
-                tei.append(TextUtilities.HTMLEncode("Assistance Publique – Hôpitaux de Paris (APHP)") + "</p>\n");
+                tei.append(TextUtilities.HTMLEncode("©Assistance Publique – Hôpitaux de Paris (APHP)") + "</p>\n");
                 tei.append("\t\t\t\t</availability>\n");
             } else {
                 // a dummy publicationStmt is still necessary according to TEI
@@ -271,9 +263,6 @@ public class TEIFormatter {
         tei.append("\t\t\t<sourceDesc>\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n");
 
         // authors + affiliation
-        //biblio.createAuthorSet();
-        //biblio.attachEmails();
-        //biblio.attachAffiliations();
 
         tei.append(headerItem.toTEIMedicBlock(6, config));
 
@@ -282,9 +271,6 @@ public class TEIFormatter {
         String language = headerItem.getLanguage();
         if (title != null) {
             tei.append("\t\t\t\t\t\t<title");
-            /*if ( (bookTitle == null) & (journal == null) )
-                    tei.append(" level=\"m\"");
-		    	else */
             tei.append(" level=\"a\" type=\"main\"");
 
             if (config.isGenerateTeiIds()) {
@@ -337,7 +323,7 @@ public class TEIFormatter {
         // output pages dimensions in the case coordinates will also be provided for some structures
         try {
             tei = toTEIPages(tei, doc, config);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.warn("Problem when serializing page size", e);
         }
 
@@ -351,17 +337,17 @@ public class TEIFormatter {
     }
 
     public StringBuilder toTEILeftNote(LeftNoteMedicalItem biblio,
-                                     String defaultPublicationStatement,
-                                     List<BibDataSet> bds,
-                                     GrobidAnalysisConfig config) {
+                                       String defaultPublicationStatement,
+                                       List<BibDataSet> bds,
+                                       GrobidAnalysisConfig config) {
         return toTEILeftNote(biblio, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
     }
 
     public StringBuilder toTEILeftNote(LeftNoteMedicalItem biblio,
-                                     SchemaDeclaration schemaDeclaration,
-                                     String defaultPublicationStatement,
-                                     List<BibDataSet> bds,
-                                     GrobidAnalysisConfig config) {
+                                       SchemaDeclaration schemaDeclaration,
+                                       String defaultPublicationStatement,
+                                       List<BibDataSet> bds,
+                                       GrobidAnalysisConfig config) {
         StringBuilder tei = new StringBuilder();
         tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         if (config.isWithXslStylesheet()) {
@@ -415,7 +401,7 @@ public class TEIFormatter {
             biblio = new LeftNoteMedicalItem();
         }
 
-        if ((biblio.getInstitution() != null) ) {
+        if ((biblio.getInstitution() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
             if (biblio.getInstitution() != null) {
                 tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(biblio.getInstitution()) +
@@ -495,7 +481,7 @@ public class TEIFormatter {
         // output pages dimensions in the case coordinates will also be provided for some structures
         try {
             tei = toTEIPages(tei, doc, config);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.warn("Problem when serializing page size", e);
         }
 
@@ -592,10 +578,10 @@ public class TEIFormatter {
                     currentNumber = Integer.parseInt(groupStr);
                     // remove this number from the layout tokens of the note
                     if (currentNumber != -1) {
-                        String toConsume =  groupStr;
+                        String toConsume = groupStr;
                         int start = 0;
-                        for(LayoutToken token : noteTokens) {
-                            if ( (token.getText() == null) || (token.getText().length() == 0) )
+                        for (LayoutToken token : noteTokens) {
+                            if ((token.getText() == null) || (token.getText().length() == 0))
                                 continue;
                             if (toConsume.startsWith(token.getText())) {
                                 start++;
@@ -621,7 +607,7 @@ public class TEIFormatter {
             Element desc = XmlBuilderUtils.teiElement("note");
             desc.addAttribute(new Attribute("place", noteType));
             if (currentNumber != -1) {
-                desc.addAttribute(new Attribute("n", ""+currentNumber));
+                desc.addAttribute(new Attribute("n", "" + currentNumber));
             }
             if (config.isGenerateTeiIds()) {
                 String divID = KeyGen.getKey().substring(0, 7);
@@ -629,7 +615,7 @@ public class TEIFormatter {
             }
 
             // for labelling bibligraphical references in footnotes
-            org.apache.commons.lang3.tuple.Pair<String, List<LayoutToken>> noteProcess =
+            /*org.apache.commons.lang3.tuple.Pair<String, List<LayoutToken>> noteProcess =
                 fullTextParser.processShort(noteTokens, doc);
             String labeledNote = noteProcess.getLeft();
             List<LayoutToken> noteLayoutTokens = noteProcess.getRight();
@@ -666,7 +652,7 @@ public class TEIFormatter {
                 }
             } else {
                 desc.appendChild(LayoutTokensUtil.normalizeText(footText.trim()));
-            }
+            }*/
 
             tei.append("\t\t\t");
             tei.append(desc.toXML());
@@ -796,14 +782,14 @@ public class TEIFormatter {
                 clusterLabel.equals(TaggingLabels.EQUATION_LABEL)) {
                 // get starting position of the cluster
                 int start = -1;
-                if ( (cluster.concatTokens() != null) && (cluster.concatTokens().size() > 0) ) {
+                if ((cluster.concatTokens() != null) && (cluster.concatTokens().size() > 0)) {
                     start = cluster.concatTokens().get(0).getOffset();
                 }
                 // get the corresponding equation
                 if (start != -1) {
                     Equation theEquation = null;
                     if (equations != null) {
-                        for(int i=0; i<equations.size(); i++) {
+                        for (int i = 0; i < equations.size(); i++) {
                             if (i < equationIndex)
                                 continue;
                             Equation equation = equations.get(i);
@@ -895,9 +881,9 @@ public class TEIFormatter {
 
         // remove possibly empty div in the div list
         if (divResults.size() != 0) {
-            for(int i = divResults.size()-1; i>=0; i--) {
+            for (int i = divResults.size() - 1; i >= 0; i--) {
                 Element theDiv = divResults.get(i);
-                if ( (theDiv.getChildElements() == null) || (theDiv.getChildElements().size() == 0) ) {
+                if ((theDiv.getChildElements() == null) || (theDiv.getChildElements().size() == 0)) {
                     divResults.remove(i);
                 }
             }
@@ -1047,7 +1033,7 @@ public class TEIFormatter {
                                                    boolean generateCoordinates,
                                                    boolean keepUnsolvedCallout) throws EntityMatcherException {
         // safety tests
-        if ( (refTokens == null) || (refTokens.size() == 0) )
+        if ((refTokens == null) || (refTokens.size() == 0))
             return null;
         String text = LayoutTokensUtil.toText(refTokens);
         if (text == null || text.trim().length() == 0 || text.endsWith("</ref>") || text.startsWith("<ref") || markerMatcher == null)
@@ -1082,7 +1068,7 @@ public class TEIFormatter {
                     ref.addAttribute(new Attribute("target", "#b" + matchResult.getBibDataSet().getResBib().getOrdinal()));
                     solved = true;
                 }
-                if ( solved || (!solved && keepUnsolvedCallout) )
+                if (solved || (!solved && keepUnsolvedCallout))
                     nodes.add(ref);
                 else
                     nodes.add(textNode(matchResult.getText()));
@@ -1237,9 +1223,9 @@ public class TEIFormatter {
                     }
                     //if ((label.length() > 0) &&
                     //        (textLow.contains(label.toLowerCase()))) {
-                    if ( (labelNumber != null && textNumber != null && labelNumber.length()>0 &&
+                    if ((labelNumber != null && textNumber != null && labelNumber.length() > 0 &&
                         labelNumber.equals(textNumber)) ||
-                        ((label.length() > 0) && (textLow.equals(label.toLowerCase()))) ) {
+                        ((label.length() > 0) && (textLow.equals(label.toLowerCase())))) {
                         bestFormula = equation.getId();
                         break;
                     }
@@ -1301,7 +1287,7 @@ public class TEIFormatter {
         List<Page> pages = doc.getPages();
         int pageNumber = 1;
         buffer.append("\t<facsimile>\n");
-        for(Page page : pages) {
+        for (Page page : pages) {
             buffer.append("\t\t<surface ");
             buffer.append("n=\"" + pageNumber + "\" ");
             buffer.append("ulx=\"0.0\" uly=\"0.0\" ");

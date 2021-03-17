@@ -59,9 +59,9 @@ dependencies {
     testCompile 'org.powermock:powermock-api-easymock:2.0.2'
 
     //GROBID
-    compile 'org.grobid:grobid-core:0.6.1'
-    compile 'org.grobid:grobid-trainer:0.6.1'
-    compile('org.grobid:grobid-service:0.6.1') {
+    compile 'org.grobid:grobid-core:0.6.2-SNAPSHOT'
+    compile 'org.grobid:grobid-trainer:0.6.2-SNAPSHOT'
+    compile('org.grobid:grobid-service:0.6.2-SNAPSHOT') {
         transitive = false
     }
 
@@ -208,30 +208,24 @@ task eval_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, g
 }
 
 // One jar configuration
-//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-/*task mainJar(type: ShadowJar, group: 'test') {
-    zip64 true
-    from sourceSets.main.output
-    from {
-        *//*project.configurations.compile.collect {
-            it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
-        }*//*
-    }
-}*/
-
-shadowJar {
+/*shadowJar {
     classifier = 'onejar'
     zip64 true
     manifest {
         attributes 'Main-Class': 'org.grobid.core.main.batch.MedicalReportMain'
     }
-}
-
-/*jar {
-    dependsOn mainJar
-    enabled false
 }*/
+
+shadowJar {
+    archiveClassifier = 'onejar'
+    mergeServiceFiles()
+    zip64 true
+    manifest {
+        attributes 'Main-Class': 'org.grobid.core.main.batch.GrobidMedicalReportMain'
+    }
+    from sourceSets.main.output
+}
 
 artifacts {
     archives shadowJar

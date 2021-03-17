@@ -61,6 +61,10 @@ public class MedicParser {
         return processing(inputs, pdfAnnotations, true);
     }
 
+    public List<PersonMedical> processingLeftNoteWithLayoutTokens(List<LayoutToken> inputs, List<PDFAnnotation> pdfAnnotations) {
+        return processing(inputs, pdfAnnotations, true);
+    }
+
     /**
      * Common processing of medics in header
      *

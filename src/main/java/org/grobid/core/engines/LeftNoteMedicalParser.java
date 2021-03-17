@@ -156,7 +156,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         for (int k = 0; k < medicSegments.size(); k++) {
                             if (medicSegments.get(k).size() == 0)
                                 continue;
-                            List<PersonMedical> localMedics = parsers.getPersonParser()
+                            List<PersonMedical> localMedics = parsers.getMedicParser()
                                 .processingLeftNoteWithLayoutTokens(medicSegments.get(k), doc.getPDFAnnotations());
                             if (localMedics != null) {
                                 for (PersonMedical pers : localMedics) {
