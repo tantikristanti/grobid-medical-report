@@ -110,7 +110,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
         if (qName.equals("idno")) {
             currentTag = "<docnum>";
-        } if (qName.equals("affiliation")) {
+        } else if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
         } else if (qName.equals("institution")) {
