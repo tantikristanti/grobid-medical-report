@@ -21,6 +21,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String BODY_LABEL = "<body>";
     public final static String PAGE_NUMBER_LABEL = "<page>";
     public final static String ACKNOWLEDGEMENT_LABEL = "<acknowledgement>";
+    public static final String ANNEX_LABEL = "<annex>";
 
     // grobid-medical-report specific labels
     public final static String DOCNUM_LABEL = "<idno>";
@@ -50,6 +51,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String SURNAME_LABEL = "<surname>";
     public final static String SUFFIX_LABEL = "<suffix>";
 
+
     /**
      * document header (<header>): front,
      * page header (<headnote>): note type headnote,
@@ -71,6 +73,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel BODY = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, BODY_LABEL);
     public static final TaggingLabel PAGE_NUMBER = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, PAGE_NUMBER_LABEL);
     public static final TaggingLabel ACKNOWLEDGEMENT = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, ACKNOWLEDGEMENT_LABEL);
+    public static final TaggingLabel ANNEX = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, ANNEX_LABEL);
 
     // Header Medical Report Model
     public static final TaggingLabel HEADER_DOCNUM = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, DOCNUM_LABEL);
@@ -128,6 +131,7 @@ public class MedicalLabels extends TaggingLabels {
         register(BODY);
         register(PAGE_NUMBER);
         register(ACKNOWLEDGEMENT);
+        register(ANNEX);
     }
 
 }

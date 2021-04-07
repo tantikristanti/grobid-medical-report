@@ -23,6 +23,7 @@ The exact list of generated files depends on the structures occurring in the art
 | `*.training.medical.tei.xml` | medical-report-segmenter | for the initial model used to segment a complete article into the principal zones |
 | `*.training.header.medical.tei.xml` | header-medical-report | a pre-annotated file for the header model |
 | `*.training.left.note.medical.tei.xml` | left-note-medical-report | a pre-annotated file for the left-note model |
+| `*.training.full.medical.text.tei.xml` | full-medical-text | a pre-annotated file for the header model |
 | `*.training.affiliation.tei.xml` | affiliation-address | for the detailed affiliation and address recognition |
 | `*.training.medics.tei.xml` | medics | for the detailed medics recognition |
 | `*.training.patients.tei.xml` | patients | for the detailed patients' recognition |
@@ -35,11 +36,11 @@ These files must be reviewed and corrected manually before being added to the tr
 
 The most important principle when correcting the pre-annotated training data is to __keep the stream of text untouched__. Only the tags can be moved, while the text itself shall not be modified or corrected. The stream of the text present in the training file as the Pdf extraction is similar to the stream of text that Grobid has to process. It is thus important to have Grobid trained on this real-world input, even if they contain OCR errors, noise, unknown Unicode characters, etc.   
 
-There are two exceptions to this main rule :
+There are two exceptions to this main rule:
 
 * Actual __end-of-lines__ from the PDF files are indicated by element `<lb/>`. These tags should be considered as part of the stream of text, and they should not be moved or removed concerning the overall text stream. 
 
-* In the TEI/XML files, end-of-line is equivalent to a space character. It is possible to add or remove end-of-line characters, as long as the spacing is preserved. For instance :
+* In the TEI/XML files, end-of-line is equivalent to a space character. It is possible to add or remove end-of-line characters, as long as the spacing is preserved. For instance:
 
 ```xml
  	<title level="a">In XML training files, end-of-line and space are the same</title> <lb/> <author>Kermitt Jr</author> <lb/> <date>2017</date> 

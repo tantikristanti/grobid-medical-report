@@ -335,11 +335,11 @@ public class LeftNoteMedicalReportTrainer extends AbstractTrainer {
     }
 
     protected final File getCorpusPath() {
-        return new File(MedicalReportProperties.get("grobid.left.note.medical.report.corpusPath"));
+        return new File(MedicalReportProperties.get("grobid.full.medical.text.corpusPath"));
     }
 
     protected final File getTemplatePath() {
-        return new File(MedicalReportProperties.get("grobid.left.note.medical.report.templatePath"));
+        return new File(MedicalReportProperties.get("grobid.full.medical.text.templatePath"));
     }
 
     /**

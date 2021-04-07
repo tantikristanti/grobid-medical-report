@@ -8,12 +8,14 @@ import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Text;
 
+import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.*;
 import org.grobid.core.data.Date;
 import org.grobid.core.document.xml.XmlBuilderUtils;
 import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.FullMedicalTextParser;
+import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.SegmentationLabels;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -88,15 +90,13 @@ public class TEIFormatter {
 
     public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      String defaultPublicationStatement,
-                                     List<BibDataSet> bds,
                                      GrobidAnalysisConfig config) {
-        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
+        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement,  config);
     }
 
     public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      SchemaDeclaration schemaDeclaration,
                                      String defaultPublicationStatement,
-                                     List<BibDataSet> bds,
                                      GrobidAnalysisConfig config) {
         StringBuilder tei = new StringBuilder();
         tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -504,11 +504,9 @@ public class TEIFormatter {
     public StringBuilder toTEIBody(StringBuilder buffer,
                                    String result,
                                    HeaderMedicalItem biblio,
-                                   List<BibDataSet> bds,
                                    LayoutTokenization layoutTokenization,
                                    List<Figure> figures,
                                    List<Table> tables,
-                                   List<Equation> equations,
                                    Document doc,
                                    GrobidAnalysisConfig config) throws Exception {
         if ((result == null) || (layoutTokenization == null) || (layoutTokenization.getTokenization() == null)) {
@@ -516,8 +514,8 @@ public class TEIFormatter {
             return buffer;
         }
         buffer.append("\t\t<body>\n");
-        buffer = toTEITextPiece(buffer, result, biblio, bds, true,
-            layoutTokenization, figures, tables, equations, doc, config);
+        buffer = toTEITextPiece(buffer, result, biblio,true,
+            layoutTokenization, figures, tables, doc, config);
 
         // notes are still in the body
         buffer = toTEINote(buffer, doc, config);
@@ -531,13 +529,13 @@ public class TEIFormatter {
                                     Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
         // write the notes
-        SortedSet<DocumentPiece> documentNoteParts = doc.getDocumentPart(SegmentationLabels.FOOTNOTE);
+        SortedSet<DocumentPiece> documentNoteParts = doc.getDocumentPart(MedicalLabels.FOOTNOTE);
         if (documentNoteParts != null) {
             tei = toTEINote("foot", documentNoteParts, tei, doc, config);
         }
-        documentNoteParts = doc.getDocumentPart(SegmentationLabels.MARGINNOTE);
+        documentNoteParts = doc.getDocumentPart(MedicalLabels.HEADNOTE);
         if (documentNoteParts != null) {
-            tei = toTEINote("margin", documentNoteParts, tei, doc, config);
+            tei = toTEINote("head", documentNoteParts, tei, doc, config);
         }
         return tei;
     }
@@ -614,46 +612,6 @@ public class TEIFormatter {
                 addXmlId(desc, "_" + divID);
             }
 
-            // for labelling bibligraphical references in footnotes
-            /*org.apache.commons.lang3.tuple.Pair<String, List<LayoutToken>> noteProcess =
-                fullTextParser.processShort(noteTokens, doc);
-            String labeledNote = noteProcess.getLeft();
-            List<LayoutToken> noteLayoutTokens = noteProcess.getRight();
-
-            if ( (labeledNote != null) && (labeledNote.length() > 0) ) {
-                TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULLTEXT, labeledNote, noteLayoutTokens);
-                List<TaggingTokenCluster> clusters = clusteror.cluster();
-
-                for (TaggingTokenCluster cluster : clusters) {
-                    if (cluster == null) {
-                        continue;
-                    }
-
-                    TaggingLabel clusterLabel = cluster.getTaggingLabel();
-                    String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                    if (clusterLabel.equals(TaggingLabels.CITATION_MARKER)) {
-                        try {
-                            List<Node> refNodes = this.markReferencesTEILuceneBased(
-                                cluster.concatTokens(),
-                                doc.getReferenceMarkerMatcher(),
-                                config.isGenerateTeiCoordinates("ref"),
-                                false);
-                            if (refNodes != null) {
-                                for (Node n : refNodes) {
-                                    desc.appendChild(n);
-                                }
-                            }
-                        } catch(Exception e) {
-                            LOGGER.warn("Problem when serializing TEI fragment for figure caption", e);
-                        }
-                    } else {
-                        desc.appendChild(textNode(clusterContent));
-                    }
-                }
-            } else {
-                desc.appendChild(LayoutTokensUtil.normalizeText(footText.trim()));
-            }*/
-
             tei.append("\t\t\t");
             tei.append(desc.toXML());
             tei.append("\n");
@@ -665,7 +623,6 @@ public class TEIFormatter {
     public StringBuilder toTEIAcknowledgement(StringBuilder buffer,
                                               String reseAcknowledgement,
                                               List<LayoutToken> tokenizationsAcknowledgement,
-                                              List<BibDataSet> bds,
                                               GrobidAnalysisConfig config) throws Exception {
         if ((reseAcknowledgement == null) || (tokenizationsAcknowledgement == null)) {
             return buffer;
@@ -674,8 +631,8 @@ public class TEIFormatter {
         buffer.append("\n\t\t\t<div type=\"acknowledgement\">\n");
         StringBuilder buffer2 = new StringBuilder();
 
-        buffer2 = toTEITextPiece(buffer2, reseAcknowledgement, null, bds, false,
-            new LayoutTokenization(tokenizationsAcknowledgement), null, null, null, doc, config);
+        buffer2 = toTEITextPiece(buffer2, reseAcknowledgement, null, false,
+            new LayoutTokenization(tokenizationsAcknowledgement), null, null, doc, config);
         String acknowResult = buffer2.toString();
         String[] acknowResultLines = acknowResult.split("\n");
         boolean extraDiv = false;
@@ -694,8 +651,7 @@ public class TEIFormatter {
 
     public StringBuilder toTEIAnnex(StringBuilder buffer,
                                     String result,
-                                    HeaderMedicalItem biblio,
-                                    List<BibDataSet> bds,
+                                    HeaderMedicalItem headerItem,
                                     List<LayoutToken> tokenizations,
                                     Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
@@ -704,8 +660,8 @@ public class TEIFormatter {
         }
 
         buffer.append("\t\t\t<div type=\"annex\">\n");
-        buffer = toTEITextPiece(buffer, result, biblio, bds, true,
-            new LayoutTokenization(tokenizations), null, null, null, doc, config);
+        buffer = toTEITextPiece(buffer, result, headerItem, true,
+            new LayoutTokenization(tokenizations), null, null, doc, config);
         buffer.append("\t\t\t</div>\n");
 
         return buffer;
@@ -713,13 +669,11 @@ public class TEIFormatter {
 
     public StringBuilder toTEITextPiece(StringBuilder buffer,
                                         String result,
-                                        HeaderMedicalItem biblio,
-                                        List<BibDataSet> bds,
+                                        HeaderMedicalItem headerItem,
                                         boolean keepUnsolvedCallout,
                                         LayoutTokenization layoutTokenization,
                                         List<Figure> figures,
                                         List<Table> tables,
-                                        List<Equation> equations,
                                         Document doc,
                                         GrobidAnalysisConfig config) throws Exception {
         TaggingLabel lastClusterLabel = null;
@@ -730,7 +684,7 @@ public class TEIFormatter {
 
         List<LayoutToken> tokenizations = layoutTokenization.getTokenization();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULLTEXT, result, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, result, tokenizations);
 
         String tokenLabel = null;
         List<TaggingTokenCluster> clusters = clusteror.cluster();
@@ -778,34 +732,6 @@ public class TEIFormatter {
 
                 curDiv.appendChild(head);
                 divResults.add(curDiv);
-            } else if (clusterLabel.equals(TaggingLabels.EQUATION) ||
-                clusterLabel.equals(TaggingLabels.EQUATION_LABEL)) {
-                // get starting position of the cluster
-                int start = -1;
-                if ((cluster.concatTokens() != null) && (cluster.concatTokens().size() > 0)) {
-                    start = cluster.concatTokens().get(0).getOffset();
-                }
-                // get the corresponding equation
-                if (start != -1) {
-                    Equation theEquation = null;
-                    if (equations != null) {
-                        for (int i = 0; i < equations.size(); i++) {
-                            if (i < equationIndex)
-                                continue;
-                            Equation equation = equations.get(i);
-                            if (equation.getStart() == start) {
-                                theEquation = equation;
-                                equationIndex = i;
-                                break;
-                            }
-                        }
-                        if (theEquation != null) {
-                            Element element = theEquation.toTEIElement(config);
-                            if (element != null)
-                                curDiv.appendChild(element);
-                        }
-                    }
-                }
             } else if (clusterLabel.equals(TaggingLabels.ITEM)) {
                 String clusterContent = LayoutTokensUtil.normalizeText(cluster.concatTokens());
                 //curDiv.appendChild(teiElement("item", clusterContent));
@@ -846,20 +772,11 @@ public class TEIFormatter {
                 parent.appendChild(new Text(" "));
 
                 List<Node> refNodes;
-                if (clusterLabel.equals(TaggingLabels.CITATION_MARKER)) {
-                    refNodes = markReferencesTEILuceneBased(refTokens,
-                        doc.getReferenceMarkerMatcher(),
-                        config.isGenerateTeiCoordinates("ref"),
-                        keepUnsolvedCallout);
-
-                } else if (clusterLabel.equals(TaggingLabels.FIGURE_MARKER)) {
+                if (clusterLabel.equals(TaggingLabels.FIGURE_MARKER)) {
                     refNodes = markReferencesFigureTEI(chunkRefString, refTokens, figures,
                         config.isGenerateTeiCoordinates("ref"));
                 } else if (clusterLabel.equals(TaggingLabels.TABLE_MARKER)) {
                     refNodes = markReferencesTableTEI(chunkRefString, refTokens, tables,
-                        config.isGenerateTeiCoordinates("ref"));
-                } else if (clusterLabel.equals(TaggingLabels.EQUATION_MARKER)) {
-                    refNodes = markReferencesEquationTEI(chunkRefString, refTokens, equations,
                         config.isGenerateTeiCoordinates("ref"));
                 } else {
                     throw new IllegalStateException("Unsupported marker type: " + clusterLabel);
@@ -984,37 +901,6 @@ public class TEIFormatter {
         }
     }
 
-    public StringBuilder toTEIReferences(StringBuilder tei,
-                                         List<BibDataSet> bds,
-                                         GrobidAnalysisConfig config) throws Exception {
-        tei.append("\t\t\t<div type=\"references\">\n\n");
-
-        if ((bds == null) || (bds.size() == 0))
-            tei.append("\t\t\t\t<listBibl/>\n");
-        else {
-            tei.append("\t\t\t\t<listBibl>\n");
-
-            int p = 0;
-            if (bds.size() > 0) {
-                for (BibDataSet bib : bds) {
-                    BiblioItem bit = bib.getResBib();
-                    bit.setReference(bib.getRawBib());
-                    if (bit != null) {
-                        tei.append("\n" + bit.toTEI(p, 0, config));
-                    } else {
-                        tei.append("\n");
-                    }
-                    p++;
-                }
-            }
-            tei.append("\n\t\t\t\t</listBibl>\n");
-        }
-        tei.append("\t\t\t</div>\n");
-
-        return tei;
-    }
-
-
     //bounding boxes should have already been calculated when calling this method
     public static String getCoordsAttribute(List<BoundingBox> boundingBoxes, boolean generateCoordinates) {
         if (!generateCoordinates || boundingBoxes == null || boundingBoxes.isEmpty()) {
@@ -1022,61 +908,6 @@ public class TEIFormatter {
         }
         String coords = Joiner.on(";").join(boundingBoxes);
         return "coords=\"" + coords + "\"";
-    }
-
-
-    /**
-     * Mark using TEI annotations the identified references in the text body build with the machine learning model.
-     */
-    public List<Node> markReferencesTEILuceneBased(List<LayoutToken> refTokens,
-                                                   ReferenceMarkerMatcher markerMatcher,
-                                                   boolean generateCoordinates,
-                                                   boolean keepUnsolvedCallout) throws EntityMatcherException {
-        // safety tests
-        if ((refTokens == null) || (refTokens.size() == 0))
-            return null;
-        String text = LayoutTokensUtil.toText(refTokens);
-        if (text == null || text.trim().length() == 0 || text.endsWith("</ref>") || text.startsWith("<ref") || markerMatcher == null)
-            return Collections.<Node>singletonList(new Text(text));
-
-        boolean spaceEnd = false;
-        text = text.replace("\n", " ");
-        if (text.endsWith(" "))
-            spaceEnd = true;
-        //System.out.println("callout text: " + text);
-        List<Node> nodes = new ArrayList<>();
-        List<ReferenceMarkerMatcher.MatchResult> matchResults = markerMatcher.match(refTokens);
-        if (matchResults != null) {
-            for (ReferenceMarkerMatcher.MatchResult matchResult : matchResults) {
-                // no need to HTMLEncode since XOM will take care about the correct escaping
-                String markerText = LayoutTokensUtil.normalizeText(matchResult.getText());
-                String coords = null;
-                if (generateCoordinates && matchResult.getTokens() != null) {
-                    coords = LayoutTokensUtil.getCoordsString(matchResult.getTokens());
-                }
-
-                Element ref = teiElement("ref");
-                ref.addAttribute(new Attribute("type", "bibr"));
-
-                if (coords != null) {
-                    ref.addAttribute(new Attribute("coords", coords));
-                }
-                ref.appendChild(markerText);
-
-                boolean solved = false;
-                if (matchResult.getBibDataSet() != null) {
-                    ref.addAttribute(new Attribute("target", "#b" + matchResult.getBibDataSet().getResBib().getOrdinal()));
-                    solved = true;
-                }
-                if (solved || (!solved && keepUnsolvedCallout))
-                    nodes.add(ref);
-                else
-                    nodes.add(textNode(matchResult.getText()));
-            }
-        }
-        if (spaceEnd)
-            nodes.add(new Text(" "));
-        return nodes;
     }
 
 

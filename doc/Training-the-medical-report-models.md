@@ -3,29 +3,31 @@
 ## Models
 
 As in Grobid, __grobid-medical-report__ also uses different sequence labeling models. For more complex extraction and parsing tasks, it uses several models in cascade.
-The models prepared are :
+The models prepared are:
 
-* medical-report-segmenter
+- [x] medical-report-segmenter
 
-* header-medical-report
+- [x] header-medical-report
 
-* left-note-medical-report
+- [x] left-note-medical-report
 
-* organization-medical-report
+- [ ] full-medical-text
 
-* medic
+- [ ] organization-medical-report
 
-* patient
-  
-* name-medic
+- [ ] medic
 
-* name-patient
+- [ ] patient
 
-* affiliation-address
+- [ ] name-medic
 
-* dateline
+- [ ] name-patient
 
-* full-medical-text
+- [ ] dateline
+
+Note:
+- [x] (A completed model)
+- [ ] (An uncompleted model - work in progress)
 
 The models are placed under `grobid/grobid-home/models`. Each of these models can be re-trained using additional training data. For production, a model is trained with all available training data to maximize performance. For development purposes, it is possible to evaluate a model with part of the training data.
 
@@ -51,7 +53,7 @@ To train and to generate a new model, under the project directory `grobid/grobid
 ```bash
 > ./gradlew <training-goal-name>
 ```
-Training goal names are : `train_medical_report_segmenter`, `train_header_medical_report`, `train_left_note_medical_report`.
+Training goal names are: `train_medical_report_segmenter`, `train_header_medical_report`, `train_left_note_medical_report`, `train_full_medical_text`.
 
 An example of a command for training the __medical-report-segmenter__ model:
 ```bash
@@ -68,6 +70,11 @@ An example of a command for training the __left-note-medical-report__ model:
 > ./gradlew train_left_note_medical_report
 ```
 
+An example of a command for training the __train_full_medical_text__ model:
+```bash
+> ./gradlew train_full_medical_text
+```
+
 As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. Further, to increase the speed, we can also modify the stopping criteria. For more information, please refer [this comment](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).
 
 ### Evaluate
@@ -77,7 +84,7 @@ To evaluate the model, under the project directory `grobid/grobid-medical-report
 > ./gradlew <evaluation-goal-name>
 ```
 
-Evaluation goal names are : `eval_medical_report_segmenter`, `eval_header_medical_report`, `eval_left_note_medical_report`.
+Evaluation goal names are: `eval_medical_report_segmenter`, `eval_header_medical_report`, `eval_left_note_medical_report`.
 
 #### Automatically split data, train and evaluate
 To split (e.g., training:evaluation = 80:20) automatically and randomly the dataset under `resources/dataset/*MODEL*/corpus/` into training and evaluation datasets, execute the following command:
@@ -86,7 +93,7 @@ To split (e.g., training:evaluation = 80:20) automatically and randomly the data
 > ./gradlew <automatic-evaluation-goal-name>
 ```
 
-Automatic evaluation goal names are : `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`.
+Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`.
 
 
 ## Generation of training data
@@ -101,19 +108,19 @@ To generate a new training data, under the project directory `grobid/grobid-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
-Generation of training data commands are : `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`.
+Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`.
 
-An example of a command for generating a new training data for the __medical-report-segmenter__ model : 
+An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
 ```
 
-An example of a command for generating a new training data for the __header-medical-report__ model : 
+An example of a command for generating a new training data for the __header-medical-report__ model: 
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```
 
-An example of a command for generating a new training data for the __header-medical-report__ model :
+An example of a command for generating a new training data for the __header-medical-report__ model:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
@@ -121,7 +128,7 @@ An example of a command for generating a new training data for the __header-medi
 
 <!---Note for developers:
 
-To create new blank training data (files containing the features and the text without any label), we need to uncomment createBlankTrainingFromPDF method in batch processing for each model. For example :
+To create new blank training data (files containing the features and the text without any label), we need to uncomment createBlankTrainingFromPDF method in batch processing for each model. For example:
 - uncomment createBlankTrainingFromPDF method in the createTrainingMedicalSegmentationBatch in MedicalReportParser class;
 OR 
 - uncomment createBlankTrainingFromPDF method in the createTrainingMedicalHeaderBatch in HeaderMedicalParser class 

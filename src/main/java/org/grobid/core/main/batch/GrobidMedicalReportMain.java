@@ -25,10 +25,12 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_PDF = "processPDF";
     private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
     private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
+    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
+    private static final String COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT = "createTrainingFullMedicalText";
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
     private static final String COMMAND_PROCESS_HEADER  = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
-    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
+
     private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
 
     private static List<String> availableCommands = Arrays.asList(
@@ -36,10 +38,11 @@ public class GrobidMedicalReportMain {
         COMMAND_PROCESS_PDF,
         COMMAND_CREATE_TRAINING_SEGMENTATION,
         COMMAND_CREATE_TRAINING_HEADER,
+        COMMAND_CREATE_TRAINING_LEFT_NOTE,
+        COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT,
         COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
-        COMMAND_CREATE_TRAINING_LEFT_NOTE,
         COMMAND_BOOTSTRAP_TRAINING_PDF
     );
 
@@ -205,6 +208,8 @@ public class GrobidMedicalReportMain {
                 nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT)) {
+                nb = parsers.getLFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER_HIGH_LEVEL)) {
                 nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {

@@ -136,7 +136,8 @@ def trainerTasks = [
         //Training models
         "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
         "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer",
-        "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer"
+        "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer",
+        "train_full_medical_text"               : "org.grobid.trainer.FullMedicalTextTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->
@@ -204,6 +205,22 @@ task eval_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, g
     main = 'org.grobid.trainer.LeftNoteMedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'left_note_medical_report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_full_medical_text -gH /path/to/grobid-home
+task eval_full_medical_text(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.FullMedicalTextTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 1, 'full_medical_text', '-gH', getArg('gH', '../grobid-home')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_full_medical_text_split -gH /path/to/grobid-home
+task eval_full_medical_text_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.FullMedicalTextTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 2, 'full_medical_text', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
