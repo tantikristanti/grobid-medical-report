@@ -1233,6 +1233,111 @@ public class FullMedicalTextParser extends AbstractParser {
     }
 
     /**
+     * Process the specified pdf and format the result as blank training data for the header model.
+     *
+     * @param inputFile  input PDF file
+     * @param pathOutput path to raw monograph featured sequence
+     * @param pathOutput path to TEI
+     * @param id         id
+     */
+
+    public Document createBlankTrainingFromPDF(File inputFile,
+                                               String pathOutput,
+                                               int id) {
+        if (tmpPath == null)
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+        DocumentSource documentSource = null;
+        Document doc = null;
+        try {
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot train for full-medical-text, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+            Writer writer = null;
+
+            // path for blank full-medical-text model
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.blank.tei.xml"));
+            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text"));
+
+            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            doc = new Document(documentSource);
+            doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
+
+            if (doc.getBlocks() == null) {
+                throw new Exception("PDF parsing resulted in empty content");
+            }
+            doc.produceStatistics();
+            
+            String fulltext = parsers.getMedicalReportParser().getAllLinesFeatured(doc);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            // first, call the medical-report-segmenter model to have high level segmentation
+            doc = parsers.getMedicalReportParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
+
+            // FULL-MEDICAL-TEXT MODEL (body part)
+            SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+            if (documentBodyParts != null) {
+                Pair<String, LayoutTokenization> featSeg = getBodyTextFeatured(doc, documentBodyParts);
+                if (featSeg != null) {
+                    String bodytext = featSeg.getLeft();
+                    //List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization();
+
+                    // we write the full text untagged
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(bodytext + "\n");
+                    writer.close();
+
+                    List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
+
+                    for (DocumentPiece docPiece : documentBodyParts) {
+                        DocumentPointer dp1 = docPiece.getLeft();
+                        DocumentPointer dp2 = docPiece.getRight();
+
+                        int tokens = dp1.getTokenDocPos();
+                        int tokene = dp2.getTokenDocPos();
+                        for (int i = tokens; i < tokene; i++) {
+                            tokenizationsBody.add(tokenizations.get(i));
+                        }
+                    }
+
+                    StringBuilder bufferBody = new StringBuilder();
+
+                    // just write the text without any label
+                    for (LayoutToken token : tokenizationsBody) {
+                        bufferBody.append(token.getText());
+                    }
+
+                    // write the TEI file to reflect the extract layout of the text as extracted from the pdf
+                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    if (id == -1) {
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader/>\n\t<text xml:lang=\"fr\">\n");
+                    } else {
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
+                            "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
+                    }
+                    writer.write(bufferBody.toString());
+                    writer.write("\n\t</text>\n</tei>\n");
+                    writer.close();
+
+                }
+            }
+
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid training" +
+                " data generation for full text.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+
+        return doc;
+    }
+
+    /**
      * Extract results from a labelled full text in the training format without any string modification.
      *
      * @param result        result
