@@ -2,7 +2,7 @@
 
 ## Introduction
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models/#generation-of-training-data).
+For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
 
 In __grobid-medical-report__, the document __organization-medical-report__ corresponds to the information of organization structures. 
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models-of-Grobid/#generation-of-training-data).
+For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
 
 For the medical report segmentation model, we use the following TEI elements:
 
