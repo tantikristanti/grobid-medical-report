@@ -1,4 +1,4 @@
-# grobid-medical-report
+# grobid-medical-report :hospital:
 grobid-medical-report is a [GROBID](https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents. As the other GROBID models, this module relies on machine learning using linear Chain Conditional Random Fields (CRF). 
 
 ## Install - Build - Run

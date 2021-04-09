@@ -3,6 +3,9 @@
 ## Models
 
 As in Grobid, __grobid-medical-report__ also uses different sequence labeling models. For more complex extraction and parsing tasks, it uses several models in cascade.
+
+![Models_grobid_medical_report](img/Training_the_medical_report_models_1.png)
+
 The models prepared are:
 
 - [x] medical-report-segmenter
@@ -84,7 +87,7 @@ To evaluate the model, under the project directory `grobid/grobid-medical-report
 > ./gradlew <evaluation-goal-name>
 ```
 
-Evaluation goal names are: `eval_medical_report_segmenter`, `eval_header_medical_report`, `eval_left_note_medical_report`.
+Evaluation goal names are: `eval_medical_report_segmenter`, `eval_header_medical_report`, `eval_left_note_medical_report`, `eval_full_medical_text`.
 
 #### Automatically split data, train and evaluate
 To split (e.g., training:evaluation = 80:20) automatically and randomly the dataset under `resources/dataset/*MODEL*/corpus/` into training and evaluation datasets, execute the following command:
@@ -93,7 +96,7 @@ To split (e.g., training:evaluation = 80:20) automatically and randomly the data
 > ./gradlew <automatic-evaluation-goal-name>
 ```
 
-Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`.
+Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`, `eval_full_medical_text`.
 
 
 ## Generation of training data
@@ -120,11 +123,15 @@ An example of a command for generating a new training data for the __header-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```
 
-An example of a command for generating a new training data for the __header-medical-report__ model:
+An example of a command for generating a new training data for the __left-note-medical-report__ model:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
 
+An example of a command for generating a new training data for the __full-medical-text__ model:
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
+```
 
 <!---Note for developers:
 
