@@ -21,7 +21,8 @@ Note that the mark-up follows overall the [TEI](http://www.tei-c.org).
 
 > Note: It is recommended to study first the existing training documents for the __medical-report-segmenter__ model (`grobid/grobid-medical-report/resources/dataset/medical-report-segmenter`) to see some examples of how these elements should be used.
 
-![Segmented medical document](../img/segmented document.png)
+![Segmented_medical_document](../img/Segmented_document.png)
+
 
 ## Analysis
 

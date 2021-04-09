@@ -4,7 +4,7 @@
 
 As in Grobid, __grobid-medical-report__ also uses different sequence labeling models. For more complex extraction and parsing tasks, it uses several models in cascade.
 
-![Models_grobid_medical_report](img/Training_the_medical_report_models_1.png)
+![Models_grobid_medical_report](img/Training_the_medical_report_models.png)
 
 The models prepared are:
 
