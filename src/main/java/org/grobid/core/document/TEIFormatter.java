@@ -533,9 +533,9 @@ public class TEIFormatter {
         if (documentNoteParts != null) {
             tei = toTEINote("foot", documentNoteParts, tei, doc, config);
         }
-        documentNoteParts = doc.getDocumentPart(MedicalLabels.HEADNOTE);
+        documentNoteParts = doc.getDocumentPart(MedicalLabels.MARGINNOTE);
         if (documentNoteParts != null) {
-            tei = toTEINote("head", documentNoteParts, tei, doc, config);
+            tei = toTEINote("margin", documentNoteParts, tei, doc, config);
         }
         return tei;
     }

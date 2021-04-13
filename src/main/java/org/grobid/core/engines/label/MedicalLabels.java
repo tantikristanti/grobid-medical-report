@@ -1,6 +1,7 @@
 package org.grobid.core.engines.label;
 
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 
 /**
  * Labels used in the medical-report-segmenter model
@@ -16,6 +17,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String HEADER_LABEL = "<header>";
     public final static String HEADNOTE_LABEL = "<headnote>";
     public final static String FOOTNOTE_LABEL = "<footnote>";
+    public final static String MARGINNOTE_LABEL = "<marginnote>";
     public final static String LEFTNOTE_LABEL = "<leftnote>";
     public final static String RIGHTNOTE_LABEL = "<rightnote>";
     public final static String BODY_LABEL = "<body>";
@@ -68,6 +70,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, HEADER_LABEL);
     public static final TaggingLabel HEADNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, HEADNOTE_LABEL);
     public static final TaggingLabel FOOTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, FOOTNOTE_LABEL);
+    public static final TaggingLabel MARGINNOTE = new TaggingLabelImpl(GrobidModels.SEGMENTATION, MARGINNOTE_LABEL);
     public static final TaggingLabel LEFTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, LEFTNOTE_LABEL);
     public static final TaggingLabel RIGHTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, RIGHTNOTE_LABEL);
     public static final TaggingLabel BODY = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, BODY_LABEL);
