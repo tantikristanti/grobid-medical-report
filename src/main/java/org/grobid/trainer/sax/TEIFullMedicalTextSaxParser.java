@@ -124,6 +124,32 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                 currentTags.push("<paragraph>");
 				currentTag = "<paragraph>";
             }
+            else if (qName.equals("note")) { // for the head and foot notes still found in the body part
+                int length = atts.getLength();
+
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
+
+                    if (name != null) {
+                        if (name.equals("place")) {
+                            if (value.equals("footnote") || value.equals("foot")) {
+                                currentTags.push("<footnote>");
+                                currentTag = "<footnote>";
+                            } else if (value.equals("headnote")|| value.equals("head")) {
+                                currentTags.push("<headnote>");
+                                currentTag = "<headnote>";
+                            } else {
+                                logger.error("Invalid attribute value for element note: " + name + "=" + value);
+                            }
+                        } else {
+                            logger.error("Invalid attribute name for element note: " + name);
+                        }
+                    }
+                }
+            }
 			else if (qName.equals("ref")) {
                 int length = atts.getLength();
 
@@ -154,11 +180,9 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                 }
             } 
 			else if (qName.equals("head")) {
-				{
-                    currentTags.push("<section>");
-					currentTag = "<section>";
-                }
-            } 
+                currentTags.push("<section>");
+                currentTag = "<section>";
+            }
             else if (qName.equals("table")) {
                 currentTags.push("<table>");
 				currentTag = "<table>";
@@ -224,7 +248,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                 (qName.equals("ref")) || (qName.equals("head")) ||
                 (qName.equals("figure")) ||  (qName.equals("table")) ||
                 (qName.equals("paragraph")) || (qName.equals("div")) ||
-                (qName.equals("item")) || (qName.equals("label"))
+                (qName.equals("item")) || (qName.equals("note"))
                 ) {
 			if (currentTag == null) {
 				return;

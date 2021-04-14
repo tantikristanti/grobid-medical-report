@@ -945,10 +945,10 @@ public class FullMedicalTextParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            String fulltext = //getAllTextFeatured(doc, false);
-                parsers.getMedicalReportParser().getAllLinesFeatured(doc);
+            /*String fulltext = //getAllTextFeatured(doc, false);
+                parsers.getMedicalReportParser().getAllLinesFeatured(doc);*/
             //List<LayoutToken> tokenizations = doc.getTokenizationsFulltext();
-            List<LayoutToken> tokenizations = doc.getTokenizations();
+            //List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write first the full text untagged (but featurized with segmentation features) --> I need to check it later after concentrating for the body part
             //writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
@@ -1461,20 +1461,24 @@ public class FullMedicalTextParser extends AbstractParser {
                         addSpace, 3, false);
                 }
                 if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<section>",
-                        "<head>", addSpace, 3, false);
-                }
-                if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<subsection>",
-                        "<head>", addSpace, 3, false);
-                }
-                if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<figure>",
                         "<figure>", addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<figure_marker>",
                         "<ref type=\"figure\">", addSpace, 3, false);
+                }
+                if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<section>",
+                        "<head>", addSpace, 3, false);
+                }
+                if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<headnote>",
+                        "<note place=\"headnote\">", addSpace, 3, false);
+                }
+                if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<footnote>",
+                        "<note place=\"footnote\">", addSpace, 3, false);
                 }
                 // for item we must distinguish starting and closing tags
                 if (!output) {
@@ -1665,8 +1669,6 @@ public class FullMedicalTextParser extends AbstractParser {
                 res = true;
 
             } else if (lastTag0.equals("<section>")) {
-                buffer.append("</head>\n\n");
-            } else if (lastTag0.equals("<subsection>")) {
                 buffer.append("</head>\n\n");
             } else if (lastTag0.equals("<table>")) {
                 buffer.append("</figure>\n\n");

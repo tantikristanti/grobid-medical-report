@@ -3,7 +3,6 @@ package org.grobid.core.engines;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
-import org.grobid.core.data.Date;
 import org.grobid.core.data.HeaderMedicalItem;
 import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.*;

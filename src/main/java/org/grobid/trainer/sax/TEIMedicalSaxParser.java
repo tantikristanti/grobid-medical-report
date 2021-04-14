@@ -125,14 +125,14 @@ public class TEIMedicalSaxParser extends DefaultHandler {
                         if (name.equals("place")) {
                             if (value.equals("footnote") || value.equals("foot")) {
                                 currentTag = "<footnote>";
-                            } else if (value.equals("headnote") || value.equals("head")) {
+                            } else if (value.equals("headnote")|| value.equals("head")) {
                                 currentTag = "<headnote>";
                             } else if (value.equals("leftnote") || value.equals("left")) {
                                 currentTag = "<leftnote>";
                             } else if (value.equals("rightnote") || value.equals("right")) {
                                 currentTag = "<rightnote>";
                             } else {
-                                logger.error("Invalid attribute value for element div: " + name + "=" + value);
+                                logger.error("Invalid attribute value for element note: " + name + "=" + value);
                             }
                         } else {
                             logger.error("Invalid attribute name for element note: " + name);
