@@ -58,10 +58,10 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:2.0.2'
     testCompile 'org.powermock:powermock-api-easymock:2.0.2'
 
-    //GROBID
-    compile 'org.grobid:grobid-core:0.6.2-SNAPSHOT'
-    compile 'org.grobid:grobid-trainer:0.6.2-SNAPSHOT'
-    compile('org.grobid:grobid-service:0.6.2-SNAPSHOT') {
+    //GROBID (.m2/repository/org/grobid/)
+    compile 'org.grobid:grobid-core:0.7.0-SNAPSHOT'
+    compile 'org.grobid:grobid-trainer:0.7.0-SNAPSHOT'
+    compile('org.grobid:grobid-service:0.7.0-SNAPSHOT') {
         transitive = false
     }
 
