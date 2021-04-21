@@ -35,8 +35,6 @@ The header section typically contains document information (i.e., document numbe
 
 There should be as many `<front>` elements as necessary that contain all the contents identified as 'front contents'. Note that for the segmentation model, there aren't any `<title>`, `<medic>` or `<patient>` elements, as they are handled in the cascaded `header-medical-report` model, applied in the next stage.
 
-Any footnotes referenced from within the `<body>` should remain there.
-
 > Note: In general, whether the `<lb/>` (line break) element is inside or outside the `<front>` or other elements is of no importance. However as indicated [here](General-principles.md#correcting-pre-annotated-files), the <lb/> element should not be removed and should follow the stream of text. 
 
 ### Page header (headnote)
@@ -65,12 +63,12 @@ Corresponding TEI XML:
 
 ```
 
-### Page 
-
-The `<page>` element which contains the page number should be outside of any of the above `<note>` elements.
-
 ### Leftnote 
 
 Any notes to the left of the main body text are to be encoded as `<note place="left">`, as is shown in the following example:
 
 <img src="../img/Leftnote.png" alt="Leftnote" width="80%"/>
+
+### Page
+
+The `<page>` element which contains the page number should be outside of any of the above `<note>` elements.
