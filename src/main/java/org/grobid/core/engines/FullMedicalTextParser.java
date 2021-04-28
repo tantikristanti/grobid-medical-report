@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.data.Figure;
 import org.grobid.core.data.HeaderMedicalItem;
+import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.Table;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
@@ -21,10 +22,7 @@ import org.grobid.core.lang.Language;
 import org.grobid.core.layout.*;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
-import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.KeyGen;
-import org.grobid.core.utilities.LayoutTokensUtil;
-import org.grobid.core.utilities.TextUtilities;
+import org.grobid.core.utilities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * A class for extracting full text of medical reports.
- * This class is taken adapted from the FullTextParser class of Grobid (@author Patrice Lopez)
+ * This class is taken and adapted from the FullTextParser class of Grobid (@author Patrice Lopez)
  * <p>
  * Tanti, 2021
  */
@@ -99,10 +97,14 @@ public class FullMedicalTextParser extends AbstractParser {
 
             // header processing
             HeaderMedicalItem resHeader = new HeaderMedicalItem();
+
+            // left-note processing
+            LeftNoteMedicalItem resLeftNote = new LeftNoteMedicalItem();
+
             Pair<String, LayoutTokenization> featSeg = null;
 
             // using the segmentation model to identify the header zones
-            parsers.getHeaderMedicalParser().processingHeaderSection(config, doc, resHeader, false);
+            parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,false);
 
             // The commented part below makes use of the PDF embedded metadata (the so-called XMP) if available 
             // as fall back to set author and title if they have not been found. 
@@ -211,7 +213,8 @@ public class FullMedicalTextParser extends AbstractParser {
             toTEI(doc, // document
                 resultBody, resultAnnex, // labeled data for body and annex
                 layoutTokenization, tokenizationsBody2, // tokenization for body and annex
-                resHeader, // header
+                resHeader,
+                resLeftNote,// header
                 figures, tables, config);
             return doc;
         } catch (GrobidException e) {
@@ -330,40 +333,6 @@ public class FullMedicalTextParser extends AbstractParser {
         }
 
         return Pair.of(res, layoutTokenization);
-    }
-
-    static protected String postProcessLabeledAbstract(String labeledAbstract) {
-        if (labeledAbstract == null)
-            return null;
-        StringBuilder result = new StringBuilder();
-
-        String[] lines = labeledAbstract.split("\n");
-        String previousLabel = null;
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            if (line == null || line.trim().length() == 0)
-                continue;
-            String[] pieces = line.split("\t");
-            String label = pieces[pieces.length - 1];
-            if (label.equals("I-" + TaggingLabels.FIGURE.getLabel()) || label.equals("I-" + TaggingLabels.TABLE.getLabel())) {
-                if (previousLabel == null || !previousLabel.endsWith(TaggingLabels.PARAGRAPH.getLabel())) {
-                    pieces[pieces.length - 1] = "I-" + TaggingLabels.PARAGRAPH.getLabel();
-                } else {
-                    pieces[pieces.length - 1] = TaggingLabels.PARAGRAPH.getLabel();
-                }
-            } else if (label.equals(TaggingLabels.FIGURE.getLabel()) || label.equals(TaggingLabels.TABLE.getLabel())) {
-                pieces[pieces.length - 1] = TaggingLabels.PARAGRAPH.getLabel();
-            }
-            for (int j = 0; j < pieces.length; j++) {
-                if (j != 0)
-                    result.append("\t");
-                result.append(pieces[j]);
-            }
-            previousLabel = label;
-            result.append("\n");
-        }
-
-        return result.toString();
     }
 
     static public Pair<String, LayoutTokenization> getBodyTextFeatured(Document doc,
@@ -854,8 +823,8 @@ public class FullMedicalTextParser extends AbstractParser {
      */
 
     public int createTrainingFullMedicalTextBatch(String inputDirectory,
-                                                String outputDirectory,
-                                                int ind) throws IOException {
+                                                  String outputDirectory,
+                                                  int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
             if (!path.exists()) {
@@ -908,9 +877,9 @@ public class FullMedicalTextParser extends AbstractParser {
     /**
      * Process the specified pdf and format the result as training data for all the models.
      *
-     * @param inputFile    input file
-     * @param pathOutput    path for result
-     * @param id           id
+     * @param inputFile  input file
+     * @param pathOutput path for result
+     * @param id         id
      */
     public Document createTraining(File inputFile,
                                    String pathOutput,
@@ -947,7 +916,6 @@ public class FullMedicalTextParser extends AbstractParser {
 
             /*String fulltext = //getAllTextFeatured(doc, false);
                 parsers.getMedicalReportParser().getAllLinesFeatured(doc);*/
-            //List<LayoutToken> tokenizations = doc.getTokenizationsFulltext();
             //List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write first the full text untagged (but featurized with segmentation features) --> I need to check it later after concentrating for the body part
@@ -1069,8 +1037,8 @@ public class FullMedicalTextParser extends AbstractParser {
                 Pair<String, List<LayoutToken>> featuredHeader = parsers.getHeaderMedicalParser().getSectionHeaderFeatured(doc, documentHeaderParts);
                 String header = featuredHeader.getLeft();*/
 
-                //if ((header != null) && (header.trim().length() > 0)) {
-                    // we write the header untagged
+            //if ((header != null) && (header.trim().length() > 0)) {
+            // we write the header untagged
                     /*String outPathHeader = pathTEI + File.separator + pdfFileName.replace(".pdf", ".training.header.medical");
                     writer = new OutputStreamWriter(new FileOutputStream(new File(outPathHeader), false), StandardCharsets.UTF_8);
                     writer.write(header + "\n");
@@ -1078,18 +1046,18 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     String rese = parsers.getHeaderMedicalParser().label(header);*/
 
-                    // buffer for the header block
+            // buffer for the header block
                     /*StringBuilder bufferHeader = parsers.getHeaderMedicalParser().trainingExtraction(rese, headerTokenizations);
                     Language lang = LanguageUtilities.getInstance().runLanguageId(bufferHeader.toString());
                     if (lang != null) {
                         doc.setLanguage(lang.getLang());
                     }*/
 
-                    // buffer for the affiliation+address block
+            // buffer for the affiliation+address block
                     /*StringBuilder bufferAffiliation =
                         parsers.getAffiliationAddressParser().trainingExtraction(rese, headerTokenizations);*/
 
-                    // buffer for the date block
+            // buffer for the date block
                     /*StringBuilder bufferDate = null;
                     // we need to rebuild the found date string as it appears
                     String input = "";
@@ -1117,9 +1085,9 @@ public class FullMedicalTextParser extends AbstractParser {
                         bufferDate = parsers.getDateParser().trainingExtraction(inputs);
                     }*/
 
-                    // buffer for the name block
+            // buffer for the name block
                     /*StringBuilder bufferName = null;
-                    // we need to rebuild the found author string as it appears
+                    // we need to rebuild the found medic string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1143,8 +1111,8 @@ public class FullMedicalTextParser extends AbstractParser {
                         bufferName = parsers.getMedicParser().trainingExtraction(input, true);
                     }*/
 
-                    // write the training TEI file for header which reflects the extract layout of the text as
-                    // extracted from the pdf
+            // write the training TEI file for header which reflects the extract layout of the text as
+            // extracted from the pdf
                     /*writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI + File.separator
                         + pdfFileName.replace(".pdf", ".training.header.tei.xml")), false), StandardCharsets.UTF_8);
                     writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
@@ -1160,7 +1128,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
                     writer.close();*/
 
-                    // AFFILIATION-ADDRESS model
+            // AFFILIATION-ADDRESS model
                     /*if (bufferAffiliation != null) {
                         if (bufferAffiliation.length() > 0) {
                             Writer writerAffiliation = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
@@ -1181,7 +1149,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }*/
 
-                    // DATE MODEL (for dates in header)
+            // DATE MODEL (for dates in header)
                     /*if (bufferDate != null) {
                         if (bufferDate.length() > 0) {
                             Writer writerDate = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
@@ -1197,7 +1165,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }*/
 
-                    // HEADER MEDICS' NAME model
+            // HEADER MEDICS' NAME model
                     /*if (bufferName != null) {
                         if (bufferName.length() > 0) {
                             Writer writerName = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
@@ -1219,7 +1187,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writerName.close();
                         }
                     }*/
-                //}
+            //}
             //}
 
             return doc;
@@ -1272,7 +1240,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 throw new Exception("PDF parsing resulted in empty content");
             }
             doc.produceStatistics();
-            
+
             String fulltext = parsers.getMedicalReportParser().getAllLinesFeatured(doc);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
@@ -1470,7 +1438,11 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<section>",
-                        "<head>", addSpace, 3, false);
+                        "<head level=\"1\">", addSpace, 3, false);
+                }
+                if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<subsection>",
+                        "<head level=\"2\">", addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<headnote>",
@@ -1669,7 +1641,9 @@ public class FullMedicalTextParser extends AbstractParser {
                 res = true;
 
             } else if (lastTag0.equals("<section>")) {
-                buffer.append("</head>\n\n");
+                buffer.append("<head level=\"1\">\n\n");
+            } else if (lastTag0.equals("<subsection>")) {
+                buffer.append("<head level=\"2\">\n\n");
             } else if (lastTag0.equals("<table>")) {
                 buffer.append("</figure>\n\n");
             } else if (lastTag0.equals("<figure>")) {
@@ -2013,6 +1987,7 @@ public class FullMedicalTextParser extends AbstractParser {
                        LayoutTokenization layoutTokenization,
                        List<LayoutToken> tokenizationsAnnex,
                        HeaderMedicalItem resHeader,
+                       LeftNoteMedicalItem resLeftNote,
                        List<Figure> figures,
                        List<Table> tables,
                        GrobidAnalysisConfig config) {
@@ -2022,10 +1997,12 @@ public class FullMedicalTextParser extends AbstractParser {
         TEIFormatter teiFormatter = new TEIFormatter(doc, this);
         StringBuilder tei;
         try {
-            tei = teiFormatter.toTEIHeader(resHeader, null, config);
+            // header  and left-note
+            tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote,null, config);
 
             //System.out.println(rese);
             //int mode = config.getFulltextProcessingMode();
+            // body
             tei = teiFormatter.toTEIBody(tei, reseBody, resHeader, layoutTokenization, figures, tables, doc, config);
 
             tei.append("\t\t<back>\n");
@@ -2100,6 +2077,148 @@ public class FullMedicalTextParser extends AbstractParser {
 
         return labeledTokenSequences;
     }
+
+    /**
+     * Processing Pdf files with the current models using new files located in a given directory.
+     */
+
+    public int processFullTextDirectory(String inputDirectory,
+                                        String outputDirectory,
+                                        boolean recursive,
+                                        boolean saveAsset,
+                                        boolean teiCoordinates,
+                                        boolean segmentSentences,
+                                        int ind) throws IOException {
+        try {
+            File path = new File(inputDirectory);
+            if (!path.exists()) {
+                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
+            }
+
+            File pathOut = new File(outputDirectory);
+            if (!pathOut.exists()) {
+                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
+            }
+
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            List<String> elementCoordinates = null;
+            if (teiCoordinates) {
+                elementCoordinates = Arrays.asList("figure", "persName", "s");
+            }
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+
+            for (final File file : refFiles) {
+                try {
+                    processing(file, outputDirectory, recursive, saveAsset, elementCoordinates, segmentSentences, n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occured while processing the following pdf: "
+                        + file.getPath() + ": " + exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+        }
+    }
+
+    /**
+     * Process the content of the specified pdf and format the result as training data.
+     *
+     * @param inputFile          input file
+     * @param outputFile         path to fulltext
+     * @param recursive          recursive processing of files in the sub-directories (by default not recursive)
+     * @param saveAsset          do not extract and save the PDF assets (bitmaps, vector graphics), by default the assets are extracted and saved
+     * @param elementCoordinates the identified structures with coordinates in the original PDF, by default no coordinates are present
+     * @param segmentSentences   add sentence segmentation level structures for paragraphs in the TEI XML result, by default no sentence segmentation is done
+     * @param id                 id
+     */
+    public void processing(File inputFile,
+                           String outputFile,
+                           boolean recursive,
+                           boolean saveAsset,
+                           List<String> elementCoordinates,
+                           boolean segmentSentences,
+                           int id) {
+        if (tmpPath == null) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        }
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+
+        DocumentSource documentSource = null;
+        Document doc = null;
+        GrobidAnalysisConfig config = null;
+        String result;
+
+        try {
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot process the model, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+
+            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".medical.high.level.tei.xml"));
+            Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+
+            if (inputFile.getName().toLowerCase().endsWith(".pdf")) {
+                System.out.println("Processing: " + inputFile.getPath());
+
+                if (saveAsset) {
+                    String baseName = pdfFileName.replace(".pdf", "").replace(".PDF", "");
+                    String assetPath = outputFile + File.separator + baseName + "_assets";
+                    config = GrobidAnalysisConfig.builder()
+                        .pdfAssetPath(new File(assetPath))
+                        .generateTeiCoordinates(elementCoordinates)
+                        .withSentenceSegmentation(segmentSentences)
+                        .build();
+                } else
+                    config = GrobidAnalysisConfig.builder()
+                        .generateTeiCoordinates(elementCoordinates)
+                        .withSentenceSegmentation(segmentSentences)
+                        .build();
+                result = parsers.getLFullMedicalTextParser().processing(inputFile, config).getTei();
+
+                StringBuilder tei = new StringBuilder();
+                tei.append(result);
+                writer.write(tei.toString());
+                writer.close();
+            }else if (recursive && inputFile.isDirectory()) {
+                File[] newFiles = inputFile.listFiles();
+                if (newFiles != null) {
+                    for (final File file : newFiles) {
+                        processing(file, outputFile, recursive, saveAsset, elementCoordinates, segmentSentences, id);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new GrobidException("An exception occured extracting medical reports.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+    }
+
 
     @Override
     public void close() throws IOException {

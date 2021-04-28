@@ -139,13 +139,9 @@ public class HeaderMedicalItem {
         return this.language;
     }
 
-    public String getDocNum() {
-        return this.document_number;
-    }
+    public String getDocNum() { return this.document_number; }
 
-    public String getDocumentType() {
-        return this.document_type;
-    }
+    public String getDocumentType() { return this.document_type; }
 
     public String getTitle() { return this.title; }
 
@@ -228,9 +224,7 @@ public class HeaderMedicalItem {
         return fullMedics;
     }
 
-    public List<PersonMedical> getFullPatients() {
-        return fullPatients;
-    }
+    public List<PersonMedical> getFullPatients() { return fullPatients; }
 
     public List<Affiliation> getFullAffiliations() {
         return fullAffiliations;
@@ -249,11 +243,9 @@ public class HeaderMedicalItem {
         this.language = StringUtils.normalizeSpace(theLanguage);
     }
 
-    public void setDocNum(String docNum) {
-        this.document_number = StringUtils.normalizeSpace(docNum);
-    }
+    public void setDocNum(String idno) { this.document_number = StringUtils.normalizeSpace(idno); }
 
-    public void setDocNumGeneral(String docNumGeneral) { this.docNumGeneral = StringUtils.normalizeSpace(docNumGeneral); }
+    public void setDocNumGeneral(String docNumGeneral) { docNumGeneral = StringUtils.normalizeSpace(docNumGeneral); }
 
     public void setDocumentType(String theDocumentType) { this.document_type = StringUtils.normalizeSpace(theDocumentType); }
 
@@ -287,9 +279,7 @@ public class HeaderMedicalItem {
 
     public void setFullMedics(List<PersonMedical> fMedics) { fullMedics = fMedics; }
 
-    public void setFullPatients(List<PersonMedical> fPatients) {
-        fullPatients = fPatients;
-    }
+    public void setFullPatients(List<PersonMedical> fPatients) { fullPatients = fPatients; }
 
     public void setFullAffiliations(List<Affiliation> full) {
         fullAffiliations = full;
@@ -356,16 +346,16 @@ public class HeaderMedicalItem {
         web = web.replace(" ", "");
     }
 
-    public void setFax(String fax) {
-        fax = fax;
+    public void setFax(String f) {
+        fax = f;
     }
 
-    public void setOriginalMedics(String originalMedics) {
-        originalMedics = originalMedics;
+    public void setOriginalMedics(String medic) {
+        originalMedics = medic;
     }
 
-    public void setOriginalPatients(String originalPatients) {
-        originalPatients = originalMedics;
+    public void setOriginalPatients(String patient) {
+        originalPatients = patient;
     }
 
     /**
@@ -713,17 +703,85 @@ public class HeaderMedicalItem {
     }
 
     /**
-     * Create the TEI encoding for the medic+affiliation block for the current biblio object.
+     * Create the TEI encoding for the medic+affiliation block for the current header object.
      */
     public String toTEIMedicBlock(int nbTag) {
         return toTEIMedicBlock(nbTag, GrobidAnalysisConfig.defaultInstance());
     }
 
     /**
-     * Create the TEI encoding for the medic+affiliation block for the current biblio object.
+     * Create the TEI encoding for the medic+affiliation block for the current header object.
      */
     public String toTEIMedicBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
+        if (medics != null || affiliation != null || address != null ||
+            phone != null || fax != null || email != null || web != null ||
+            org != null) {
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("<listPerson type=\"medics\">\n");
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<medic>").append("\n");
+            if(medics != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append(TextUtilities.HTMLEncode(medics) + "\n");
+            }
+
+            if(org != null){
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<org>").append("\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append(TextUtilities.HTMLEncode(org) + "\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("</org>\n");
+            }
+
+
+            TextUtilities.appendN(tei, '\t', nbTag + 2);
+            tei.append("<affiliation>").append("\n");
+            if(affiliation != null){
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append(TextUtilities.HTMLEncode(affiliation) + "\n");
+            }
+            if(address != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("<address>").append("\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 4);
+                tei.append("<addrLine>").append("\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 5);
+                tei.append(TextUtilities.HTMLEncode(address) + "\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 4);
+                tei.append("</addrLine>").append("\n");
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("</address>").append("\n");
+            }
+            if(phone != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("<phone>" + TextUtilities.HTMLEncode(phone.replaceAll("\\n", "")) + "</phone>\n");
+            }
+            if(fax != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("<fax>" + TextUtilities.HTMLEncode(fax.replaceAll("\\n", "")) + "</fax>\n");
+            }
+            if(email != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("<email>" + TextUtilities.HTMLEncode(email.replaceAll("\\n", "")) + "</email>\n");
+            }
+            if(web != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append("<web>" + TextUtilities.HTMLEncode(web.replaceAll("\\n", "")) + "</web>\n");
+            }
+            TextUtilities.appendN(tei, '\t', nbTag + 2);
+            tei.append("</affiliation>\n");
+
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("</medic>\n");
+
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("</listPerson>\n");
+
+        }
+        // ===================original version===================
+        /*StringBuffer tei = new StringBuffer();
         int nbmedics = 0;
         int nbAffiliations = 0;
         int nbAddresses = 0;
@@ -734,7 +792,7 @@ public class HeaderMedicalItem {
         }
 
         // uncomment below when collaboration will be concretely added to headers
-        /*
+        *//*
         if ( (collaboration != null) &&
             ( (fullMedics == null) || (fullMedics.size() == 0) ) ) {
             // collaboration plays at the same time the role of medic and affiliation
@@ -753,7 +811,7 @@ public class HeaderMedicalItem {
             tei.append("</medic>").append("\n");
             return tei.toString();
         }
-        */
+        *//*
 
         List<PersonMedical> medics = fullMedics;
 
@@ -881,6 +939,112 @@ public class HeaderMedicalItem {
                 affiliationRank++;
             }
         }
+
+        return tei.toString();
+        */
+
+        return tei.toString();
+    }
+
+    /**
+     * Create the TEI encoding for the patient block for the current header object.
+     */
+    public String toTEIPatientBlock(int nbTag, GrobidAnalysisConfig config) {
+        StringBuffer tei = new StringBuffer();
+        if (patients != null) {
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("<listPerson type=\"patients\">\n");
+
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<patient>").append("\n");
+
+            if(patients != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append(TextUtilities.HTMLEncode(patients) + "\n");
+            }
+
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("</patient>\n");
+
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("</listPerson>\n");
+
+        }
+        // ===================original version===================
+        /*StringBuffer tei = new StringBuffer();
+        int nbpatients = 0;
+        int nbAffiliations = 0;
+        int nbAddresses = 0;
+
+        boolean withCoordinates = false;
+        if (config != null && config.getGenerateTeiCoordinates() != null) {
+            withCoordinates = config.getGenerateTeiCoordinates().contains("persName");
+        }
+
+        List<PersonMedical> patients = fullPatients;
+
+        Lexicon lexicon = Lexicon.getInstance();
+
+        if (patients == null)
+            nbpatients = 0;
+        else
+            nbpatients = patients.size();
+
+        if (patients != null) {
+            if (nbpatients > 0) {
+                int autRank = 0;
+                int contactAut = -1;
+                //check if we have a single patient of contact
+                for (PersonMedical patient : patients) {
+                    if (patient.getAddress() != null) {
+                        if (contactAut == -1)
+                            contactAut = autRank;
+                        else {
+                            contactAut = -1;
+                            break;
+                        }
+                    }
+                    autRank++;
+                }
+                autRank = 0;
+                for (PersonMedical patient : patients) {
+                    if (patient.getLastName() != null) {
+                        if (patient.getLastName().length() < 2)
+                            continue;
+                    }
+
+                    if ((patient.getFirstName() == null) && (patient.getMiddleName() == null) &&
+                        (patient.getLastName() == null)) {
+                        continue;
+                    }
+
+                    TextUtilities.appendN(tei, '\t', nbTag);
+                    tei.append("<patient");
+
+                    if (autRank == contactAut) {
+                        tei.append(" role=\"corresp\">\n");
+                    } else
+                        tei.append(">\n");
+
+                    TextUtilities.appendN(tei, '\t', nbTag + 1);
+
+                    String localString = patient.toTEI(withCoordinates);
+                    localString = localString.replace(" xmlns=\"http://www.tei-c.org/ns/1.0\"", "");
+                    tei.append(localString).append("\n");
+                    if (patient.getAddress() != null) {
+                        TextUtilities.appendN(tei, '\t', nbTag + 1);
+                        tei.append("<address><addrLine>" + TextUtilities.HTMLEncode(patient.getAddress()) + "</addrLine></address>\n");
+                    }
+
+                    TextUtilities.appendN(tei, '\t', nbTag);
+                    tei.append("</patient>\n");
+                    autRank++;
+                }
+            }
+        }
+
+        return tei.toString();*/
+
         return tei.toString();
 
     }

@@ -3,6 +3,7 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.data.HeaderMedicalItem;
+import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.Document;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
@@ -80,24 +81,24 @@ public class EngineMedical extends Engine {
      * Apply a parsing model for the header of a PDF file based on CRF, using
      * dynamic range of pages as header
      *
-     * @param inputFile : the path of the PDF file to be processed
-     * @param result    : header item result
+     * @param inputFile         : the path of the PDF file to be processed
+     * @param resultHeader      : header item result
      * @return the TEI representation of the extracted bibliographical
      * information
      */
-    public String processHeaderMedicalReport(String inputFile, int consolidate, HeaderMedicalItem result) {
-        return processHeaderMedicalReport(inputFile, GrobidAnalysisConfig.defaultInstance(), result);
+    public String processHeaderMedicalReport(String inputFile, int consolidate, HeaderMedicalItem resultHeader) {
+        return processHeaderMedicalReport(inputFile, GrobidAnalysisConfig.defaultInstance(), resultHeader);
     }
 
-    public String processHeaderMedicalReport(String inputFile, GrobidAnalysisConfig config, HeaderMedicalItem result) {
+    public String processHeaderMedicalReport(String inputFile, GrobidAnalysisConfig config, HeaderMedicalItem resultHeader) {
         // normally the medical items must not be null, but if it is the
         // case, we still continue
         // with a new instance, so that the resulting TEI string is still
         // delivered
-        if (result == null) {
-            result = new HeaderMedicalItem();
+        if (resultHeader == null) {
+            resultHeader = new HeaderMedicalItem();
         }
-        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), result, config);
+        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), resultHeader, config);
         return resultTEI.getLeft();
     }
 

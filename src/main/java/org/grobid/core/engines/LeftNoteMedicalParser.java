@@ -1257,7 +1257,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * Processing Pdf files with the current models using new files located in a given directory.
      */
 
-    public int processHighLevelBatch(String inputDirectory,
+    public int processLeftNoteDirectory(String inputDirectory,
                                      String outputDirectory,
                                      int ind) throws IOException {
         try {

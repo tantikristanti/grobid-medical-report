@@ -178,20 +178,46 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         }
                     }
                 }
-            } 
-			else if (qName.equals("head")) {
+            }
+            else if (qName.equals("head")) {
+                int length = atts.getLength();
+
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
+
+                    if (name != null) {
+                        if (name.equals("level")) {
+                            if (value.equals("1")) {
+                                currentTags.push("<section>");
+                                currentTag = "<section>";
+                            } else if (value.equals("2")) {
+                                currentTags.push("<subsection>");
+                                currentTag = "<subsection>";
+                            } else {
+                                logger.error("Invalid attribute value for element ref: " + name + "=" + value);
+                            }
+                        } else {
+                            logger.error("Invalid attribute name for element ref: " + name);
+                        }
+                    }
+                }
+            }
+            /*else if (qName.equals("head")) {
                 currentTags.push("<section>");
                 currentTag = "<section>";
-            }
+            }*/
             else if (qName.equals("table")) {
                 currentTags.push("<table>");
 				currentTag = "<table>";
             } 
 			else if (qName.equals("item")) {
-//                currentTags.push("<paragraph>");
-//				currentTag = "<paragraph>";
-                currentTags.push("<item>");
-                currentTag = "<item>";
+                currentTags.push("<paragraph>");
+				currentTag = "<paragraph>";
+                /*currentTags.push("<item>");
+                currentTag = "<item>";*/
             } 
 			else if (qName.equals("figure")) {
 	            figureBlock = true;
@@ -229,10 +255,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                 currentTags.push("<other>");
                 currentTag = "<other>";
             }
-            else if (qName.equals("text")) {
-                currentTags.push("<other>");
-                currentTag = "<other>";
-            } else {
+            else {
                 if (!qName.equals("tei") && !qName.equals("teiHeader") && !qName.equals("fileDesc") && !qName.equals("list")) {
                     logger.error("Invalid element name: " + qName + " - it will be mapped to the label <other>");
                     currentTags.push("<other>");
@@ -240,7 +263,6 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                 }
             }
         }
-		
     }
 
     private void writeData(String qName, boolean pop) {

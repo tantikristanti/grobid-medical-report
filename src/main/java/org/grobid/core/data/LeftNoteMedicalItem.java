@@ -802,6 +802,67 @@ public class LeftNoteMedicalItem {
 
     }
 
+    /**
+     * Create the TEI encoding for the patient block for the current left-note object.
+     */
+    public String toTEILeftNoteBlock(int nbTag, GrobidAnalysisConfig config) {
+        StringBuffer tei = new StringBuffer();
+        if (affiliation != null || address != null ||
+            medics != null || org != null || email != null ||
+            phone != null || fax != null || web != null) {
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("<listOrg>\n");
+            if (affiliation != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<org>\n");
+
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<orgName>\n");
+
+                TextUtilities.appendN(tei, '\t', nbTag + 3);
+                tei.append(TextUtilities.HTMLEncode(affiliation) + "\n");
+
+                TextUtilities.appendN(tei, '\t', nbTag +2);
+                tei.append("</orgName>\n");
+
+                if (medics != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<listPerson type=\"medics\">\n");
+                    TextUtilities.appendN(tei, '\t', nbTag + 3);
+                    tei.append("<medic>").append("\n");
+                    if (medics != null) {
+                        TextUtilities.appendN(tei, '\t', nbTag + 4);
+                        tei.append(TextUtilities.HTMLEncode(medics) + "\n");
+                    }
+                    TextUtilities.appendN(tei, '\t', nbTag + 3);
+                    tei.append("</medic>\n");
+
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("</listPerson>\n");
+                }
+
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("</org>\n");
+            }
+
+            if (org != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<org>\n");
+
+                if (org != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append(TextUtilities.HTMLEncode(org) + "\n");
+                }
+
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("</org>\n");
+            }
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("</listOrg>\n");
+        }
+        return tei.toString();
+    }
+
     private void appendAffiliation(
         StringBuffer tei,
         int nbTag,

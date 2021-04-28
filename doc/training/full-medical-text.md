@@ -11,6 +11,8 @@ Full-medical-text model attempts to recognize and struture information appearing
 For the full-medical-text model, we use the following TEI elements:
 
 * `<head>` for section titles
+    * `<head level="1">` for sections
+    * `<head level="2">` for subsections
 * `<p>` for paragraphs
 * `<item>` for list items inside lists
 * `<figure>` for figures
@@ -18,6 +20,9 @@ For the full-medical-text model, we use the following TEI elements:
 * `<ref>` markers, for reference to other parts of the document
     * `<ref type="figure">` a pointer to a figure in the document
     * `<ref type="table">` a link to a table in the document
+* `<note>` for headnotes and footnotes that can appear in the body part
+    * `<note place="headnote">` for the page header note
+    * `<note place="footnote">` for the page footer note
 * `<other>` for unknown (yet) part
 
 > Note: It is recommended to study first the existing training documents for the __full-medical-text__ model (`grobid/grobid-medical-report/resources/dataset/full-medical-text`) to see some examples of how these elements should be used.

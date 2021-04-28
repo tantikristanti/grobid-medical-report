@@ -30,6 +30,7 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
     private static final String COMMAND_PROCESS_HEADER  = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
+    private static final String COMMAND_PROCESS_FULL_TEXT = "processFulltextMedical";
 
     private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
 
@@ -43,6 +44,7 @@ public class GrobidMedicalReportMain {
         COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
+        COMMAND_PROCESS_FULL_TEXT,
         COMMAND_BOOTSTRAP_TRAINING_PDF
     );
 
@@ -107,8 +109,11 @@ public class GrobidMedicalReportMain {
         help.append("-gH: gives the path to grobid home directory.\n");
         help.append("-dIn: gives the path to the directory where the files to be processed are located, to be used only when the called method needs it.\n");
         help.append("-dOut: gives the path to the directory where the result files will be saved. The default output directory is the curent directory.\n");
-        help.append("-s: is the parameter used for process using string as input and not file.\n");
         help.append("-r: recursive directory processing, default processing is not recursive.\n");
+        help.append("-ignoreAssets: do not extract and save the PDF assets (bitmaps, vector graphics), by default the assets are extracted and saved.\n");
+        help.append("-teiCoordinates: output a subset of the identified structures with coordinates in the original PDF, by default no coordinates are present.\n");
+        help.append("-segmentSentences: add sentence segmentation level structures for paragraphs in the TEI XML result, by default no sentence segmentation is done.\n");
+        help.append("-s: is the parameter used for process using string as input and not file.\n");
         help.append("-exe: gives the command to execute. The value should be one of these:\n");
         help.append("\t" + availableCommands + "\n");
         return help.toString();
@@ -164,6 +169,22 @@ public class GrobidMedicalReportMain {
                     i++;
                     continue;
                 }
+                if (currArg.equals("-r")) {
+                    gbdArgs.setRecursive(true);
+                    continue;
+                }
+                if (currArg.equals("-ignoreAssets")) {
+                    gbdArgs.setSaveAssets(false);
+                    continue;
+                }
+                if (currArg.equals("-teiCoordinates")) {
+                    gbdArgs.setTeiCoordinates(true);
+                    continue;
+                }
+                if (currArg.equals("-segmentSentences")) {
+                    gbdArgs.setSegmentSentences(true);
+                    continue;
+                }
                 if (currArg.equals("-exe")) {
                     final String command = pArgs[i + 1];
                     if (availableCommands.contains(command)) {
@@ -176,10 +197,7 @@ public class GrobidMedicalReportMain {
                         break;
                     }
                 }
-                if (currArg.equals("-r")) {
-                    gbdArgs.setRecursive(true);
-                    continue;
-                }
+
             }
         }
         return result;
@@ -213,9 +231,12 @@ public class GrobidMedicalReportMain {
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER_HIGH_LEVEL)) {
                 nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
-                nb = parsers.getHeaderMedicalParser().processingHeaderUserBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getHeaderMedicalParser().processHeaderDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
-                nb = parsers.getLeftNoteMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getLeftNoteMedicalParser().processLeftNoteDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_FULL_TEXT)) {
+                nb = parsers.getLFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
+                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(),  gbdArgs.getSegmentSentences(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");
             }

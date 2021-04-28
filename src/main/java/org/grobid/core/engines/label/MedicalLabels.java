@@ -26,7 +26,8 @@ public class MedicalLabels extends TaggingLabels {
     public static final String ANNEX_LABEL = "<annex>";
 
     // grobid-medical-report specific labels
-    public final static String DOCNUM_LABEL = "<idno>";
+    public final static String DOCNUM_LABEL = "<docnum>";
+    public static final String DOCTYPE_LABEL = "<doctype>";
     public final static String TITLE_LABEL = "<title>";
     public final static String DATE_LABEL = "<date>";
     public final static String DATELINE_LABEL = "<dateline>";

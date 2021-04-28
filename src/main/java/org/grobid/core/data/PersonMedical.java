@@ -35,6 +35,7 @@ public class PersonMedical {
     private List<String> affiliationMarkers = null;
     private List<String> markers = null;
 
+    private String address = null;
     private String email = null;
     private String phone = null;
     private String fax = null;
@@ -162,6 +163,10 @@ public class PersonMedical {
         markers.add(f);
     }
 
+    public String getAddress() { return address; }
+
+    public void setAddress(String add) { address = add; }
+
     public String getEmail() {
         return email;
     }
@@ -209,6 +214,7 @@ public class PersonMedical {
         personMedical.suffix = this.suffix;
         personMedical.rawName = this.rawName;
         personMedical.corresp = this.corresp;
+        personMedical.address = this.address;
         personMedical.email = this.email;
         personMedical.phone = this.phone;
         personMedical.fax = this.fax;
@@ -241,6 +247,9 @@ public class PersonMedical {
             res += suffix;
         if (email != null) {
             res += " (email:" + email + ")";
+        }
+        if (address != null) {
+            res += " (address:" + address + ")";
         }
         if (affiliations != null) {
             for(Affiliation aff : affiliations) {
@@ -735,6 +744,9 @@ public class PersonMedical {
                                     localPerson.addMarker(marker);
                             }
                         }
+
+                        if (localPerson.getAddress() == null)
+                            localPerson.setAddress(otherPerson.getAddress());
 
                         if (localPerson.getEmail() == null)
                             localPerson.setEmail(otherPerson.getEmail());
