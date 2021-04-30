@@ -814,16 +814,16 @@ public class LeftNoteMedicalItem {
             tei.append("<listOrg>\n");
             if (affiliation != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("<org>\n");
+                tei.append("<institution>\n");
 
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<orgName>\n");
+                tei.append("<affiliation>\n");
 
                 TextUtilities.appendN(tei, '\t', nbTag + 3);
                 tei.append(TextUtilities.HTMLEncode(affiliation) + "\n");
 
                 TextUtilities.appendN(tei, '\t', nbTag +2);
-                tei.append("</orgName>\n");
+                tei.append("</affiliation>\n");
 
                 if (medics != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
@@ -832,7 +832,7 @@ public class LeftNoteMedicalItem {
                     tei.append("<medic>").append("\n");
                     if (medics != null) {
                         TextUtilities.appendN(tei, '\t', nbTag + 4);
-                        tei.append(TextUtilities.HTMLEncode(medics) + "\n");
+                        tei.append(TextUtilities.HTMLEncode(medics.replaceAll("\n", " ")) + "\n");
                     }
                     TextUtilities.appendN(tei, '\t', nbTag + 3);
                     tei.append("</medic>\n");
@@ -842,7 +842,7 @@ public class LeftNoteMedicalItem {
                 }
 
                 TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("</org>\n");
+                tei.append("</institution>\n");
             }
 
             if (org != null) {
