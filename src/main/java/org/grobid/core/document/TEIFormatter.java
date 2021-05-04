@@ -978,6 +978,7 @@ public class TEIFormatter {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 curDiv = teiElement("div");
                 Element head = teiElement("head");
+                head.addAttribute(new Attribute("level", "1"));
                 // section numbers
                 org.grobid.core.utilities.Pair<String, String> numb = getSectionNumber(clusterContent);
                 if (numb != null) {
@@ -1005,6 +1006,7 @@ public class TEIFormatter {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 curDiv = teiElement("div");
                 Element head = teiElement("head");
+                head.addAttribute(new Attribute("level", "2"));
                 // section numbers
                 org.grobid.core.utilities.Pair<String, String> numb = getSectionNumber(clusterContent);
                 if (numb != null) {
