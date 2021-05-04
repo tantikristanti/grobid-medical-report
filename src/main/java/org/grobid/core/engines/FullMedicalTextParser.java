@@ -12,17 +12,18 @@ import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.engines.tagging.GenericTaggerUtils;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
 import org.grobid.core.features.FeaturesVectorFullMedicalText;
-import org.grobid.core.lang.Language;
 import org.grobid.core.layout.*;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
-import org.grobid.core.utilities.*;
+import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.KeyGen;
+import org.grobid.core.utilities.LayoutTokensUtil;
+import org.grobid.core.utilities.TextUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,8 +104,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
             Pair<String, LayoutTokenization> featSeg = null;
 
-            // using the segmentation model to identify the header zones
-            parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,false);
+            // using the segmentation model to identify the header and left-note zones
+            parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, false);
 
             // The commented part below makes use of the PDF embedded metadata (the so-called XMP) if available 
             // as fall back to set author and title if they have not been found. 
@@ -158,11 +159,10 @@ public class FullMedicalTextParser extends AbstractParser {
             if (featSeg != null && isNotBlank(featSeg.getLeft())) {
                 // if featSeg is null, it usually means that no body segment is found in the
                 // document segmentation
-                String bodytext = featSeg.getLeft();
+                String bodytext = featSeg.getLeft(); // features of body tokens
                 layoutTokenization = featSeg.getRight();
-                //tokenizationsBody = featSeg.getB().getTokenization();
-                //layoutTokensBody = featSeg.getB().getLayoutTokens();
 
+                // labeling the featured tokens of the body part
                 resultBody = label(bodytext);
 
                 // we apply now the figure and table models based on the fulltext labeled output
@@ -985,7 +985,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.close();
 
                     // training data for FIGURES --> check it later
-                    /*Pair<String, String> trainingFigure = processTrainingDataFigures(rese, tokenizationsBody, inputFile.getName());
+                    /*Pair<String, String> trainingFigure = createTrainingDataFigures(rese, tokenizationsBody, inputFile.getName());
                     if (trainingFigure.getLeft().trim().length() > 0) {
                         String outPathFigures = pathFullText + File.separator
                             + pdfFileName.replace(".pdf", ".training.figure");
@@ -1001,7 +1001,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
 
                     // training data for TABLES --> check it later
-                   /* Pair<String, String> trainingTable = processTrainingDataTables(rese, tokenizationsBody, inputFile.getName());
+                   /* Pair<String, String> trainingTable = createTrainingDataTables(rese, tokenizationsBody, inputFile.getName());
                     if (trainingTable.getLeft().trim().length() > 0) {
                         String outPathTables = pathFullText + File.separator
                             + pdfFileName.replace(".pdf", ".training.table");
@@ -1452,7 +1452,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     output = writeField(buffer, s1, lastTag0, s2, "<footnote>",
                         "<note place=\"footnote\">", addSpace, 3, false);
                 }
-                // for item we must distinguish starting and closing tags
+                // for items we must distinguish starting and closing tags
                 if (!output) {
                     output = writeFieldBeginEnd(buffer, s1, lastTag, s2, "<item>",
                         "<item>", addSpace, 3, false);
@@ -1641,9 +1641,9 @@ public class FullMedicalTextParser extends AbstractParser {
                 res = true;
 
             } else if (lastTag0.equals("<section>")) {
-                buffer.append("<head level=\"1\">\n\n");
+                buffer.append("</head>\n\n");
             } else if (lastTag0.equals("<subsection>")) {
-                buffer.append("<head level=\"2\">\n\n");
+                buffer.append("</head>\n\n");
             } else if (lastTag0.equals("<table>")) {
                 buffer.append("</figure>\n\n");
             } else if (lastTag0.equals("<figure>")) {
@@ -1711,15 +1711,15 @@ public class FullMedicalTextParser extends AbstractParser {
      * Create training data for the figures as identified by the full text model.
      * Return the pair (TEI fragment, CRF raw data).
      */
-    private Pair<String, String> processTrainingDataFigures(String rese,
-                                                            List<LayoutToken> tokenizations, String id) {
+    private Pair<String, String> createTrainingDataFigures(String rese,
+                                                           List<LayoutToken> tokenizations, String id) {
         StringBuilder tei = new StringBuilder();
         StringBuilder featureVector = new StringBuilder();
         int nb = 0;
         StringTokenizer st1 = new StringTokenizer(rese, "\n");
         boolean openFigure = false;
         StringBuilder figureBlock = new StringBuilder();
-        List<LayoutToken> tokenizationsFigure = new ArrayList<LayoutToken>();
+        List<LayoutToken> tokenizationsFigure = new ArrayList<>();
         List<LayoutToken> tokenizationsBuffer = null;
         int p = 0; // position in tokenizations
         int i = 0;
@@ -1729,7 +1729,7 @@ public class FullMedicalTextParser extends AbstractParser {
             String token = s[0].trim();
             int p0 = p;
             boolean strop = false;
-            tokenizationsBuffer = new ArrayList<LayoutToken>();
+            tokenizationsBuffer = new ArrayList<>();
             while ((!strop) && (p < tokenizations.size())) {
                 String tokOriginal = tokenizations.get(p).getText().trim();
                 if (openFigure)
@@ -1755,24 +1755,22 @@ public class FullMedicalTextParser extends AbstractParser {
             String plainLabel = GenericTaggerUtils.getPlainLabel(label);
             if (label.equals("<figure>") || ((label.equals("I-<figure>") && !openFigure))) {
                 if (!openFigure) {
-                    for (LayoutToken lTok : tokenizationsBuffer) {
-                        tokenizationsFigure.add(lTok);
-                    }
                     openFigure = true;
+                    tokenizationsFigure.addAll(tokenizationsBuffer);
                 }
                 // we remove the label in the CRF row
                 int ind = row.lastIndexOf("\t");
-                figureBlock.append(row.substring(0, ind)).append("\n");
+                figureBlock.append(row, 0, ind).append("\n");
             } else if (label.equals("I-<figure>") || openFigure) {
-                // remove last token
+                // remove last tokens
                 if (tokenizationsFigure.size() > 0) {
                     int nbToRemove = tokenizationsBuffer.size();
                     for (int q = 0; q < nbToRemove; q++)
                         tokenizationsFigure.remove(tokenizationsFigure.size() - 1);
                 }
                 // parse the recognized figure area
-                //System.out.println(tokenizationsFigure.toString());
-                //System.out.println(figureBlock.toString());
+//System.out.println(tokenizationsFigure.toString());
+//System.out.println(figureBlock.toString());
                 //adjustment
                 if ((p != tokenizations.size()) && (tokenizations.get(p).getText().equals("\n") ||
                     tokenizations.get(p).getText().equals("\r") ||
@@ -1788,7 +1786,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 // process the "accumulated" figure
                 Pair<String, String> trainingData = parsers.getFigureParser()
                     .createTrainingData(tokenizationsFigure, figureBlock.toString(), "Fig" + nb);
-                tokenizationsFigure = new ArrayList<LayoutToken>();
+                tokenizationsFigure = new ArrayList<>();
                 figureBlock = new StringBuilder();
                 if (trainingData != null) {
                     if (tei.length() == 0) {
@@ -1801,9 +1799,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
 
                 if (label.equals("I-<figure>")) {
-                    for (LayoutToken lTok : tokenizationsBuffer) {
-                        tokenizationsFigure.add(lTok);
-                    }
+                    tokenizationsFigure.addAll(tokenizationsBuffer);
                     int ind = row.lastIndexOf("\t");
                     figureBlock.append(row.substring(0, ind)).append("\n");
                 } else {
@@ -1812,6 +1808,25 @@ public class FullMedicalTextParser extends AbstractParser {
                 nb++;
             } else
                 openFigure = false;
+        }
+
+        // If there still an open figure
+        if (openFigure) {
+            while ((tokenizationsFigure.size() > 0) &&
+                (tokenizationsFigure.get(0).getText().equals("\n") ||
+                    tokenizationsFigure.get(0).getText().equals(" ")))
+                tokenizationsFigure.remove(0);
+
+            // process the "accumulated" figure
+            Pair<String, String> trainingData = parsers.getFigureParser()
+                .createTrainingData(tokenizationsFigure, figureBlock.toString(), "Fig" + nb);
+            if (tei.length() == 0) {
+                tei.append(parsers.getFigureParser().getTEIHeader(id)).append("\n\n");
+            }
+            if (trainingData.getLeft() != null)
+                tei.append(trainingData.getLeft()).append("\n\n");
+            if (trainingData.getRight() != null)
+                featureVector.append(trainingData.getRight()).append("\n\n");
         }
 
         if (tei.length() != 0) {
@@ -1869,8 +1884,8 @@ public class FullMedicalTextParser extends AbstractParser {
      * Create training data for the table as identified by the full text model.
      * Return the pair (TEI fragment, CRF raw data).
      */
-    private Pair<String, String> processTrainingDataTables(String rese,
-                                                           List<LayoutToken> tokenizations, String id) {
+    private Pair<String, String> createTrainingDataTables(String rese,
+                                                          List<LayoutToken> tokenizations, String id) {
         StringBuilder tei = new StringBuilder();
         StringBuilder featureVector = new StringBuilder();
         int nb = 0;
@@ -1912,18 +1927,16 @@ public class FullMedicalTextParser extends AbstractParser {
             int ll = s.length;
             String label = s[ll - 1];
             String plainLabel = GenericTaggerUtils.getPlainLabel(label);
-            if (label.equals("<table>") || (label.equals("I-<table>") && !openTable)) {
+            if (label.equals("<table>") || ((label.equals("I-<table>") && !openTable))) {
                 if (!openTable) {
-                    for (LayoutToken lTok : tokenizationsBuffer) {
-                        tokenizationsTable.add(lTok);
-                    }
                     openTable = true;
+                    tokenizationsTable.addAll(tokenizationsBuffer);
                 }
                 // we remove the label in the CRF row
                 int ind = row.lastIndexOf("\t");
                 tableBlock.append(row.substring(0, ind)).append("\n");
             } else if (label.equals("I-<table>") || openTable) {
-                // remove last token
+                // remove last tokens
                 if (tokenizationsTable.size() > 0) {
                     int nbToRemove = tokenizationsBuffer.size();
                     for (int q = 0; q < nbToRemove; q++)
@@ -1931,7 +1944,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
                 // parse the recognized table area
 //System.out.println(tokenizationsTable.toString());
-//System.out.println(tableBlock.toString()); 
+//System.out.println(tableBlock.toString());
                 //adjustment
                 if ((p != tokenizations.size()) && (tokenizations.get(p).getText().equals("\n") ||
                     tokenizations.get(p).getText().equals("\r") ||
@@ -1946,7 +1959,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                 // process the "accumulated" table
                 Pair<String, String> trainingData = parsers.getTableParser().createTrainingData(tokenizationsTable, tableBlock.toString(), "Fig" + nb);
-                tokenizationsTable = new ArrayList<LayoutToken>();
+                tokenizationsTable = new ArrayList<>();
                 tableBlock = new StringBuilder();
                 if (trainingData != null) {
                     if (tei.length() == 0) {
@@ -1969,6 +1982,25 @@ public class FullMedicalTextParser extends AbstractParser {
                 openTable = false;
         }
 
+        // If there still an open table
+        if (openTable) {
+            while ((tokenizationsTable.size() > 0) &&
+                (tokenizationsTable.get(0).getText().equals("\n") ||
+                    tokenizationsTable.get(0).getText().equals(" ")))
+                tokenizationsTable.remove(0);
+
+            // process the "accumulated" figure
+            Pair<String, String> trainingData = parsers.getTableParser()
+                .createTrainingData(tokenizationsTable, tableBlock.toString(), "Fig" + nb);
+            if (tei.length() == 0) {
+                tei.append(parsers.getTableParser().getTEIHeader(id)).append("\n\n");
+            }
+            if (trainingData.getLeft() != null)
+                tei.append(trainingData.getLeft()).append("\n\n");
+            if (trainingData.getRight() != null)
+                featureVector.append(trainingData.getRight()).append("\n\n");
+        }
+
         if (tei.length() != 0) {
             tei.append("\n    </text>\n" +
                 "</tei>\n");
@@ -1978,7 +2010,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
 
     /**
-     * Create the TEI representation for a document based on the parsed header, references
+     * Create the TEI representation for a document based on the parsed header, left-note
      * and body sections.
      */
     private void toTEI(Document doc,
@@ -1998,7 +2030,7 @@ public class FullMedicalTextParser extends AbstractParser {
         StringBuilder tei;
         try {
             // header  and left-note
-            tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote,null, config);
+            tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
 
             //System.out.println(rese);
             //int mode = config.getFulltextProcessingMode();
@@ -2204,7 +2236,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 tei.append(result);
                 writer.write(tei.toString());
                 writer.close();
-            }else if (recursive && inputFile.isDirectory()) {
+            } else if (recursive && inputFile.isDirectory()) {
                 File[] newFiles = inputFile.listFiles();
                 if (newFiles != null) {
                     for (final File file : newFiles) {
