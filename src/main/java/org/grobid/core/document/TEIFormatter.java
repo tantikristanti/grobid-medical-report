@@ -1101,6 +1101,11 @@ public class TEIFormatter {
             lastClusterLabel = cluster.getTaggingLabel();
         }
 
+        // in case we segment paragraph into sentences, we still need to do it for the last paragraph
+        if (curParagraph != null && config.isWithSentenceSegmentation()) {
+            segmentIntoSentences(curParagraph, curParagraphTokens, config, doc.getLanguage());
+        }
+
         // remove possibly empty div in the div list
         if (divResults.size() != 0) {
             for (int i = divResults.size() - 1; i >= 0; i--) {
