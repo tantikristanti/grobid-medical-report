@@ -1193,8 +1193,8 @@ public class TEIFormatter {
                 // for readability in another conditional
                 if (((Element) theNode).getLocalName().equals("ref")) {
                     // map character offset of the node
-                    mapRefNodes.put(new Integer(pos), theNode);
-                    refPositions.add(new Integer(pos));
+                    mapRefNodes.put(pos, theNode);
+                    refPositions.add(pos);
 
                     String chunk = theNode.getValue();
                     forbiddenPositions.add(new OffsetPosition(pos, pos+chunk.length()));
@@ -1296,7 +1296,7 @@ System.out.println(theSentences.toString());
                     continue;
 
                 if (refPos >= pos+posInSentence && refPos <= pos+sentenceLength) {
-                    Node valueNode = mapRefNodes.get(new Integer(refPos));
+                    Node valueNode = mapRefNodes.get(refPos);
                     if (pos+posInSentence < refPos)
                         sentenceElement.appendChild(text.substring(pos+posInSentence, refPos));
                     valueNode.detach();
