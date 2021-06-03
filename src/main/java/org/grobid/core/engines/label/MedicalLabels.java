@@ -118,6 +118,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel FIGURE_MARKER = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, FIGURE_MARKER_LABEL);
     public static final TaggingLabel PARAGRAPH = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, PARAGRAPH_LABEL);
     public static final TaggingLabel ITEM = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, ITEM_LABEL);
+    public static final TaggingLabel TITLE = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, TITLE_LABEL);
     public static final TaggingLabel SECTION = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, SECTION_LABEL);
     public static final TaggingLabel SUB_SECTION = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, SUB_SECTION_LABEL);
     public static final TaggingLabel FIGURE = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, FIGURE_LABEL);
@@ -185,6 +186,7 @@ public class MedicalLabels extends TaggingLabels {
         register(FIGURE_MARKER);
         register(PARAGRAPH);
         register(ITEM);
+        register(TITLE);
         register(SECTION);
         register(FIGURE);
         register(TABLE);

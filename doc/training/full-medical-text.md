@@ -10,6 +10,7 @@ Full-medical-text model attempts to recognize and struture information appearing
 
 For the full-medical-text model, we use the following TEI elements:
 
+* `<titlePart>` for the document title (that appears in the body part)
 * `<head>` for section titles
     * `<head level="1">` for sections
     * `<head level="2">` for subsections
@@ -30,6 +31,28 @@ For the full-medical-text model, we use the following TEI elements:
 The following sections will give examples for each of the objects above and how they should be marked up. Note that the mark-up follows nearly overall the [TEI](http://www.tei-c.org).
 
 ## Analysis
+
+### Title
+
+Title encoding is realized following the TEI inline scheme:
+
+```xml
+    <docTitle>
+        <titlePart>Compte-rendu de consultation<lb/></titlePart>
+    </docTitle>
+```
+
+Subtitles are labeled similarly as a title but as an independent field. It's important to keep a break (in term of XML tagging) between the main title and possible subtitles, even if there are next to each other in the text stream.
+
+Running titles are not labeled at all.
+
+```xml
+    <address>Villejuif, France<lb/></address>
+
+    Running title: HBsAg quantification in anti-HBs positive HBV carriers<lb/>
+```
+
+In the case of an article written in non-English language having an additional English title as a translation of the original title, we annotate the English title with a tag `<note type="english-title">`.
 
 ### Section titles
 

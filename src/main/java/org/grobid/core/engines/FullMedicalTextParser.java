@@ -1437,6 +1437,10 @@ public class FullMedicalTextParser extends AbstractParser {
                         "<ref type=\"figure\">", addSpace, 3, false);
                 }
                 if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<title>",
+                        "<docTitle>\n\t<titlePart>", addSpace, 3, false);
+                }
+                if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<section>",
                         "<head level=\"1\">", addSpace, 3, false);
                 }
@@ -1640,6 +1644,8 @@ public class FullMedicalTextParser extends AbstractParser {
                 buffer.append("</p>\n\n");
                 res = true;
 
+            } else if (lastTag0.equals("<title>")) {
+                buffer.append("</titlePart>\n\t</docTitle>\n");
             } else if (lastTag0.equals("<section>")) {
                 buffer.append("</head>\n\n");
             } else if (lastTag0.equals("<subsection>")) {

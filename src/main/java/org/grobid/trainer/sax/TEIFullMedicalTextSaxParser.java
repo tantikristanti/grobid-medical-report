@@ -179,6 +179,10 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                     }
                 }
             }
+            else if (qName.equals("title")) {
+                currentTags.push("<title>");
+                currentTag = "<title>";
+            }
             else if (qName.equals("head")) {
                 int length = atts.getLength();
 
@@ -266,8 +270,8 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
     }
 
     private void writeData(String qName, boolean pop) {
-        if ( (qName.equals("other")) || (qName.equals("p")) || 
-                (qName.equals("ref")) || (qName.equals("head")) ||
+        if ( (qName.equals("other")) || (qName.equals("p")) || (qName.equals("title")) ||
+            (qName.equals("ref")) || (qName.equals("head")) ||
                 (qName.equals("figure")) ||  (qName.equals("table")) ||
                 (qName.equals("paragraph")) || (qName.equals("div")) ||
                 (qName.equals("item")) || (qName.equals("note"))

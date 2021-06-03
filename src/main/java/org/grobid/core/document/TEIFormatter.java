@@ -974,7 +974,12 @@ public class TEIFormatter {
 
             TaggingLabel clusterLabel = cluster.getTaggingLabel();
             Engine.getCntManager().i(clusterLabel);
-            if (clusterLabel.equals(MedicalLabels.SECTION)) {
+            if (clusterLabel.equals(MedicalLabels.TITLE)) {
+                String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
+                Element note = teiElement("title", clusterContent);
+                curDiv.appendChild(note);
+            }
+            else if (clusterLabel.equals(MedicalLabels.SECTION)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 curDiv = teiElement("div");
                 Element head = teiElement("head");
