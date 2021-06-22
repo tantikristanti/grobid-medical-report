@@ -1,9 +1,11 @@
 package org.grobid.trainer;
 
-import org.grobid.core.GrobidMedicalReportModels;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportProperties;
+import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.trainer.sax.TEIFullMedicalTextSaxParser;
 
@@ -17,57 +19,48 @@ import java.util.StringTokenizer;
 /**
  * The class for training body part of medical reports.
  * This class is taken and adapted from the class FulltextTrainer class (@author Patrice Lopez)
- *
+ * <p>
  * Tanti, 2021
  */
-public class FullMedicalTextTrainer extends AbstractTrainer{
+public class FullMedicalTextTrainer extends AbstractTrainer {
 
     public FullMedicalTextTrainer() {
-        super(GrobidMedicalReportModels.FULL_MEDICAL_TEXT);
-
-        // adjusting CRF training parameters for this model (only with Wapiti)
-        epsilon = 0.0001;
-        window = 20;
-        nbMaxIterations = 1500;
+        super(GrobidModels.FULL_MEDICAL_TEXT);
     }
 
     @Override
     public int createCRFPPData(File corpusPath, File outputFile) {
         return addFeaturesFullText(corpusPath.getAbsolutePath() + "/tei",
-                corpusPath + "/raw", outputFile, null, 1.0);
+            corpusPath + "/raw", outputFile, null, 1.0);
     }
 
-	/**
-	 * Add the selected features to a full text example set 
-	 * 
-	 * @param corpusDir
-	 *            a path where corpus files are located
-	 * @param trainingOutputPath
-	 *            path where to store the temporary training data
-	 * @param evalOutputPath
-	 *            path where to store the temporary evaluation data
-	 * @param splitRatio
-	 *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80% 
-	 * @return the total number of used corpus items 
-	 */
-	@Override
-	public int createCRFPPData(final File corpusDir, 
-							final File trainingOutputPath, 
-							final File evalOutputPath, 
-							double splitRatio) {
+    /**
+     * Add the selected features to a full text example set
+     *
+     * @param corpusDir          a path where corpus files are located
+     * @param trainingOutputPath path where to store the temporary training data
+     * @param evalOutputPath     path where to store the temporary evaluation data
+     * @param splitRatio         ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @return the total number of used corpus items
+     */
+    @Override
+    public int createCRFPPData(final File corpusDir,
+                               final File trainingOutputPath,
+                               final File evalOutputPath,
+                               double splitRatio) {
         return addFeaturesFullText(corpusDir.getAbsolutePath() + "/tei",
-                corpusDir.getAbsolutePath() + "/raw",
-                trainingOutputPath,
-                evalOutputPath,
-                splitRatio);
+            corpusDir.getAbsolutePath() + "/raw",
+            trainingOutputPath,
+            evalOutputPath,
+            splitRatio);
     }
 
     public int addFeaturesFullText(String sourceTEIPathLabel,
-                                    String sourceRawPathLabel,
-                                    final File trainingOutputPath,
-                                    final File evalOutputPath,
-                                    double splitRatio) {
-		int totalExamples = 0;
+                                   String sourceRawPathLabel,
+                                   final File trainingOutputPath,
+                                   final File evalOutputPath,
+                                   double splitRatio) {
+        int totalExamples = 0;
         try {
             System.out.println("sourceTEIPathLabel: " + sourceTEIPathLabel);
             System.out.println("sourceRawPathLabel: " + sourceRawPathLabel);
@@ -117,7 +110,7 @@ public class FullMedicalTextTrainer extends AbstractTrainer{
                 LOGGER.info("Processing: " + name);
 
                 TEIFullMedicalTextSaxParser parser2 = new TEIFullMedicalTextSaxParser();
-            
+
                 //get a new instance of parser
                 SAXParser p = spf.newSAXParser();
                 p.parse(tf, parser2);
@@ -141,15 +134,15 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
                 // we can now (try to) add the features
                 // we open the featured file
                 try {
-                    File rawFile = new File(sourceRawPathLabel + File.separator + 
-                                    name.replace(".tei.xml", ""));
+                    File rawFile = new File(sourceRawPathLabel + File.separator +
+                        name.replace(".tei.xml", ""));
                     if (!rawFile.exists()) {
                         LOGGER.error("The raw file does not exist: " + rawFile.getPath());
                         continue;
                     }
 
                     BufferedReader bis = new BufferedReader(
-                            new InputStreamReader(new FileInputStream(
+                        new InputStreamReader(new FileInputStream(
                             rawFile), "UTF8"));
                     int q = 0; // current position in the TEI labeled list
                     StringBuilder fulltext = new StringBuilder();
@@ -172,7 +165,7 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
                             // has been gnerated by a recent version of grobid
                             token = UnicodeUtil.normaliseTextAndRemoveSpaces(token);
                         }
-    //                    boolean found = false;
+                        //                    boolean found = false;
                         // we get the label in the labelled data file for the same token
                         for (int pp = q; pp < labeled.size(); pp++) {
                             String localLine = labeled.get(pp);
@@ -198,7 +191,7 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
                                 nbInvalid++;
                                 // let's reuse the latest tag
                                 if (previousTag != null)
-                                   fulltext.append(line).append(" ").append(previousTag);
+                                    fulltext.append(line).append(" ").append(previousTag);
                                 break;
                             }
                         }
@@ -207,8 +200,8 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
                             break;
                         }
                     }
-                    
-                    bis.close();   
+
+                    bis.close();
 
                     // format with features for sequence tagging...
                     if (nbInvalid < 10) {
@@ -243,43 +236,40 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
         } catch (Exception e) {
             LOGGER.error("An exception occured while running Grobid.", e);
         }
-        return totalExamples;					
-	}
-
-    protected final File getCorpusPath() {
-        return new File(MedicalReportProperties.get("grobid.full.medical.text.corpusPath"));
-    }
-
-    protected final File getTemplatePath() {
-        return new File(MedicalReportProperties.get("grobid.full.medical.text.templatePath"));
+        return totalExamples;
     }
 
     /**
      * Command line execution.
      *
      * @param args Command line arguments.
-     * @throws Exception 
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-    	/*GrobidProperties.getInstance();
-        AbstractTrainer.runTraining(new FullMedicalTextTrainer());
-        System.out.println(AbstractTrainer.runEvaluation(new FullMedicalTextTrainer()));
-        System.exit(0);*/
-
+        MedicalReportConfiguration medicalReportConfiguration = null;
         try {
-            String pGrobidHome = MedicalReportProperties.get("grobid.home");
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+        } catch (Exception e) {
+            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
+        }
+        try {
+            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
-            System.out.println("GROBID_HOME Path =" + GrobidProperties.get_GROBID_HOME_PATH());
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
         } catch (final Exception exp) {
-            System.err.println("GROBID-medical-report initialisation failed: " + exp);
+            System.err.println("grobid-medical-report initialisation failed: " + exp);
             exp.printStackTrace();
         }
 
-        Trainer trainer = new FullMedicalTextTrainer();
+        FullMedicalTextTrainer trainer = new FullMedicalTextTrainer();
+
         AbstractTrainer.runTraining(trainer);
-        AbstractTrainer.runEvaluation(trainer);
+        System.out.println(AbstractTrainer.runEvaluation(trainer));
+
+        System.exit(0);
     }
 }	

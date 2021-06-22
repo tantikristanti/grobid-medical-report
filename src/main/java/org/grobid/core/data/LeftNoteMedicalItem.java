@@ -3,6 +3,7 @@ package org.grobid.core.data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.data.util.ClassicMedicEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
@@ -1165,7 +1166,7 @@ public class LeftNoteMedicalItem {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, labeledResult, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, labeledResult, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         for (TaggingTokenCluster cluster : clusters) {
             if (cluster == null) {

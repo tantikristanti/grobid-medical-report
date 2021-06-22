@@ -3,6 +3,7 @@ package org.grobid.core.engines;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.PersonMedical;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -39,7 +40,7 @@ public class MedicParser {
     private final GenericTagger namesMedicParser;
 
     public MedicParser() {
-        namesMedicParser = TaggerFactory.getTagger(GrobidMedicalReportModels.NAME_MEDIC);
+        namesMedicParser = TaggerFactory.getTagger(GrobidModels.NAME_MEDIC);
     }
     
     /**
@@ -88,7 +89,7 @@ public class MedicParser {
             GenericTagger tagger = namesMedicParser ;
             String res = tagger.label(sequence);
 //System.out.println(res);
-            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.NAME_MEDIC, res, tokens);
+            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.NAME_MEDIC, res, tokens);
             PersonMedical medic = new PersonMedical();
             boolean newMarker = false;
             String currentMarker = null;

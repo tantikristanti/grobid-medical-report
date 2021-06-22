@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.data.Figure;
 import org.grobid.core.data.HeaderMedicalItem;
 import org.grobid.core.data.LeftNoteMedicalItem;
@@ -12,6 +13,7 @@ import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
+import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.engines.tagging.GenericTaggerUtils;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
@@ -41,9 +43,16 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Tanti, 2021
  */
 public class FullMedicalTextParser extends AbstractParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FullMedicalTextParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FullTextParser.class);
 
+    //private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
+
+    //	private String tmpPathName = null;
+//    private Document doc = null;
     protected File tmpPath = null;
+//    private String pathXML = null;
+//	private BiblioItem resHeader = null;
+
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
 
@@ -59,10 +68,9 @@ public class FullMedicalTextParser extends AbstractParser {
     protected EngineMedicalParsers parsers;
 
     /**
-     * TODO some documentation...
      */
     public FullMedicalTextParser(EngineMedicalParsers parsers) {
-        super(GrobidMedicalReportModels.FULL_MEDICAL_TEXT);
+        super(GrobidModels.FULL_MEDICAL_TEXT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
     }
@@ -75,11 +83,21 @@ public class FullMedicalTextParser extends AbstractParser {
         return processing(documentSource, config);
     }
 
+    public Document processing(File inputPdf,
+                               String md5Str,
+                               GrobidAnalysisConfig config) throws Exception {
+        DocumentSource documentSource =
+            DocumentSource.fromPdf(inputPdf, config.getStartPage(), config.getEndPage(),
+                config.getPdfAssetPath() != null, true, false);
+        documentSource.setMD5(md5Str);
+        return processing(documentSource, config);
+    }
+
     /**
      * Machine-learning recognition of the complete full text structures.
      *
      * @param documentSource input
-     * @param config         config
+     * @param config config
      * @return the document object with built TEI
      */
     public Document processing(DocumentSource documentSource,
@@ -914,37 +932,6 @@ public class FullMedicalTextParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            /*String fulltext = //getAllTextFeatured(doc, false);
-                parsers.getMedicalReportParser().getAllLinesFeatured(doc);*/
-            //List<LayoutToken> tokenizations = doc.getTokenizations();
-
-            // we write first the full text untagged (but featurized with segmentation features) --> I need to check it later after concentrating for the body part
-            //writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
-            /*writer.write(fulltext + "\n");
-            writer.close();
-
-            // also write the raw text as seen before segmentation
-            StringBuffer rawtxt = new StringBuffer();
-            for (LayoutToken txtline : tokenizations) {
-                rawtxt.append(txtline.getText());
-            }
-
-            FileUtils.writeStringToFile(outputTextFile, rawtxt.toString(), StandardCharsets.UTF_8);
-
-            if (isNotBlank(fulltext)) {
-                String rese = parsers.getMedicalReportParser().label(fulltext);
-                StringBuffer bufferFulltext = parsers.getMedicalReportParser().trainingExtraction(rese, tokenizations, doc);
-
-                // write the TEI file to reflect the extact layout of the text as extracted from the pdf
-                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
-                    "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"en\">\n");
-
-                writer.write(bufferFulltext.toString());
-                writer.write("\n\t</text>\n</tei>\n");
-                writer.close();
-            }*/
-
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportParser().processing(documentSource,
                 GrobidAnalysisConfig.defaultInstance());
@@ -985,41 +972,41 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.close();
 
                     // training data for FIGURES --> check it later
-                    /*Pair<String, String> trainingFigure = createTrainingDataFigures(rese, tokenizationsBody, inputFile.getName());
-                    if (trainingFigure.getLeft().trim().length() > 0) {
-                        String outPathFigures = pathFullText + File.separator
-                            + pdfFileName.replace(".pdf", ".training.figure");
-                        writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFigures), false), StandardCharsets.UTF_8);
-                        writer.write(trainingFigure.getRight() + "\n\n");
-                        writer.close();
+                    /*Pair<String,String> trainingFigure = processTrainingDataFigures(rese, tokenizationsBody, inputFile.getName());
+    	            if (trainingFigure.getLeft().trim().length() > 0) {
+    		            String outPathFigures = pathFullText + File.separator
+    						+ pdfFileName.replace(".pdf", ".training.figure");
+    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFigures), false), StandardCharsets.UTF_8);
+    		            writer.write(trainingFigure.getRight() + "\n\n");
+    		            writer.close();
 
-                        String outPathFiguresTEI = pathTEI + File.separator
-                            + pdfFileName.replace(".pdf", ".training.figure.tei.xml");
-                        writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFiguresTEI), false), StandardCharsets.UTF_8);
-                        writer.write(trainingFigure.getLeft() + "\n");
-                        writer.close();
-                    }*/
+    					String outPathFiguresTEI = pathTEI + File.separator
+    						+ pdfFileName.replace(".pdf", ".training.figure.tei.xml");
+    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFiguresTEI), false), StandardCharsets.UTF_8);
+    		            writer.write(trainingFigure.getLeft() + "\n");
+    		            writer.close();
+    		        }*/
 
                     // training data for TABLES --> check it later
-                   /* Pair<String, String> trainingTable = createTrainingDataTables(rese, tokenizationsBody, inputFile.getName());
-                    if (trainingTable.getLeft().trim().length() > 0) {
-                        String outPathTables = pathFullText + File.separator
-                            + pdfFileName.replace(".pdf", ".training.table");
-                        writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTables), false), StandardCharsets.UTF_8);
-                        writer.write(trainingTable.getRight() + "\n\n");
-                        writer.close();
+                   /* Pair<String,String> trainingTable = processTrainingDataTables(rese, tokenizationsBody, inputFile.getName());
+    	            if (trainingTable.getLeft().trim().length() > 0) {
+    		            String outPathTables = pathFullText + File.separator
+    						+ pdfFileName.replace(".pdf", ".training.table");
+    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTables), false), StandardCharsets.UTF_8);
+    		            writer.write(trainingTable.getRight() + "\n\n");
+    		            writer.close();
 
-                        String outPathTablesTEI = pathTEI + File.separator
-                            + pdfFileName.replace(".pdf", ".training.table.tei.xml");
-                        writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTablesTEI), false), StandardCharsets.UTF_8);
-                        writer.write(trainingTable.getLeft() + "\n");
-                        writer.close();
-                    }*/
+    					String outPathTablesTEI = pathTEI + File.separator
+    						+ pdfFileName.replace(".pdf", ".training.table.tei.xml");
+    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTablesTEI), false), StandardCharsets.UTF_8);
+    		            writer.write(trainingTable.getLeft() + "\n");
+    		            writer.close();
+    		        }*/
                 }
             }
 
             // HEADER MODEL (I need to check it later after concentrating with body part), the same case for the LEFT-NOTE model
-            /*SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
+            /*SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(SegmentationLabels.HEADER);
             List<LayoutToken> tokenizationsFull = doc.getTokenizations();
             if (documentHeaderParts != null) {
                 List<LayoutToken> headerTokenizations = new ArrayList<LayoutToken>();
@@ -1034,31 +1021,31 @@ public class FullMedicalTextParser extends AbstractParser {
                         headerTokenizations.add(tokenizationsFull.get(i));
                     }
                 }
-                Pair<String, List<LayoutToken>> featuredHeader = parsers.getHeaderMedicalParser().getSectionHeaderFeatured(doc, documentHeaderParts);
-                String header = featuredHeader.getLeft();*/
+                Pair<String, List<LayoutToken>> featuredHeader = parsers.getHeaderParser().getSectionHeaderFeatured(doc, documentHeaderParts);
+                String header = featuredHeader.getLeft();
 
-            //if ((header != null) && (header.trim().length() > 0)) {
-            // we write the header untagged
-                    /*String outPathHeader = pathTEI + File.separator + pdfFileName.replace(".pdf", ".training.header.medical");
+                if ((header != null) && (header.trim().length() > 0)) {
+                    // we write the header untagged
+                    String outPathHeader = pathTEI + File.separator + pdfFileName.replace(".pdf", ".training.header");
                     writer = new OutputStreamWriter(new FileOutputStream(new File(outPathHeader), false), StandardCharsets.UTF_8);
                     writer.write(header + "\n");
                     writer.close();
 
-                    String rese = parsers.getHeaderMedicalParser().label(header);*/
+                    String rese = parsers.getHeaderParser().label(header);
 
-            // buffer for the header block
-                    /*StringBuilder bufferHeader = parsers.getHeaderMedicalParser().trainingExtraction(rese, headerTokenizations);
+                    // buffer for the header block
+                    StringBuilder bufferHeader = parsers.getHeaderParser().trainingExtraction(rese, headerTokenizations);
                     Language lang = LanguageUtilities.getInstance().runLanguageId(bufferHeader.toString());
                     if (lang != null) {
                         doc.setLanguage(lang.getLang());
-                    }*/
+                    }
 
-            // buffer for the affiliation+address block
-                    /*StringBuilder bufferAffiliation =
-                        parsers.getAffiliationAddressParser().trainingExtraction(rese, headerTokenizations);*/
+                    // buffer for the affiliation+address block
+                    StringBuilder bufferAffiliation =
+                            parsers.getAffiliationAddressParser().trainingExtraction(rese, headerTokenizations);
 
-            // buffer for the date block
-                    /*StringBuilder bufferDate = null;
+                    // buffer for the date block
+                    StringBuilder bufferDate = null;
                     // we need to rebuild the found date string as it appears
                     String input = "";
                     int q = 0;
@@ -1083,11 +1070,11 @@ public class FullMedicalTextParser extends AbstractParser {
                         List<String> inputs = new ArrayList<String>();
                         inputs.add(input.trim());
                         bufferDate = parsers.getDateParser().trainingExtraction(inputs);
-                    }*/
+                    }
 
-            // buffer for the name block
-                    /*StringBuilder bufferName = null;
-                    // we need to rebuild the found medic string as it appears
+                    // buffer for the name block
+                    StringBuilder bufferName = null;
+                    // we need to rebuild the found author string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1102,22 +1089,50 @@ public class FullMedicalTextParser extends AbstractParser {
                                 theTotalTok += theTok;
                             }
                         }
-                        if (line.endsWith("<medic>")) {
+                        if (line.endsWith("<author>")) {
                             input += theTotalTok;
                         }
                         q++;
                     }
                     if (input.length() > 1) {
-                        bufferName = parsers.getMedicParser().trainingExtraction(input, true);
-                    }*/
+                        bufferName = parsers.getAuthorParser().trainingExtraction(input, true);
+                    }
 
-            // write the training TEI file for header which reflects the extract layout of the text as
-            // extracted from the pdf
-                    /*writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI + File.separator
-                        + pdfFileName.replace(".pdf", ".training.header.tei.xml")), false), StandardCharsets.UTF_8);
+                    // buffer for the reference block
+                    StringBuilder bufferReference = null;
+                    // we need to rebuild the found citation string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<reference>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+                    if (input.length() > 1) {
+                        List<String> inputs = new ArrayList<String>();
+                        inputs.add(input.trim());
+                        bufferReference = parsers.getCitationParser().trainingExtraction(inputs);
+                    }
+
+                    // write the training TEI file for header which reflects the extract layout of the text as
+                    // extracted from the pdf
+                    writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI + File.separator
+                            + pdfFileName.replace(".pdf", ".training.header.tei.xml")), false), StandardCharsets.UTF_8);
                     writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
-                        + pdfFileName.replace(".pdf", "")
-                        + "\"/>\n\t</teiHeader>\n\t<text");
+                            + pdfFileName.replace(".pdf", "")
+                            + "\"/>\n\t</teiHeader>\n\t<text");
 
                     if (lang != null) {
                         writer.write(" xml:lang=\"" + lang.getLang() + "\"");
@@ -1126,17 +1141,17 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     writer.write(bufferHeader.toString());
                     writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
-                    writer.close();*/
+                    writer.close();
 
-            // AFFILIATION-ADDRESS model
-                    /*if (bufferAffiliation != null) {
+                    // AFFILIATION-ADDRESS model
+                    if (bufferAffiliation != null) {
                         if (bufferAffiliation.length() > 0) {
                             Writer writerAffiliation = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
-                                File.separator
-                                + pdfFileName.replace(".pdf", ".training.header.affiliation.tei.xml")), false), StandardCharsets.UTF_8);
+                                    File.separator
+                                    + pdfFileName.replace(".pdf", ".training.header.affiliation.tei.xml")), false), StandardCharsets.UTF_8);
                             writerAffiliation.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                             writerAffiliation.write("\n<tei xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\""
-                                + " xmlns:xlink=\"http://www.w3.org/1999/xlink\" " + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
+                                    + " xmlns:xlink=\"http://www.w3.org/1999/xlink\" " + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
                             writerAffiliation.write("\n\t<teiHeader>\n\t\t<fileDesc>\n\t\t\t<sourceDesc>");
                             writerAffiliation.write("\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n\t\t\t\t\t\t<author>\n\n");
 
@@ -1153,8 +1168,8 @@ public class FullMedicalTextParser extends AbstractParser {
                     /*if (bufferDate != null) {
                         if (bufferDate.length() > 0) {
                             Writer writerDate = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
-                                File.separator
-                                + pdfFileName.replace(".pdf", ".training.header.date.xml")), false), StandardCharsets.UTF_8);
+                                    File.separator
+                                    + pdfFileName.replace(".pdf", ".training.header.date.xml")), false), StandardCharsets.UTF_8);
                             writerDate.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                             writerDate.write("<dates>\n");
 
@@ -1169,19 +1184,19 @@ public class FullMedicalTextParser extends AbstractParser {
                     /*if (bufferName != null) {
                         if (bufferName.length() > 0) {
                             Writer writerName = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
-                                File.separator
-                                + pdfFileName.replace(".pdf", ".training.header.medics.tei.xml")), false), StandardCharsets.UTF_8);
+                                    File.separator
+                                    + pdfFileName.replace(".pdf", ".training.header.authors.tei.xml")), false), StandardCharsets.UTF_8);
                             writerName.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                             writerName.write("\n<tei xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\"" + " xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
-                                + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
+                                    + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
                             writerName.write("\n\t<teiHeader>\n\t\t<fileDesc>\n\t\t\t<sourceDesc>");
-                            writerName.write("\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n\n\t\t\t\t\t\t<medic>");
+                            writerName.write("\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n\n\t\t\t\t\t\t<author>");
                             writerName.write("\n\t\t\t\t\t\t\t<persName>\n");
 
                             writerName.write(bufferName.toString());
 
                             writerName.write("\t\t\t\t\t\t\t</persName>\n");
-                            writerName.write("\t\t\t\t\t\t</medic>\n\n\t\t\t\t\t</analytic>");
+                            writerName.write("\t\t\t\t\t\t</author>\n\n\t\t\t\t\t</analytic>");
                             writerName.write("\n\t\t\t\t</biblStruct>\n\t\t\t</sourceDesc>\n\t\t</fileDesc>");
                             writerName.write("\n\t</teiHeader>\n</tei>\n");
                             writerName.close();
@@ -1355,9 +1370,11 @@ public class FullMedicalTextParser extends AbstractParser {
                             if (tokOriginal.equals(" ")
                                 || tokOriginal.equals("\u00A0")) {
                                 addSpace = true;
-                            } else if (tokOriginal.equals("\n")) {
+                            }
+                            else if (tokOriginal.equals("\n")) {
                                 newLine = true;
-                            } else if (tokOriginal.equals(s)) {
+                            }
+                            else if (tokOriginal.equals(s)) {
                                 strop = true;
                             }
                             p++;
@@ -1407,6 +1424,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
 
                 boolean output;
+
                 output = writeField(buffer, s1, lastTag0, s2, "<other>",
                     "<note type=\"other\">", addSpace, 3, false);
 
@@ -1482,7 +1500,6 @@ public class FullMedicalTextParser extends AbstractParser {
     }
 
     /**
-     * TODO some documentation...
      *
      * @param buffer   buffer
      * @param s1
@@ -1511,9 +1528,9 @@ public class FullMedicalTextParser extends AbstractParser {
             result = true;
             String divID = null;
             if (generateIDs) {
-                divID = KeyGen.getKey().substring(0, 7);
-                if (outField.charAt(outField.length() - 2) == '>')
-                    outField = outField.substring(0, outField.length() - 2) + " xml:id=\"_" + divID + "\">";
+                divID = KeyGen.getKey().substring(0,7);
+                if (outField.charAt(outField.length()-2) == '>')
+                    outField = outField.substring(0, outField.length()-2) + " xml:id=\"_"+ divID + "\">";
             }
             if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
                 if (addSpace)
@@ -1583,9 +1600,9 @@ public class FullMedicalTextParser extends AbstractParser {
             }
             String divID;
             if (generateIDs) {
-                divID = KeyGen.getKey().substring(0, 7);
-                if (outField.charAt(outField.length() - 2) == '>')
-                    outField = outField.substring(0, outField.length() - 2) + " xml:id=\"_" + divID + "\">";
+                divID = KeyGen.getKey().substring(0,7);
+                if (outField.charAt(outField.length()-2) == '>')
+                    outField = outField.substring(0, outField.length()-2) + " xml:id=\"_"+ divID + "\">";
             }
             if (lastTag0.equals("I-" + field)) {
                 if (addSpace)
@@ -1613,7 +1630,6 @@ public class FullMedicalTextParser extends AbstractParser {
     }
 
     /**
-     * TODO some documentation
      *
      * @param buffer
      * @param currentTag0
@@ -1676,10 +1692,10 @@ public class FullMedicalTextParser extends AbstractParser {
 
         List<Figure> results = new ArrayList<>();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, rese, layoutTokens, true);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULL_MEDICAL_TEXT, rese, layoutTokens, true);
 
         for (TaggingTokenCluster cluster : Iterables.filter(clusteror.cluster(),
-            new TaggingTokenClusteror.LabelTypePredicate(MedicalLabels.FIGURE))) {
+            new TaggingTokenClusteror.LabelTypePredicate(TaggingLabels.FIGURE))) {
             List<LayoutToken> tokenizationFigure = cluster.concatTokens();
             Figure result = parsers.getFigureParser().processing(
                 tokenizationFigure,
@@ -1712,13 +1728,12 @@ public class FullMedicalTextParser extends AbstractParser {
         return results;
     }
 
-
     /**
      * Create training data for the figures as identified by the full text model.
      * Return the pair (TEI fragment, CRF raw data).
      */
-    private Pair<String, String> createTrainingDataFigures(String rese,
-                                                           List<LayoutToken> tokenizations, String id) {
+    protected Pair<String,String> processTrainingDataFigures(String rese,
+                                                             List<LayoutToken> tokenizations, String id) {
         StringBuilder tei = new StringBuilder();
         StringBuilder featureVector = new StringBuilder();
         int nb = 0;
@@ -1729,7 +1744,7 @@ public class FullMedicalTextParser extends AbstractParser {
         List<LayoutToken> tokenizationsBuffer = null;
         int p = 0; // position in tokenizations
         int i = 0;
-        while (st1.hasMoreTokens()) {
+        while(st1.hasMoreTokens()) {
             String row = st1.nextToken();
             String[] s = row.split("\t");
             String token = s[0].trim();
@@ -1757,7 +1772,7 @@ public class FullMedicalTextParser extends AbstractParser {
             }
 
             int ll = s.length;
-            String label = s[ll - 1];
+            String label = s[ll-1];
             String plainLabel = GenericTaggerUtils.getPlainLabel(label);
             if (label.equals("<figure>") || ((label.equals("I-<figure>") && !openFigure))) {
                 if (!openFigure) {
@@ -1771,8 +1786,8 @@ public class FullMedicalTextParser extends AbstractParser {
                 // remove last tokens
                 if (tokenizationsFigure.size() > 0) {
                     int nbToRemove = tokenizationsBuffer.size();
-                    for (int q = 0; q < nbToRemove; q++)
-                        tokenizationsFigure.remove(tokenizationsFigure.size() - 1);
+                    for(int q = 0; q < nbToRemove; q++)
+                        tokenizationsFigure.remove(tokenizationsFigure.size()-1);
                 }
                 // parse the recognized figure area
 //System.out.println(tokenizationsFigure.toString());
@@ -1780,21 +1795,21 @@ public class FullMedicalTextParser extends AbstractParser {
                 //adjustment
                 if ((p != tokenizations.size()) && (tokenizations.get(p).getText().equals("\n") ||
                     tokenizations.get(p).getText().equals("\r") ||
-                    tokenizations.get(p).getText().equals(" "))) {
+                    tokenizations.get(p).getText().equals(" ")) ) {
                     tokenizationsFigure.add(tokenizations.get(p));
                     p++;
                 }
-                while ((tokenizationsFigure.size() > 0) &&
+                while((tokenizationsFigure.size() > 0) &&
                     (tokenizationsFigure.get(0).getText().equals("\n") ||
-                        tokenizationsFigure.get(0).getText().equals(" ")))
+                        tokenizationsFigure.get(0).getText().equals(" ")) )
                     tokenizationsFigure.remove(0);
 
                 // process the "accumulated" figure
-                Pair<String, String> trainingData = parsers.getFigureParser()
+                Pair<String,String> trainingData = parsers.getFigureParser()
                     .createTrainingData(tokenizationsFigure, figureBlock.toString(), "Fig" + nb);
                 tokenizationsFigure = new ArrayList<>();
                 figureBlock = new StringBuilder();
-                if (trainingData != null) {
+                if (trainingData!= null) {
                     if (tei.length() == 0) {
                         tei.append(parsers.getFigureParser().getTEIHeader(id)).append("\n\n");
                     }
@@ -1818,13 +1833,13 @@ public class FullMedicalTextParser extends AbstractParser {
 
         // If there still an open figure
         if (openFigure) {
-            while ((tokenizationsFigure.size() > 0) &&
+            while((tokenizationsFigure.size() > 0) &&
                 (tokenizationsFigure.get(0).getText().equals("\n") ||
-                    tokenizationsFigure.get(0).getText().equals(" ")))
+                    tokenizationsFigure.get(0).getText().equals(" ")) )
                 tokenizationsFigure.remove(0);
 
             // process the "accumulated" figure
-            Pair<String, String> trainingData = parsers.getFigureParser()
+            Pair<String,String> trainingData = parsers.getFigureParser()
                 .createTrainingData(tokenizationsFigure, figureBlock.toString(), "Fig" + nb);
             if (tei.length() == 0) {
                 tei.append(parsers.getFigureParser().getTEIHeader(id)).append("\n\n");
@@ -1849,34 +1864,39 @@ public class FullMedicalTextParser extends AbstractParser {
                                         List<LayoutToken> tokenizations,
                                         Document doc) {
         List<Table> results = new ArrayList<>();
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, rese, tokenizations, true);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULL_MEDICAL_TEXT, rese, tokenizations, true);
 
         for (TaggingTokenCluster cluster : Iterables.filter(clusteror.cluster(),
-            new TaggingTokenClusteror.LabelTypePredicate(MedicalLabels.TABLE))) {
+            new TaggingTokenClusteror.LabelTypePredicate(TaggingLabels.TABLE))) {
             List<LayoutToken> tokenizationTable = cluster.concatTokens();
-            Table result = parsers.getTableParser().processing(
+            List<Table> localResults = parsers.getTableParser().processing(
                 tokenizationTable,
                 cluster.getFeatureBlock()
             );
 
-            SortedSet<Integer> blockPtrs = new TreeSet<>();
-            for (LayoutToken lt : tokenizationTable) {
-                if (!LayoutTokensUtil.spaceyToken(lt.t()) && !LayoutTokensUtil.newLineToken(lt.t())) {
-                    blockPtrs.add(lt.getBlockPtr());
-                }
-            }
-            result.setBlockPtrs(blockPtrs);
-            result.setLayoutTokens(tokenizationTable);
+            for (Table result : localResults) {
+                List<LayoutToken> localTokenizationTable = result.getLayoutTokens();
+                //result.setLayoutTokens(tokenizationTable);
 
-            // the first token could be a space from previous page
-            for (LayoutToken lt : tokenizationTable) {
-                if (!LayoutTokensUtil.spaceyToken(lt.t()) && !LayoutTokensUtil.newLineToken(lt.t())) {
-                    result.setPage(lt.getPage());
-                    break;
+                // block setting: we restrict to the tokenization of this particulart table
+                SortedSet<Integer> blockPtrs = new TreeSet<>();
+                for (LayoutToken lt : localTokenizationTable) {
+                    if (!LayoutTokensUtil.spaceyToken(lt.t()) && !LayoutTokensUtil.newLineToken(lt.t())) {
+                        blockPtrs.add(lt.getBlockPtr());
+                    }
                 }
+                result.setBlockPtrs(blockPtrs);
+
+                // page setting: the first token could be a space from previous page
+                for (LayoutToken lt : localTokenizationTable) {
+                    if (!LayoutTokensUtil.spaceyToken(lt.t()) && !LayoutTokensUtil.newLineToken(lt.t())) {
+                        result.setPage(lt.getPage());
+                        break;
+                    }
+                }
+                results.add(result);
+                result.setId("" + (results.size() - 1));
             }
-            results.add(result);
-            result.setId("" + (results.size() - 1));
         }
 
         doc.setTables(results);
@@ -1890,8 +1910,8 @@ public class FullMedicalTextParser extends AbstractParser {
      * Create training data for the table as identified by the full text model.
      * Return the pair (TEI fragment, CRF raw data).
      */
-    private Pair<String, String> createTrainingDataTables(String rese,
-                                                          List<LayoutToken> tokenizations, String id) {
+    protected Pair<String,String> processTrainingDataTables(String rese,
+                                                            List<LayoutToken> tokenizations, String id) {
         StringBuilder tei = new StringBuilder();
         StringBuilder featureVector = new StringBuilder();
         int nb = 0;
@@ -1902,7 +1922,7 @@ public class FullMedicalTextParser extends AbstractParser {
         List<LayoutToken> tokenizationsBuffer = null;
         int p = 0; // position in tokenizations
         int i = 0;
-        while (st1.hasMoreTokens()) {
+        while(st1.hasMoreTokens()) {
             String row = st1.nextToken();
             String[] s = row.split("\t");
             String token = s[0].trim();
@@ -1931,13 +1951,12 @@ public class FullMedicalTextParser extends AbstractParser {
             }
 
             int ll = s.length;
-            String label = s[ll - 1];
+            String label = s[ll-1];
             String plainLabel = GenericTaggerUtils.getPlainLabel(label);
-            if (label.equals("<table>") || ((label.equals("I-<table>") && !openTable))) {
+            if (label.equals("<table>") || ((label.equals("I-<table>") && !openTable) )) {
                 if (!openTable) {
                     openTable = true;
-                    tokenizationsTable.addAll(tokenizationsBuffer);
-                }
+                    tokenizationsTable.addAll(tokenizationsBuffer);    				    }
                 // we remove the label in the CRF row
                 int ind = row.lastIndexOf("\t");
                 tableBlock.append(row.substring(0, ind)).append("\n");
@@ -1945,8 +1964,8 @@ public class FullMedicalTextParser extends AbstractParser {
                 // remove last tokens
                 if (tokenizationsTable.size() > 0) {
                     int nbToRemove = tokenizationsBuffer.size();
-                    for (int q = 0; q < nbToRemove; q++)
-                        tokenizationsTable.remove(tokenizationsTable.size() - 1);
+                    for(int q=0; q<nbToRemove; q++)
+                        tokenizationsTable.remove(tokenizationsTable.size()-1);
                 }
                 // parse the recognized table area
 //System.out.println(tokenizationsTable.toString());
@@ -1954,20 +1973,20 @@ public class FullMedicalTextParser extends AbstractParser {
                 //adjustment
                 if ((p != tokenizations.size()) && (tokenizations.get(p).getText().equals("\n") ||
                     tokenizations.get(p).getText().equals("\r") ||
-                    tokenizations.get(p).getText().equals(" "))) {
+                    tokenizations.get(p).getText().equals(" ")) ) {
                     tokenizationsTable.add(tokenizations.get(p));
                     p++;
                 }
-                while ((tokenizationsTable.size() > 0) &&
+                while( (tokenizationsTable.size() > 0) &&
                     (tokenizationsTable.get(0).getText().equals("\n") ||
-                        tokenizationsTable.get(0).getText().equals(" ")))
+                        tokenizationsTable.get(0).getText().equals(" ")) )
                     tokenizationsTable.remove(0);
 
                 // process the "accumulated" table
-                Pair<String, String> trainingData = parsers.getTableParser().createTrainingData(tokenizationsTable, tableBlock.toString(), "Fig" + nb);
+                Pair<String,String> trainingData = parsers.getTableParser().createTrainingData(tokenizationsTable, tableBlock.toString(), "Fig"+nb);
                 tokenizationsTable = new ArrayList<>();
                 tableBlock = new StringBuilder();
-                if (trainingData != null) {
+                if (trainingData!= null) {
                     if (tei.length() == 0) {
                         tei.append(parsers.getTableParser().getTEIHeader(id)).append("\n\n");
                     }
@@ -1980,23 +1999,25 @@ public class FullMedicalTextParser extends AbstractParser {
                     tokenizationsTable.addAll(tokenizationsBuffer);
                     int ind = row.lastIndexOf("\t");
                     tableBlock.append(row.substring(0, ind)).append("\n");
-                } else {
+                }
+                else {
                     openTable = false;
                 }
                 nb++;
-            } else
+            }
+            else
                 openTable = false;
         }
 
         // If there still an open table
         if (openTable) {
-            while ((tokenizationsTable.size() > 0) &&
+            while((tokenizationsTable.size() > 0) &&
                 (tokenizationsTable.get(0).getText().equals("\n") ||
-                    tokenizationsTable.get(0).getText().equals(" ")))
+                    tokenizationsTable.get(0).getText().equals(" ")) )
                 tokenizationsTable.remove(0);
 
             // process the "accumulated" figure
-            Pair<String, String> trainingData = parsers.getTableParser()
+            Pair<String,String> trainingData = parsers.getTableParser()
                 .createTrainingData(tokenizationsTable, tableBlock.toString(), "Fig" + nb);
             if (tei.length() == 0) {
                 tei.append(parsers.getTableParser().getTEIHeader(id)).append("\n\n");
@@ -2013,7 +2034,6 @@ public class FullMedicalTextParser extends AbstractParser {
         }
         return Pair.of(tei.toString(), featureVector.toString());
     }
-
 
     /**
      * Create the TEI representation for a document based on the parsed header, left-note
@@ -2079,7 +2099,7 @@ public class FullMedicalTextParser extends AbstractParser {
     private static List<TaggingLabel> inlineFullTextLabels = Arrays.asList(MedicalLabels.TABLE_MARKER, MedicalLabels.FIGURE_MARKER);
 
     public static List<LayoutTokenization> getDocumentFullTextTokens(List<TaggingLabel> labels, String labeledResult, List<LayoutToken> tokenizations) {
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, labeledResult, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULL_MEDICAL_TEXT, labeledResult, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         List<LayoutTokenization> labeledTokenSequences = new ArrayList<LayoutTokenization>();
         LayoutTokenization currentTokenization = null;
@@ -2256,7 +2276,6 @@ public class FullMedicalTextParser extends AbstractParser {
             DocumentSource.close(documentSource, true, true, true);
         }
     }
-
 
     @Override
     public void close() throws IOException {

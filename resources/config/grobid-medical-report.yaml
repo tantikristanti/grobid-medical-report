@@ -1,0 +1,48 @@
+grobidHome: "../grobid-home/"
+
+# path relative to the corpus and template path
+corpusMedicalReportSegmenterPath: "resources/dataset/medical-report-segmenter/corpus"
+templateMedicalReportSegmenterPath: "medical-report-segmenter/crfpp-templates/medical-report-segmenter.template"
+evaluationMedicalReportSegmenterPath: "resources/dataset/medical-report-segmenter/evaluation"
+
+models:
+  # we configure here how each sequence labeling model should be implemented
+  # for feature-engineered CRF, use "wapiti" and possible training parameters are window, epsilon and nbMaxIterations
+  # for Deep Learning, use "delft" and select the target DL architecture (see DeLFT library), the training
+  # parameters then depends on this selected DL architecture
+
+  - name: "medical-report-segmenter"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.0000001
+      window: 50
+      nbMaxIterations: 2000
+
+  - name: "full-medical-text"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.0001
+      window: 20
+      nbMaxIterations: 1500
+
+  - name: "header-medical-report"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 30
+      nbMaxIterations: 1500
+
+
+  - name: "left-note-medical-report"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 30
+      nbMaxIterations: 1500
+

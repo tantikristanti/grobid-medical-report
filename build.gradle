@@ -2,35 +2,37 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
+        //jcenter()
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
     }
     dependencies {
-        classpath group: 'net.researchgate', name: 'gradle-release', version: '2.8.1'
+        //classpath group: 'net.researchgate', name: 'gradle-release', version: '2.8.1'
         classpath 'gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.10.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
+        //classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath 'com.github.jengelman.gradle.plugins:shadow:6.0.0'
         classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
     }
 }
 
+
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
-    maven { url "https://dl.bintray.com/rookies/maven" }
+    //jcenter()
+    /*maven { url "https://dl.bintray.com/rookies/maven" }
+    maven { url "https://jitpack.io" }
     maven { url "http://oss.jfrog.org/artifactory/libs-snapshot" }
-    maven { url "http://oss.jfrog.org/artifactory/libs-release" }
+    maven { url "http://oss.jfrog.org/artifactory/libs-release" }*/
     flatDir {
         dirs 'localLibs'
     }
 }
 
-apply plugin: 'net.researchgate.release'
+//apply plugin: 'net.researchgate.release'
 apply plugin: 'maven'
-apply plugin: 'com.jfrog.bintray'
+//apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 apply plugin: 'war'
@@ -48,57 +50,63 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-log4j12:1.7.25'
-
     //Unit tests
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.easymock:easymock:4.0.2'
-    testCompile 'org.hamcrest:hamcrest-all:1.3'
-    testCompile group: 'org.easymock', name: 'easymock', version: '3.4'
-    testCompile 'org.powermock:powermock-module-junit4:2.0.2'
-    testCompile 'org.powermock:powermock-api-easymock:2.0.2'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.easymock:easymock:4.0.2'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+    testImplementation group: 'org.easymock', name: 'easymock', version: '3.4'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
+    testImplementation 'org.powermock:powermock-api-easymock:2.0.7'
+    testImplementation 'xmlunit:xmlunit:1.6'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
 
     //GROBID (.m2/repository/org/grobid/)
-    compile 'org.grobid:grobid-core:0.7.0-SNAPSHOT'
-    compile 'org.grobid:grobid-trainer:0.7.0-SNAPSHOT'
-    compile('org.grobid:grobid-service:0.7.0-SNAPSHOT') {
+    implementation 'org.grobid:grobid-core:0.7.0-SNAPSHOT'
+    implementation 'org.grobid:grobid-trainer:0.7.0-SNAPSHOT'
+    implementation ('org.grobid:grobid-service:0.7.0-SNAPSHOT') {
         transitive = false
     }
 
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'com.googlecode.clearnlp:clearnlp:1.3.1'
+
     //Apache commons
-    compile 'org.apache.commons:commons-collections4:4.1'
-    compile 'org.apache.commons:commons-lang3:3.6'
-    compile 'commons-logging:commons-logging:1.2'
-    compile 'commons-io:commons-io:2.6'
-    compile 'commons-pool:commons-pool:1.6'
+    implementation 'org.apache.commons:commons-collections4:4.1'
+    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'commons-logging:commons-logging:1.2'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-pool:commons-pool:1.6'
+    implementation 'org.apache.commons:commons-text:1.8'
+
 
     //Json
-    compile "com.fasterxml.jackson.core:jackson-core:2.10.1"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.10.1"
-    compile "com.fasterxml.jackson.module:jackson-module-afterburner:2.10.1"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.10.1"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
+    implementation "com.fasterxml.jackson.module:jackson-module-afterburner:2.10.1"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.1"
 
     // XML
     implementation 'org.codehaus.woodstox:stax2-api:3.1.4'
     implementation 'com.fasterxml.woodstox:woodstox-core:5.1.0'
 
     // Needed for compatibility with JDK > 8
-    compile 'javax.activation:activation:1.1.1'
+    implementation 'javax.activation:activation:1.1.1'
 
     //Web interface
-    compile 'org.glassfish.jersey.media:jersey-media-multipart:2.27'
-    compile 'org.glassfish.jersey.inject:jersey-hk2:2.27'
-    compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:2.27'
-    compile 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.27'
-    compile 'org.glassfish.jersey.core:jersey-client:2.27'
-    compile 'javax.ws.rs:javax.ws.rs-api:2.1'
+    implementation 'org.glassfish.jersey.media:jersey-media-multipart:2.27'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.27'
+    implementation 'org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:2.27'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.27'
+    implementation 'org.glassfish.jersey.core:jersey-client:2.27'
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1'
 
-    compile 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation 'javax.servlet:javax.servlet-api:3.1.0'
 
-    compile 'javax.activation:activation:1.1.1'
-    compile 'com.google.guava:guava:16.0.1'
+    implementation 'javax.activation:activation:1.1.1'
+    implementation 'com.google.guava:guava:16.0.1'
 
-    compile 'org.jvnet.mimepull:mimepull:1.6'
-    compile 'net.arnx:jsonic:1.3.5'
+    implementation 'org.jvnet.mimepull:mimepull:1.6'
+    implementation 'net.arnx:jsonic:1.3.5'
 }
 
 configurations {
@@ -133,11 +141,11 @@ task integration(type: Test) {
 // Training configuration
 
 def trainerTasks = [
-        //Training models
-        "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
-        "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer",
-        "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer",
-        "train_full_medical_text"               : "org.grobid.trainer.FullMedicalTextTrainer"
+    //Training models
+    "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
+    "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer",
+    "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer",
+    "train_full_medical_text"               : "org.grobid.trainer.FullMedicalTextTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->

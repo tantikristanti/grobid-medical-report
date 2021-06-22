@@ -74,71 +74,71 @@ public class MedicalLabels extends TaggingLabels {
      */
 
     // Medical Report Segmenter Model
-    public static final TaggingLabel HEADER = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, HEADER_LABEL);
-    public static final TaggingLabel HEADNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, HEADNOTE_LABEL);
-    public static final TaggingLabel FOOTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, FOOTNOTE_LABEL);
-    public static final TaggingLabel MARGINNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, MARGINNOTE_LABEL);
-    public static final TaggingLabel LEFTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, LEFTNOTE_LABEL);
-    public static final TaggingLabel RIGHTNOTE = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, RIGHTNOTE_LABEL);
-    public static final TaggingLabel BODY = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, BODY_LABEL);
-    public static final TaggingLabel PAGE_NUMBER = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, PAGE_NUMBER_LABEL);
-    public static final TaggingLabel ACKNOWLEDGEMENT = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, ACKNOWLEDGEMENT_LABEL);
-    public static final TaggingLabel ANNEX = new TaggingLabelImpl(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER, ANNEX_LABEL);
+    public static final TaggingLabel HEADER = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, HEADER_LABEL);
+    public static final TaggingLabel HEADNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, HEADNOTE_LABEL);
+    public static final TaggingLabel FOOTNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, FOOTNOTE_LABEL);
+    public static final TaggingLabel MARGINNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, MARGINNOTE_LABEL);
+    public static final TaggingLabel LEFTNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, LEFTNOTE_LABEL);
+    public static final TaggingLabel RIGHTNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, RIGHTNOTE_LABEL);
+    public static final TaggingLabel BODY = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, BODY_LABEL);
+    public static final TaggingLabel PAGE_NUMBER = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, PAGE_NUMBER_LABEL);
+    public static final TaggingLabel ACKNOWLEDGEMENT = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, ACKNOWLEDGEMENT_LABEL);
+    public static final TaggingLabel ANNEX = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, ANNEX_LABEL);
 
     // Header Medical Report Model
-    public static final TaggingLabel HEADER_DOCNUM = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, DOCNUM_LABEL);
-    public static final TaggingLabel HEADER_TITLE = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, TITLE_LABEL);
-    public static final TaggingLabel HEADER_DATE = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, DATE_LABEL);
-    public static final TaggingLabel HEADER_TIME = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, TIME_LABEL);
-    public static final TaggingLabel HEADER_DATELINE = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, DATELINE_LABEL);
-    public static final TaggingLabel HEADER_MEDIC = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, MEDIC_LABEL);
-    public static final TaggingLabel HEADER_PATIENT = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, PATIENT_LABEL);
-    public static final TaggingLabel HEADER_AFFILIATION = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, AFFILIATION_LABEL);
-    public static final TaggingLabel HEADER_ADDRESS = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, ADDRESS_LABEL);
-    public static final TaggingLabel HEADER_ORG = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, ORG_ABEL);
-    public static final TaggingLabel HEADER_EMAIL = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, EMAIL_LABEL);
-    public static final TaggingLabel HEADER_PHONE = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, PHONE_LABEL);
-    public static final TaggingLabel HEADER_FAX = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, FAX_LABEL);
-    public static final TaggingLabel HEADER_WEB = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, WEB_LABEL);
-    public static final TaggingLabel HEADER_DOCTYPE = new TaggingLabelImpl(GrobidMedicalReportModels.HEADER_MEDICAL_REPORT, DOCTYPE_LABEL);
+    public static final TaggingLabel HEADER_DOCNUM = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, DOCNUM_LABEL);
+    public static final TaggingLabel HEADER_TITLE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, TITLE_LABEL);
+    public static final TaggingLabel HEADER_DATE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, DATE_LABEL);
+    public static final TaggingLabel HEADER_TIME = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, TIME_LABEL);
+    public static final TaggingLabel HEADER_DATELINE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, DATELINE_LABEL);
+    public static final TaggingLabel HEADER_MEDIC = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, MEDIC_LABEL);
+    public static final TaggingLabel HEADER_PATIENT = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, PATIENT_LABEL);
+    public static final TaggingLabel HEADER_AFFILIATION = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, AFFILIATION_LABEL);
+    public static final TaggingLabel HEADER_ADDRESS = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, ADDRESS_LABEL);
+    public static final TaggingLabel HEADER_ORG = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, ORG_ABEL);
+    public static final TaggingLabel HEADER_EMAIL = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, EMAIL_LABEL);
+    public static final TaggingLabel HEADER_PHONE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, PHONE_LABEL);
+    public static final TaggingLabel HEADER_FAX = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, FAX_LABEL);
+    public static final TaggingLabel HEADER_WEB = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, WEB_LABEL);
+    public static final TaggingLabel HEADER_DOCTYPE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, DOCTYPE_LABEL);
 
     // Left-Note Medical Report Model
-    public static final TaggingLabel LEFT_NOTE_DOCNUM = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, DOCNUM_LABEL);
-    public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
-    public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
-    public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
-    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, ORG_ABEL);
-    public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
-    public static final TaggingLabel LEFT_NOTE_PHONE = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, PHONE_LABEL);
-    public static final TaggingLabel LEFT_NOTE_FAX = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, FAX_LABEL);
-    public static final TaggingLabel LEFT_NOTE_WEB = new TaggingLabelImpl(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, WEB_LABEL);
+    public static final TaggingLabel LEFT_NOTE_DOCNUM = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DOCNUM_LABEL);
+    public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
+    public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
+    public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
+    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_ABEL);
+    public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
+    public static final TaggingLabel LEFT_NOTE_PHONE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, PHONE_LABEL);
+    public static final TaggingLabel LEFT_NOTE_FAX = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, FAX_LABEL);
+    public static final TaggingLabel LEFT_NOTE_WEB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, WEB_LABEL);
 
     // Full medical model
-    public static final TaggingLabel TABLE_MARKER = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, TABLE_MARKER_LABEL);
-    public static final TaggingLabel FIGURE_MARKER = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, FIGURE_MARKER_LABEL);
-    public static final TaggingLabel PARAGRAPH = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, PARAGRAPH_LABEL);
-    public static final TaggingLabel ITEM = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, ITEM_LABEL);
-    public static final TaggingLabel TITLE = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, TITLE_LABEL);
-    public static final TaggingLabel SECTION = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, SECTION_LABEL);
-    public static final TaggingLabel SUB_SECTION = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, SUB_SECTION_LABEL);
-    public static final TaggingLabel FIGURE = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, FIGURE_LABEL);
-    public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
+    public static final TaggingLabel TABLE_MARKER = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_MARKER_LABEL);
+    public static final TaggingLabel FIGURE_MARKER = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, FIGURE_MARKER_LABEL);
+    public static final TaggingLabel PARAGRAPH = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, PARAGRAPH_LABEL);
+    public static final TaggingLabel ITEM = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, ITEM_LABEL);
+    public static final TaggingLabel TITLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TITLE_LABEL);
+    public static final TaggingLabel SECTION = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, SECTION_LABEL);
+    public static final TaggingLabel SUB_SECTION = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, SUB_SECTION_LABEL);
+    public static final TaggingLabel FIGURE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, FIGURE_LABEL);
+    public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
 
     // Medical personnel names
-    public static final TaggingLabel NAMES_MEDIC_MARKER = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, MARKER_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_TITLE = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, TITLE_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_FORENAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_MIDDLENAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_MEDIC, SUFFIX_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_MARKER = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, MARKER_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_TITLE = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, TITLE_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_FORENAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, FORENAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, MIDDLENAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SURNAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SUFFIX_LABEL);
 
     // Names
-    public static final TaggingLabel NAMES_PATIENT_MARKER = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, MARKER_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, TITLE_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_FORENAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_MIDDLENAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SURNAME = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SUFFIX = new TaggingLabelImpl(GrobidMedicalReportModels.NAME_PATIENT, SUFFIX_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_MARKER = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, MARKER_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, TITLE_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_FORENAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, FORENAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, MIDDLENAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_SURNAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, SURNAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_SUFFIX = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, SUFFIX_LABEL);
 
     static {
         // medical-report-segmenter

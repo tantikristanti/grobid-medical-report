@@ -76,7 +76,8 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             currentTag = null;
             upperTag = null;
         } else if (qName.equals("note") ||
-            qName.equals("page")) {
+            qName.equals("page") ||
+            qName.equals("pages")) {
             currentTag = upperTag;
         }
     }
@@ -178,8 +179,8 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             surfaceTag = "<other>";
         }
         if ((qName.equals("front")) || (qName.equals("note")) ||
-            (qName.equals("page")) || (qName.equals("body")) ||
-            (qName.equals("div")) || (qName.equals("other"))
+            (qName.equals("page")) || (qName.equals("pages")) ||
+            (qName.equals("body")) || (qName.equals("div")) || (qName.equals("other"))
         ) {
             String text = getText();
             text = text.replace("\n", " ");

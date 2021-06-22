@@ -1,12 +1,13 @@
 package org.grobid.trainer;
 
-import org.grobid.core.GrobidMedicalReportModels;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportProperties;
+import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
-import org.grobid.trainer.evaluation.EvaluationUtilities;
 import org.grobid.trainer.sax.TEILeftNoteMedicalSaxParser;
 
 import javax.xml.parsers.SAXParser;
@@ -27,12 +28,7 @@ import java.util.StringTokenizer;
 public class LeftNoteMedicalReportTrainer extends AbstractTrainer {
 
     public LeftNoteMedicalReportTrainer() {
-        super(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT);
-
-        // adjusting CRF training parameters for this model (only with Wapiti)
-        epsilon = 0.000001;
-        window = 30;
-        nbMaxIterations = 1500;
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
     }
 
 
@@ -294,80 +290,36 @@ public class LeftNoteMedicalReportTrainer extends AbstractTrainer {
     }
 
     /**
-     * Standard evaluation via the the usual Grobid evaluation framework.
-     */
-    public String evaluate() {
-        File evalDataF = GrobidProperties.getInstance().getEvalCorpusPath(
-            new File(new File("resources").getAbsolutePath()), model);
-
-        File tmpEvalPath = getTempEvaluationDataPath();
-        createCRFPPData(evalDataF, tmpEvalPath);
-
-        return EvaluationUtilities.evaluateStandard(tmpEvalPath.getAbsolutePath(), getTagger()).toString();
-    }
-
-    public String splitTrainEvaluate(Double split, boolean random) {
-        System.out.println("Paths :\n" + getCorpusPath() + "\n" + GrobidProperties.getModelPath(model).getAbsolutePath() + "\n" + getTempTrainingDataPath().getAbsolutePath() + "\n" + getTempEvaluationDataPath().getAbsolutePath() + " \nrand " + random);
-
-        File trainDataPath = getTempTrainingDataPath();
-        File evalDataPath = getTempEvaluationDataPath();
-
-        final File dataPath = trainDataPath;
-        createCRFPPData(getCorpusPath(), dataPath, evalDataPath, split);
-        GenericTrainer trainer = TrainerFactory.getTrainer();
-
-        if (epsilon != 0.0)
-            trainer.setEpsilon(epsilon);
-        if (window != 0)
-            trainer.setWindow(window);
-        if (nbMaxIterations != 0)
-            trainer.setNbMaxIterations(nbMaxIterations);
-
-        final File tempModelPath = new File(GrobidProperties.getModelPath(model).getAbsolutePath() + NEW_MODEL_EXT);
-        final File oldModelPath = GrobidProperties.getModelPath(model);
-
-        trainer.train(getTemplatePath(), dataPath, tempModelPath, GrobidProperties.getNBThreads(), model);
-
-        // if we are here, that means that training succeeded
-        renameModels(oldModelPath, tempModelPath);
-
-        return EvaluationUtilities.evaluateStandard(evalDataPath.getAbsolutePath(), getTagger()).toString();
-    }
-
-    protected final File getCorpusPath() {
-        return new File(MedicalReportProperties.get("grobid.left.note.medical.report.corpusPath"));
-    }
-
-    protected final File getTemplatePath() {
-        return new File(MedicalReportProperties.get("grobid.left.note.medical.report.templatePath"));
-    }
-
-    /**
      * Command line execution.
      *
      * @param args Command line arguments.
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        /*GrobidProperties.getInstance();
-        AbstractTrainer.runTraining(new LeftNoteMedicalReportTrainer());
-        System.out.println(AbstractTrainer.runEvaluation(new LeftNoteMedicalReportTrainer()));
-        System.exit(0);*/
-
+        MedicalReportConfiguration medicalReportConfiguration = null;
         try {
-            String pGrobidHome = MedicalReportProperties.get("grobid.home");
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+        } catch (Exception e) {
+            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
+        }
+        try {
+            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
-            System.out.println("GROBID_HOME Path =" + GrobidProperties.get_GROBID_HOME_PATH());
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
         } catch (final Exception exp) {
-            System.err.println("GROBID-medical-report initialisation failed: " + exp);
+            System.err.println("grobid-medical-report initialisation failed: " + exp);
             exp.printStackTrace();
         }
 
-        Trainer trainer = new LeftNoteMedicalReportTrainer();
+        LeftNoteMedicalReportTrainer trainer = new LeftNoteMedicalReportTrainer();
+
         AbstractTrainer.runTraining(trainer);
-        AbstractTrainer.runEvaluation(trainer);
+        System.out.println(AbstractTrainer.runEvaluation(trainer));
+
+        System.exit(0);
     }
 }

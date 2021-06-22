@@ -1,10 +1,15 @@
 package org.grobid.core.main.batch;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.engines.EngineMedicalParsers;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
+import org.grobid.core.utilities.GrobidConfig;
 import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.MedicalReportProperties;
+import org.grobid.core.utilities.GrobidConfig.ModelParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +26,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class GrobidMedicalReportMain {
     private static Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportMain.class);
 
-    private static final String COMMAND_PROCESS_TEXT = "processText";
-    private static final String COMMAND_PROCESS_PDF = "processPDF";
     private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
     private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
     private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
@@ -32,11 +35,9 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
     private static final String COMMAND_PROCESS_FULL_TEXT = "processFulltextMedical";
 
-    private static final String COMMAND_BOOTSTRAP_TRAINING_PDF = "bootstrapTrainingPDF";
+
 
     private static List<String> availableCommands = Arrays.asList(
-        COMMAND_PROCESS_TEXT,
-        COMMAND_PROCESS_PDF,
         COMMAND_CREATE_TRAINING_SEGMENTATION,
         COMMAND_CREATE_TRAINING_HEADER,
         COMMAND_CREATE_TRAINING_LEFT_NOTE,
@@ -44,14 +45,14 @@ public class GrobidMedicalReportMain {
         COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
-        COMMAND_PROCESS_FULL_TEXT,
-        COMMAND_BOOTSTRAP_TRAINING_PDF
+        COMMAND_PROCESS_FULL_TEXT
     );
 
     /**
      * Arguments of the batch.
      */
     private static GrobidMainArgs gbdArgs;
+
 
     /**
      * Build the path to grobid.properties from the path to grobid-home.
@@ -69,7 +70,15 @@ public class GrobidMedicalReportMain {
     protected static void inferParamsNotSet() {
         String tmpFilePath;
         if (gbdArgs.getPath2grobidHome() == null) {
-            tmpFilePath = MedicalReportProperties.get("grobid.home");
+            MedicalReportConfiguration medicalReportConfiguration = null;
+            try {
+                ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+            } catch(Exception e) {
+                LOGGER.error("The config file does not appear valid, see resources/config/grobid-medical-report.yaml", e);
+            }
+
+            tmpFilePath = medicalReportConfiguration.getGrobidHome();
 
             if (tmpFilePath == null) {
                 tmpFilePath = new File("grobid-home").getAbsolutePath();
@@ -82,13 +91,13 @@ public class GrobidMedicalReportMain {
     }
 
     /**
-     * Initialize the batch.
+     * Initialize the batch (using previous GrobidProperties configuration).
      */
-    protected static void initProcess() {
+    /*protected static void initProcess() {
         GrobidProperties.getInstance();
-    }
+    }*/
 
-    protected static void initProcess(String grobidHome) {
+    /*protected static void initProcess(String grobidHome) {
         try {
             final GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(grobidHome));
             grobidHomeFinder.findGrobidHomeOrFail();
@@ -96,6 +105,37 @@ public class GrobidMedicalReportMain {
             LibraryLoader.load();
         } catch (final Exception exp) {
             System.err.println("Grobid initialisation failed: " + exp);
+        }
+    }*/
+
+    /**
+     * Init process with the provided grobid-home or  default value of the grobid home
+     *
+     * @param grobidHome
+     */
+    protected static void initProcess(String grobidHome) {
+        MedicalReportConfiguration medicalReportConfiguration = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+        } catch (Exception e) {
+            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
+        }
+        try {
+            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+
+            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
+            GrobidProperties.getInstance(grobidHomeFinder);
+
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
+
+            for (ModelParameters theModel : medicalReportConfiguration.getModels())
+                GrobidProperties.getInstance().addModel(theModel);
+
+            LibraryLoader.load();
+        } catch (final Exception exp) {
+            System.err.println("grobid-medical-report initialisation failed: " + exp);
+            exp.printStackTrace();
         }
     }
 
@@ -197,7 +237,6 @@ public class GrobidMedicalReportMain {
                         break;
                     }
                 }
-
             }
         }
         return result;
@@ -212,7 +251,7 @@ public class GrobidMedicalReportMain {
                 initProcess(gbdArgs.getPath2grobidHome());
             } else {
                 LOGGER.warn("Grobid home not provided, using default. ");
-                initProcess();
+                initProcess(null);
             }
 
             int nb = 0;

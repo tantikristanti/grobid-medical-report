@@ -84,7 +84,7 @@ public class LeftNoteMedicalReportTrainerRunner {
                 if (i + 1 == args.length) {
                     throw new IllegalStateException("Missing Threads number. ");
                 }
-                GrobidProperties.getInstance().setNBThreads(args[i + 1]);
+                GrobidProperties.getInstance().setWapitiNbThreads(Integer.parseInt(args[i + 1]));
             } else if (args[i].equals("-s")) {
                 if (i + 1 == args.length) {
                     throw new IllegalStateException("Missing split ratio value. ");

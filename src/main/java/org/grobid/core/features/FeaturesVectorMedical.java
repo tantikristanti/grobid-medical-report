@@ -5,15 +5,15 @@ import org.grobid.core.utilities.TextUtilities;
 
 /**
  * This class contains feature vectors of medical report segmenter model.
- *
+ * <p>
  * Tanti, 2020
  */
 public class FeaturesVectorMedical {
     public LayoutToken token = null; // not a feature, reference value
-	public String line = null; // not a feature, the complete processed line
+    public String line = null; // not a feature, the complete processed line
 
     public String string = null; // first lexical feature
-	public String secondString = null; // second lexical feature
+    public String secondString = null; // second lexical feature
     public String label = null; // label if known
     public String blockStatus = null; // one of BLOCKSTART, BLOCKIN, BLOCKEND
     public String lineStatus = null; // one of LINESTART, LINEIN, LINEEND
@@ -38,11 +38,11 @@ public class FeaturesVectorMedical {
     public String punctType = null; // one of NOPUNCT, OPENBRACKET, ENDBRACKET, DOT, COMMA, HYPHEN, QUOTE, PUNCT (default)
     public int relativeDocumentPosition = -1;
     public int relativePagePosition = -1;
-	public int relativePagePositionChar = -1; // not used
-	public String punctuationProfile = null; // the punctuations of the current line of the token
-	public boolean firstPageBlock = false;
-	public boolean lastPageBlock = false;
-	public int lineLength = 0;
+    public int relativePagePositionChar = -1; // not used
+    public String punctuationProfile = null; // the punctuations of the current line of the token
+    public boolean firstPageBlock = false;
+    public boolean lastPageBlock = false;
+    public int lineLength = 0;
     public boolean bitmapAround = false;
     public boolean vectorAround = false;
     public boolean inMainArea = true;
@@ -61,11 +61,11 @@ public class FeaturesVectorMedical {
         // token string (1)
         res.append(string);
 
-		// second token string
-		if (secondString != null)
-			res.append(" " + secondString);
-		else
-			res.append(" " + string);
+        // second token string
+        if (secondString != null)
+            res.append(" " + secondString);
+        else
+            res.append(" " + string);
 
         // lowercase string
         res.append(" " + string.toLowerCase());
@@ -77,13 +77,13 @@ public class FeaturesVectorMedical {
         res.append(" " + TextUtilities.prefix(string, 4));
 
         // block information (1)
-		if (blockStatus != null)
-			res.append(" " + blockStatus);
+        if (blockStatus != null)
+            res.append(" " + blockStatus);
         //res.append(" 0");
 
         // line information (1)
-		if (lineStatus != null)
-			res.append(" " + lineStatus);
+        if (lineStatus != null)
+            res.append(" " + lineStatus);
 
         // line alignment/identation information (1)
         //res.append(" " + alignmentStatus);
@@ -134,6 +134,7 @@ public class FeaturesVectorMedical {
         else
             res.append(" 0");
 
+        /* TODO: to review, never set! */
         if (firstName)
             res.append(" 1");
         else
@@ -160,8 +161,8 @@ public class FeaturesVectorMedical {
             res.append(" 0");
 
         // punctuation information (1)
-		if (punctType != null)
-			res.append(" " + punctType); // in case the token is a punctuation (NO otherwise)
+        if (punctType != null)
+            res.append(" " + punctType); // in case the token is a punctuation (NO otherwise)
 
         // relative document position (1)
         res.append(" " + relativeDocumentPosition);
@@ -172,22 +173,21 @@ public class FeaturesVectorMedical {
         // relative page position characters (1)
         res.append(" " + relativePagePositionChar);
 
-		// punctuation profile
-		if ( (punctuationProfile == null) || (punctuationProfile.length() == 0) ) {
-			// string profile
-			res.append(" no");
-			// number of punctuation symbols in the line
-			res.append(" 0");
-		}
-		else {
-			// string profile
-			res.append(" " + punctuationProfile);
-			// number of punctuation symbols in the line
-			res.append(" "+punctuationProfile.length());
-		}
+        // punctuation profile
+        if ((punctuationProfile == null) || (punctuationProfile.length() == 0)) {
+            // string profile
+            res.append(" no");
+            // number of punctuation symbols in the line
+            res.append(" 0");
+        } else {
+            // string profile
+            res.append(" " + punctuationProfile);
+            // number of punctuation symbols in the line
+            res.append(" " + punctuationProfile.length());
+        }
 
-		// current line length on a predefined scale and relative to the longest line of the current block
-		res.append(" " + lineLength);
+        // current line length on a predefined scale and relative to the longest line of the current block
+        res.append(" " + lineLength);
 
         if (bitmapAround) {
             res.append(" 1");

@@ -3,6 +3,7 @@ package org.grobid.core.engines;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.*;
@@ -59,7 +60,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     protected EngineMedicalParsers parsers;
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         // GrobidProperties.getInstance();
@@ -67,7 +68,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     }
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers) {
-        super(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT);
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
@@ -663,7 +664,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem medical, Document doc) {
 
         TaggingLabel lastClusterLabel = null;
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
 
         String tokenLabel = null;
         List<TaggingTokenCluster> clusters = clusteror.cluster();

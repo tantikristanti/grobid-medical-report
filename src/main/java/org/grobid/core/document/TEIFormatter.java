@@ -9,6 +9,7 @@ import nu.xom.Node;
 import nu.xom.Text;
 
 import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.data.*;
 import org.grobid.core.data.Date;
 import org.grobid.core.document.xml.XmlBuilderUtils;
@@ -120,7 +121,6 @@ public class TEIFormatter {
         }
 
         // by default there is no schema association
-
         if (schemaDeclaration != SchemaDeclaration.XSD) {
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
         }
@@ -359,28 +359,22 @@ public class TEIFormatter {
             tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
         }
         if (schemaDeclaration == SchemaDeclaration.DTD) {
-            tei.append("<!DOCTYPE TEI SYSTEM \"" + GrobidProperties.get_GROBID_HOME_PATH()
-                + "/schemas/dtd/Grobid.dtd" + "\">\n");
+            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.XSD) {
             // XML schema
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
                 "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/xsd/Grobid.xsd\"" +
-                "\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+                SCHEMA_XSD_LOCATION +
+                "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+//				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
-            tei.append("<?xml-model href=\"file://" +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/rng/Grobid.rng" +
+            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
                 "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
-        } else if (schemaDeclaration == SchemaDeclaration.RNC) {
-            // compact RelaxNG
-            tei.append("<?xml-model href=\"file://" +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/rng/Grobid.rnc" +
-                "\" type=\"application/relax-ng-compact-syntax\"?>\n");
         }
-        // by default there is no schema association
 
+        // by default there is no schema association
         if (schemaDeclaration != SchemaDeclaration.XSD) {
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
         }
@@ -611,7 +605,7 @@ public class TEIFormatter {
         return toTEILeftNote(biblio, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
     }
 
-    public StringBuilder toTEILeftNote(LeftNoteMedicalItem biblio,
+    public StringBuilder toTEILeftNote(LeftNoteMedicalItem leftNoteMedicalItem,
                                        SchemaDeclaration schemaDeclaration,
                                        String defaultPublicationStatement,
                                        List<BibDataSet> bds,
@@ -622,31 +616,22 @@ public class TEIFormatter {
             tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
         }
         if (schemaDeclaration == SchemaDeclaration.DTD) {
-            tei.append("<!DOCTYPE TEI SYSTEM \"" + GrobidProperties.get_GROBID_HOME_PATH()
-                + "/schemas/dtd/Grobid.dtd" + "\">\n");
+            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.XSD) {
             // XML schema
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                //"\n xsi:noNamespaceSchemaLocation=\"" +
-                //GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/xsd/Grobid.xsd\""	+
                 "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/xsd/Grobid.xsd\"" +
-                "\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+                SCHEMA_XSD_LOCATION +
+                "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
 //				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
-            tei.append("<?xml-model href=\"file://" +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/rng/Grobid.rng" +
+            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
                 "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
-        } else if (schemaDeclaration == SchemaDeclaration.RNC) {
-            // compact RelaxNG
-            tei.append("<?xml-model href=\"file://" +
-                GrobidProperties.get_GROBID_HOME_PATH() + "/schemas/rng/Grobid.rnc" +
-                "\" type=\"application/relax-ng-compact-syntax\"?>\n");
         }
-        // by default there is no schema association
 
+        // by default there is no schema association
         if (schemaDeclaration != SchemaDeclaration.XSD) {
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
         }
@@ -664,21 +649,21 @@ public class TEIFormatter {
         }
         tei.append(">");
 
-        if (biblio == null) {
+        if (leftNoteMedicalItem == null) {
             // if the biblio object is null, we simply create an empty one
-            biblio = new LeftNoteMedicalItem();
+            leftNoteMedicalItem = new LeftNoteMedicalItem();
         }
 
-        if ((biblio.getInstitution() != null)) {
+        if ((leftNoteMedicalItem.getInstitution() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
-            if (biblio.getInstitution() != null) {
-                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(biblio.getInstitution()) +
+            if (leftNoteMedicalItem.getInstitution() != null) {
+                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(leftNoteMedicalItem.getInstitution()) +
                     "</institution>\n");
 
                 tei.append("\t\t\t\t<availability status=\"unknown\">");
                 tei.append("<p>Copyright ");
                 //if (biblio.getPublicationDate() != null)
-                tei.append(TextUtilities.HTMLEncode(biblio.getInstitution()) + "</p>\n");
+                tei.append(TextUtilities.HTMLEncode(leftNoteMedicalItem.getInstitution()) + "</p>\n");
                 tei.append("\t\t\t\t</availability>\n");
             } else {
                 // a dummy publicationStmt is still necessary according to TEI
@@ -706,7 +691,7 @@ public class TEIFormatter {
         //biblio.attachEmails();
         //biblio.attachAffiliations();
 
-        tei.append(biblio.toTEIMedicBlock(6, config));
+        tei.append(leftNoteMedicalItem.toTEIMedicBlock(6, config));
 
         tei.append("\t\t\t\t\t</analytic>\n");
         tei.append("\t\t\t\t\t<monogr>\n");
@@ -952,7 +937,7 @@ public class TEIFormatter {
 
         List<LayoutToken> tokenizations = layoutTokenization.getTokenization();
 
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidMedicalReportModels.FULL_MEDICAL_TEXT, result, tokenizations);
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULL_MEDICAL_TEXT, result, tokenizations);
 
         List<TaggingTokenCluster> clusters = clusteror.cluster();
 

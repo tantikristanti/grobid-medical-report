@@ -2,7 +2,7 @@ package org.grobid.core.engines;
 
 import eugfc.imageio.plugins.PNMRegistry;
 import org.apache.commons.io.FileUtils;
-import org.grobid.core.GrobidMedicalReportModels;
+import org.grobid.core.GrobidModels;
 import org.grobid.core.document.BasicStructureBuilder;
 import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentSource;
@@ -53,23 +53,6 @@ public class MedicalReportParser extends AbstractParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportParser.class);
 
-    /*private static volatile MedicalReportParser instance;
-
-    public static MedicalReportParser getInstance() {
-        if (instance == null) {
-            getNewInstance();
-        }
-        return instance;
-    }
-
-    */
-    /**
-     * Create a new instance.
-     *//*
-    private static synchronized void getNewInstance() {
-        instance = new MedicalReportParser();
-    }*/
-
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
 
@@ -87,7 +70,7 @@ public class MedicalReportParser extends AbstractParser {
 
 
     public MedicalReportParser() {
-        super(GrobidMedicalReportModels.MEDICAL_REPORT_SEGMENTER);
+        super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
     }
 
     /**
@@ -115,6 +98,7 @@ public class MedicalReportParser extends AbstractParser {
             return doc;
         } finally {
             {
+                // remove the pdfalto tmp files, including the sub-directories
                 DocumentSource.close(documentSource, true, true, true);
             }
         }
@@ -163,7 +147,7 @@ public class MedicalReportParser extends AbstractParser {
                 if (files != null) {
                     int nbFiles = 0;
                     for (final File currFile : files) {
-                        if (nbFiles > DocumentSource.PDFTOXML_FILES_AMOUNT_LIMIT)
+                        if (nbFiles > DocumentSource.PDFALTO_FILES_AMOUNT_LIMIT)
                             break;
 
                         String toLowerCaseName = currFile.getName().toLowerCase();
@@ -337,7 +321,7 @@ public class MedicalReportParser extends AbstractParser {
                     for (GraphicObject localImage : localImages) {
                         if (localImage.getType() == GraphicObjectType.BITMAP)
                             graphicBitmap = true;
-                        if (localImage.getType() == GraphicObjectType.VECTOR)
+                        if (localImage.getType() == GraphicObjectType.VECTOR || localImage.getType() == GraphicObjectType.VECTOR_BOX)
                             graphicVector = true;
                     }
                 }
@@ -537,11 +521,11 @@ public class MedicalReportParser extends AbstractParser {
                         currentFontSize = newFontSize;
                     }
 
-                    /*if (token.getBold())
+                    if (token.isBold())
                         features.bold = true;
 
-                    if (token.getItalic())
-                        features.italic = true;*/
+                    if (token.isItalic())
+                        features.italic = true;
 
                     // HERE horizontal information
                     // CENTERED
@@ -681,8 +665,10 @@ public class MedicalReportParser extends AbstractParser {
         DocumentSource documentSource = null;
         try {
             File file = new File(inputFile);
+            /*GrobidAnalysisConfig config =
+                new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder().build();
+            documentSource = DocumentSource.fromPdf(file, config.getStartPage(), config.getEndPage());*/
 
-            //documentSource = DocumentSource.fromPdf(file);
             documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
             Document doc = new Document(documentSource);
 
@@ -694,8 +680,7 @@ public class MedicalReportParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            String fulltext = //getAllTextFeatured(doc, false);
-                getAllLinesFeatured(doc);
+            String fulltext = getAllLinesFeatured(doc);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write the full text untagged (but featurized)
@@ -708,7 +693,7 @@ public class MedicalReportParser extends AbstractParser {
             // also write the raw text as seen before segmentation
             StringBuffer rawtxt = new StringBuffer();
             for (LayoutToken txtline : tokenizations) {
-                rawtxt.append(txtline.getText());
+                rawtxt.append(TextUtilities.HTMLEncode(txtline.getText()));
             }
             String outPathRawtext = outputFile + File.separator +
                 PDFFileName.replace(".pdf", ".training.medical.rawtxt");
@@ -752,7 +737,6 @@ public class MedicalReportParser extends AbstractParser {
         try {
             File file = new File(inputFile);
 
-            //documentSource = DocumentSource.fromPdf(inputfile);
             documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
             Document doc = new Document(documentSource);
 
@@ -764,8 +748,7 @@ public class MedicalReportParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            String fulltext = //getAllTextFeatured(doc, false);
-                getAllLinesFeatured(doc);
+            String fulltext = getAllLinesFeatured(doc);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // we write the full text untagged (but featurized)
@@ -978,8 +961,6 @@ public class MedicalReportParser extends AbstractParser {
     }
 
     /**
-     * TODO some documentation...
-     *
      * @param buffer
      * @param s1
      * @param lastTag0
@@ -1025,8 +1006,6 @@ public class MedicalReportParser extends AbstractParser {
     }
 
     /**
-     * TODO some documentation
-     *
      * @param buffer
      * @param currentTag0
      * @param lastTag0
@@ -1038,7 +1017,6 @@ public class MedicalReportParser extends AbstractParser {
                                    String lastTag0,
                                    String currentTag) {
         boolean res = false;
-        // reference_marker and citation_marker are two exceptions because they can be embedded
 
         if (!currentTag0.equals(lastTag0)) {
 

@@ -32,3 +32,4 @@ maven-build.xml
 release.properties
 
 resources/dataset
+resources/models/
