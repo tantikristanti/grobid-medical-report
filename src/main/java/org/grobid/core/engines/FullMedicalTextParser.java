@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Tanti, 2021
  */
 public class FullMedicalTextParser extends AbstractParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FullTextParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FullMedicalTextParser.class);
 
     //private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
 
