@@ -26,7 +26,7 @@ For the full-medical-text model, we use the following TEI elements:
     * `<note place="footnote">` for the page footer note
 * `<other>` for unknown (yet) part
 
-> Note: It is recommended to study first the existing training documents for the __full-medical-text__ model (`grobid/grobid-medical-report/resources/dataset/full-medical-text`) to see some examples of how these elements should be used.
+> Note: It is recommended to study first the existing training documents for the __full-medical-text__ model (`grobid/grobid-trainer/resources/dataset/full-medical-text`) to see some examples of how these elements should be used.
 
 The following sections will give examples for each of the objects above and how they should be marked up. Note that the mark-up follows nearly overall the [TEI](http://www.tei-c.org).
 

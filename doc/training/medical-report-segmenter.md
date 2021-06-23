@@ -19,7 +19,7 @@ For the medical report segmentation model, we use the following TEI elements:
 Figures and tables (including their potential titles, captions, and notes) are considered part of the body, so contained by the `<body>` element.
 Note that the mark-up follows overall the [TEI](http://www.tei-c.org). 
 
-> Note: It is recommended to study first the existing training documents for the __medical-report-segmenter__ model (`grobid/grobid-medical-report/resources/dataset/medical-report-segmenter`) to see some examples of how these elements should be used.
+> Note: It is recommended to study first the existing training documents for the __medical-report-segmenter__ model (`grobid/grobid-trainer/resources/dataset/medical-report-segmenter`) to see some examples of how these elements should be used.
 
 <img src="../img/Segmented_document.png" alt="Segmented_medical_document" width="70%"/>
 

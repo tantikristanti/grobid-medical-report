@@ -23,7 +23,7 @@ For the left-note-medical-report model, we use the following TEI elements:
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
 Encoding the left-note section is challenging because of the variety of information that appears in this section can be in unexpected and overlapped manners (e.g., the overlapped information in affiliation and organization). Some information is often redundant (for example, medics can be mentioned several times among different levels of details). These annotation guidelines are thus particularly important to follow to ensure stable encoding practices in the complete training data and to avoid the machine learning models learn contradictory labeling resulting in poorer performance and less valuable training data.
-> Note: It is recommended to study first the existing training documents for the __left-note-medical-report__ model (`grobid/grobid-medical-report/resources/dataset/left-note-medical-report`) to see some examples of how these elements should be used.
+> Note: It is recommended to study first the existing training documents for the __left-note-medical-report__ model (`grobid/grobid-trainer/resources/dataset/left-note-medical-report`) to see some examples of how these elements should be used.
 
 ## Analysis
 

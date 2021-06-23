@@ -665,9 +665,9 @@ public class MedicalReportParser extends AbstractParser {
         DocumentSource documentSource = null;
         try {
             File file = new File(inputFile);
-            /*GrobidAnalysisConfig config =
+            GrobidAnalysisConfig config =
                 new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder().build();
-            documentSource = DocumentSource.fromPdf(file, config.getStartPage(), config.getEndPage());*/
+            /*documentSource = DocumentSource.fromPdf(file, config.getStartPage(), config.getEndPage());*/
 
             documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
             Document doc = new Document(documentSource);

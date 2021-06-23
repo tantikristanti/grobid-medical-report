@@ -36,7 +36,7 @@ The so-called "GROBID home" in GROBID is the path to `grobid-home` (by default `
 
 Example:
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
 ```
 
 #### createTrainingHeader
@@ -50,7 +50,7 @@ Example:
 
 Example:
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```
 
 #### createTrainingLeftNote
@@ -64,7 +64,7 @@ Example:
 
 Example:
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
 
 ### processHeader
@@ -81,6 +81,6 @@ The needed parameters for that command are:
 
 Example:
 ```bash
-> java -Xmx1G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-hom -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -r -exe processHeader 
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -r -exe processHeader 
 ```
 

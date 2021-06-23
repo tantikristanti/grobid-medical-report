@@ -15,7 +15,7 @@ For the organization-medical-report model, we use the following TEI elements:
 * `<place>` for the list of place names
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
-> It is recommended to study first the existing training documents for the __organization-medical-report__ model (`grobid/grobid-medical-report/resources/dataset/organization-medical-report`) to see some examples of how these elements should be used.
+> It is recommended to study first the existing training documents for the __organization-medical-report__ model (`grobid/grobid-trainer/resources/dataset/organization-medical-report`) to see some examples of how these elements should be used.
 
 
 ## Analysis

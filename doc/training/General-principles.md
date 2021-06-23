@@ -57,7 +57,7 @@ is equivalent to
 	<date>2017</date> 
 ```
 
-In the standard Grobid installation, examples of existing annotations for each model is under `grobid/grobid-trainer/resources/dataset/*MODEL*/`. Meanwhile, for the grobid-medical-report, the annotated data is under `grobid-medical-report/resources/dataset/*MODEL*/`
+In the standard Grobid installation, examples of existing annotations for each model is under `grobid/grobid-trainer/resources/dataset/*MODEL*/`. 
 
 We cannot add XML files as training and evaluation datasets for the following cases:
 * If XML files are incorrectly produced  (e.g., `*.training.header.medical.xml` is produced after a chunk of text wrongly identified as the header section), then these files must be removed.

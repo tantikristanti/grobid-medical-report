@@ -14,7 +14,7 @@ The models prepared are:
 
 - [x] left-note-medical-report
 
-- [ ] full-medical-text
+- [x] full-medical-text
 
 - [ ] organization-medical-report
 
@@ -42,10 +42,10 @@ TEI files can be divided (e.g., 80%-20%) into training and evaluation datasets i
 
 - manually: we choose and put the annotated datasets in two folders separately.
   
-    The training data is present under `grobid/grobid-medical-report/resources/dataset/*MODEL*/corpus/` while the evaluation data is present under  `grobid/grobid-medical-report/resources/dataset/*MODEL*/evaluation/`.
+    The training data is present under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus/` while the evaluation data is present under  `grobid/grobid-trainer/resources/dataset/*MODEL*/evaluation/`.
 
 
-- automatically: we put the the datasets under `grobid/grobid-medical-report/resources/dataset/*MODEL*/corpus` and let grobid-medical-report choose and split them randomly as a given ratio (e.g., 0.8 for 80%). The first part of the data is the training data, while the second is the evaluation data.
+- automatically: we put the the datasets under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus` and let grobid-medical-report choose and split them randomly as a given ratio (e.g., 0.8 for 80%). The first part of the data is the training data, while the second is the evaluation data.
 
 Regardless of the method chosen (i.e., manual or automatic), the built model is placed under `grobid/grobid-home/models/*MODEL*/model.wapiti`. The newly built model will automatically replace the previous one. It is possible to rollback the process by replacing the current generated model with the backup record (`<model name>.wapiti.old`).
 
@@ -81,7 +81,7 @@ An example of a command for training the __train_full_medical_text__ model:
 As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. Further, to increase the speed, we can also modify the stopping criteria. For more information, please refer [this comment](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).
 
 ### Evaluate
-The considered evaluation dataset is under `grobid/grobid-medical-report/resources/dataset/*MODEL*/evaluation`
+The considered evaluation dataset is under `grobid/grobid-trainer/resources/dataset/*MODEL*/evaluation`
 To evaluate the model, under the project directory `grobid/grobid-medical-report/` execute the following command:
 ```bash
 > ./gradlew <evaluation-goal-name>
@@ -98,6 +98,7 @@ To split (e.g., training:evaluation = 80:20) automatically and randomly the data
 
 Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`, `eval_full_medical_text`.
 
+By default, the training and evaluation data partition is 80:20 (i.e., the datasets are under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus`). To change it, add the `-s` parameter or change the `-s` `build.gradle` to the desired proportion.
 
 ## Generation of training data
 
@@ -108,29 +109,29 @@ When the models use PDF layout features, __grobid-medical-report__ generates add
 To generate a new training data, under the project directory `grobid/grobid-medical-report/` execute the following command:
 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
 Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`.
 
 An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
 ```
 
 An example of a command for generating a new training data for the __header-medical-report__ model: 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```
 
 An example of a command for generating a new training data for the __left-note-medical-report__ model:
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
 
 An example of a command for generating a new training data for the __full-medical-text__ model:
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
 ```
 
 <!---Note for developers:

@@ -16,7 +16,7 @@ For the place-medical-report model, we use the following TEI elements:
 * `<fax>` for the fax number 
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
-> It is recommended to study first the existing training documents for the __place-medical-report__ model (`grobid/grobid-medical-report/resources/dataset/place-medical-report`) to see some examples of how these elements should be used.
+> It is recommended to study first the existing training documents for the __place-medical-report__ model (`grobid/grobid-trainer/resources/dataset/place-medical-report`) to see some examples of how these elements should be used.
 
 ## Analysis
 
