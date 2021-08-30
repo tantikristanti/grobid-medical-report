@@ -2,9 +2,8 @@ package org.grobid.core.data;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.util.ClassicMedicEmailAssigner;
+import org.grobid.core.data.util.ClassicPersonEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
 import org.grobid.core.document.Document;
@@ -33,7 +32,7 @@ public class LeftNoteMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(LeftNoteMedicalItem.class);
 
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    private MedicEmailAssigner medicEmailAssigner = new ClassicMedicEmailAssigner();
+    private MedicEmailAssigner medicEmailAssigner = new ClassicPersonEmailAssigner();
     private EmailSanitizer emailSanitizer = new EmailSanitizer();
     private String teiId;
     //TODO: keep in sync with teiId - now teiId is generated in many different places

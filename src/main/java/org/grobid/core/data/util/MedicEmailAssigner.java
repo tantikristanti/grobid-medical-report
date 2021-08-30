@@ -4,11 +4,8 @@ import org.grobid.core.data.PersonMedical;
 
 import java.util.List;
 
-/**
- * Tanti, 2020
- */
 public interface MedicEmailAssigner {
-    //embeds emails into medics
+    //embeds emails into authors
     //emails should be sanitized before
     public void assign(List<PersonMedical> medics, List<String> emails);
 }

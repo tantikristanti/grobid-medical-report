@@ -15,24 +15,26 @@ import java.util.StringTokenizer;
  * Normally all training data should be in this unique format.
  * The segmentation of tokens must be identical as the one from pdf2xml files so that
  * training and online input tokens are aligned.
- *
+ * <p>
  * Tanti, 2020
  */
-public class TEIMedicalSaxParser extends DefaultHandler {
+public class TEIMedicalReportSegmenterSaxParser extends DefaultHandler {
 
-  	/* TEI -> label mapping (9 labels for this model)
-		document header (<header>): front,
-		page header (<headnote>): note type headnote,
-		page footer (<footnote>): note type footnote,
-		left note (<leftnote>): note type left,
-		right note (<rightnote>): note type right,
-		document body (<body>): body,
-		page number (<page>): page,
-		acknowledgement (<acknowledgment>): acknowledgement,
-		other (<other>): other
+  	/* TEI --> sax label mapping (11 labels for this model)
+        <titlePage> cover page --> <cover>  : cover page (not much present in the APHP corpus, but there are some, ex. "701955797.pdf"), optionally under front,
+        <front> document header --> <header>  : document header,
+        <note place="headnote"> page header --> <headnote> : note type headnote,
+        <note place="footnote"> page footer --> <footnote>: note type footnote,
+        <note place="left"> left note --> <leftnote> : note type left,
+        <note place="right"> right note  --> <rightnote> : note type right,
+        <body> document body --> <body> : body,
+        <page> page number --> <page> : page,
+        <div type="annex"> annexes --> <annex> : annex,
+        <div type="acknowledgment"> acknowledgement --> <acknowledgment> : acknowledgement,
+        <other> other <other> : unknown entities
  	*/
 
-    private static final Logger logger = LoggerFactory.getLogger(TEIMedicalSaxParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(TEIMedicalReportSegmenterSaxParser.class);
 
     private StringBuffer accumulator = null; // current accumulated text
 
@@ -41,7 +43,7 @@ public class TEIMedicalSaxParser extends DefaultHandler {
     private String upperTag = null;
     private List<String> labeled = null; // store line by line the labeled data
 
-    public TEIMedicalSaxParser() {
+    public TEIMedicalReportSegmenterSaxParser() {
         labeled = new ArrayList<String>();
         accumulator = new StringBuffer();
     }
@@ -69,7 +71,8 @@ public class TEIMedicalSaxParser extends DefaultHandler {
         if ((!qName.equals("lb")) && (!qName.equals("pb"))) {
             writeData(qName, currentTag);
         }
-        if (qName.equals("front") ||
+        if (qName.equals("cover") ||
+            qName.equals("front") ||
             qName.equals("body") ||
             qName.equals("div") ||
             qName.equals("other")) {
@@ -77,7 +80,8 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             upperTag = null;
         } else if (qName.equals("note") ||
             qName.equals("page") ||
-            qName.equals("pages")) {
+            qName.equals("pages") ||
+            qName.equals("titlePage")) {
             currentTag = upperTag;
         }
     }
@@ -103,7 +107,11 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             }
             //accumulator.setLength(0);
 
-            if (qName.equals("front")) {
+            if (qName.equals("titlePage")) {
+                currentTag = "<cover>";
+                //upperTag = currentTag;
+                //upperQname = "titlePage";
+            } else if (qName.equals("front")) {
                 currentTag = "<header>";
                 upperTag = currentTag;
                 upperQname = "front";
@@ -126,7 +134,7 @@ public class TEIMedicalSaxParser extends DefaultHandler {
                         if (name.equals("place")) {
                             if (value.equals("footnote") || value.equals("foot")) {
                                 currentTag = "<footnote>";
-                            } else if (value.equals("headnote")|| value.equals("head")) {
+                            } else if (value.equals("headnote") || value.equals("head")) {
                                 currentTag = "<headnote>";
                             } else if (value.equals("leftnote") || value.equals("left")) {
                                 currentTag = "<leftnote>";
@@ -151,7 +159,14 @@ public class TEIMedicalSaxParser extends DefaultHandler {
 
                     if (name != null) {
                         if (name.equals("type")) {
-                            if (value.equals("acknowledgement")) {
+                            // Note: funding and data availability annexes not fully annotated in the training corpus
+                            // when it will be the case, we can add specific label for this
+                            if (value.equals("annex")) {
+                                currentTag = "<annex>";
+                                upperTag = currentTag;
+                                upperQname = "div";
+                            } else if (value.equals("acknowledgement") || value.equals("acknowledgements") || value.equals("acknowledgment")
+                                || value.equals("acknowledgments")) {
                                 currentTag = "<acknowledgement>";
                                 upperTag = currentTag;
                                 upperQname = "div";
@@ -178,9 +193,9 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             qName = "other";
             surfaceTag = "<other>";
         }
-        if ((qName.equals("front")) || (qName.equals("note")) ||
-            (qName.equals("page")) || (qName.equals("pages")) ||
-            (qName.equals("body")) || (qName.equals("div")) || (qName.equals("other"))
+        if (((qName.equals("titlePage")) || qName.equals("front")) || (qName.equals("note")) ||
+            (qName.equals("page")) || (qName.equals("pages")) || (qName.equals("body")) ||
+            (qName.equals("div")) || (qName.equals("other"))
         ) {
             String text = getText();
             text = text.replace("\n", " ");
@@ -190,15 +205,18 @@ public class TEIMedicalSaxParser extends DefaultHandler {
             //System.out.println(text);
             // we segment the text line by line first
             String[] tokens = text.split("\\+L\\+");
+            //while (st.hasMoreTokens()) {
             boolean page = false;
             for (int p = 0; p < tokens.length; p++) {
+                //String line = st.nextToken().trim();
                 String line = tokens[p].trim();
                 if (line.length() == 0)
                     continue;
-                if (line.equals("\n"))
+                if (line.equals("\n") || line.equals("\r"))
                     continue;
                 if (line.indexOf("+PAGE+") != -1) {
                     // page break should be a distinct feature
+                    //labeled.add("@newpage\n");
                     line = line.replace("+PAGE+", "");
                     page = true;
                 }
@@ -224,6 +242,7 @@ public class TEIMedicalSaxParser extends DefaultHandler {
                 } else {
                     labeled.add(tok + " " + surfaceTag + "\n");
                 }
+
                 if (page) {
                     page = false;
                 }

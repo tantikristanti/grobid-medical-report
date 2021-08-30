@@ -27,6 +27,7 @@ public class PersonMedical {
     private String title = null;
     private String suffix = null;
     private String rawName = null; // raw full name if relevant/available, e.g. name exactly as displayed
+    private String orcid = null;
     private boolean corresp = false;
 
     private List<LayoutToken> layoutTokens = new ArrayList<>();
@@ -35,10 +36,7 @@ public class PersonMedical {
     private List<String> affiliationMarkers = null;
     private List<String> markers = null;
 
-    private String address = null;
     private String email = null;
-    private String phone = null;
-    private String fax = null;
 
     public String getFirstName() {
         return firstName;
@@ -106,6 +104,20 @@ public class PersonMedical {
         corresp = b;
     }
 
+    public String getORCID() {
+        return orcid;
+    }
+
+    public void setORCID(String id) {
+        if (id == null)
+            return;
+        if (id.startsWith("http://orcid.org/"))
+            id = id.replace("http://orcid.org/", "");
+        else if (id.startsWith("https://orcid.org/"))
+            id = id.replace("https://orcid.org/", "");
+        orcid = id;
+    }
+
     public List<String> getAffiliationBlocks() {
         return affiliationBlocks;
     }
@@ -163,32 +175,12 @@ public class PersonMedical {
         markers.add(f);
     }
 
-    public String getAddress() { return address; }
-
-    public void setAddress(String add) { address = add; }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String f) {
         email = f;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getFax() {
-        return fax;
-    }
-
-    public void setFax(String fax) {
-        this.fax = fax;
     }
 
     public boolean notNull() {
@@ -206,31 +198,29 @@ public class PersonMedical {
      * Create a new instance of Person object from current instance (shallow copy)
      */
     public PersonMedical clonePerson() {
-        PersonMedical personMedical = new PersonMedical();
-        personMedical.firstName = this.firstName ;
-        personMedical.middleName = this.middleName;
-        personMedical.lastName = this.lastName;
-        personMedical.title = this.title;
-        personMedical.suffix = this.suffix;
-        personMedical.rawName = this.rawName;
-        personMedical.corresp = this.corresp;
-        personMedical.address = this.address;
-        personMedical.email = this.email;
-        personMedical.phone = this.phone;
-        personMedical.fax = this.fax;
+        PersonMedical person = new PersonMedical();
+        person.firstName = this.firstName ;
+        person.middleName = this.middleName;
+        person.lastName = this.lastName;
+        person.title = this.title;
+        person.suffix = this.suffix;
+        person.rawName = this.rawName; 
+        person.orcid = this.orcid;
+        person.corresp = this.corresp;
+        person.email = this.email;
 
         if (this.layoutTokens != null)
-            personMedical.layoutTokens = new ArrayList<>(this.layoutTokens);
+            person.layoutTokens = new ArrayList<>(this.layoutTokens);
         if (this.affiliationBlocks != null)
-            personMedical.affiliationBlocks = new ArrayList<>(this.affiliationBlocks);
+            person.affiliationBlocks = new ArrayList<>(this.affiliationBlocks);
         if (this.affiliations != null)
-            personMedical.affiliations = new ArrayList<>(this.affiliations);
+            person.affiliations = new ArrayList<>(this.affiliations);
         if (this.affiliationMarkers != null)
-            personMedical.affiliationMarkers = new ArrayList<>(this.affiliationMarkers);
+            person.affiliationMarkers = new ArrayList<>(this.affiliationMarkers);
         if (this.markers != null)
-            personMedical.markers = new ArrayList<>(this.markers);
+            person.markers = new ArrayList<>(this.markers);
 
-        return personMedical;
+        return person;
     }
 
     public String toString() {
@@ -248,8 +238,8 @@ public class PersonMedical {
         if (email != null) {
             res += " (email:" + email + ")";
         }
-        if (address != null) {
-            res += " (address:" + address + ")";
+        if (orcid != null) {
+            res += " (orcid:" + orcid + ")";
         }
         if (affiliations != null) {
             for(Affiliation aff : affiliations) {
@@ -726,6 +716,10 @@ public class PersonMedical {
                             localSuffix = localPerson.getSuffix().toLowerCase();
                         }
 
+                        String otherOrcid = otherPerson.getORCID();
+                        if (otherOrcid != null)
+                            localPerson.setORCID(otherOrcid);
+
                         if (otherPerson.getAffiliations() != null) {
                             for(Affiliation affOther : otherPerson.getAffiliations()) {
                                 localPerson.addAffiliation(affOther);
@@ -744,9 +738,6 @@ public class PersonMedical {
                                     localPerson.addMarker(marker);
                             }
                         }
-
-                        if (localPerson.getAddress() == null)
-                            localPerson.setAddress(otherPerson.getAddress());
 
                         if (localPerson.getEmail() == null)
                             localPerson.setEmail(otherPerson.getEmail());
@@ -771,7 +762,7 @@ public class PersonMedical {
         if (persons.size() == 0)
             return persons;
         
-        List<PersonMedical> result = new ArrayList<>();
+        List<PersonMedical> result = new ArrayList<PersonMedical>();
 
         for(PersonMedical person : persons) {
             if (person.getLastName() == null || person.getLastName().trim().length() == 0) 

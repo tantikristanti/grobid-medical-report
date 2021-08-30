@@ -6,6 +6,7 @@ For the following guidelines, we first need to generate the training data as exp
 
 For the medical report segmentation model, we use the following TEI elements:
 
+* `<titlePage>` for the cover page (not much present in the APHP corpus, yet there are some)
 * `<front>` for document header
 * `<note place="headnote">` for the page header note
 * `<note place="footnote">` for the page footer note
@@ -13,6 +14,7 @@ For the medical report segmentation model, we use the following TEI elements:
 * `<note place="right">` for the notes on the document right section
 * `<body>` for the document body
 * `<page>` for the page numbers
+* `<div type="annex">` for the annexes
 * `<div type="acknowledgment">` for the acknowledgment
 * `<other>` for unknown (yet) part
 

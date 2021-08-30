@@ -2,9 +2,8 @@ package org.grobid.core.data;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.util.ClassicMedicEmailAssigner;
+import org.grobid.core.data.util.ClassicPersonEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
 import org.grobid.core.document.Document;
@@ -33,7 +32,7 @@ public class HeaderMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalItem.class);
 
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    private MedicEmailAssigner medicEmailAssigner = new ClassicMedicEmailAssigner();
+    private MedicEmailAssigner medicEmailAssigner = new ClassicPersonEmailAssigner();
     private EmailSanitizer emailSanitizer = new EmailSanitizer();
     private String teiId;
     //TODO: keep in sync with teiId - now teiId is generated in many different places
@@ -419,18 +418,6 @@ public class HeaderMedicalItem {
         originalAffiliation = null;
         originalMedics = null;
         originalPatients = null;
-    }
-
-    public static void cleanTitles(HeaderMedicalItem headerItem) {
-        if (headerItem.getTitle() != null) {
-            String localTitle = TextUtilities.cleanField(headerItem.getTitle(), false);
-            if (localTitle.endsWith(" y")) {
-                // some markers at the end of the title are extracted from the pdf as " y" at the end of the title
-                // e.g. <title level="a" type="main">Computations in finite-dimensional Lie algebras y</title>
-                localTitle = localTitle.substring(0, localTitle.length() - 2);
-            }
-            headerItem.setTitle(localTitle);
-        }
     }
 
     /**
@@ -1515,7 +1502,7 @@ public class HeaderMedicalItem {
         labeledTokens.put(headerLabel.getLabel(), tokens);
     }
 
-    public void generalResultMapping(Document doc, String labeledResult, List<LayoutToken> tokenizations) {
+    public void generalResultMapping(String labeledResult, List<LayoutToken> tokenizations) {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
 
@@ -1527,16 +1514,11 @@ public class HeaderMedicalItem {
             }
 
             TaggingLabel clusterLabel = cluster.getTaggingLabel();
-            /*if (clusterLabel.equals(TaggingLabels.HEADER_INTRO)) {
-                break;
-            }*/
             List<LayoutToken> clusterTokens = cluster.concatTokens();
             List<LayoutToken> theList = labeledTokens.get(clusterLabel.getLabel());
 
-            if (theList == null)
-                theList = new ArrayList<>();
-            for (LayoutToken token : clusterTokens)
-                theList.add(token);
+            theList = theList == null ? new ArrayList<>() : theList;
+            theList.addAll(clusterTokens);
             labeledTokens.put(clusterLabel.getLabel(), theList);
         }
     }

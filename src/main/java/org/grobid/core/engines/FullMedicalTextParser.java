@@ -5,11 +5,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.Figure;
-import org.grobid.core.data.HeaderMedicalItem;
-import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.Table;
+import org.grobid.core.data.*;
 import org.grobid.core.document.*;
+import org.grobid.core.engines.citations.CalloutAnalyzer;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -26,6 +24,7 @@ import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.KeyGen;
 import org.grobid.core.utilities.LayoutTokensUtil;
 import org.grobid.core.utilities.TextUtilities;
+import org.grobid.core.engines.citations.CalloutAnalyzer.MarkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +44,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class FullMedicalTextParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(FullMedicalTextParser.class);
 
-    //private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-
-    //	private String tmpPathName = null;
-//    private Document doc = null;
     protected File tmpPath = null;
-//    private String pathXML = null;
-//	private BiblioItem resHeader = null;
 
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
@@ -111,7 +104,7 @@ public class FullMedicalTextParser extends AbstractParser {
         }
         try {
             // general segmentation
-            Document doc = parsers.getMedicalReportParser().processing(documentSource, config);
+            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
 
             // header processing
@@ -124,49 +117,6 @@ public class FullMedicalTextParser extends AbstractParser {
 
             // using the segmentation model to identify the header and left-note zones
             parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, false);
-
-            // The commented part below makes use of the PDF embedded metadata (the so-called XMP) if available 
-            // as fall back to set author and title if they have not been found. 
-            // However tests on PMC set 1942 did not improve recognition. This will have to be re-evaluated with
-            // another, more diverse, testing set and with further updates of the header model. 
-
-            // ---> DO NOT DELETE !
-            
-            /*if (isBlank(resHeader.getTitle()) || isBlank(resHeader.getAuthors()) || CollectionUtils.isEmpty(resHeader.getFullAuthors())) {
-                // try to exploit PDF embedded metadata (the so-called XMP) if we are still without title/authors
-                // this is risky as those metadata are highly unreliable, but as last chance, why not :)
-                Metadata metadata = doc.getMetadata();
-                if (metadata != null) { 
-                    boolean titleUpdated = false;
-                    boolean authorsUpdated = false;
-
-                    if (isNotBlank(metadata.getTitle()) && isBlank(resHeader.getTitle())) {
-                        if (!endsWithAny(lowerCase(metadata.getTitle()), ".doc", ".pdf", ".tex", ".dvi", ".docx", ".odf", ".odt", ".txt")) {
-                            resHeader.setTitle(metadata.getTitle());
-                            titleUpdated = true;
-                        }
-                    }
-
-                    if (isNotBlank(metadata.getAuthor())
-                        && (isBlank(resHeader.getAuthors()) || CollectionUtils.isEmpty(resHeader.getFullAuthors()))) {
-                        resHeader.setAuthors(metadata.getAuthor());
-                        resHeader.setOriginalAuthors(metadata.getAuthor());
-                        authorsUpdated = true;
-                        List<Person> localAuthors = parsers.getAuthorParser().processingHeader(metadata.getAuthor());
-                        if (localAuthors != null) {
-                            for (Person pers : localAuthors) {
-                                resHeader.addFullAuthor(pers);
-                            }
-                        }
-                    }
-
-                    // if title and author have been updated with embedded PDF metadata, we try to consolidate 
-                    // again as required 
-                    if ( titleUpdated || authorsUpdated ) {
-                        parsers.getHeaderParser().consolidateHeader(resHeader, config.getConsolidateHeader());
-                    }
-                }
-            }*/
 
             // full text processing
             featSeg = getBodyTextFeatured(doc, documentBodyParts);
@@ -227,13 +177,21 @@ public class FullMedicalTextParser extends AbstractParser {
                 //System.out.println(rese);
             }
 
+            // post-process reference and footnote callout to keep them consistent (e.g. for example avoid that a footnote
+            // callout in superscript is by error labeled as a numerical reference callout)
+            List<MarkerType> markerTypes = null;
+
+            if (resultBody != null)
+                markerTypes = postProcessCallout(resultBody, layoutTokenization);
+
             // final combination
             toTEI(doc, // document
                 resultBody, resultAnnex, // labeled data for body and annex
                 layoutTokenization, tokenizationsBody2, // tokenization for body and annex
-                resHeader,
-                resLeftNote,// header
-                figures, tables, config);
+                resHeader, // header
+                resLeftNote, // left-note information
+                figures, tables, markerTypes,
+                config);
             return doc;
         } catch (GrobidException e) {
             throw e;
@@ -364,13 +322,14 @@ public class FullMedicalTextParser extends AbstractParser {
         int currentFontSize = -1;
 
         List<Block> blocks = doc.getBlocks();
-        if ((blocks == null) || blocks.size() == 0) {
+        if ( (blocks == null) || blocks.size() == 0) {
             return null;
         }
 
         // vector for features
         FeaturesVectorFullMedicalText features;
         FeaturesVectorFullMedicalText previousFeatures = null;
+
 
         boolean endblock;
         boolean endPage = true;
@@ -391,13 +350,13 @@ public class FullMedicalTextParser extends AbstractParser {
 
 //System.out.println("fulltextLength: " + fulltextLength);
 
-        for (DocumentPiece docPiece : documentBodyParts) {
+        for(DocumentPiece docPiece : documentBodyParts) {
             DocumentPointer dp1 = docPiece.getLeft();
             DocumentPointer dp2 = docPiece.getRight();
 
             //int blockPos = dp1.getBlockPtr();
-            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
-//System.out.println("blockIndex: " + blockIndex);			
+            for(int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
+//System.out.println("blockIndex: " + blockIndex);
                 boolean graphicVector = false;
                 boolean graphicBitmap = false;
                 Block block = blocks.get(blockIndex);
@@ -427,10 +386,11 @@ public class FullMedicalTextParser extends AbstractParser {
 					lowestPos = 0.0;
 	            }*/
 
-                if (lowestPos > block.getY()) {
-                    // we have a vertical shift, which can be due to a change of column or other particular layout formatting 
+                if (lowestPos >  block.getY()) {
+                    // we have a vertical shift, which can be due to a change of column or other particular layout formatting
                     spacingPreviousBlock = doc.getMaxBlockSpacing() / 5.0; // default
-                } else
+                }
+                else
                     spacingPreviousBlock = block.getY() - lowestPos;
 
                 String localText = block.getText();
@@ -450,19 +410,19 @@ public class FullMedicalTextParser extends AbstractParser {
 
                 // character density of the block
                 double density = 0.0;
-                if ((block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
+                if ( (block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
                     (localText != null) && (!localText.contains("@PAGE")) &&
-                    (!localText.contains("@IMAGE")))
-                    density = (double) localText.length() / (block.getHeight() * block.getWidth());
+                    (!localText.contains("@IMAGE")) )
+                    density = (double)localText.length() / (block.getHeight() * block.getWidth());
 
                 // check if we have a graphical object connected to the current block
                 List<GraphicObject> localImages = Document.getConnectedGraphics(block, doc);
                 if (localImages != null) {
-                    for (GraphicObject localImage : localImages) {
+                    for(GraphicObject localImage : localImages) {
                         if (localImage.getType() == GraphicObjectType.BITMAP)
-                            graphicVector = true;
-                        if (localImage.getType() == GraphicObjectType.VECTOR)
                             graphicBitmap = true;
+                        if (localImage.getType() == GraphicObjectType.VECTOR || localImage.getType() == GraphicObjectType.VECTOR_BOX)
+                            graphicVector = true;
                     }
                 }
 
@@ -479,7 +439,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 int lastPos = tokens.size();
                 // if it's a last block from a document piece, it may end earlier
                 if (blockIndex == dp2.getBlockPtr()) {
-                    lastPos = dp2.getTokenBlockPos() + 1;
+                    lastPos = dp2.getTokenBlockPos()+1;
                     if (lastPos > tokens.size()) {
                         LOGGER.error("DocumentPointer for block " + blockIndex + " points to " +
                             dp2.getTokenBlockPos() + " token, but block token size is " +
@@ -505,7 +465,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     double coordinateLineY = token.getY();
 
                     String text = token.getText();
-                    if ((text == null) || (text.length() == 0)) {
+                    if ( (text == null) || (text.length() == 0)) {
                         n++;
                         //mm++;
                         //nn++;
@@ -600,7 +560,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     if (indented) {
                         features.alignmentStatus = "LINEINDENT";
-                    } else {
+                    }
+                    else {
                         features.alignmentStatus = "ALIGNEDLEFT";
                     }
 
@@ -657,7 +618,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         if ((!endline) && !(newline)) {
                             features.lineStatus = "LINEIN";
-                        } else if (!newline) {
+                        }
+                        else if (!newline) {
                             features.lineStatus = "LINEEND";
                             previousNewline = true;
                         }
@@ -740,7 +702,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     if (pagePos > NBBINS_POSITION)
                         pagePos = NBBINS_POSITION;
                     features.relativePagePosition = pagePos;
-//System.out.println((coordinateLineY) + " " + (pageHeight) + " " + NBBINS_POSITION + " " + pagePos); 
+//System.out.println((coordinateLineY) + " " + (pageHeight) + " " + NBBINS_POSITION + " " + pagePos);
 
                     if (spacingPreviousBlock != 0.0) {
                         features.spacingWithPreviousBlock = featureFactory
@@ -794,7 +756,7 @@ public class FullMedicalTextParser extends AbstractParser {
      * Evaluate the length of the fulltext
      */
     private static int getFullTextLength(Document doc, SortedSet<DocumentPiece> documentBodyParts, int fulltextLength) {
-        for (DocumentPiece docPiece : documentBodyParts) {
+        for(DocumentPiece docPiece : documentBodyParts) {
             DocumentPointer dp1 = docPiece.getLeft();
             DocumentPointer dp2 = docPiece.getRight();
 
@@ -817,7 +779,7 @@ public class FullMedicalTextParser extends AbstractParser {
         int startTokenBlockPos = block.getStartToken();
         List<LayoutToken> tokens = doc.getTokenizations();
         int i = startTokenBlockPos;
-        for (; i < tokens.size(); i++) {
+        for(; i < tokens.size(); i++) {
             int offset = tokens.get(i).getOffset();
             if (offset >= token.getOffset())
                 break;
@@ -933,7 +895,7 @@ public class FullMedicalTextParser extends AbstractParser {
             doc.produceStatistics();
 
             // first, call the medical-report-segmenter model to have high level segmentation
-            doc = parsers.getMedicalReportParser().processing(documentSource,
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource,
                 GrobidAnalysisConfig.defaultInstance());
 
             // FULL-MEDICAL-TEXT MODEL (body part)
@@ -1026,19 +988,12 @@ public class FullMedicalTextParser extends AbstractParser {
 
                 if ((header != null) && (header.trim().length() > 0)) {
                     // we write the header untagged
-                    String outPathHeader = pathTEI + File.separator + pdfFileName.replace(".pdf", ".training.header");
+                    String outPathHeader = pathTEI + File.separator + pdfFileName.replace(".pdf", ".training.header.medical");
                     writer = new OutputStreamWriter(new FileOutputStream(new File(outPathHeader), false), StandardCharsets.UTF_8);
                     writer.write(header + "\n");
                     writer.close();
 
                     String rese = parsers.getHeaderParser().label(header);
-
-                    // buffer for the header block
-                    StringBuilder bufferHeader = parsers.getHeaderParser().trainingExtraction(rese, headerTokenizations);
-                    Language lang = LanguageUtilities.getInstance().runLanguageId(bufferHeader.toString());
-                    if (lang != null) {
-                        doc.setLanguage(lang.getLang());
-                    }
 
                     // buffer for the affiliation+address block
                     StringBuilder bufferAffiliation =
@@ -1072,8 +1027,9 @@ public class FullMedicalTextParser extends AbstractParser {
                         bufferDate = parsers.getDateParser().trainingExtraction(inputs);
                     }
 
-                    // buffer for the name block
-                    StringBuilder bufferName = null;
+                    // buffer for the medics name block
+                    StringBuilder bufferMedicsName = null;
+
                     // we need to rebuild the found author string as it appears
                     input = "";
                     q = 0;
@@ -1089,18 +1045,18 @@ public class FullMedicalTextParser extends AbstractParser {
                                 theTotalTok += theTok;
                             }
                         }
-                        if (line.endsWith("<author>")) {
+                        if (line.endsWith("<medic>")) {
                             input += theTotalTok;
                         }
                         q++;
                     }
                     if (input.length() > 1) {
-                        bufferName = parsers.getAuthorParser().trainingExtraction(input, true);
+                        bufferMedicsName = parsers.getAuthorParser().trainingExtraction(input, true);
                     }
 
-                    // buffer for the reference block
-                    StringBuilder bufferReference = null;
-                    // we need to rebuild the found citation string as it appears
+                    // buffer for the patient name block
+                    StringBuilder bufferPatientName = null;
+                    // we need to rebuild the found author string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1115,21 +1071,19 @@ public class FullMedicalTextParser extends AbstractParser {
                                 theTotalTok += theTok;
                             }
                         }
-                        if (line.endsWith("<reference>")) {
+                        if (line.endsWith("<patient>")) {
                             input += theTotalTok;
                         }
                         q++;
                     }
                     if (input.length() > 1) {
-                        List<String> inputs = new ArrayList<String>();
-                        inputs.add(input.trim());
-                        bufferReference = parsers.getCitationParser().trainingExtraction(inputs);
+                        bufferPatientName = parsers.getPatientParser().trainingExtraction(input, true);
                     }
 
                     // write the training TEI file for header which reflects the extract layout of the text as
                     // extracted from the pdf
                     writer = new OutputStreamWriter(new FileOutputStream(new File(pathTEI + File.separator
-                            + pdfFileName.replace(".pdf", ".training.header.tei.xml")), false), StandardCharsets.UTF_8);
+                            + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml")), false), StandardCharsets.UTF_8);
                     writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                             + pdfFileName.replace(".pdf", "")
                             + "\"/>\n\t</teiHeader>\n\t<text");
@@ -1181,11 +1135,11 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
 
             // HEADER MEDICS' NAME model
-                    /*if (bufferName != null) {
-                        if (bufferName.length() > 0) {
+                    /*if (bufferMedicsName != null) {
+                        if (bufferMedicsName.length() > 0) {
                             Writer writerName = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
                                     File.separator
-                                    + pdfFileName.replace(".pdf", ".training.header.authors.tei.xml")), false), StandardCharsets.UTF_8);
+                                    + pdfFileName.replace(".pdf", ".training.header.medics.tei.xml")), false), StandardCharsets.UTF_8);
                             writerName.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                             writerName.write("\n<tei xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\"" + " xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
                                     + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
@@ -1193,7 +1147,30 @@ public class FullMedicalTextParser extends AbstractParser {
                             writerName.write("\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n\n\t\t\t\t\t\t<author>");
                             writerName.write("\n\t\t\t\t\t\t\t<persName>\n");
 
-                            writerName.write(bufferName.toString());
+                            writerName.write(bufferMedicsName.toString());
+
+                            writerName.write("\t\t\t\t\t\t\t</persName>\n");
+                            writerName.write("\t\t\t\t\t\t</author>\n\n\t\t\t\t\t</analytic>");
+                            writerName.write("\n\t\t\t\t</biblStruct>\n\t\t\t</sourceDesc>\n\t\t</fileDesc>");
+                            writerName.write("\n\t</teiHeader>\n</tei>\n");
+                            writerName.close();
+                        }
+                    }*/
+
+            // HEADER PATIENTS' NAME model
+                    /*if (bufferPatientName != null) {
+                        if (bufferPatientName.length() > 0) {
+                            Writer writerName = new OutputStreamWriter(new FileOutputStream(new File(pathTEI +
+                                    File.separator
+                                    + pdfFileName.replace(".pdf", ".training.header.patients.tei.xml")), false), StandardCharsets.UTF_8);
+                            writerName.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                            writerName.write("\n<tei xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\"" + " xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
+                                    + "xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">");
+                            writerName.write("\n\t<teiHeader>\n\t\t<fileDesc>\n\t\t\t<sourceDesc>");
+                            writerName.write("\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n\n\t\t\t\t\t\t<author>");
+                            writerName.write("\n\t\t\t\t\t\t\t<persName>\n");
+
+                            writerName.write(bufferPatientName.toString());
 
                             writerName.write("\t\t\t\t\t\t\t</persName>\n");
                             writerName.write("\t\t\t\t\t\t</author>\n\n\t\t\t\t\t</analytic>");
@@ -1256,11 +1233,11 @@ public class FullMedicalTextParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            String fulltext = parsers.getMedicalReportParser().getAllLinesFeatured(doc);
+            String fulltext = parsers.getMedicalReportSegmenterParser().getAllLinesFeatured(doc);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // first, call the medical-report-segmenter model to have high level segmentation
-            doc = parsers.getMedicalReportParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
             // FULL-MEDICAL-TEXT MODEL (body part)
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
@@ -2036,6 +2013,104 @@ public class FullMedicalTextParser extends AbstractParser {
     }
 
     /**
+     * Ensure consistent use of callouts in the entire document body
+     */
+    private List<MarkerType> postProcessCallout(String result, LayoutTokenization layoutTokenization) {
+        if (layoutTokenization == null)
+            return null;
+
+        List<LayoutToken> tokenizations = layoutTokenization.getTokenization();
+
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FULLTEXT, result, tokenizations);
+        String tokenLabel = null;
+        List<TaggingTokenCluster> clusters = clusteror.cluster();
+
+        MarkerType majorityReferenceMarkerType = MarkerType.UNKNOWN;
+        MarkerType majorityFigureMarkerType = MarkerType.UNKNOWN;
+        MarkerType majorityTableMarkerType = MarkerType.UNKNOWN;
+        MarkerType majorityEquationarkerType = MarkerType.UNKNOWN;
+
+        Map<MarkerType,Integer> referenceMarkerTypeCounts = new HashMap<>();
+        Map<MarkerType,Integer> figureMarkerTypeCounts = new HashMap<>();
+        Map<MarkerType,Integer> tableMarkerTypeCounts = new HashMap<>();
+        Map<MarkerType,Integer> equationMarkerTypeCounts = new HashMap<>();
+
+        List<String> referenceMarkerSeen = new ArrayList<>();
+        List<String> figureMarkerSeen = new ArrayList<>();
+        List<String> tableMarkerSeen = new ArrayList<>();
+        List<String> equationMarkerSeen = new ArrayList<>();
+
+        for (TaggingTokenCluster cluster : clusters) {
+            if (cluster == null) {
+                continue;
+            }
+
+            TaggingLabel clusterLabel = cluster.getTaggingLabel();
+            if (TEIFormatter.MARKER_LABELS.contains(clusterLabel)) {
+                List<LayoutToken> refTokens = cluster.concatTokens();
+                refTokens = LayoutTokensUtil.dehyphenize(refTokens);
+                String refText = LayoutTokensUtil.toText(refTokens);
+                refText = refText.replace("\n", "");
+                refText = refText.replace(" ", "");
+                if (refText.trim().length() == 0)
+                    continue;
+
+               if (clusterLabel.equals(TaggingLabels.FIGURE_MARKER)) {
+                    if (figureMarkerSeen.contains(refText)) {
+                        // already seen reference marker sequence, we skip it
+                        continue;
+                    }
+                    MarkerType localMarkerType = CalloutAnalyzer.getCalloutType(refTokens);
+                    if (figureMarkerTypeCounts.get(localMarkerType) == null)
+                        figureMarkerTypeCounts.put(localMarkerType, 1);
+                    else
+                        figureMarkerTypeCounts.put(localMarkerType, figureMarkerTypeCounts.get(localMarkerType)+1);
+
+                    if (!figureMarkerSeen.contains(refText))
+                        figureMarkerSeen.add(refText);
+                } else if (clusterLabel.equals(TaggingLabels.TABLE_MARKER)) {
+                    if (tableMarkerSeen.contains(refText)) {
+                        // already seen reference marker sequence, we skip it
+                        continue;
+                    }
+                    MarkerType localMarkerType = CalloutAnalyzer.getCalloutType(refTokens);
+                    if (tableMarkerTypeCounts.get(localMarkerType) == null)
+                        tableMarkerTypeCounts.put(localMarkerType, 1);
+                    else
+                        tableMarkerTypeCounts.put(localMarkerType, tableMarkerTypeCounts.get(localMarkerType)+1);
+
+                    if (!tableMarkerSeen.contains(refText))
+                        tableMarkerSeen.add(refText);
+                }
+            }
+        }
+
+        majorityReferenceMarkerType = getBestType(referenceMarkerTypeCounts);
+        majorityFigureMarkerType = getBestType(figureMarkerTypeCounts);
+        majorityTableMarkerType = getBestType(tableMarkerTypeCounts);
+        majorityEquationarkerType = getBestType(equationMarkerTypeCounts);
+
+/*System.out.println("majorityReferenceMarkerType: " + majorityReferenceMarkerType);
+System.out.println("majorityFigureMarkerType: " + majorityFigureMarkerType);
+System.out.println("majorityTableMarkerType: " + majorityTableMarkerType);
+System.out.println("majorityEquationarkerType: " + majorityEquationarkerType);*/
+
+        return Arrays.asList(majorityReferenceMarkerType, majorityFigureMarkerType, majorityTableMarkerType, majorityEquationarkerType);
+    }
+
+    private static MarkerType getBestType(Map<MarkerType,Integer> markerTypeCount) {
+        MarkerType bestType = MarkerType.UNKNOWN;
+        int maxCount = 0;
+        for(Map.Entry<MarkerType,Integer> entry : markerTypeCount.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                bestType = entry.getKey();
+                maxCount = entry.getValue();
+            }
+        }
+        return bestType;
+    }
+
+    /**
      * Create the TEI representation for a document based on the parsed header, left-note
      * and body sections.
      */
@@ -2048,6 +2123,7 @@ public class FullMedicalTextParser extends AbstractParser {
                        LeftNoteMedicalItem resLeftNote,
                        List<Figure> figures,
                        List<Table> tables,
+                       List<CalloutAnalyzer.MarkerType> markerTypes,
                        GrobidAnalysisConfig config) {
         if (doc.getBlocks() == null) {
             return;
@@ -2061,7 +2137,7 @@ public class FullMedicalTextParser extends AbstractParser {
             //System.out.println(rese);
             //int mode = config.getFulltextProcessingMode();
             // body
-            tei = teiFormatter.toTEIBody(tei, reseBody, resHeader, layoutTokenization, figures, tables, doc, config);
+            tei = teiFormatter.toTEIBody(tei, reseBody, resHeader, layoutTokenization, figures, tables, markerTypes, doc, config);
 
             tei.append("\t\t<back>\n");
 
@@ -2084,7 +2160,7 @@ public class FullMedicalTextParser extends AbstractParser {
             }
 
             tei = teiFormatter.toTEIAnnex(tei, reseAnnex, resHeader,
-                tokenizationsAnnex, doc, config);
+                tokenizationsAnnex, markerTypes, doc, config);
 
             tei.append("\t\t</back>\n");
 
@@ -2256,7 +2332,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         .generateTeiCoordinates(elementCoordinates)
                         .withSentenceSegmentation(segmentSentences)
                         .build();
-                result = parsers.getLFullMedicalTextParser().processing(inputFile, config).getTei();
+                result = parsers.getFullMedicalTextParser().processing(inputFile, config).getTei();
 
                 StringBuilder tei = new StringBuilder();
                 tei.append(result);

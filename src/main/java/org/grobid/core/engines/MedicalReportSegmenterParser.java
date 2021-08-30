@@ -34,24 +34,29 @@ import static org.apache.commons.lang3.StringUtils.*;
  * This class realises a high level segmentation of medical reports into document header, page header,
  * page footer, left note, right note, document body, page, and acknowledgment.
  * <p>
+ * <p>
+ * Taken and adapted from the Segmentation class of Grobid (@author Patrice Lopez)
+ * <p>
  * Tanti, 2020
  */
-public class MedicalReportParser extends AbstractParser {
+public class MedicalReportSegmenterParser extends AbstractParser {
 
 	/*
-        9 labels for this model:
-            document header <front> : for document header
+        11 labels for this model:
+            cover page (<cover>): titlePage (optionally under front),
+            document header (<header>): front,
             page header (<headnote>): note type headnote,
             page footer (<footnote>): note type footnote,
             left note (<leftnote>): note type left,
             right note (<rightnote>): note type right,
             document body (<body>): body,
             page number (<page>): page,
+            annexes <annex>,
             acknowledgement (<acknowledgment>): acknowledgement,
             other (<other>): other
 	*/
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportSegmenterParser.class);
 
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
@@ -69,7 +74,7 @@ public class MedicalReportParser extends AbstractParser {
     private FeatureFactory featureFactory = FeatureFactory.getInstance();
 
 
-    public MedicalReportParser() {
+    public MedicalReportSegmenterParser() {
         super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
     }
 
@@ -130,6 +135,7 @@ public class MedicalReportParser extends AbstractParser {
     private void dealWithImages(DocumentSource documentSource, Document doc, File assetFile, GrobidAnalysisConfig config) {
         if (assetFile != null) {
             // copy the files under the directory pathXML+"_data" (the asset files) into the path specified by assetPath
+
             if (!assetFile.exists()) {
                 // we create it
                 if (assetFile.mkdir()) {
@@ -163,6 +169,7 @@ public class MedicalReportParser extends AbstractParser {
                             }
                         } else if (toLowerCaseName.endsWith(".jpg")
                             || toLowerCaseName.endsWith(".ppm")
+                            //	|| currFile.getName().toLowerCase().endsWith(".pbm")
                         ) {
 
                             String outputFilePath = "";
@@ -172,7 +179,12 @@ public class MedicalReportParser extends AbstractParser {
                                 if (toLowerCaseName.endsWith(".jpg")) {
                                     outputFilePath = assetFile.getPath() + File.separator +
                                         toLowerCaseName.replace(".jpg", ".png");
-                                } else {
+                                }
+                                /*else if (currFile.getName().toLowerCase().endsWith(".pbm")) {
+                                    outputFilePath = assetFile.getPath() + File.separator +
+                                         currFile.getName().toLowerCase().replace(".pbm",".png");
+                                }*/
+                                else {
                                     outputFilePath = assetFile.getPath() + File.separator +
                                         toLowerCaseName.replace(".ppm", ".png");
                                 }
@@ -229,6 +241,9 @@ public class MedicalReportParser extends AbstractParser {
         if (blocks.size() > GrobidProperties.getPdfBlocksMax()) {
             throw new GrobidException("Postprocessed document is too big, contains: " + blocks.size(), GrobidExceptionStatus.TOO_MANY_BLOCKS);
         }
+
+        //boolean graphicVector = false;
+        //boolean graphicBitmap = false;
 
         // list of textual patterns at the head and foot of pages which can be re-occur on several pages
         // (typically indicating a publisher foot or head notes)
@@ -295,13 +310,17 @@ public class MedicalReportParser extends AbstractParser {
             pageLength = page.getPageLengthChar();
             BoundingBox pageBoundingBox = page.getMainArea();
             mm = 0;
+            //endPage = true;
 
             if ((page.getBlocks() == null) || (page.getBlocks().size() == 0))
                 continue;
 
             for (int blockIndex = 0; blockIndex < page.getBlocks().size(); blockIndex++) {
                 Block block = page.getBlocks().get(blockIndex);
-
+                /*if (start) {
+                    newPage = true;
+                    start = false;
+                }*/
                 boolean graphicVector = false;
                 boolean graphicBitmap = false;
 
@@ -314,6 +333,13 @@ public class MedicalReportParser extends AbstractParser {
                 if (blockIndex == 0) {
                     firstPageBlock = true;
                 }
+
+                //endblock = false;
+
+                /*if (endPage) {
+                    newPage = true;
+                    mm = 0;
+                }*/
 
                 // check if we have a graphical object connected to the current block
                 List<GraphicObject> localImages = Document.getConnectedGraphics(block, doc);
@@ -363,6 +389,13 @@ public class MedicalReportParser extends AbstractParser {
                 }
                 for (int li = 0; li < lines.length; li++) {
                     String line = lines[li];
+                    /*boolean firstPageBlock = false;
+                    boolean lastPageBlock = false;
+                    if (newPage)
+                        firstPageBlock = true;
+                    if (endPage)
+                        lastPageBlock = true;
+                    */
 
                     // for the layout information of the block, we take simply the first layout token
                     LayoutToken token = null;
@@ -407,7 +440,11 @@ public class MedicalReportParser extends AbstractParser {
                     text = text.replaceAll("[ \n\r]", "");
                     text = text.trim();
 
-                    if ((text.length() == 0) || (TextUtilities.filterLine(line))) {
+                    if ((text.length() == 0) ||
+//                            (text.equals("\n")) ||
+//                            (text.equals("\r")) ||
+//                            (text.equals("\n\r")) ||
+                        (TextUtilities.filterLine(line))) {
                         continue;
                     }
 
@@ -416,6 +453,7 @@ public class MedicalReportParser extends AbstractParser {
 
                     features.firstPageBlock = firstPageBlock;
                     features.lastPageBlock = lastPageBlock;
+                    //features.lineLength = line.length() / LINESCALE;
                     features.lineLength = featureFactory
                         .linearScaling(line.length(), maxLineLength, LINESCALE);
 
@@ -436,6 +474,7 @@ public class MedicalReportParser extends AbstractParser {
                         features.blockStatus = "BLOCKSTART";
                     } else if (li == lines.length - 1) {
                         features.blockStatus = "BLOCKEND";
+                        //endblock = true;
                     } else if (features.blockStatus == null) {
                         features.blockStatus = "BLOCKIN";
                     }
@@ -443,11 +482,13 @@ public class MedicalReportParser extends AbstractParser {
                     if (newPage) {
                         features.pageStatus = "PAGESTART";
                         newPage = false;
+                        //endPage = false;
                         if (previousFeatures != null)
                             previousFeatures.pageStatus = "PAGEEND";
                     } else {
                         features.pageStatus = "PAGEIN";
                         newPage = false;
+                        //endPage = false;
                     }
 
                     if (text.length() == 1) {
@@ -665,8 +706,8 @@ public class MedicalReportParser extends AbstractParser {
         DocumentSource documentSource = null;
         try {
             File file = new File(inputFile);
-            GrobidAnalysisConfig config =
-                new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder().build();
+            /*GrobidAnalysisConfig config =
+                new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder().build();*/
             /*documentSource = DocumentSource.fromPdf(file, config.getStartPage(), config.getEndPage());*/
 
             documentSource = DocumentSource.fromPdf(file, -1, -1, true, true, true);
@@ -753,7 +794,7 @@ public class MedicalReportParser extends AbstractParser {
 
             // we write the full text untagged (but featurized)
             String outPathFulltext = outputFile + File.separator +
-                PDFFileName.replace(".pdf", ".training.medical");
+                PDFFileName.replace(".pdf", ".training.medical.blank");
             Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFulltext), false), "UTF-8");
             writer.write(fulltext + "\n");
             writer.close();
@@ -841,7 +882,7 @@ public class MedicalReportParser extends AbstractParser {
                     i++;
                 }
 
-                // as we process the medical document line by line, we don't use the usual
+                // as we process the document segmentation line by line, we don't use the usual
                 // tokenization to rebuild the text flow, but we get each line again from the
                 // text stored in the document blocks (similarly as when generating the features)
                 line = null;
@@ -911,36 +952,50 @@ public class MedicalReportParser extends AbstractParser {
 
                 boolean output;
 
-                output = writeField(buffer, line, s1, lastTag0, s2, "<header>", "<front>", addSpace, 3);
+                output = writeField(buffer, line, s1, lastTag0, s2, "<cover>", "<titlePage>", addSpace, 3);
 
                 if (!output) {
-                    output = writeField(buffer, line, s1, lastTag0, s2, "<other>", "", addSpace, 3);
+                    output = writeField(buffer, line, s1, lastTag0, s2, "<header>", "<front>", addSpace, 3);
                 }
 
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<headnote>", "<note place=\"headnote\">",
                         addSpace, 3);
                 }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<footnote>", "<note place=\"footnote\">",
                         addSpace, 3);
                 }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<leftnote>", "<note place=\"left\">",
                         addSpace, 3);
                 }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<rightnote>", "<note place=\"right\">",
                         addSpace, 3);
                 }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<page>", "<page>", addSpace, 3);
                 }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<body>", "<body>", addSpace, 3);
                 }
+
+                if (!output) {
+                    output = writeField(buffer, line, s1, lastTag0, s2, "<annex>", "<div type=\"annex\">", addSpace, 3);
+                }
+
                 if (!output) {
                     output = writeField(buffer, line, s1, lastTag0, s2, "<acknowledgement>", "<div type=\"acknowledgement\">", addSpace, 3);
+                }
+
+                if (!output) {
+                    output = writeField(buffer, line, s1, lastTag0, s2, "<other>", "", addSpace, 3);
                 }
 
                 lastTag = s1;
@@ -1000,7 +1055,10 @@ public class MedicalReportParser extends AbstractParser {
                     buffer.append("\t");
                 }
                 buffer.append(outField).append(line);
-            }
+            } /*else {
+                // otherwise we continue by ouputting the token
+                buffer.append(line);
+            }*/
         }
         return result;
     }
@@ -1017,27 +1075,42 @@ public class MedicalReportParser extends AbstractParser {
                                    String lastTag0,
                                    String currentTag) {
         boolean res = false;
+        // reference_marker and citation_marker are two exceptions because they can be embedded
 
         if (!currentTag0.equals(lastTag0)) {
 
             res = false;
             // we close the current tag
-            if (lastTag0.equals("<header>")) {
+            if (lastTag0.equals("<cover>")) {
+                buffer.append("</titlePage>\n\n");
+                res = true;
+            } else if (lastTag0.equals("<header>")) {
                 buffer.append("</front>\n\n");
+                res = true;
             } else if (lastTag0.equals("<body>")) {
                 buffer.append("</body>\n\n");
+                res = true;
             } else if (lastTag0.equals("<headnote>")) {
                 buffer.append("</note>\n\n");
+                res = true;
             } else if (lastTag0.equals("<footnote>")) {
                 buffer.append("</note>\n\n");
+                res = true;
             } else if (lastTag0.equals("<leftnote>")) {
                 buffer.append("</note>\n\n");
+                res = true;
             } else if (lastTag0.equals("<rightnote>")) {
                 buffer.append("</note>\n\n");
+                res = true;
             } else if (lastTag0.equals("<page>")) {
                 buffer.append("</page>\n\n");
+                res = true;
+            } else if (lastTag0.equals("<annex>")) {
+                buffer.append("</div>\n\n");
+                res = true;
             } else if (lastTag0.equals("<acknowledgement>")) {
                 buffer.append("</div>\n\n");
+                res = true;
             } else if (lastTag0.equals("<other>")) {
                 buffer.append("\n\n");
             } else {

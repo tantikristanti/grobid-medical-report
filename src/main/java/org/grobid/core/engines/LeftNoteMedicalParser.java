@@ -81,7 +81,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
-            Document doc = parsers.getMedicalReportParser().processing(documentSource, config);
+            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
             String tei = processingLeftNoteSection(config, doc, resLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
@@ -1081,7 +1081,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             // segment first with medical report segmenter model
-            doc = parsers.getMedicalReportParser().processing(documentSource, config);
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
             // retreive only the left-note part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
@@ -1186,7 +1186,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             // segment first with medical report segmenter model
-            doc = parsers.getMedicalReportParser().processing(documentSource, config);
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
             // retreive only the left-note part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
@@ -1344,7 +1344,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             // general segmentation
-            doc = parsers.getMedicalReportParser().processing(documentSource, config);
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
             List<LayoutToken> tokenizations = doc.getTokenizations();
 

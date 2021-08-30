@@ -31,5 +31,9 @@ build.xml
 maven-build.xml
 release.properties
 
+resources/corpus
 resources/dataset
-resources/models/
+resources/lexicon
+resources/models
+
+

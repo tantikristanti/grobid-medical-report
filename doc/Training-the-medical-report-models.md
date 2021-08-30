@@ -16,6 +16,8 @@ The models prepared are:
 
 - [x] full-medical-text
 
+- [ ] French medical NER 
+
 - [ ] organization-medical-report
 
 - [ ] medic
@@ -112,7 +114,7 @@ To generate a new training data, under the project directory `grobid/grobid-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
-Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`.
+Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`, `createMedicalNerTraining`.
 
 An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
 ```bash
@@ -132,6 +134,11 @@ An example of a command for generating a new training data for the __left-note-m
 An example of a command for generating a new training data for the __full-medical-text__ model:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
+```
+
+An example of a command for generating a new training data for the __fr-medical-NER__ model:
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createMedicalNerTraining
 ```
 
 <!---Note for developers:

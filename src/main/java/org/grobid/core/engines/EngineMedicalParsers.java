@@ -11,24 +11,27 @@ import java.io.IOException;
 public class EngineMedicalParsers extends EngineParsers {
     public static final Logger LOGGER = LoggerFactory.getLogger(EngineMedicalParsers.class);
 
-    private MedicalReportParser medicalReportParser = null;
+    private MedicalReportSegmenterParser medicalReportSegmenterParser = null;
     private HeaderMedicalParser headerMedicalParser = null;
     private LeftNoteMedicalParser leftNoteMedicalParser = null;
     private FullMedicalTextParser fullTextParser = null;
+    private FrenchMedicalNERParser frenchMedicalNERParser = null;
     private MedicParser medicParser = null;
     private PatientParser patientParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
     private DateParser dateParser = null;
+    private NEREnParser nerParser = null;
+    private NERFrParser nerFrParser = null;
 
-    public MedicalReportParser getMedicalReportParser() {
-        if (medicalReportParser == null) {
+    public MedicalReportSegmenterParser getMedicalReportSegmenterParser() {
+        if (medicalReportSegmenterParser == null) {
             synchronized (this) {
-                if (medicalReportParser == null) {
-                    medicalReportParser = new MedicalReportParser();
+                if (medicalReportSegmenterParser == null) {
+                    medicalReportSegmenterParser = new MedicalReportSegmenterParser();
                 }
             }
         }
-        return medicalReportParser;
+        return medicalReportSegmenterParser;
     }
 
     public HeaderMedicalParser getHeaderMedicalParser() {
@@ -53,7 +56,7 @@ public class EngineMedicalParsers extends EngineParsers {
         return leftNoteMedicalParser;
     }
 
-    public FullMedicalTextParser getLFullMedicalTextParser() {
+    public FullMedicalTextParser getFullMedicalTextParser() {
         if (fullTextParser == null) {
             synchronized (this) {
                 if (fullTextParser == null) {
@@ -62,6 +65,39 @@ public class EngineMedicalParsers extends EngineParsers {
             }
         }
         return fullTextParser;
+    }
+
+    public FrenchMedicalNERParser getFrenchMedicalNERParser() {
+        if (frenchMedicalNERParser == null) {
+            synchronized (this) {
+                if (frenchMedicalNERParser == null) {
+                    frenchMedicalNERParser = new FrenchMedicalNERParser(this);
+                }
+            }
+        }
+        return frenchMedicalNERParser;
+    }
+
+    public NEREnParser getNerParser() {
+        if (nerParser == null) {
+            synchronized (this) {
+                if (nerParser == null) {
+                    nerParser = new NEREnParser();
+                }
+            }
+        }
+        return  nerParser;
+    }
+
+    public NERFrParser getNerFrParser() {
+        if (nerFrParser == null) {
+            synchronized (this) {
+                if (nerFrParser == null) {
+                    nerFrParser = new NERFrParser();
+                }
+            }
+        }
+        return nerFrParser;
     }
 
     public MedicParser getMedicParser() {
@@ -124,10 +160,11 @@ public class EngineMedicalParsers extends EngineParsers {
      * Init all model, this will also load the model into memory
      */
     public void initAll() {
-        medicalReportParser = getMedicalReportParser();
+        medicalReportSegmenterParser = getMedicalReportSegmenterParser();
         headerMedicalParser = getHeaderMedicalParser();
         leftNoteMedicalParser = getLeftNoteMedicalParser();
-        fullTextParser = getLFullMedicalTextParser();
+        fullTextParser = getFullMedicalTextParser();
+        frenchMedicalNERParser = getFrenchMedicalNERParser();
         affiliationAddressParser = getAffiliationAddressParser();
         // personParser = getPersonParser();
         dateParser = getDateParser();
@@ -138,9 +175,9 @@ public class EngineMedicalParsers extends EngineParsers {
     public void close() throws IOException {
         LOGGER.debug("==> Closing all resources...");
 
-        if (medicalReportParser != null) {
-            medicalReportParser.close();
-            medicalReportParser = null;
+        if (medicalReportSegmenterParser != null) {
+            medicalReportSegmenterParser.close();
+            medicalReportSegmenterParser = null;
             LOGGER.debug("CLOSING medicalReportSegmenterParser");
         }
 
@@ -160,6 +197,12 @@ public class EngineMedicalParsers extends EngineParsers {
             fullTextParser.close();
             fullTextParser = null;
             LOGGER.debug("CLOSING fullMedicalTextParser");
+        }
+
+        if (frenchMedicalNERParser != null) {
+            frenchMedicalNERParser.close();
+            frenchMedicalNERParser = null;
+            LOGGER.debug("CLOSING frenchMedicalNERParser");
         }
 
         if (affiliationAddressParser != null) {
@@ -185,6 +228,18 @@ public class EngineMedicalParsers extends EngineParsers {
             bodyMedicalParser = null;
             LOGGER.debug("CLOSING bodyMedicalParser");
         }*/
+
+        if (nerParser != null) {
+            nerParser.close();
+            nerParser = null;
+            LOGGER.debug("CLOSING nerParser");
+        }
+
+        if (nerFrParser != null) {
+            nerFrParser.close();
+            nerFrParser = null;
+            LOGGER.debug("CLOSING nerFrParser");
+        }
 
         LOGGER.debug("==> All resources closed");
 

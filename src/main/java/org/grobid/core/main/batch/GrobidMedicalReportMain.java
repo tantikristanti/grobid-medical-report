@@ -31,11 +31,10 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
     private static final String COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT = "createTrainingFullMedicalText";
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
-    private static final String COMMAND_PROCESS_HEADER  = "processHeaderUser";
+    private static final String COMMAND_PROCESS_HEADER = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
     private static final String COMMAND_PROCESS_FULL_TEXT = "processFulltextMedical";
-
-
+    private static final String COMMAND_CREATE_MEDICAL_NER_TRAINING = "createMedicalNerTraining";
 
     private static List<String> availableCommands = Arrays.asList(
         COMMAND_CREATE_TRAINING_SEGMENTATION,
@@ -45,13 +44,14 @@ public class GrobidMedicalReportMain {
         COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
-        COMMAND_PROCESS_FULL_TEXT
+        COMMAND_PROCESS_FULL_TEXT,
+        COMMAND_CREATE_MEDICAL_NER_TRAINING
     );
 
     /**
      * Arguments of the batch.
      */
-    private static GrobidMainArgs gbdArgs;
+    private static GrobidMedicalReportMainArgs gbdArgs;
 
 
     /**
@@ -74,7 +74,7 @@ public class GrobidMedicalReportMain {
             try {
                 ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
                 medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("The config file does not appear valid, see resources/config/grobid-medical-report.yaml", e);
             }
 
@@ -243,7 +243,7 @@ public class GrobidMedicalReportMain {
     }
 
     public static void main(final String[] args) throws Exception {
-        gbdArgs = new GrobidMainArgs();
+        gbdArgs = new GrobidMedicalReportMainArgs();
 
         if (processArgs(args) && (gbdArgs.getProcessMethodName() != null)) {
             inferParamsNotSet();
@@ -260,13 +260,13 @@ public class GrobidMedicalReportMain {
             EngineMedicalParsers parsers = new EngineMedicalParsers();
 
             if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                nb = parsers.getMedicalReportParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
                 nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT)) {
-                nb = parsers.getLFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER_HIGH_LEVEL)) {
                 nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
@@ -274,8 +274,10 @@ public class GrobidMedicalReportMain {
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().processLeftNoteDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_FULL_TEXT)) {
-                nb = parsers.getLFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
-                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(),  gbdArgs.getSegmentSentences(), -1);
+                nb = parsers.getFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
+                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
+                nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");
             }

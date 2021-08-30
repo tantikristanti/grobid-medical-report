@@ -15,6 +15,7 @@ import org.grobid.core.data.Date;
 import org.grobid.core.document.xml.XmlBuilderUtils;
 import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.FullMedicalTextParser;
+import org.grobid.core.engines.citations.CalloutAnalyzer;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -91,13 +92,46 @@ public class TEIFormatter {
 
     public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      String defaultPublicationStatement,
+                                     List<CalloutAnalyzer.MarkerType> markerTypes,
                                      GrobidAnalysisConfig config) {
-        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement,  config);
+        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement,  markerTypes, config);
+    }
+
+    public static String toISOString(Date date) {
+        int year = date.getYear();
+        int month = date.getMonth();
+        int day = date.getDay();
+
+        String when = "";
+        if (year != -1) {
+            if (year <= 9)
+                when += "000" + year;
+            else if (year <= 99)
+                when += "00" + year;
+            else if (year <= 999)
+                when += "0" + year;
+            else
+                when += year;
+            if (month != -1) {
+                if (month <= 9)
+                    when += "-0" + month;
+                else
+                    when += "-" + month;
+                if (day != -1) {
+                    if (day <= 9)
+                        when += "-0" + day;
+                    else
+                        when += "-" + day;
+                }
+            }
+        }
+        return when;
     }
 
     public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
                                      SchemaDeclaration schemaDeclaration,
                                      String defaultPublicationStatement,
+                                     List<CalloutAnalyzer.MarkerType> markerTypes,
                                      GrobidAnalysisConfig config) {
         StringBuilder tei = new StringBuilder();
         tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -760,6 +794,7 @@ public class TEIFormatter {
                                    LayoutTokenization layoutTokenization,
                                    List<Figure> figures,
                                    List<Table> tables,
+                                   List<CalloutAnalyzer.MarkerType> markerTypes,
                                    Document doc,
                                    GrobidAnalysisConfig config) throws Exception {
         if ((result == null) || (layoutTokenization == null) || (layoutTokenization.getTokenization() == null)) {
@@ -768,10 +803,10 @@ public class TEIFormatter {
         }
         buffer.append("\t\t<body>\n");
         buffer = toTEITextPiece(buffer, result, headerItem,true,
-            layoutTokenization, figures, tables, doc, config);
+            layoutTokenization, figures, tables, markerTypes, doc, config);
 
         // notes are still in the body
-        buffer = toTEINote(buffer, doc, config);
+        buffer = toTEINote(buffer, doc, markerTypes, config);
 
         buffer.append("\t\t</body>\n");
 
@@ -780,15 +815,16 @@ public class TEIFormatter {
 
     private StringBuilder toTEINote(StringBuilder tei,
                                     Document doc,
+                                    List<CalloutAnalyzer.MarkerType> markerTypes,
                                     GrobidAnalysisConfig config) throws Exception {
         // write the notes
         SortedSet<DocumentPiece> documentNoteParts = doc.getDocumentPart(MedicalLabels.FOOTNOTE);
         if (documentNoteParts != null) {
-            tei = toTEINote("foot", documentNoteParts, tei, doc, config);
+            tei = toTEINote("foot", documentNoteParts, tei, markerTypes, doc, config);
         }
-        documentNoteParts = doc.getDocumentPart(MedicalLabels.MARGINNOTE);
+        documentNoteParts = doc.getDocumentPart(MedicalLabels.HEADNOTE);
         if (documentNoteParts != null) {
-            tei = toTEINote("margin", documentNoteParts, tei, doc, config);
+            tei = toTEINote("head", documentNoteParts, tei, markerTypes, doc, config);
         }
         return tei;
     }
@@ -796,6 +832,7 @@ public class TEIFormatter {
     private StringBuilder toTEINote(String noteType,
                                     SortedSet<DocumentPiece> documentNoteParts,
                                     StringBuilder tei,
+                                    List<CalloutAnalyzer.MarkerType> markerTypes,
                                     Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
         List<String> allNotes = new ArrayList<>();
@@ -885,7 +922,7 @@ public class TEIFormatter {
         StringBuilder buffer2 = new StringBuilder();
 
         buffer2 = toTEITextPiece(buffer2, reseAcknowledgement, null, false,
-            new LayoutTokenization(tokenizationsAcknowledgement), null, null, doc, config);
+            new LayoutTokenization(tokenizationsAcknowledgement), null, null, null, doc, config);
         String acknowResult = buffer2.toString();
         String[] acknowResultLines = acknowResult.split("\n");
         boolean extraDiv = false;
@@ -906,6 +943,7 @@ public class TEIFormatter {
                                     String result,
                                     HeaderMedicalItem headerItem,
                                     List<LayoutToken> tokenizations,
+                                    List<CalloutAnalyzer.MarkerType> markerTypes,
                                     Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
         if ((result == null) || (tokenizations == null)) {
@@ -914,7 +952,7 @@ public class TEIFormatter {
 
         buffer.append("\t\t\t<div type=\"annex\">\n");
         buffer = toTEITextPiece(buffer, result, headerItem, true,
-            new LayoutTokenization(tokenizations), null, null, doc, config);
+            new LayoutTokenization(tokenizations), null, null, markerTypes, doc, config);
         buffer.append("\t\t\t</div>\n");
 
         return buffer;
@@ -927,6 +965,7 @@ public class TEIFormatter {
                                         LayoutTokenization layoutTokenization,
                                         List<Figure> figures,
                                         List<Table> tables,
+                                        List<CalloutAnalyzer.MarkerType> markerTypes,
                                         Document doc,
                                         GrobidAnalysisConfig config) throws Exception {
         TaggingLabel lastClusterLabel = null;
@@ -1056,6 +1095,10 @@ public class TEIFormatter {
                 parent.appendChild(new Text(" "));
 
                 List<Node> refNodes;
+                CalloutAnalyzer.MarkerType citationMarkerType = null;
+                if (markerTypes != null && markerTypes.size()>0) {
+                    citationMarkerType = markerTypes.get(0);
+                }
                 if (clusterLabel.equals(MedicalLabels.FIGURE_MARKER)) {
                     refNodes = markReferencesFigureTEI(chunkRefString, refTokens, figures,
                         config.isGenerateTeiCoordinates("ref"));
@@ -1136,7 +1179,7 @@ public class TEIFormatter {
 
         if (figures != null) {
             for (Figure figure : figures) {
-                String figSeg = figure.toTEI(config, doc, this);
+                String figSeg = figure.toTEI(config, doc, this, markerTypes);
                 if (figSeg != null) {
                     buffer.append(figSeg).append("\n");
                 }
@@ -1144,7 +1187,7 @@ public class TEIFormatter {
         }
         if (tables != null) {
             for (Table table : tables) {
-                String tabSeg = table.toTEI(config, doc, this);
+                String tabSeg = table.toTEI(config, doc, this, markerTypes);
                 if (tabSeg != null) {
                     buffer.append(tabSeg).append("\n");
                 }

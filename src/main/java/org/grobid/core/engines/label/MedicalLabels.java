@@ -14,6 +14,7 @@ public class MedicalLabels extends TaggingLabels {
     }
 
     // grobid-medical-report segmenter labels
+    public final static String TITLE_PAGE_LABEL = "<titlePage>";
     public final static String HEADER_LABEL = "<header>";
     public final static String HEADNOTE_LABEL = "<headnote>";
     public final static String FOOTNOTE_LABEL = "<footnote>";
@@ -74,6 +75,7 @@ public class MedicalLabels extends TaggingLabels {
      */
 
     // Medical Report Segmenter Model
+    public static final TaggingLabel TITLE_PAGE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, TITLE_PAGE_LABEL);
     public static final TaggingLabel HEADER = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, HEADER_LABEL);
     public static final TaggingLabel HEADNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, HEADNOTE_LABEL);
     public static final TaggingLabel FOOTNOTE = new TaggingLabelImpl(GrobidModels.MEDICAL_REPORT_SEGMENTER, FOOTNOTE_LABEL);
@@ -142,6 +144,7 @@ public class MedicalLabels extends TaggingLabels {
 
     static {
         // medical-report-segmenter
+        register(TITLE_PAGE);
         register(HEADER);
         register(HEADNOTE);
         register(FOOTNOTE);

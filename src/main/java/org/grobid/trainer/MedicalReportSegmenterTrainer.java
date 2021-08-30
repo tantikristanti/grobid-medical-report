@@ -8,7 +8,7 @@ import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
-import org.grobid.trainer.sax.TEIMedicalSaxParser;
+import org.grobid.trainer.sax.TEIMedicalReportSegmenterSaxParser;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -24,8 +24,6 @@ import java.util.StringTokenizer;
  */
 public class MedicalReportSegmenterTrainer extends AbstractTrainer {
 
-    private MedicalReportConfiguration medicalReportConfiguration = null;
-
     public MedicalReportSegmenterTrainer() {
         super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
     }
@@ -35,10 +33,6 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
         return addFeaturesMedical(corpusPath.getAbsolutePath() + "/tei",
             corpusPath.getAbsolutePath() + "/raw",
             outputFile, null, 1.0);
-    }
-
-    public void setMedicalReportConfiguration(MedicalReportConfiguration config) {
-        this.medicalReportConfiguration = config;
     }
 
     /**
@@ -122,7 +116,7 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
                 String name = tf.getName();
                 LOGGER.info("Processing: " + name);
 
-                TEIMedicalSaxParser parser2 = new TEIMedicalSaxParser();
+                TEIMedicalReportSegmenterSaxParser parser2 = new TEIMedicalReportSegmenterSaxParser();
 
                 //get a new instance of parser
                 SAXParser p = spf.newSAXParser();

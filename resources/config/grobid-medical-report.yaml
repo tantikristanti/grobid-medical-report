@@ -37,7 +37,6 @@ models:
       window: 30
       nbMaxIterations: 1500
 
-
   - name: "left-note-medical-report"
     engine: "wapiti"
     wapiti:
@@ -46,3 +45,28 @@ models:
       window: 30
       nbMaxIterations: 1500
 
+  - name: "fr-medical-ner"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+
+  - name: "ner"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 50
+      nbMaxIterations: 1000
+
+  - name: "nerfr"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
