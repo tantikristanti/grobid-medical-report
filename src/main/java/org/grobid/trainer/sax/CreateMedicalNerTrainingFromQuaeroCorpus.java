@@ -115,7 +115,6 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                 }
 
                 if (quaeroDocuments != null && quaeroDocuments.size() > 0) {
-
                     for (int i = 0; i < quaeroDocuments.size(); i++) {
                         String docId = quaeroDocuments.get(i).getId().replace(" ", "_");
                         String theTextOriginal = quaeroDocuments.get(i).getText();
@@ -154,7 +153,7 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                     sbContent.append(TextUtilities.HTMLEncode(entityText));
                                     sbContent.append("</ENAMEX>");
                                 }
-                                if (entityStart + tagLengthSum >= 0) {
+                                if (entityStart + tagLengthSum > 0) {
                                     String textBefore = theText.substring(0, entityStart + tagLengthSum);
                                     String textAfter = theText.substring(entityEnd + tagLengthSum);
                                     theText = textBefore + sbContent.toString() + textAfter;
@@ -309,10 +308,10 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
     }
 
     public static void main(String[] args) {
-        String inputDirectory = "resources/corpus/Quaero/Example";
-        String outputDirectory = "resources/corpus/Quaero/Example/Results";
-        /*String inputDirectory = "resources/corpus/Quaero/Example/Short";
-        String outputDirectory = "resources/corpus/Quaero/Example/Short";*/
+        /*String inputDirectory = "resources/corpus/Quaero/Example";
+        String outputDirectory = "resources/corpus/Quaero/Example/Results";*/
+        String inputDirectory = "resources/corpus/Quaero/Example/Short";
+        String outputDirectory = "resources/corpus/Quaero/Example/Short";
         CreateMedicalNerTrainingFromQuaeroCorpus createMedicalLexiconFromQuaeroCorpus = new CreateMedicalNerTrainingFromQuaeroCorpus();
         createMedicalLexiconFromQuaeroCorpus.createMedicalNerTraining(inputDirectory, outputDirectory);
     }

@@ -31,7 +31,8 @@ build.xml
 maven-build.xml
 release.properties
 
-resources/corpus
+resources/corpus/Quaero
+resources/corpus/*
 resources/dataset
 resources/lexicon
 resources/models
