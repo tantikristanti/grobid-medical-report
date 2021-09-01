@@ -1,64 +1,37 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        //classpath group: 'net.researchgate', name: 'gradle-release', version: '2.8.1'
-        classpath 'gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.10.1'
-        //classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:6.0.0'
-        classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
-    }
+plugins {
+    id 'java'
+    id 'maven'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
-
 
 repositories {
     mavenLocal()
     mavenCentral()
-    //jcenter()
-    /*maven { url "https://dl.bintray.com/rookies/maven" }
     maven { url "https://jitpack.io" }
-    maven { url "http://oss.jfrog.org/artifactory/libs-snapshot" }
-    maven { url "http://oss.jfrog.org/artifactory/libs-release" }*/
     flatDir {
         dirs 'localLibs'
     }
 }
 
-//apply plugin: 'net.researchgate.release'
-apply plugin: 'maven'
-//apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
-apply plugin: 'war'
-apply from: 'https://raw.github.com/gretty-gradle-plugin/gretty/master/pluginScripts/gretty.plugin'
-
-group = "org.grobid"
-version = '0.0.1'
-description = "grobid-medical-report is a GROBID module for extracting and structuring medical documents (e.g. text, PDF) into structured XML/TEI encoded documents."
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
 dependencies {
+    implementation(group: 'xml-apis', name: 'xml-apis') {
+        // otherwise xml-apis 2.0.1 will come from XOM and will result in
+        // java.lang.ClassNotFoundException: org.w3c.dom.ElementTraversal
+        //TODO: sort out this problem better
+        version {
+            strictly '1.4.01'
+        }
+    }
+
     //Unit tests
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.easymock:easymock:4.0.2'
     testImplementation 'org.hamcrest:hamcrest-all:1.3'
-    testImplementation group: 'org.easymock', name: 'easymock', version: '3.4'
+
     testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
     testImplementation 'org.powermock:powermock-api-easymock:2.0.7'
     testImplementation 'xmlunit:xmlunit:1.6'
-    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+
 
     //GROBID (.m2/repository/org/grobid/)
     implementation 'org.grobid:grobid-core:0.7.1-SNAPSHOT'
@@ -110,37 +83,33 @@ dependencies {
     implementation 'net.arnx:jsonic:1.3.5'
 }
 
+group = "org.grobid"
+version = '0.0.1'
+description = "grobid-medical-report is a GROBID module for extracting and structuring medical documents (e.g. text, PDF) into structured XML/TEI encoded documents."
+
+sourceCompatibility = '1.8'
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 configurations {
-    compile.exclude group: "org.slf4j", module: "slf4j-jdk14"
-    compile.exclude group: 'org.slf4j', module: "slf4j-log4j12"
-    compile.exclude group: 'log4j', module: "log4j"
-}
-
-configurations.all {
-    resolutionStrategy {
-        force 'xml-apis:xml-apis:1.4.01'
-    }
-}
-
-// Gretty configuration
-
-gretty {
-    httpPort = 8080
-    contextPath = '/'
-    servletContainer = "jetty9.4"
+    implementation.exclude group: "org.slf4j", module: "slf4j-jdk14"
+    implementation.exclude group: 'org.slf4j', module: "slf4j-log4j12"
+    implementation.exclude group: 'log4j', module: "log4j"
 }
 
 
-test {
-    exclude '**/**IntegrationTest**'
+// Copy the model
+task copyModels(type: Copy) {
+    from "${rootDir}/resources/models"
+    include "*"
+    into "${rootDir}/../grobid-home/models/"
 }
 
-task integration(type: Test) {
-    include '**'
-}
 
-// Training configuration
-
+/** Training configuration **/
 def trainerTasks = [
     //Training models
     "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
@@ -162,11 +131,13 @@ ext.getArg = { propName, defaultVal ->
     return project.hasProperty(propName) ? project.getProperty(propName) : defaultVal;
 }
 
-// Copy the model
-task copyModels(type: Copy) {
-    from "${rootDir}/resources/models"
-    include "*"
-    into "${rootDir}/../grobid-home/models/"
+// Train and evaluation NER
+// run like: gradle trainEvalNer -gH /path/to/grobid-home
+task trainEvalNer(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    main = 'org.grobid.trainer.NERTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 2, 'ner', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    jvmArgs '-Xmx3072m'
 }
 
 // Evaluation
@@ -251,39 +222,46 @@ task eval_fr_medical_ner_split(dependsOn: 'classes', type: JavaExec, group: 'tra
     jvmArgs '-Xmx3072m'
 }
 
-// One jar configuration
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-/*shadowJar {
-    classifier = 'onejar'
+task mainJar(type: ShadowJar, group: 'test') {
     zip64 true
-    manifest {
-        attributes 'Main-Class': 'org.grobid.core.main.batch.MedicalReportMain'
+    from sourceSets.main.output
+    from {
+        project.configurations.compile.collect {
+//            it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
+        }
     }
-}*/
+}
 
 shadowJar {
-    archiveClassifier = 'onejar'
-    mergeServiceFiles()
+    classifier = 'onejar'
     zip64 true
     manifest {
         attributes 'Main-Class': 'org.grobid.core.main.batch.GrobidMedicalReportMain'
     }
-    from sourceSets.main.output
+}
+
+jar {
+    dependsOn mainJar
+    enabled false
 }
 
 artifacts {
     archives shadowJar
-//    archives mainJar
+    archives mainJar
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-Xlint:deprecation"
-    options.compilerArgs << "-Xlint:unchecked"
-}
-
+/*gretty {
+    httpPort = 8080
+    contextPath = '/'
+    servletContainer = "jetty9.4"
+}*/
 
 wrapper {
-    gradleVersion "6.5.1"
+    gradleVersion "7.1.1"
 }
 
 build.dependsOn project.getSubprojects().collect({ it.getTasks().getByName("build") })
+
+
