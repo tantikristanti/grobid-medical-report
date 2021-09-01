@@ -63,7 +63,7 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
 
             for (final File file : refFiles) {
                 try {
-                    createTrainingBioC_GrobidNerFormat(file, output, tokenizer);
+                    createTrainingBioC_Xml(file, output, tokenizer);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -74,7 +74,7 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
         }
     }
 
-    public void createTrainingBioC_GrobidNerFormat(File inputFile, String pathOutput, AbstractTokenizer tokenizer) {
+    public void createTrainingBioC_Xml(File inputFile, String pathOutput, AbstractTokenizer tokenizer) {
         try {
             if (!inputFile.exists()) {
                 throw new GrobidResourceException("Cannot create medical NER training datasets from the Quaero French Medical Corpus, because file '" +
@@ -114,21 +114,29 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                     }
                 }
 
+                outputTrainingFile = new File(pathOutput + File.separator + inputFile.getName() + ".training.french.medical.ner.tei.xml");
+                writer = new OutputStreamWriter(new FileOutputStream(outputTrainingFile, false), StandardCharsets.UTF_8);
+                StringBuilder sbAll = new StringBuilder(), sbHeader = new StringBuilder(), sbAfter = new StringBuilder(), sbContents = new StringBuilder();
+
+                sbHeader.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                sbHeader.append("<corpus>\n");
+                sbAll.append(sbHeader);
                 if (quaeroDocuments != null && quaeroDocuments.size() > 0) {
                     for (int i = 0; i < quaeroDocuments.size(); i++) {
                         String docId = quaeroDocuments.get(i).getId().replace(" ", "_");
                         String theTextOriginal = quaeroDocuments.get(i).getText();
                         String theText = theTextOriginal;
                         //System.out.println("Document ID : " + docId + "; Text : " + theTextOriginal);
-                        outputTrainingFile = new File(pathOutput + File.separator + docId + ".training.french.medical.ner.tei.xml");
-                        writer = new OutputStreamWriter(new FileOutputStream(outputTrainingFile, false), StandardCharsets.UTF_8);
+                        // each document has one output file
+                        //outputTrainingFile = new File(pathOutput + File.separator + docId + ".training.french.medical.ner.tei.xml");
+                        //writer = new OutputStreamWriter(new FileOutputStream(outputTrainingFile, false), StandardCharsets.UTF_8);
 
-                        StringBuilder sbAll = new StringBuilder(), sbBefore = new StringBuilder(), sbAfter = new StringBuilder(), sbContents = new StringBuilder();
+                        /*StringBuilder sbAll = new StringBuilder(), sbBefore = new StringBuilder(), sbAfter = new StringBuilder(), sbContents = new StringBuilder();
 
                         sbBefore.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                        sbBefore.append("\t<document name=\"" + docId + "\"" + " xml:lang=\"" + Language.FR + "\">\n");
-                        sbBefore.append("\t\t<corpus>\n");
-                        sbAll.append(sbBefore);
+                        sbBefore.append("\t\t<corpus>\n");*/
+
+                        sbAll.append("\t<document name=\"" + docId + "\"" + " xml:lang=\"" + Language.FR + "\">\n");
 
                         if (quaeroDocuments.get(i).getEntities() != null && quaeroDocuments.get(i).getEntities().size() != 0) {
                             quaeroEntities = quaeroDocuments.get(i).getEntities();
@@ -142,8 +150,8 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                 int length = entity.getLength();
                                 int entityEnd = entityStart + length;
                                 boolean isNested = entity.isNestedEntity();
-                                //String entityTextCut = theText.substring(entityStart, entityEnd);
-                                //System.out.println("entityTextOriginal : " + entityText + "; entityTextCut : " + entityTextCut + "; isNested : " + isNested);
+                                String entityTextCut = theTextOriginal.substring(entityStart, entityEnd);
+                                System.out.println("entityTextOriginal : " + entityText + "; entityType : " + entityType + "; entityStart : " + entityStart + "; isNested : " + isNested);
 
                                 // don't include the nested entities
                                 if (isNested) {
@@ -152,12 +160,11 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                     sbContent.append("<ENAMEX type=\"" + entityType + "\">");
                                     sbContent.append(TextUtilities.HTMLEncode(entityText));
                                     sbContent.append("</ENAMEX>");
-                                }
-                                if (entityStart + tagLengthSum > 0) {
+
                                     String textBefore = theText.substring(0, entityStart + tagLengthSum);
                                     String textAfter = theText.substring(entityEnd + tagLengthSum);
                                     theText = textBefore + sbContent.toString() + textAfter;
-                                    tagLengthSum = tagLengthSum + sbContent.length() - entityText.length();
+                                    tagLengthSum = tagLengthSum + sbContent.length() - length;
                                 }
                             }
                             sbContents = new StringBuilder(theText);
@@ -176,17 +183,20 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                 if (theText.trim().length() == 0)
                                     continue;
 
-                                sbAll.append("\t\t\t<p" + " xml:id=\"p_" + +p + "\">" + splitText + "</p>\n");
+                                sbAll.append("\t\t<p" + " xml:id=\"p_" + +p + "\">" + splitText + "</p>\n");
                             }
                         }
-
-                        sbAfter.append("\n\t\t</corpus>\n");
-                        sbAfter.append("\t</document>\n");
+                        sbAll.append("\t</document>\n");
+                        /*sbAfter.append("\n\t\t</corpus>\n");
                         sbAll.append(sbAfter);
                         System.out.println(sbAll);
                         writer.write(sbAll.toString());
-                        writer.close();
+                        writer.close();*/
                     }
+                    sbAll.append("</corpus>\n");
+                    System.out.println(sbAll);
+                    writer.write(sbAll.toString());
+                    writer.close();
                 }
             } catch (SAXException | ParserConfigurationException | IOException ie) {
                 ie.printStackTrace();
@@ -262,13 +272,13 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                     if ((nextEntity != null) &&
                         (nextEntity.split(" ").length > 1)) {
                         if (currentEntity.split(" ").length == 1) {
-                            if (Integer.compare(nextOffset, currentOffset) == 0) {
+                            if (Integer.compare(currentOffset, nextOffset) == 0) {
                                 entities.get(i).setNestedEntity(true);
                             }
                         }
 
                         if (nextEntity.contains(currentEntity) &&
-                            currentOffset >= nextOffset && currentOffset <= nextOffset + nextLength) {
+                            (currentOffset >= nextOffset) && (currentOffset <= nextOffset + nextLength)) {
                             entities.get(i).setNestedEntity(true);
                         }
                     }
@@ -308,10 +318,10 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
     }
 
     public static void main(String[] args) {
-        /*String inputDirectory = "resources/corpus/Quaero/Example";
-        String outputDirectory = "resources/corpus/Quaero/Example/Results";*/
-        String inputDirectory = "resources/corpus/Quaero/Example/Short";
-        String outputDirectory = "resources/corpus/Quaero/Example/Short";
+        String inputDirectory = "resources/corpus/Quaero/Example";
+        String outputDirectory = "resources/corpus/Quaero/Example/Results";
+        /*String inputDirectory = "resources/corpus/Quaero/Example/Short";
+        String outputDirectory = "resources/corpus/Quaero/Example/Short";*/
         CreateMedicalNerTrainingFromQuaeroCorpus createMedicalLexiconFromQuaeroCorpus = new CreateMedicalNerTrainingFromQuaeroCorpus();
         createMedicalLexiconFromQuaeroCorpus.createMedicalNerTraining(inputDirectory, outputDirectory);
     }
