@@ -150,7 +150,7 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                 int length = entity.getLength();
                                 int entityEnd = entityStart + length;
                                 boolean isNested = entity.isNestedEntity();
-                                String entityTextCut = theTextOriginal.substring(entityStart, entityEnd);
+                                //String entityTextCut = theTextOriginal.substring(entityStart, entityEnd);
                                 System.out.println("entityTextOriginal : " + entityText + "; entityType : " + entityType + "; entityStart : " + entityStart + "; isNested : " + isNested);
 
                                 // don't include the nested entities
@@ -160,8 +160,10 @@ public class CreateMedicalNerTrainingFromQuaeroCorpus {
                                     sbContent.append("<ENAMEX type=\"" + entityType + "\">");
                                     sbContent.append(TextUtilities.HTMLEncode(entityText));
                                     sbContent.append("</ENAMEX>");
+                                    String textBefore = "";
+                                    if(entityStart + tagLengthSum >=0)
+                                        textBefore = theText.substring(0, entityStart + tagLengthSum);
 
-                                    String textBefore = theText.substring(0, entityStart + tagLengthSum);
                                     String textAfter = theText.substring(entityEnd + tagLengthSum);
                                     theText = textBefore + sbContent.toString() + textAfter;
                                     tagLengthSum = tagLengthSum + sbContent.length() - length;
