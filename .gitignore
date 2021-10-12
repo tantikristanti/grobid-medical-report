@@ -33,8 +33,6 @@ release.properties
 
 resources/corpus/Quaero
 resources/corpus/*
-resources/dataset
 resources/lexicon
-resources/models
-
-
+resources/dataset
+resources/models/

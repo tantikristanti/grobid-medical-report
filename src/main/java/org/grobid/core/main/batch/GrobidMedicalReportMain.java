@@ -35,6 +35,7 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
     private static final String COMMAND_PROCESS_FULL_TEXT = "processFulltextMedical";
     private static final String COMMAND_CREATE_MEDICAL_NER_TRAINING = "createMedicalNerTraining";
+    private static final String COMMAND_EXTRACT_NER = "extractNER";
 
     private static List<String> availableCommands = Arrays.asList(
         COMMAND_CREATE_TRAINING_SEGMENTATION,
@@ -45,7 +46,8 @@ public class GrobidMedicalReportMain {
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
         COMMAND_PROCESS_FULL_TEXT,
-        COMMAND_CREATE_MEDICAL_NER_TRAINING
+        COMMAND_CREATE_MEDICAL_NER_TRAINING,
+        COMMAND_EXTRACT_NER
     );
 
     /**
@@ -278,6 +280,8 @@ public class GrobidMedicalReportMain {
                     gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
                 nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_EXTRACT_NER)) {
+                nb = parsers.getFrMedicalNERParser().processNERBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");
             }

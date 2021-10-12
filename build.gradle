@@ -108,7 +108,11 @@ task copyModels(type: Copy) {
     into "${rootDir}/../grobid-home/models/"
 }
 
-
+/*To run these tasks,
+- put all the models should be under grobid/grobid-home/models
+- add the definition or names of the models in the grobid/grobid-core/src/main/java/org/grobid/core/GrobidModels.java
+- don't forget to add the models setting both for CRF and DeLFT models in grobid/grobid-home/config/grobid.yaml
+/ */
 /** Training configuration **/
 def trainerTasks = [
     //Training models
@@ -134,7 +138,7 @@ ext.getArg = { propName, defaultVal ->
 // Train and evaluation NER
 // run like: gradle trainEvalNer -gH /path/to/grobid-home
 task trainEvalNer(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    main = 'org.grobid.trainer.NERTrainerRunner'
+    main = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'ner', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
@@ -153,7 +157,7 @@ task eval_medical_report_segmenter(dependsOn: 'classes', type: JavaExec, group: 
 task eval_medical_report_segmenter_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     main = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 2, 'medical-report-segmenter', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    args 2, 'medical-report-segmenter', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
@@ -169,7 +173,7 @@ task eval_header_medical_report(dependsOn: 'classes', type: JavaExec, group: 'tr
 task eval_header_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     main = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 2, 'header-medical-report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    args 2, 'header-medical-report', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 

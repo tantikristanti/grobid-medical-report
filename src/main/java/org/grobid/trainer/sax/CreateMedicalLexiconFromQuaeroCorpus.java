@@ -24,7 +24,6 @@ The sources files are downloaded from the openly available sources https://quaer
 Névéol A, Grouin C, Leixa J, Rosset S, Zweigenbaum P. The QUAERO French Medical Corpus: A Ressource for Medical Entity Recognition and Normalization. Fourth Workshop on Building and Evaluating Ressources for Health and Biomedical Text Processing - BioTxtM2014. 2014:24-30
 */
 
-
 public class CreateMedicalLexiconFromQuaeroCorpus {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateMedicalLexiconFromQuaeroCorpus.class);
     private List<QuaeroEntity> quaeroEntities = new ArrayList<>();

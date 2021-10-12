@@ -15,6 +15,8 @@ import java.util.List;
 
 /**
  * Training application for training a target model.
+ * How to use : gH 1
+ *
  *
  */
 public class MedicalReportTrainerRunner {

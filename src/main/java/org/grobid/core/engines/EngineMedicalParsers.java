@@ -16,6 +16,7 @@ public class EngineMedicalParsers extends EngineParsers {
     private LeftNoteMedicalParser leftNoteMedicalParser = null;
     private FullMedicalTextParser fullTextParser = null;
     private FrenchMedicalNERParser frenchMedicalNERParser = null;
+    private FrMedicalNERParser frMedicalNERParser = null;
     private MedicParser medicParser = null;
     private PatientParser patientParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
@@ -76,6 +77,17 @@ public class EngineMedicalParsers extends EngineParsers {
             }
         }
         return frenchMedicalNERParser;
+    }
+
+    public FrMedicalNERParser getFrMedicalNERParser() {
+        if (frMedicalNERParser == null) {
+            synchronized (this) {
+                if (frMedicalNERParser == null) {
+                    frMedicalNERParser = new FrMedicalNERParser(this);
+                }
+            }
+        }
+        return frMedicalNERParser;
     }
 
     public NEREnParser getNerParser() {
@@ -144,17 +156,6 @@ public class EngineMedicalParsers extends EngineParsers {
         return dateParser;
     }
 
-    /*public BodyMedicalParser getBodyMedicaltParser() {
-        if (bodyMedicalParser == null) {
-            synchronized (this) {
-                if (bodyMedicalParser == null) {
-                    bodyMedicalParser = new BodyMedicalParser(this);
-                }
-            }
-        }
-
-        return bodyMedicalParser;
-    }*/
 
     /**
      * Init all model, this will also load the model into memory
@@ -166,9 +167,7 @@ public class EngineMedicalParsers extends EngineParsers {
         fullTextParser = getFullMedicalTextParser();
         frenchMedicalNERParser = getFrenchMedicalNERParser();
         affiliationAddressParser = getAffiliationAddressParser();
-        // personParser = getPersonParser();
         dateParser = getDateParser();
-        // bodyMedicalParser = getBodyMedicaltParser();
     }
 
     @Override
@@ -211,23 +210,11 @@ public class EngineMedicalParsers extends EngineParsers {
             LOGGER.debug("CLOSING affiliationAddressParser");
         }
 
-        /*if (personParser != null) {
-            personParser.close();
-            personParser = null;
-            LOGGER.debug("CLOSING personParser");
-        }*/
-
         if (dateParser != null) {
             dateParser.close();
             dateParser = null;
             LOGGER.debug("CLOSING dateParser");
         }
-
-        /*if (bodyMedicalParser != null) {
-            bodyMedicalParser.close();
-            bodyMedicalParser = null;
-            LOGGER.debug("CLOSING bodyMedicalParser");
-        }*/
 
         if (nerParser != null) {
             nerParser.close();
