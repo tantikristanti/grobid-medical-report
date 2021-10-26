@@ -280,6 +280,7 @@ public class GrobidMedicalReportMain {
                     gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
                 nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                // extract with grobid-ner --> it works properly
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_EXTRACT_NER)) {
                 nb = parsers.getFrMedicalNERParser().processNERBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {

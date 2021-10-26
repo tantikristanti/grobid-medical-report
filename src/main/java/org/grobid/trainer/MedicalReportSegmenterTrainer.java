@@ -3,7 +3,15 @@ package org.grobid.trainer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
+import org.grobid.core.analyzers.GrobidAnalyzer;
+import org.grobid.core.data.Entity;
+import org.grobid.core.engines.EngineMedicalParsers;
+import org.grobid.core.engines.NEREnParser;
+import org.grobid.core.engines.NERParser;
+import org.grobid.core.engines.NERParsers;
 import org.grobid.core.exceptions.GrobidException;
+import org.grobid.core.lang.Language;
+import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.MedicalReportConfiguration;
@@ -23,6 +31,8 @@ import java.util.StringTokenizer;
  * Tanti, 2020
  */
 public class MedicalReportSegmenterTrainer extends AbstractTrainer {
+    protected EngineMedicalParsers engineMedicalParsers;
+    protected NERParsers nerParsers;
 
     public MedicalReportSegmenterTrainer() {
         super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
@@ -161,6 +171,42 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
                                 // has been gnerated by a recent version of grobid
                                 localToken = UnicodeUtil.normaliseTextAndRemoveSpaces(localToken);
                                 if (localToken.equals(token)) {
+                                    /* anonymization of sensitive information (ex. person's name)
+                                    With the reason that in the segmentation model,
+                                    there is no named entity recognition since the purpose is for segmenting the document segmentation,
+                                    so, to help identify the entity type of each token for anonymization purposes, we use grobid-ner.
+                                     */
+
+                                    String[] splitLine  = line.split(" ");
+                                    // we only checked the first and the second tokens as they are used as part of features for the segmentation model
+                                    List<String> tokensToBeChecked = Arrays.asList(splitLine[0], splitLine[1]);
+                                    String theText = String.join(" ", tokensToBeChecked);
+
+                                    // it works, but grobid-ner usage is not very good at predicting people's names
+                                    /*nerParsers = new NERParsers();
+                                    List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(theText, new Language(Language.FR, 1.0));
+                                    List<Entity> entities = nerParsers.extractNE(theText,new Language(Language.FR, 1.0));
+                                    if (entities != null) {
+                                        boolean person = false;
+                                        for (Entity entity : entities) {
+                                            if (entity.getType().getName().equals("PERSON")){
+                                                person = true;
+                                            }
+                                        }
+                                        if(person) {
+                                            splitLine[0] = "Anonym1";
+                                            splitLine[1] = "Anonym2";
+                                            splitLine[2] = splitLine[0].toLowerCase();
+                                            line = String.join(" ", splitLine);
+                                        }
+                                    }*/
+
+                                    // so we anonymize all tokens
+                                    splitLine[0] = "Anonym1";
+                                    splitLine[1] = "Anonym2";
+                                    splitLine[2] = splitLine[0].toLowerCase();
+                                    line = String.join(" ", splitLine);
+
                                     String tag = st.nextToken();
                                     medical.append(line).append(" ").append(tag);
                                     previousTag = tag;
@@ -236,6 +282,7 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
         }
         try {
             String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+            String pGrobidProperties = "../grobid-home/config/grobid.properties";
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);

@@ -595,8 +595,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
                 }
                 // this is only for building the model-0
-                createTrainingFromTextGrobidNer(bufferBody.toString(), result, lang);
-                writer.write(result + "\n");
+                //createTrainingFromTextGrobidNer(bufferBody.toString(), result, lang);
+                //writer.write(result + "\n");
+                writer.write(bufferBody + "\n");
                 writer.write("\n\t\t</document>\n");
                 writer.write("\t</subcorpus>\n</corpus>\n");
                 writer.close();

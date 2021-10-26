@@ -31,7 +31,7 @@ public class MedicalReportConfiguration {
             else
                 medicalReportConfiguration = mapper.readValue(new File(projectRootPath + "/resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
         } catch(Exception e) {
-            LOGGER.error("The config file does not appear valid, see resources/config/grobid-astro.yaml", e);
+            LOGGER.error("The config file does not appear valid, see resources/config/grobid-medical-report.yaml", e);
         }
         return medicalReportConfiguration;
     }
