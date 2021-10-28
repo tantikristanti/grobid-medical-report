@@ -1,17 +1,7 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath 'gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.12.0'
-        classpath "gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0"
-        classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
-    }
+plugins {
+    id 'java'
+    id 'maven'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 repositories {
@@ -23,22 +13,6 @@ repositories {
         dirs 'localLibs'
     }
 }
-
-apply plugin: 'java-library'
-apply plugin: 'base'
-apply plugin: 'maven-publish'
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
-}
-
-task install(dependsOn: publishToMavenLocal)
 
 dependencies {
     implementation(group: 'xml-apis', name: 'xml-apis') {
@@ -252,3 +226,47 @@ task eval_fr_medical_ner_split(dependsOn: 'classes', type: JavaExec, group: 'tra
     args 2, 'fr-medical-ner', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+task mainJar(type: ShadowJar, group: 'test') {
+    zip64 true
+    from sourceSets.main.output
+    from {
+        project.configurations.compile.collect {
+//            it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
+        }
+    }
+}
+
+shadowJar {
+    classifier = 'onejar'
+    zip64 true
+    manifest {
+        attributes 'Main-Class': 'org.grobid.core.main.batch.GrobidMedicalReportMain'
+    }
+}
+
+jar {
+    dependsOn mainJar
+    enabled false
+}
+
+artifacts {
+    archives shadowJar
+    archives mainJar
+}
+
+/*gretty {
+    httpPort = 8080
+    contextPath = '/'
+    servletContainer = "jetty9.4"
+}*/
+
+wrapper {
+    gradleVersion "7.1.1"
+}
+
+build.dependsOn project.getSubprojects().collect({ it.getTasks().getByName("build") })
+
+
