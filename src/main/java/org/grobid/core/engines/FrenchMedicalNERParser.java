@@ -16,10 +16,7 @@ import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.tagging.GenericTagger;
-import org.grobid.core.engines.tagging.GenericTaggerUtils;
-import org.grobid.core.engines.tagging.GrobidCRFEngine;
-import org.grobid.core.engines.tagging.TaggerFactory;
+import org.grobid.core.engines.tagging.*;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeaturesVectorNER;
@@ -54,26 +51,25 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 public class FrenchMedicalNERParser extends AbstractParser {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    protected EngineMedicalParsers parsers;
-
     private MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
-    private Lexicon lexicon = Lexicon.getInstance();
 
-    private final GenericTagger frMedicalNer;
+    protected File tmpPath = null;
+    protected EngineMedicalParsers parsers;
+    protected NERParsers nerParsers;
+    //private DeLFTTagger frMedicalNer;
+    private GenericTagger frenchMedicalNER;
 
-    private File tmpPath = null;
 
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.FULL_MEDICAL_TEXT);
+        super(GrobidModels.FR_MEDICAL_NER_QUAERO);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
-        frMedicalNer = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
+        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //frenchMedicalNER = new DeLFTTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, "BidLSTM_CRF");
+        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
     }
-
 
     /**
      * Extract all occurrences of named entity from a simple piece of text.
@@ -91,7 +87,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
         }
 
         return extractNE(tokens);
-
     }
 
     /**
@@ -552,7 +547,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
-            // The BODY part after calling the segmentation model
+            // take only the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             if (documentBodyParts != null) {
                 //Pair<String, LayoutTokenization> featSeg = getTextFeatured(doc, documentBodyParts);

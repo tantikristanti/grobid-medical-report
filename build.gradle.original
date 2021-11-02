@@ -244,6 +244,7 @@ shadowJar {
     zip64 true
     manifest {
         attributes 'Main-Class': 'org.grobid.core.main.batch.GrobidMedicalReportMain'
+        src/main/java/org/grobid/core/main/batch/GrobidMedicalReportMain.java
     }
 }
 

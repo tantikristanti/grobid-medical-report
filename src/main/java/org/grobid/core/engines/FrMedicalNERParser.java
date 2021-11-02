@@ -1,25 +1,27 @@
 package org.grobid.core.engines;
 
-import org.grobid.core.GrobidModel;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Entity;
-import org.grobid.core.document.*;
+import org.grobid.core.document.Document;
+import org.grobid.core.document.DocumentPiece;
+import org.grobid.core.document.DocumentPointer;
+import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
-import org.grobid.core.engines.tagging.*;
+import org.grobid.core.engines.tagging.GenericTagger;
+import org.grobid.core.engines.tagging.TaggerFactory;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
-import org.grobid.core.jni.DeLFTModel;
-import org.grobid.core.lang.Language;
-import org.grobid.core.layout.*;
+import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.GrobidProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * A class for extracting medical NER.
@@ -35,12 +37,11 @@ public class FrMedicalNERParser {
     private GenericTagger frMedicalNer;
 
     public FrMedicalNERParser() {
-        //frMedicalNer = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
         frMedicalNer = TaggerFactory.getTagger(GrobidModels.ENTITIES_NER);
+        //frMedicalNer = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
     }
 
     public FrMedicalNERParser(EngineMedicalParsers parsers) {
-        //super(GrobidModels.FULL_MEDICAL_TEXT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
         frMedicalNer = TaggerFactory.getTagger(GrobidModels.ENTITIES_NER);
@@ -97,8 +98,10 @@ public class FrMedicalNERParser {
             }
             for (final File file : refFiles) {
                 try {
-                    processNER(file, outputDirectory, n);
+                    // NER with grobid-ner
+                    processNERWithGrobidNer(file, outputDirectory, n);
 
+                    // NER with french-medical-ner
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -122,7 +125,7 @@ public class FrMedicalNERParser {
      * @param id         id
      */
 
-    public Document processNER(File inputFile,
+    public Document processNERWithGrobidNer(File inputFile,
                                String pathOutput,
                                int id) {
         if (tmpPath == null)
@@ -158,7 +161,7 @@ public class FrMedicalNERParser {
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
-            // FULL-MEDICAL-TEXT MODEL (body part)
+            // take only the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             if (documentBodyParts != null) {
                 List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
@@ -176,7 +179,7 @@ public class FrMedicalNERParser {
 
                 StringBuilder bufferBody = new StringBuilder();
 
-                // just write the text without any label
+                // the text without any label
                 for (LayoutToken token : tokenizationsBody) {
                     bufferBody.append(token.getText());
                 }
@@ -191,7 +194,7 @@ public class FrMedicalNERParser {
                 }
                 //writer.write(bufferBody.toString());
 
-                // calling the French Medical NER model
+                // calling the French Medical NER model (grobid-ner)
                 nerParsers = new NERParsers();
                 String stringBody = bufferBody.toString();
                 List<Entity> entities = nerParsers.extractNE(stringBody);
@@ -230,31 +233,6 @@ public class FrMedicalNERParser {
 
         return doc;
     }
-
-    /**
-     * Extract all occurrences of named entity from a simple piece of text.
-     * The positions of the recognized entities are given as character offsets
-     * (following Java specification of characters).
-     */
-    public String extractNE(String text) {
-        List<LayoutToken> tokens = null;
-        String results = null;
-        try {
-            // for the analyser is English to avoid any bad surprises
-            tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.EN, 1.0));
-            //tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.FR, 1.0));
-            results = frMedicalNer.label(text);
-
-        } catch (Exception e) {
-            LOGGER.error("Tokenization failed", e);
-        }
-        return results;
-    }
-
-    /*@Override
-    public void close() throws IOException {
-        super.close();
-    }*/
 
     public void close() throws IOException {
     }
