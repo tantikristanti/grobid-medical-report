@@ -16,7 +16,9 @@ import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.tagging.*;
+import org.grobid.core.engines.tagging.GenericTagger;
+import org.grobid.core.engines.tagging.GenericTaggerUtils;
+import org.grobid.core.engines.tagging.TaggerFactory;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeaturesVectorNER;
@@ -26,7 +28,6 @@ import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.lexicon.LexiconPositionsIndexes;
 import org.grobid.core.lexicon.MedicalNERLexicon;
 import org.grobid.core.lexicon.MedicalNERLexiconPositionsIndexes;
-import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -63,10 +63,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
 
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        super(GrobidModels.FULL_MEDICAL_TEXT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FULL_MEDICAL_TEXT);
         //frenchMedicalNER = new DeLFTTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, "BidLSTM_CRF");
         //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
     }
@@ -89,6 +91,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
         return extractNE(tokens);
     }
 
+
     /**
      * Extract all occurrences of named entities from a list of LayoutToken
      * coming from a document with fixed/preserved layout, e.g. PDF.
@@ -104,9 +107,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
         String res = toFeatureVectorLayout(tokens, positionsIndexes);
         String result = label(res);
-        //List<Pair<String, String>> labeled = GenericTaggerUtils.getTokensAndLabels(result);
-
-        //String text = LayoutTokensUtil.toText(tokens);
         List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER_QUAERO, result, tokens);
 
         return entities;
@@ -702,67 +702,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
         }
 
         return doc;
-    }
-
-    /**
-     * Create datasets from The QUAERO French Medical Corpus.
-     * Névéol A, Grouin C, Leixa J, Rosset S, Zweigenbaum P. The QUAERO French Medical Corpus: A Ressource for Medical Entity Recognition and Normalization. Fourth Workshop on Building and Evaluating Ressources for Health and Biomedical Text Processing - BioTxtM2014. 2014:24-30
-     * https://quaerofrenchmed.limsi.fr
-     *
-     * @param inputDirectory    input directory containing The QUAERO French Medical Corpus
-     * @param outputDirectory   path for results
-     * @param ind               id
-     */
-    public int createDatasetsFromQuaeroBatch(String inputDirectory,
-                                                   String outputDirectory,
-                                                   int ind) throws IOException {
-        try {
-            File path = new File(inputDirectory);
-            if (!path.exists()) {
-                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
-            }
-
-            File pathOut = new File(outputDirectory);
-            if (!pathOut.exists()) {
-                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
-            }
-
-            // we process all pdf files in the directory
-            File[] refFiles = path.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    System.out.println(name);
-                    return name.endsWith(".pdf") || name.endsWith(".PDF");
-                }
-            });
-
-            if (refFiles == null)
-                return 0;
-
-            System.out.println(refFiles.length + " files to be processed.");
-
-            int n = 0;
-            if (ind == -1) {
-                // for undefined identifier (value at -1), we initialize it to 0
-                n = 1;
-            }
-            for (final File file : refFiles) {
-                try {
-                    createTraining(file, outputDirectory, n);
-
-                    // uncomment this command to create files containing features and blank training without any label
-                    //createBlankTrainingFromPDF(file, outputDirectory, n);
-                } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
-                        + file.getPath() + ": " + exp);
-                }
-                if (ind != -1)
-                    n++;
-            }
-
-            return refFiles.length;
-        } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
-        }
     }
 
 

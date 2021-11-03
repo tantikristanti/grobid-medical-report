@@ -286,6 +286,7 @@ shadowJar {
 
 artifacts {
     archives jar
+    archives shadowJar
 }
 
 wrapper {

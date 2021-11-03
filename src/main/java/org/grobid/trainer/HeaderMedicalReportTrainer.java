@@ -166,7 +166,7 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
 
                 String line;
                 while ((line = bis.readLine()) != null) {
-                    //header.append(line);
+                    header.append(line);
                     int ii = line.indexOf(' ');
                     String token = null;
                     if (ii != -1) {
@@ -193,12 +193,12 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
                                     there is no named entity recognition since the purpose is for segmenting the document segmentation,
                                     so, to help identify the entity type of each token for anonymization purposes, we use grobid-ner.
                                      */
-                                String[] splitLine  = line.split(" ");
+                                /*String[] splitLine  = line.split(" ");
                                 // so we anonymize all tokens
                                 splitLine[0] = "Anonym";
                                 splitLine[1] = splitLine[0].toLowerCase();
                                 line = String.join(" ", splitLine);
-                                header.append(line);
+                                header.append(line);*/
 
                                 String tag = st.nextToken();
                                 header.append(" ").append(tag);

@@ -12,10 +12,9 @@ import java.util.List;
 public class MedicalReportConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportConfiguration.class);
 
-    public String grobidHome;
-    public String corpusMedicalReportSegmenterPath;
-    public String templateMedicalReportSegmenterPath;
-    public String evaluationMedicalReportSegmenterPath;
+    private String grobidHome;
+
+    private String dataPath;
 
     public MedicalReportConfiguration getInstance() {
         return getInstance(null);
@@ -47,30 +46,6 @@ public class MedicalReportConfiguration {
         this.grobidHome = grobidHome;
     }
 
-    public String getCorpusMedicalReportSegmenterPath() {
-        return this.corpusMedicalReportSegmenterPath;
-    }
-
-    public void setCorpusMedicalReportSegmenterPath(String corpusMedicalReportSegmenterPath) {
-        this.corpusMedicalReportSegmenterPath = corpusMedicalReportSegmenterPath;
-    }
-
-    public String getTemplateMedicalReportSegmenterPath() {
-        return this.templateMedicalReportSegmenterPath;
-    }
-
-    public void setTemplateMedicalReportSegmenterPath(String templateMedicalReportSegmenterPath) {
-        this.templateMedicalReportSegmenterPath = templateMedicalReportSegmenterPath;
-    }
-
-    public String getEvaluationMedicalReportSegmenterPath() {
-        return this.evaluationMedicalReportSegmenterPath;
-    }
-
-    public void setEvaluationMedicalReportSegmenterPath(String evaluationMedicalReportSegmenterPath) {
-        this.evaluationMedicalReportSegmenterPath = evaluationMedicalReportSegmenterPath;
-    }
-
     public List<ModelParameters> getModels() {
         return this.models;
     }
@@ -79,5 +54,13 @@ public class MedicalReportConfiguration {
         this.models = models;
     }
 
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
 
 }
