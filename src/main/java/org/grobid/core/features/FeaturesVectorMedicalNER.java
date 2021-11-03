@@ -179,12 +179,11 @@ public class FeaturesVectorMedicalNER {
                                                           boolean isLocationToken,
                                                           boolean isPersonTitleToken,
                                                           boolean isOrganisationToken,
-                                                          boolean isOrgFormToken,
-                                                          boolean isBiotechToken) {
+                                                          boolean isOrgFormToken) {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
 
         FeaturesVectorMedicalNER featuresVector = new FeaturesVectorMedicalNER();
-        StringTokenizer st = new StringTokenizer(line, "\t ");
+        StringTokenizer st = new StringTokenizer(line, " ");
         if (st.hasMoreTokens()) {
             String word = st.nextToken();
             String label = null;
@@ -281,6 +280,8 @@ public class FeaturesVectorMedicalNER {
             featuresVector.wordShape = TextUtilities.wordShape(word);
 
             featuresVector.wordShapeTrimmed = TextUtilities.wordShapeTrimmed(word);
+            
+            // To be done : other lexicon information
         }
 
         return featuresVector;

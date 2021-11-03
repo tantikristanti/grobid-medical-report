@@ -202,10 +202,10 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
                                     }*/
 
                                     // so we anonymize all tokens
-                                    splitLine[0] = "Anonym1";
+                                    /*splitLine[0] = "Anonym1";
                                     splitLine[1] = "Anonym2";
                                     splitLine[2] = splitLine[0].toLowerCase();
-                                    line = String.join(" ", splitLine);
+                                    line = String.join(" ", splitLine);*/
 
                                     String tag = st.nextToken();
                                     medical.append(line).append(" ").append(tag);

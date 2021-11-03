@@ -79,22 +79,4 @@ public class MedicalNERLexiconPositionsIndexes {
     public void setLocalOrgFormPositions(List<OffsetPosition> localOrgFormPositions) {
         this.localOrgFormPositions = localOrgFormPositions;
     }
-
-    /**
-     * Give the list of textual tokens from a list of LayoutToken
-     */
-    /*private static List<String> getTexts(List<LayoutToken> tokenizations) {
-        List<String> texts = new ArrayList<String>();
-        for (LayoutToken token : tokenizations) {
-            if (isNotEmpty(trim(token.getText())) && 
-                !token.getText().equals(" ") &&
-                !token.getText().equals("\n") && 
-                !token.getText().equals("\r") &&  
-                !token.getText().equals("\t") && 
-                !token.getText().equals("\u00A0")) {
-                    texts.add(token.getText());
-            }
-        }
-        return texts;
-    }*/
 }

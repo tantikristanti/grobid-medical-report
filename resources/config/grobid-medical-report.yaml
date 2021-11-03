@@ -1,9 +1,7 @@
 grobidHome: "../grobid-home/"
 
 # path relative to the corpus and template path
-corpusMedicalReportSegmenterPath: "resources/dataset/medical-report-segmenter/corpus"
-templateMedicalReportSegmenterPath: "medical-report-segmenter/crfpp-templates/medical-report-segmenter.template"
-evaluationMedicalReportSegmenterPath: "resources/dataset/medical-report-segmenter/evaluation"
+dataPath: "resources/dataset/"
 
 models:
   # we configure here how each sequence labeling model should be implemented
@@ -46,6 +44,14 @@ models:
       nbMaxIterations: 1500
 
   - name: "fr-medical-ner"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+
+  - name: "fr-medical-ner-quaero"
     engine: "wapiti"
     wapiti:
       # wapiti training parameters, they will be used at training time only
