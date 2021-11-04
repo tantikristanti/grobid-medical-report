@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 /**
- * A class for extracting medical NER.
+ * A class for process medical NER.
  * <p>
  * Tanti, 2021
  */

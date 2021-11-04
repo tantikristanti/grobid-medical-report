@@ -147,7 +147,7 @@ def trainerTasks = [
     "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer",
     "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer",
     "train_full_medical_text"               : "org.grobid.trainer.FullMedicalTextTrainer",
-    "train_fr_medical_ner"                  : "org.grobid.trainer.FrenchMedicalNERTrainer"
+    "train_french_medical_ner"              : "org.grobid.trainer.FrenchMedicalNERTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->

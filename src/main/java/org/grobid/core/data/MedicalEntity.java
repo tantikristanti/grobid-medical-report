@@ -19,7 +19,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
      - The Quaero Corpus (https://quaerofrenchmed.limsi.fr/)
     * */
     public enum Medical_NER_Type {
-        UNKNOWN("UNKNOWN"), // Entity not belonging to any classes
+        OTHER("OTHER"), // Entity not belonging to any classes
         PERSON("PERSON"), // grobid-ner : first, middle, last names and aliases of people and fictional characters
         LOCATION("LOCATION"), // grobid-ner : physical location, including planets and galaxies; The Quaero Corpus - GEOG : Geographic area
         ORGANISATION("ORGANISATION"), // grobid-ner : organized group of people, with some sort of legal entity and concrete membership
@@ -45,6 +45,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
 
         private String name;
 
+
         private Medical_NER_Type(String name) {
             this.name = name;
         }
@@ -68,18 +69,22 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         public String getName() {
             return name;
         }
-    }
-
-    ;
+    };
 
     // name of the entity = entity type
     private String rawName = null;
+
+    //entity type
+    private String rawType;
+
+    // entity-type in string format
+    private String stringType = null;
 
     // normalised name of the entity
     private String normalisedName = null;
 
     // type of the entity (person, location, etc.)
-    private NERLexicon.NER_Type type = null;
+    private Medical_NER_Type type = null;
 
     // subtypes of the entity when available - the first one is the main one, the others secondary subtypes
     private List<String> subTypes = null;
@@ -119,6 +124,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
 
     public MedicalEntity(MedicalEntity ent) {
         rawName = ent.rawName;
+        rawType = ent.rawType;
+        stringType = ent.stringType;
         normalisedName = ent.normalisedName;
         type = ent.type;
         subTypes = ent.subTypes;
@@ -149,20 +156,79 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.normalisedName = raw;
     }
 
-    public NERLexicon.NER_Type getType() {
+    public Medical_NER_Type getType() {
         return type;
     }
 
-    public void setType(NERLexicon.NER_Type theType) {
+    public void setType(Medical_NER_Type theType) {
         type = theType;
     }
 
-    public void setTypeFromString(String theType) {
-        if (theType.toUpperCase().equals("ATHLETIC_TEAM"))
-            theType = "SPORT_TEAM";
-        type = NERLexicon.NER_Type.valueOf(theType.toUpperCase());
+    public String getRawType() {
+        return rawType;
     }
 
+    public void setRawType(String rawType) {
+        this.rawType = rawType;
+    }
+
+    public String getStringType() {
+        return stringType;
+    }
+
+    public void setStringType(String stringType) {
+        if (stringType.toUpperCase().contains("OTHER")) {
+            this.stringType = "OTHER";
+        } else if (stringType.toUpperCase().contains("PERSON")) {
+            this.stringType = "PERSON";
+        } else if (stringType.toUpperCase().contains("LOCATION")) {
+            this.stringType = "LOCATION";
+        } else if (stringType.toUpperCase().contains("ORGANISATION")) {
+            this.stringType = "ORGANISATION";
+        } else if (stringType.toUpperCase().contains("ANIMAL")) {
+            this.stringType = "ANIMAL";
+        } else if (stringType.toUpperCase().contains("MEASURE")) {
+            this.stringType = "MEASURE";
+        } else if (stringType.toUpperCase().contains("LEGAL")) {
+            this.stringType = "LEGAL";
+        } else if (stringType.toUpperCase().contains("IDENTIFIER")) {
+            this.stringType = "IDENTIFIER";
+        } else if (stringType.toUpperCase().contains("INSTALLATION")) {
+            this.stringType = "INSTALLATION";
+        } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
+            this.stringType = "SUBSTANCE";
+        } else if (stringType.toUpperCase().contains("DRUG")) {
+            this.stringType = "DRUG";
+        } else if (stringType.toUpperCase().contains("PLANT")) {
+            this.stringType = "PLANT";
+        } else if (stringType.toUpperCase().contains("PERIOD")) {
+            this.stringType = "PERIOD";
+        } else if (stringType.toUpperCase().contains("TITLE")) {
+            this.stringType = "TITLE";
+        } else if (stringType.toUpperCase().contains("WEBSITE")) {
+            this.stringType = "WEBSITE";
+        } else if (stringType.toUpperCase().contains("ANATOMY")) {
+            this.stringType = "ANATOMY";
+        } else if (stringType.toUpperCase().contains("DEVICE")) {
+            this.stringType = "DEVICE";
+        } else if (stringType.toUpperCase().contains("DISORDER")) {
+            this.stringType = "DISORDER";
+        } else if (stringType.toUpperCase().contains("LIVING")) {
+            this.stringType = "LIVING";
+        } else if (stringType.toUpperCase().contains("OBJECT")) {
+            this.stringType = "OBJECT";
+        } else if (stringType.toUpperCase().contains("PHENOMENA")) {
+            this.stringType = "PHENOMENA";
+        } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
+            this.stringType = "PHYSIOLOGY";
+        } else if (stringType.toUpperCase().contains("PROCEDURE")) {
+            this.stringType = "PROCEDURE";
+        }
+    }
+
+    public void setTypeFromString(String theType) {
+        type = Medical_NER_Type.valueOf(theType);
+    }
     public List<String> getSubTypes() {
         return subTypes;
     }
@@ -406,7 +472,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         StringBuffer buffer = new StringBuffer();
         buffer.append("<stf xml:id=\"" + "ner-" + n + "\" type=\"ne\" who=\"nerd\" when=\"\">");
         buffer.append("<ptr target=\"id," + offsets.start + "," + offsets.end + "\" />");
-        if (type == NERLexicon.NER_Type.PERSON) {
+        if (type == Medical_NER_Type.LIVING) {
             buffer.append("<person>" + rawName + "</person>");
         }
         buffer.append("</stf>");

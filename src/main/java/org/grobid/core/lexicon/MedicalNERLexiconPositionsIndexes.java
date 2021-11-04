@@ -10,6 +10,7 @@ import java.util.List;
 public class MedicalNERLexiconPositionsIndexes {
 
     private Lexicon lexicon;
+    private MedicalNERLexicon medicalNERLexicon;
 
     private List<OffsetPosition> localLocationPositions = new ArrayList<OffsetPosition>();
     private List<OffsetPosition> localPersonTitlePositions = new ArrayList<OffsetPosition>();
@@ -17,11 +18,12 @@ public class MedicalNERLexiconPositionsIndexes {
     private List<OffsetPosition> localOrgFormPositions = new ArrayList<OffsetPosition>();
 
     public MedicalNERLexiconPositionsIndexes(MedicalNERLexicon medicalNERLexicon) {
-        this.lexicon = lexicon;
+        this.medicalNERLexicon = medicalNERLexicon;
+        this.lexicon = Lexicon.getInstance();
     }
 
     public void computeIndexes(List<LayoutToken> tokens) {
-        localLocationPositions = lexicon.tokenPositionsLocationNames(tokens);
+        localLocationPositions = medicalNERLexicon.tokenPositionsGeographicNames(tokens);
         localPersonTitlePositions = lexicon.tokenPositionsPersonTitle(tokens);
         localOrganisationPositions = lexicon.tokenPositionsOrganisationNames(tokens);
         localOrgFormPositions = lexicon.tokenPositionsOrgForm(tokens);
