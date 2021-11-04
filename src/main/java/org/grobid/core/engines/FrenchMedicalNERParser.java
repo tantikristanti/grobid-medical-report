@@ -462,6 +462,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
             // take only the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+
             if (documentBodyParts != null) {
                 List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
 
