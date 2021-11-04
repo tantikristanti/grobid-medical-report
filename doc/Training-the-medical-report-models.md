@@ -16,7 +16,7 @@ The models prepared are:
 
 - [x] full-medical-text
 
-- [ ] French medical NER 
+- [x] French medical NER 
 
 - [ ] organization-medical-report
 
@@ -78,6 +78,11 @@ An example of a command for training the __left-note-medical-report__ model:
 An example of a command for training the __train_full_medical_text__ model:
 ```bash
 > ./gradlew train_full_medical_text
+```
+
+An example of a command for training the __french_medical_ner__ model:
+```bash
+> ./gradlew train_french_medical_ner
 ```
 
 As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. Further, to increase the speed, we can also modify the stopping criteria. For more information, please refer [this comment](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).

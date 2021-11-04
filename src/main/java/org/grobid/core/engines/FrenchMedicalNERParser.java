@@ -21,6 +21,7 @@ import org.grobid.core.engines.tagging.GenericTaggerUtils;
 import org.grobid.core.engines.tagging.TaggerFactory;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
+import org.grobid.core.features.FeaturesVectorMedicalNER;
 import org.grobid.core.features.FeaturesVectorNER;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
@@ -53,22 +54,21 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class FrenchMedicalNERParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    private MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
-
+    protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
+    protected Lexicon lexicon = Lexicon.getInstance();
     protected File tmpPath = null;
     protected EngineMedicalParsers parsers;
     protected NERParsers nerParsers;
     //private DeLFTTagger frMedicalNer;
     private GenericTagger frenchMedicalNER;
 
-
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
-        //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
-        super(GrobidModels.FULL_MEDICAL_TEXT);
+        super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //super(GrobidModels.FULL_MEDICAL_TEXT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
-        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FULL_MEDICAL_TEXT);
+        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FULL_MEDICAL_TEXT);
         //frenchMedicalNER = new DeLFTTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, "BidLSTM_CRF");
         //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
     }
@@ -84,7 +84,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             // for the analyser is English to avoid any bad surprises
             //tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.EN, 1.0));
             tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.FR, 1.0));
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Tokenization failed", e);
         }
 
@@ -126,6 +126,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(model, result, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         MedicalEntity currentEntity = null;
+        String label = null, previousLabel = null;
+        boolean begin = true;
         for (TaggingTokenCluster cluster : clusters) {
             if (cluster == null) {
                 continue;
@@ -140,10 +142,19 @@ public class FrenchMedicalNERParser extends AbstractParser {
             String clusterContent = LayoutTokensUtil.normalizeText(LayoutTokensUtil.toText(cluster.concatTokens()));
             currentEntity = new MedicalEntity();
             currentEntity.setRawName(clusterContent);
-            currentEntity.setTypeFromString(GenericTaggerUtils.getPlainIOBLabel(clusterLabel.getLabel()));
+            //currentEntity.setTypeFromString(GenericTaggerUtils.getPlainIOBLabel(clusterLabel.getLabel()));
+            label = clusterLabel.getLabel();
+            if (begin && label != previousLabel) {
+                label = "I-" + label;
+                currentEntity.setRawType(label);
+                begin = false;
+            }
+            previousLabel = clusterLabel.getLabel();
+
             currentEntity.setBoundingBoxes(BoundingBoxCalculator.calculate(cluster.concatTokens()));
             currentEntity.setOffsets(calculateOffsets(cluster));
             currentEntity.setLayoutTokens(cluster.concatTokens());
+            //currentEntity.setStringType(currentEntity.getRawType());
             entities.add(currentEntity);
         }
 
@@ -165,154 +176,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
         return new OffsetPosition(start, end);
     }
 
-    public int extractFrenchMedicalNerBatch(String inputDirectory,
-                                                   String outputDirectory,
-                                                   int ind) throws IOException {
-        try {
-            File path = new File(inputDirectory);
-            if (!path.exists()) {
-                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
-            }
-
-            File pathOut = new File(outputDirectory);
-            if (!pathOut.exists()) {
-                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
-            }
-
-            // we process all pdf files in the directory
-            File[] refFiles = path.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    System.out.println(name);
-                    return name.endsWith(".pdf") || name.endsWith(".PDF");
-                }
-            });
-
-            if (refFiles == null)
-                return 0;
-
-            System.out.println(refFiles.length + " files to be processed.");
-
-            int n = 0;
-            if (ind == -1) {
-                // for undefined identifier (value at -1), we initialize it to 0
-                n = 1;
-            }
-            for (final File file : refFiles) {
-                try {
-                    extractFrenchMedicalNer(file, outputDirectory, n);
-
-                    // uncomment this command to create files containing features and blank training without any label
-                    //createBlankTrainingFromPDF(file, outputDirectory, n);
-                } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
-                        + file.getPath() + ": " + exp);
-                }
-                if (ind != -1)
-                    n++;
-            }
-
-            return refFiles.length;
-        } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
-        }
-    }
-
-    /**
-     * Process the specified pdf and format the result as training data for all the models.
-     *
-     * @param inputFile  input file
-     * @param pathOutput path for result
-     * @param id         id
-     */
-    public Document extractFrenchMedicalNer(File inputFile,
-                                   String pathOutput,
-                                   int id) {
-        if (tmpPath == null)
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
-        DocumentSource documentSource = null;
-        Document doc = null;
-        StringBuilder result = new StringBuilder();
-        String lang = Language.FR; // by default, it's French
-        try {
-            if (!inputFile.exists()) {
-                throw new GrobidResourceException("Cannot train for full-medical-text, because the file '" +
-                    inputFile.getAbsolutePath() + "' does not exists.");
-            }
-            String pdfFileName = inputFile.getName();
-            Writer writer = null;
-
-            // path for blank full-medical-text model
-            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner.tei.xml"));
-            //File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner"));
-
-            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
-            doc = new Document(documentSource);
-            doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
-
-            if (doc.getBlocks() == null) {
-                throw new Exception("PDF parsing resulted in empty content");
-            }
-            doc.produceStatistics();
-
-            List<LayoutToken> tokenizations = doc.getTokenizations();
-
-            // first, call the medical-report-segmenter model to have high level segmentation
-            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
-
-            // The BODY part after calling the segmentation model
-            SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
-            if (documentBodyParts != null) {
-                List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
-
-                for (DocumentPiece docPiece : documentBodyParts) {
-                    DocumentPointer dp1 = docPiece.getLeft();
-                    DocumentPointer dp2 = docPiece.getRight();
-
-                    int tokens = dp1.getTokenDocPos();
-                    int tokene = dp2.getTokenDocPos();
-                    for (int i = tokens; i < tokene; i++) {
-                        tokenizationsBody.add(tokenizations.get(i));
-                    }
-                }
-
-                StringBuilder bufferBody = new StringBuilder();
-
-                // just write the text without any label
-                for (LayoutToken token : tokenizationsBody) {
-                    bufferBody.append(token.getText());
-                }
-
-                // write the TEI file to reflect the extract layout of the text as extracted from the pdf
-                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                if (id == -1) {
-                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
-                    writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
-                } else {
-                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
-                    writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
-                }
-                // this is only for building the model-0
-                //createTrainingFromTextGrobidNer(bufferBody.toString(), result, lang);
-                writer.write(result + "\n");
-                writer.write("\n\t\t</document>\n");
-                writer.write("\t</subcorpus>\n</corpus>\n");
-                writer.close();
-                //}
-            }
-
-        } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
-                " data generation for full text.", e);
-        } finally {
-            DocumentSource.close(documentSource, true, true, true);
-        }
-
-        return doc;
-    }
 
     // create training data for model-0 where the tagger comes from grobid-ner
     public StringBuilder createTrainingFromTextGrobidNer(String text, StringBuilder sb, String lang) throws IOException {
@@ -397,6 +260,56 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 sentenceIndex++;
             }
             sb.append("\t\t\t</p>\n");
+        }
+        return sb;
+    }
+
+    // create training data using the model built from the Quaero Corpus
+    public StringBuilder createTrainingFromModelQuaero(String text, StringBuilder sb) throws IOException {
+        if (isEmpty(text))
+            return null;
+
+        // let's segment in paragraphs, assuming we have one per paragraph per line
+        String[] paragraphs = text.split("\n");
+        for (int p = 0; p < paragraphs.length; p++) {
+
+            String theText = paragraphs[p];
+            if (theText.trim().length() == 0)
+                continue;
+
+            sb.append("\t\t\t<p " + "xml:id=\"p" + p + "\">");
+
+            // we process NER at paragraph level (as it is trained at this level and because
+            // inter sentence features/template are used by the CFR)
+            // calling the French Medical NER model (grobid-ner)
+
+            List<MedicalEntity> medicalEntities = extractNE(theText.trim());
+
+            int nerTextLength = 0;
+            String nerTextStart = "", nerText = "", nerTextEnd = "",
+                combinedText = "", prevText = "", nextText = "";
+            for (MedicalEntity entity : medicalEntities) {
+                if (entity.getRawType() != null) {
+                    String nerType = entity.getRawType();
+                    entity.setStringType(nerType);
+                    if (entity.getStringType() != "OTHER") {
+                        nerTextStart = "<ENAMEX type=\"" + entity.getStringType() + "\">";
+                        nerText = entity.getRawName();
+                        nerTextEnd = "</ENAMEX>";
+                        int offsetStart = entity.getOffsetStart() + nerTextLength;
+                        int offsetEnd = entity.getOffsetEnd() + nerTextLength;
+                        prevText = theText.substring(0, offsetStart);
+                        nextText = theText.substring(offsetEnd);
+                        nerTextLength = nerTextLength + nerTextStart.length() + nerTextEnd.length();
+                        combinedText = prevText + nerTextStart +
+                            nerText + nerTextEnd + nextText;
+                        theText = combinedText;
+                    }
+                }
+            }
+            sb.append(theText);
+
+            sb.append("</p>\n");
         }
         return sb;
     }
@@ -550,16 +463,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
             // take only the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             if (documentBodyParts != null) {
-                //Pair<String, LayoutTokenization> featSeg = getTextFeatured(doc, documentBodyParts);
-                //if (featSeg != null) {
-                //String bodytext = featSeg.getLeft();
-                //List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization();
-
-                // we write the full text untagged
-                    /*writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
-                    writer.write(bodytext + "\n");
-                    writer.close();*/
-
                 List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
 
                 for (DocumentPiece docPiece : documentBodyParts) {
@@ -582,21 +485,20 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
                 // write the TEI file to reflect the extract layout of the text as extracted from the pdf
                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                if (id == -1) {
-                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
-                    writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
-                } else {
-                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
-                    writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
-                }
-                // this is only for building the model-0
+                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
+                writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
+
+                /*writer.write(bufferBody.toString() + "\n");*/
+                // create training data by calling the grobid-ner models
                 //createTrainingFromTextGrobidNer(bufferBody.toString(), result, lang);
-                //writer.write(result + "\n");
-                writer.write(bufferBody + "\n");
+
+                // create training data by calling the French Quaero model
+                String theText = bufferBody.toString();
+                createTrainingFromModelQuaero(theText, result);
+                writer.write(result + "\n");
                 writer.write("\n\t\t</document>\n");
                 writer.write("\t</subcorpus>\n</corpus>\n");
                 writer.close();
-                //}
             }
 
         } catch (Exception e) {
@@ -722,16 +624,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
             // check if the token is a known NE
             // do we have a NE at position posit?
-            boolean isLocationToken = LexiconPositionsIndexes
+            boolean isLocationToken = MedicalNERLexiconPositionsIndexes
                 .isTokenInLexicon(positionsIndexes.getLocalLocationPositions(), posit);
-            boolean isPersonTitleToken = LexiconPositionsIndexes
+            boolean isPersonTitleToken = MedicalNERLexiconPositionsIndexes
                 .isTokenInLexicon(positionsIndexes.getLocalPersonTitlePositions(), posit);
-            boolean isOrganisationToken = LexiconPositionsIndexes
+            boolean isOrganisationToken = MedicalNERLexiconPositionsIndexes
                 .isTokenInLexicon(positionsIndexes.getLocalOrganisationPositions(), posit);
-            boolean isOrgFormToken = LexiconPositionsIndexes
+            boolean isOrgFormToken = MedicalNERLexiconPositionsIndexes
                 .isTokenInLexicon(positionsIndexes.getLocalOrgFormPositions(), posit);
 
-            ress.append(FeaturesVectorNER
+            ress.append(FeaturesVectorMedicalNER
                 .addFeaturesNER(token.getText(),
                     isLocationToken, isPersonTitleToken, isOrganisationToken, isOrgFormToken)
                 .printVector());
