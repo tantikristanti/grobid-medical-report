@@ -2,42 +2,44 @@
 <corpus>
 	<subcorpus>
 		<document name="5325322850.pdf" xml:lang="fr">
-			<p xml:id="p0">Motif </p>
-			<p xml:id="p2"><ENAMEX type="PROCEDURE">Bilan</ENAMEX> cognitif </p>
-			<p xml:id="p4">Pour mémoire </p>
-			<p xml:id="p6">Résumé clinique </p>
-			<p xml:id="p8"><ENAMEX type="LIVING">Patient</ENAMEX> droitier niveau bac +2 vit seul avec accompagnement à domicile. </p>
-			<p xml:id="p10">Antécédents </p>
-			<p xml:id="p12"><ENAMEX type="LIVING">Antécédents</ENAMEX> médicaux : </p>
-			<p xml:id="p13">-</p>
-			<p xml:id="p15"><ENAMEX type="LIVING">Antécédents</ENAMEX> chirurgicaux : </p>
+			<p xml:id="p0">L'enfant TEST Test, âgée de 3 ans 2 mois, née le 21/07/2015, a été vue en consultation dans le </p>
+			<p xml:id="p1"><ENAMEX type="OBJECT">service</ENAMEX> de BRC EIG. </p>
+			<p xml:id="p3">Motif </p>
+			<p xml:id="p5"><ENAMEX type="PROCEDURE">Bilan</ENAMEX> cognitif </p>
+			<p xml:id="p7">Pour mémoire </p>
+			<p xml:id="p9">Résumé clinique </p>
+			<p xml:id="p11"><ENAMEX type="LIVING">Patient</ENAMEX> droitier niveau bac +2 vit seul avec accompagnement à domicile. </p>
+			<p xml:id="p13">Antécédents </p>
+			<p xml:id="p15"><ENAMEX type="LIVING">Antécédents</ENAMEX> médicaux : </p>
 			<p xml:id="p16">-</p>
-			<p xml:id="p18"><ENAMEX type="LIVING">Antécédents</ENAMEX> gynéco-obstétriques : </p>
+			<p xml:id="p18"><ENAMEX type="LIVING">Antécédents</ENAMEX> chirurgicaux : </p>
 			<p xml:id="p19">-</p>
-			<p xml:id="p21"><ENAMEX type="DISORDER">Histoire</ENAMEX> de la maladie actuelle </p>
-			<p xml:id="p23"><ENAMEX type="DISORDER">Troubles cognitifs</ENAMEX> aggravation depuis 2 ans </p>
-			<p xml:id="p25"><ENAMEX type="PHYSIOLOGY">Evolution</ENAMEX> depuis la dernière consultation </p>
-			<p xml:id="p27"><ENAMEX type="DISORDER">Perte</ENAMEX> de 3 kilos </p>
-			<p xml:id="p29">Examen clinique </p>
-			<p xml:id="p31">Le 27/03/2018 : Poids : 50 kg, Taille : 162 cm </p>
-			<p xml:id="p33"><ENAMEX type="DRUG">IMC</ENAMEX> 19 dénutrition </p>
-			<p xml:id="p35"><ENAMEX type="PROCEDURE">Examens complémentaires</ENAMEX> </p>
-			<p xml:id="p36"><ENAMEX type="PHENOMENA">Résultats</ENAMEX> de biologie </p>
-			<p xml:id="p38"><ENAMEX type="ANATOMY">hypo</ENAMEX> albuminemie 30g/l Autres examens </p>
-			<p xml:id="p39"><ENAMEX type="PROCEDURE">IRM</ENAMEX> </p>
-			<p xml:id="p41">Conclusion </p>
-			<p xml:id="p43"><ENAMEX type="DISORDER">Perte</ENAMEX> d'autonomie lié a des troubles cognitifs et denutrition </p>
-			<p xml:id="p45">Suivi </p>
-			<p xml:id="p47"><ENAMEX type="PROCEDURE">Bilan</ENAMEX> cognitif à faire en HDJ </p>
-			<p xml:id="p49">Courrier validé électroniquement par Imane SEFIANI le 26/09/2018 </p>
-			<p xml:id="p51"><ENAMEX type="PROCEDURE">I</ENAMEX>. SEFIANI </p>
-			<p xml:id="p53"><ENAMEX type="PROCEDURE">Information</ENAMEX> aux patients : vous êtes informé(e) que les données à caractère personnel vous concernant, recueillies dans le cadre de la gestion administrative et de votre </p>
-			<p xml:id="p54"><ENAMEX type="PROCEDURE">prise en charge</ENAMEX> à l'hôpital, peuvent être utilisées à des fins de recherche dans le domaine de la santé, sous la responsabilité de l'AP-HP. Notamment, un Entrepôt de </p>
-			<p xml:id="p55">Données de Santé (EDS) a été créé afin de permettre la réalisation de recherches non interventionnelles sur données, d'études de faisabilité des essais cliniques et </p>
-			<p xml:id="p56">d'études de pilotage de l'activité hospitalière. Pour plus d'informations relatives à chaque recherche, aux données utilisées, aux destinataires des données, aux durées de </p>
-			<p xml:id="p57">conservation des données et aux modalités d'exercice de vos droits, vous pouvez consulter le portail d'information de l'EDS à l'adresse http://recherche.aphp.fr/eds . Pour </p>
-			<p xml:id="p58">vous opposer à l'utilisation des données vous concernant à des fins de recherche, vous pouvez vous adresser au bureau des usagers ou directeur de l'hôpital où vous </p>
-			<p xml:id="p59">avez été pris en charge ou remplir le formulaire d'opposition électronique disponible à l'adresse http://recherche.aphp.fr/eds/droit-opposition. </p>
+			<p xml:id="p21"><ENAMEX type="LIVING">Antécédents</ENAMEX> gynéco-obstétriques : </p>
+			<p xml:id="p22">-</p>
+			<p xml:id="p24"><ENAMEX type="DISORDER">Histoire</ENAMEX> de la maladie actuelle </p>
+			<p xml:id="p26"><ENAMEX type="DISORDER">Troubles cognitifs</ENAMEX> aggravation depuis 2 ans </p>
+			<p xml:id="p28"><ENAMEX type="PHYSIOLOGY">Evolution</ENAMEX> depuis la dernière consultation </p>
+			<p xml:id="p30"><ENAMEX type="DISORDER">Perte</ENAMEX> de 3 kilos </p>
+			<p xml:id="p32">Examen clinique </p>
+			<p xml:id="p34">Le 27/03/2018 : Poids : 50 kg, Taille : 162 cm </p>
+			<p xml:id="p36"><ENAMEX type="DRUG">IMC</ENAMEX> 19 dénutrition </p>
+			<p xml:id="p38"><ENAMEX type="PROCEDURE">Examens complémentaires</ENAMEX> </p>
+			<p xml:id="p39"><ENAMEX type="PHENOMENA">Résultats</ENAMEX> de biologie </p>
+			<p xml:id="p41"><ENAMEX type="ANATOMY">hypo</ENAMEX> albuminemie 30g/l Courrier validé électroniquement par Imane SEFIANI le 26/09/2018 </p>
+			<p xml:id="p43">Autres examens </p>
+			<p xml:id="p44"><ENAMEX type="PROCEDURE">IRM</ENAMEX> </p>
+			<p xml:id="p46">Conclusion </p>
+			<p xml:id="p48">Suivi </p>
+			<p xml:id="p50"><ENAMEX type="DISORDER">Perte</ENAMEX> d'autonomie lié a des troubles cognitifs et denutrition </p>
+			<p xml:id="p52"><ENAMEX type="PROCEDURE">Bilan</ENAMEX> cognitif à faire en HDJ </p>
+			<p xml:id="p54"><ENAMEX type="PROCEDURE">I</ENAMEX>. SEFIANI </p>
+			<p xml:id="p56"><ENAMEX type="PROCEDURE">Information</ENAMEX> aux patients : vous êtes informé(e) que les données à caractère personnel vous concernant, recueillies dans le cadre de la gestion administrative et de votre </p>
+			<p xml:id="p57"><ENAMEX type="PROCEDURE">prise en charge</ENAMEX> à l'hôpital, peuvent être utilisées à des fins de recherche dans le domaine de la santé, sous la responsabilité de l'AP-HP. Notamment, un Entrepôt de </p>
+			<p xml:id="p58">Données de Santé (EDS) a été créé afin de permettre la réalisation de recherches non interventionnelles sur données, d'études de faisabilité des essais cliniques et </p>
+			<p xml:id="p59">d'études de pilotage de l'activité hospitalière. Pour plus d'informations relatives à chaque recherche, aux données utilisées, aux destinataires des données, aux durées de </p>
+			<p xml:id="p60"><ENAMEX type="PROCEDURE">conservation</ENAMEX> des données et aux modalités d'exercice de vos droits, vous pouvez consulter le portail d'information de l'EDS à l'adresse http://recherche.aphp.fr/eds . Pour </p>
+			<p xml:id="p61">vous opposer à l'utilisation des données vous concernant à des fins de recherche, vous pouvez vous adresser au bureau des usagers ou directeur de l'hôpital où vous </p>
+			<p xml:id="p62">avez été pris en charge ou remplir le formulaire d'opposition électronique disponible à l'adresse http://recherche.aphp.fr/eds/droit-opposition. </p>
 
 
 		</document>

@@ -22,7 +22,7 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
 
     private List<String> endTags = Arrays.asList("ENAMEX");
 
-    private List<String> intermediaryTags = Arrays.asList("subcorpus", "document", "p");
+    private List<String> intermediaryTags = Arrays.asList("corpus", "subcorpus", "document", "p");
 
     public FrenchCorpusSaxHandler() {
         labeled = new ArrayList<String>();
@@ -53,15 +53,6 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                            java.lang.String qName) throws SAXException {
         if (endTags.contains(qName)) {
             writeData();
-            accumulator.setLength(0);
-        } else if (qName.equals("front")) {
-            String text = getText();
-            if (text != null) {
-                if (text.length() > 0) {
-                    currentTag = "<other>";
-                    writeData();
-                }
-            }
             accumulator.setLength(0);
         } else if (intermediaryTags.contains(qName)) {
             // do nothing

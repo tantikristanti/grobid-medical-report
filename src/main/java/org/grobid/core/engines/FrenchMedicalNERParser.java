@@ -444,7 +444,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
             // path for blank full-medical-text model
             File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner.tei.xml"));
-            //File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             doc = new Document(documentSource);
