@@ -82,6 +82,11 @@ An example of a command for training the __train_full_medical_text__ model:
 > ./gradlew train_full_medical_text
 ```
 
+An example of a command for training the __train_dateline__ model:
+```bash
+> ./gradlew train_dateline
+```
+
 An example of a command for training the __french_medical_ner__ model:
 ```bash
 > ./gradlew train_french_medical_ner
@@ -110,13 +115,11 @@ Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eva
 By default, the training and evaluation data partition is 80:20 (i.e., the datasets are under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus`). To change it, add the `-s` parameter or change the `-s` `build.gradle` to the desired proportion.
 
 ## Generation of training data
-
 For each input Pdf file, __grobid-medical-report__ generates XML files according to the models adopted since each model uses different training data (e.g., *.training.medical.tei.xml, *.training.header.medical.tei.xml, *.training.left.note.medical.tei.xml). To use these automatically-generated XML files as a gold standard,  we need first to check and correct them.
 
 When the models use PDF layout features, __grobid-medical-report__ generates additional feature files (e.g., *.training.medical, *.training.header.medical, *.training.left.note.medical).
 
 To generate a new training data, under the project directory `grobid/grobid-medical-report/` execute the following command:
-
 
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
@@ -145,7 +148,7 @@ An example of a command for generating a new training data for the __full-medica
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
 ```
-With this command, for each PDF file as input, several training files will be generated as output. The output files are pre-annotated TEI files and feature files built automatically using trained models (e.g., medical-report-segmenter model, header-medical-report model). These files can then be used for re-training new models. The pre-annotated TEI files need to be repaired if needed while the feature files are left untouched.
+With this command, for each PDF file as input, several training files will be generated as output. The output files are pre-annotated TEI files and feature files built automatically using trained models (e.g., medical-report-segmenter model, header-medical-report model). These files can then be used for re-training new models. The pre-annotated TEI files need to be revised if needed while the feature files are left untouched.
 
 Depending on what model we want to retrain, these files will then need to be placed under grobid-trainer directory (`grobid-trainer/resources/dataset/*MODEL*/`), especially under `grobid-trainer/resources/dataset/*MODEL*/corpus` for training data and under `grobid-trainer/resources/dataset/*MODEL*/evaluation` for evaluation data. The corrected TEI files need to be put under `grobid-trainer/resources/dataset/*MODEL*/corpus/tei` and the feature files under `grobid-trainer/resources/dataset/*MODEL*/corpus/raw`.
 
