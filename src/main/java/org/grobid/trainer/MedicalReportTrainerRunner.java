@@ -128,6 +128,8 @@ public class MedicalReportTrainerRunner {
             trainer = new LeftNoteMedicalReportTrainer();
         } else if (model.equals("fr-medical-ner")) {
             trainer = new FrenchMedicalNERTrainer();
+        } else if (model.equals("dateline")) {
+            trainer = new DatelineTrainer();
         } else {
             throw new IllegalStateException("The model " + model + " is unknown.");
         }
