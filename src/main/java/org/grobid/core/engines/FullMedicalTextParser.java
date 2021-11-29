@@ -2,6 +2,7 @@ package org.grobid.core.engines;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
@@ -16,6 +17,7 @@ import org.grobid.core.engines.tagging.GenericTaggerUtils;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
+import org.grobid.core.features.FeaturesVectorDateline;
 import org.grobid.core.features.FeaturesVectorFullMedicalText;
 import org.grobid.core.layout.*;
 import org.grobid.core.tokenization.TaggingTokenCluster;
@@ -879,12 +881,12 @@ public class FullMedicalTextParser extends AbstractParser {
             String pdfFileName = inputFile.getName();
             Writer writer = null;
 
-            // path for segmentation model
+            // path for medical report segmenter model
             File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical.tei.xml"));
             File outputTextFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical.rawtxt"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical"));
 
-            // SEGMENTATION MODEL
+            // 1. MEDICAL REPORT SEGMENTER MODEL
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, false, true, true);
             Document doc = new Document(documentSource);
             doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
@@ -894,76 +896,197 @@ public class FullMedicalTextParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            // first, call the medical-report-segmenter model to have high level segmentation
+            // create training data for the medical report segmenter model
+            String featuredData = parsers.getMedicalReportSegmenterParser().getAllLinesFeatured(doc);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            // we write first the full text untagged (but featurized with segmentation features)
+            /*writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+            writer.write(featuredData + "\n");
+            writer.close();*/
+
+            // also write the raw text as seen before segmentation
+            StringBuffer rawtxt = new StringBuffer();
+            for(LayoutToken txtline : tokenizations) {
+                rawtxt.append(txtline.getText());
+            }
+            //FileUtils.writeStringToFile(outputTextFile, rawtxt.toString(), StandardCharsets.UTF_8);
+
+            // lastly, write the featurized and tagged data
+            if (isNotBlank(featuredData)) {
+                String rese = parsers.getMedicalReportSegmenterParser().label(featuredData);
+                StringBuffer bufferFulltext = parsers.getMedicalReportSegmenterParser().trainingExtraction(rese, tokenizations, doc);
+
+                // write the TEI file to reflect the extact layout of the text as extracted from the pdf
+                /*writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") +
+                    "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
+
+                writer.write(bufferFulltext.toString());
+                writer.write("\n\t</text>\n</tei>\n");
+                writer.close();*/
+            }
+
+            // Now we process and create training data for other models ...
+
+            // But first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource,
                 GrobidAnalysisConfig.defaultInstance());
 
-            // FULL-MEDICAL-TEXT MODEL (body part)
+            // 2. HEADER MEDICAL REPORT  MODEL
+
+            // path for header medical report model
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
+
+            SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
+            List<LayoutToken> tokenizationsFull = doc.getTokenizations();
+            if (documentHeaderParts != null) {
+                List<LayoutToken> headerTokenizations = new ArrayList<LayoutToken>();
+                for (DocumentPiece docPiece : documentHeaderParts) {
+                    DocumentPointer dp1 = docPiece.getLeft();
+                    DocumentPointer dp2 = docPiece.getRight();
+
+                    int tokens = dp1.getTokenDocPos();
+                    int tokene = dp2.getTokenDocPos();
+                    for (int i = tokens; i < tokene; i++) {
+                        headerTokenizations.add(tokenizationsFull.get(i));
+                    }
+                }
+                Pair<String, List<LayoutToken>> featuredHeader = parsers.getHeaderMedicalParser().getSectionHeaderFeatured(doc, documentHeaderParts);
+                String header = featuredHeader.getLeft();
+                if ((header != null) && (header.trim().length() > 0)) {
+                    // we write the featured header yet unlabeled
+                    /*writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(header + "\n");
+                    writer.close();*/
+                    
+                    // featured and labeled (tagged) data
+                    String rese = parsers.getHeaderMedicalParser().label(header);
+
+                    // buffer for the header block
+                    StringBuilder bufferHeader = parsers.getHeaderMedicalParser().trainingExtraction(rese, headerTokenizations);
+
+                    // write the training TEI file for header which reflects the extract layout of the text as
+                    // extracted from the pdf
+                    /*writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
+                        + pdfFileName.replace(".pdf", "")
+                        + "\"/>\n\t</teiHeader>\n\t<text");
+
+                    writer.write(" xml:lang=\"fr\"");
+                    writer.write(">\n\t\t<front>\n");
+
+                    writer.write(bufferHeader.toString());
+                    writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
+                    writer.close();*/
+
+                    // buffer for the affiliation+address block
+                    StringBuilder bufferAffiliation =
+                        parsers.getAffiliationAddressParser().trainingExtraction(rese, headerTokenizations);
+
+                    // 3. DATELINE MODEL
+                    // buffer for the dateline block
+                    // path for dateline  model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.dateline.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.dateline"));
+
+                    StringBuilder bufferDateline = null;
+                    // we need to rebuild the found date string as it appears
+                    String input = "";
+                    int q = 0;
+                    StringTokenizer st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<dateline>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+                    List<String> inputs = new ArrayList<String>();
+                    if (input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        //bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs); //if the models exists already
+                    }
+
+                    // if the models doesn't exist yet
+                    List<String> tokenizationDateline = analyzer.tokenize(input);
+                    List<String> datelineBlocks = new ArrayList<String>();
+                    if (tokenizationDateline.size() == 0)
+                        return null;
+                    for(String tok : tokenizationDateline) {
+                        if (tok.equals("\n")) {
+                            datelineBlocks.add("@newline");
+                        } else if (!tok.equals(" ")) {
+                            datelineBlocks.add(tok + " <dateline>");
+                        }
+                    }
+
+                    // we write the featured header yet unlabeled
+                    String featuredDateline = FeaturesVectorDateline.addFeaturesDateline(datelineBlocks).toString();
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(featuredDateline + "\n");
+                    writer.close();
+
+                    // we write the dateline data yet unlabeled
+                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                    writer.write("<datelines>\n");
+                    writer.write(input);
+                    writer.write("\n</datelines>\n");
+                    writer.close();
+                }
+            }
+
+            // 4. LEFT NOTE MEDICAL REPORT MODEL
+            SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+
+
+            // 5. MEDIC MODEL
+
+            // 6. PATIENT MODEL
+            
+            // 7. FULL MEDICAL TEXT MODEL
+            // we take the body part only
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             if (documentBodyParts != null) {
                 Pair<String, LayoutTokenization> featSeg = getBodyTextFeatured(doc, documentBodyParts);
                 if (featSeg != null) {
                     // if no textual body part found, nothing to generate
 
-
                     String bodytext = featSeg.getLeft();
                     List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization();
 
                     // we write the full text untagged
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text"));
-                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    /*writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(bodytext + "\n");
-                    writer.close();
+                    writer.close();*/
 
-                    // StringTokenizer st = new StringTokenizer(fulltext, "\n");
                     String rese = label(bodytext);
-                    //System.out.println(rese);
                     StringBuilder bufferFulltext = trainingExtraction(rese, tokenizationsBody);
 
                     // write the TEI file to reflect the extract layout of the text as extracted from the pdf
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.tei.xml"));
-                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    /*writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                     if (id == -1) {
                         writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader/>\n\t<text xml:lang=\"fr\">\n");
                     } else {
-                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") +
                             "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
                     }
                     writer.write(bufferFulltext.toString());
                     writer.write("\n\t</text>\n</tei>\n");
-                    writer.close();
-
-                    // training data for FIGURES --> check it later
-                    /*Pair<String,String> trainingFigure = processTrainingDataFigures(rese, tokenizationsBody, inputFile.getName());
-    	            if (trainingFigure.getLeft().trim().length() > 0) {
-    		            String outPathFigures = pathFullText + File.separator
-    						+ pdfFileName.replace(".pdf", ".training.figure");
-    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFigures), false), StandardCharsets.UTF_8);
-    		            writer.write(trainingFigure.getRight() + "\n\n");
-    		            writer.close();
-
-    					String outPathFiguresTEI = pathTEI + File.separator
-    						+ pdfFileName.replace(".pdf", ".training.figure.tei.xml");
-    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFiguresTEI), false), StandardCharsets.UTF_8);
-    		            writer.write(trainingFigure.getLeft() + "\n");
-    		            writer.close();
-    		        }*/
-
-                    // training data for TABLES --> check it later
-                   /* Pair<String,String> trainingTable = processTrainingDataTables(rese, tokenizationsBody, inputFile.getName());
-    	            if (trainingTable.getLeft().trim().length() > 0) {
-    		            String outPathTables = pathFullText + File.separator
-    						+ pdfFileName.replace(".pdf", ".training.table");
-    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTables), false), StandardCharsets.UTF_8);
-    		            writer.write(trainingTable.getRight() + "\n\n");
-    		            writer.close();
-
-    					String outPathTablesTEI = pathTEI + File.separator
-    						+ pdfFileName.replace(".pdf", ".training.table.tei.xml");
-    					writer = new OutputStreamWriter(new FileOutputStream(new File(outPathTablesTEI), false), StandardCharsets.UTF_8);
-    		            writer.write(trainingTable.getLeft() + "\n");
-    		            writer.close();
-    		        }*/
+                    writer.close();*/
                 }
             }
 

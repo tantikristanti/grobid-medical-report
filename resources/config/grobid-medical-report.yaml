@@ -76,3 +76,10 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
+
+  - name: "dateline"
+      engine: "wapiti"
+      #engine: "delft"
+      delft:
+        # deep learning parameters
+        architecture: "BidLSTM_CRF_FEATURES"

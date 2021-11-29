@@ -18,6 +18,8 @@ The models prepared are:
 
 - [x] French medical NER 
 
+- [x] dateline
+
 - [ ] organization-medical-report
 
 - [ ] medic
@@ -28,7 +30,7 @@ The models prepared are:
 
 - [ ] name-patient
 
-- [ ] dateline
+
 
 Note:
 - [x] (A completed model)
@@ -115,12 +117,14 @@ When the models use PDF layout features, __grobid-medical-report__ generates add
 
 To generate a new training data, under the project directory `grobid/grobid-medical-report/` execute the following command:
 
+
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
-Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`, `createMedicalNerTraining`.
+Generation of training data commands are: `createTrainingFullMedicalText`, `createMedicalNerTraining`.
 
+<!---
 An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
@@ -135,11 +139,15 @@ An example of a command for generating a new training data for the __left-note-m
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
+--->
 
 An example of a command for generating a new training data for the __full-medical-text__ model:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
 ```
+With this command, for each PDF file as input, several training files will be generated as output. The output files are pre-annotated TEI files and feature files built automatically using trained models (e.g., medical-report-segmenter model, header-medical-report model). These files can then be used for re-training new models. The pre-annotated TEI files need to be repaired if needed while the feature files are left untouched.
+
+Depending on what model we want to retrain, these files will then need to be placed under grobid-trainer directory (`grobid-trainer/resources/dataset/*MODEL*/`), especially under `grobid-trainer/resources/dataset/*MODEL*/corpus` for training data and under `grobid-trainer/resources/dataset/*MODEL*/evaluation` for evaluation data. The corrected TEI files need to be put under `grobid-trainer/resources/dataset/*MODEL*/corpus/tei` and the feature files under `grobid-trainer/resources/dataset/*MODEL*/corpus/raw`.
 
 An example of a command for generating a new training data for the __fr-medical-NER__ model:
 ```bash

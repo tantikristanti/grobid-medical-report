@@ -1,5 +1,5 @@
 # grobid-medical-report :hospital:
-grobid-medical-report is a [GROBID](https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents. As the other GROBID models, this module relies on machine learning using linear Chain Conditional Random Fields (CRF). 
+grobid-medical-report is a [GROBID](https://github.com/kermitt2/grobid) module for extracting and restructuring medical reports from raw documents (PDF, text) into encoded documents (XML/TEI). All models built in this module are machine learning models that implement Wapiti CRF as Grobid's default models (it's possible to use deep learning models developed with [DeLFT](https://github.com/kermitt2/delft/) in Grobid as an alternative to the Wapiti CRF).
 
 ![FromPDF2TEI](doc/img/PDF2TEI.png)
 
@@ -7,7 +7,63 @@ grobid-medical-report is a [GROBID](https://github.com/kermitt2/grobid) module f
 
 First install the latest development version of GROBID as explained by the [documentation](http://grobid.readthedocs.org).
 
-Copy the module grobid-medical-report as a sibling sub-project of GROBID (e.g., grobid-core, grobid-trainer) :
+It is recommended to create a new branch to work specifically with the grobid-medical-report module as some adaptations are required.
+
+### Slight adjustments on the Grobid side
+grobid-medical-report is a module of Grobid that is intentionally separated from Grobid as this tool is specifically intended for APHP medical document extraction projects that handle sensitive data. Neither the training data nor the built models are shared publicly (only the program codes are accessible).
+
+To be able to use this tool, the installation of Grobid is a must. In addition, after installing Grobid, there are some adjustments on the Grobid side:
+1. Registration of the new model names in the GrobidModels class (grobid-core/src/main/java/org/grobid/core/GrobidModels.java). For examples:
+   ```
+    MEDICAL_REPORT_SEGMENTER("medical-report-segmenter"),
+    HEADER_MEDICAL_REPORT("header-medical-report"),
+    LEFT_NOTE_MEDICAL_REPORT("left-note-medical-report"),
+    NAME_MEDIC("name/medic"),
+    NAME_PATIENT("name/patient"),
+    DATELINE("dateline"),
+    FULL_MEDICAL_TEXT("full-medical-text"),
+    FR_MEDICAL_NER("fr-medical-ner"),
+    FR_MEDICAL_NER_QUAERO("fr-medical-ner-quaero");
+   ```
+2. Configuration of new models in grobid.yaml (grobid-home/config/grobid.yaml) by specifying:
+   - Model names
+   - Engine (machine learning with [Wapiti](https://wapiti.limsi.fr/) or deep learning with [Delft](https://github.com/kermitt2/delft/))
+   - Training parameters
+    
+    For examples:
+     ```
+     - name: "medical-report-segmenter"
+       engine: "wapiti"
+       wapiti:
+        # wapiti training parameters
+        epsilon: 0.0000001
+        window: 50
+        nbMaxIterations: 2000
+   
+   - name: "header-medical-report"
+       engine: "wapiti"
+       engine: "delft"
+       wapiti:
+        # wapiti training parameters
+        epsilon: 0.000001
+        window: 30
+        nbMaxIterations: 1500
+       delft:
+        # deep learning parameters
+        architecture: "BidLSTM_CRF_FEATURES"
+        runtime:
+          # parameters used at runtime/prediction
+          max_sequence_length: 3000
+          batch_size: 1
+     ```
+   
+3. Activation of the **-readingOrder** option to read the document block according to the reading order.
+
+To apply the changes, Grobid needs to be rebuilt:
+> ./gradlew clean install
+
+### Copy the trained models
+Put the module grobid-medical-report as a sibling sub-project of GROBID (e.g., grobid-core, grobid-trainer) :
 > cp -r grobid-medical-report grobid/
 
 > cd PATH-TO-GROBID/grobid/grobid-medical-report
@@ -16,7 +72,7 @@ Copy the existing trained model in the standard `grobid-home` path, type the com
 
 > ./gradlew copyModels 
 
-In general, the model will be placed under `PATH-TO-GROBID/grobid/grobid-home/models/medical-report/`
+In general, the model will be placed under `PATH-TO-GROBID/grobid/grobid-home/models/`
 
 Try compiling everything with:
 

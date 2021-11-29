@@ -748,7 +748,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                 writer = new OutputStreamWriter(new FileOutputStream(new File(outputFile +
                     File.separator +
                     PDFFileName.replace(".pdf", ".training.medical.tei.xml")), false), "UTF-8");
-                writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + id +
+                writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + PDFFileName +
                     "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
 
                 writer.write(bufferFulltext.toString());

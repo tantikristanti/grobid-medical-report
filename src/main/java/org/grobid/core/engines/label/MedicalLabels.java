@@ -44,6 +44,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String WEB_LABEL = "<web>";
     public final static String OTHER_LABEL = "<other>";
     public final static String MARKER_LABEL = "<marker>";
+    public static final String PLACE_NAME_LABEL = "<placeName>";
 
     // full medical text
     public static final String PARAGRAPH_LABEL = "<paragraph>";
@@ -60,7 +61,6 @@ public class MedicalLabels extends TaggingLabels {
     public final static String MIDDLENAME_LABEL = "<middlename>";
     public final static String SURNAME_LABEL = "<surname>";
     public final static String SUFFIX_LABEL = "<suffix>";
-
 
     /**
      * document header (<header>): front,
@@ -134,6 +134,11 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SURNAME_LABEL);
     public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SUFFIX_LABEL);
 
+    // Dateline
+    public static final TaggingLabel DATELINE_PLACE_NAME = new TaggingLabelImpl(GrobidModels.DATELINE, PLACE_NAME_LABEL);
+    public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
+    public static final TaggingLabel DATELINE_TIME = new TaggingLabelImpl(GrobidModels.DATELINE, TIME_LABEL);
+
     // Names
     public static final TaggingLabel NAMES_PATIENT_MARKER = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, MARKER_LABEL);
     public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, TITLE_LABEL);
@@ -191,9 +196,14 @@ public class MedicalLabels extends TaggingLabels {
         register(ITEM);
         register(TITLE);
         register(SECTION);
+        register(SUB_SECTION);
         register(FIGURE);
         register(TABLE);
 
+        // dateline
+        register(DATELINE_PLACE_NAME);
+        register(DATELINE_DATE);
+        register(DATELINE_TIME);
     }
 
 }

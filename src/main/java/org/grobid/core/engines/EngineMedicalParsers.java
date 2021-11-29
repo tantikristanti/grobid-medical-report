@@ -20,6 +20,7 @@ public class EngineMedicalParsers extends EngineParsers {
     private MedicParser medicParser = null;
     private PatientParser patientParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
+    private DatelineParser datelineParser = null;
     private DateParser dateParser = null;
     private NEREnParser nerParser = null;
     private NERFrParser nerFrParser = null;
@@ -143,6 +144,17 @@ public class EngineMedicalParsers extends EngineParsers {
             }
         }
         return affiliationAddressParser;
+    }
+
+    public DatelineParser getDatelineParser() {
+        if (datelineParser == null) {
+            synchronized (this) {
+                if (datelineParser == null) {
+                    datelineParser = new DatelineParser();
+                }
+            }
+        }
+        return datelineParser;
     }
 
     public DateParser getDateParser() {
