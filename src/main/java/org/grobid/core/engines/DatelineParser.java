@@ -201,7 +201,8 @@ public class DatelineParser extends AbstractParser {
                     continue;
                 } else {
                     String theTok = tokenizations.get(q).getText();
-                    while (theTok.equals(" ")) {
+                    while (theTok.equals(" ")
+                        || theTok.equals("\u00A0")) {
                         addSpace = true;
                         q++;
                         theTok = tokenizations.get(q).getText();
@@ -264,7 +265,7 @@ public class DatelineParser extends AbstractParser {
                     lastTag = s1;
                     continue;
                 } else {
-                    output = writeField(s1, lastTag0, s2, "<date>", "<date>", false, 0);
+                    output = writeField(s1, lastTag0, s2, "<date>", "<date>", addSpace, 0);
                 }
 
                 if (output != null) {
@@ -298,7 +299,7 @@ public class DatelineParser extends AbstractParser {
                     lastTag = s1;
                     continue;
                 } else {
-                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", true, 0);
+                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 0);
                 }
 
                 if (output != null) {
