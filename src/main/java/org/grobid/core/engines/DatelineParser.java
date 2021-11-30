@@ -298,7 +298,7 @@ public class DatelineParser extends AbstractParser {
                     lastTag = s1;
                     continue;
                 } else {
-                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 0);
+                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", true, 0);
                 }
 
                 if (output != null) {
