@@ -77,9 +77,13 @@ models:
       window: 20
       nbMaxIterations: 1000
 
+
   - name: "dateline"
-      engine: "wapiti"
-      #engine: "delft"
-      delft:
-        # deep learning parameters
-        architecture: "BidLSTM_CRF_FEATURES"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    #engine: "delft"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000

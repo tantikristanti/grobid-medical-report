@@ -1015,11 +1015,11 @@ public class FullMedicalTextParser extends AbstractParser {
                     List<String> inputs = new ArrayList<String>();
                     if (input.trim().length() > 1) {
                         inputs.add(input.trim());
-                        //bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs); //if the models exists already
+                        bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs); //if the models exists already
                     }
 
                     // if the models doesn't exist yet
-                    List<String> tokenizationDateline = analyzer.tokenize(input);
+                    /*List<String> tokenizationDateline = analyzer.tokenize(input);
                     List<String> datelineBlocks = new ArrayList<String>();
                     if (tokenizationDateline.size() == 0)
                         return null;
@@ -1029,21 +1029,34 @@ public class FullMedicalTextParser extends AbstractParser {
                         } else if (!tok.equals(" ")) {
                             datelineBlocks.add(tok + " <dateline>");
                         }
-                    }
+                    }*/
 
                     // we write the featured header yet unlabeled
-                    String featuredDateline = FeaturesVectorDateline.addFeaturesDateline(datelineBlocks).toString();
+                    /*String featuredDateline = FeaturesVectorDateline.addFeaturesDateline(datelineBlocks).toString();
                     writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(featuredDateline + "\n");
-                    writer.close();
+                    writer.close();*/
 
                     // we write the dateline data yet unlabeled
-                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    /*writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                     writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                     writer.write("<datelines>\n");
                     writer.write(input);
                     writer.write("\n</datelines>\n");
-                    writer.close();
+                    writer.close();*/
+
+                    if (bufferDateline != null) {
+                        if (bufferDateline.length() > 0) {
+                            Writer writerDate = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writerDate.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writerDate.write("<datelines>\n");
+
+                            writerDate.write(bufferDateline.toString());
+
+                            writerDate.write("</datelines>\n");
+                            writerDate.close();
+                        }
+                    }
                 }
             }
 

@@ -158,7 +158,7 @@ public class DatelineParser extends AbstractParser {
                 if (input == null)
                     continue;
 
-				tokenizations = analyzer.tokenizeWithLayoutToken(input);
+				tokenizations = analyzer.tokenizeWithLayoutToken(input, new Language("fr"));
 				
 				if (tokenizations.size() == 0)
                     return null;
@@ -249,7 +249,6 @@ public class DatelineParser extends AbstractParser {
 
                 tagClosed = lastTag0 != null && testClosingTag(buffer, currentTag0, lastTag0);
 
-
                 String output = writeField(s1, lastTag0, s2, "<placeName>", "<placeName>", addSpace, 0);
                 if (output != null) {
                     if (lastTag0 != null) {
@@ -265,20 +264,10 @@ public class DatelineParser extends AbstractParser {
                     lastTag = s1;
                     continue;
                 } else {
-                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 0);
+                    output = writeField(s1, lastTag0, s2, "<date>", "<date>", false, 0);
                 }
 
-                if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<date>", "<date>", addSpace, 0);
-                } else {
-                    buffer.append(output);
-                    lastTag = s1;
-                    continue;
-                }
-
-                if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<time>", "<time>", addSpace, 0);
-                } else {
+                if (output != null) {
                     if (lastTag0 != null) {
                         if (hasDate && !lastTag0.equals("<date>")) {
                             buffer.append("</dateline>\n");
@@ -291,6 +280,8 @@ public class DatelineParser extends AbstractParser {
                     hasDate = true;
                     lastTag = s1;
                     continue;
+                } else {
+                    output = writeField(s1, lastTag0, s2, "<time>", "<time>", addSpace, 0);
                 }
 
                 if (output != null) {
@@ -306,7 +297,16 @@ public class DatelineParser extends AbstractParser {
                     hasTime = true;
                     lastTag = s1;
                     continue;
+                } else {
+                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 0);
                 }
+
+                if (output != null) {
+                    buffer.append(output);
+                    lastTag = s1;
+                    continue;
+                }
+
                 lastTag = s1;
             }
 
