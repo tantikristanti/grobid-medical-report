@@ -34,7 +34,7 @@ public class DatelineParser extends AbstractParser {
     DatelineParser(GrobidModel model) {
         super(model);
     }
-    
+
     public List<Dateline> process(String input) {
         List<String> datelineBlocks = new ArrayList<>();
         // force English language for the tokenization only
@@ -49,7 +49,7 @@ public class DatelineParser extends AbstractParser {
                 datelineBlocks.add(tok + " <dateline>");
             }
         }
-        
+
         return processCommon(datelineBlocks);
     }
 
@@ -59,16 +59,16 @@ public class DatelineParser extends AbstractParser {
             if (!" ".equals(tok.getText()) && !"\n".equals(tok.getText())) {
                 String normalizedText = tok.getText().replaceAll("[ \n]", "");
                 datelineBlocks.add(normalizedText + " <dateline>");
-            } 
+            }
         }
 
         return processCommon(datelineBlocks);
     }
-    
+
     protected List<Dateline> processCommon(List<String> input) {
         if (CollectionUtils.isEmpty(input))
             return null;
-        
+
         try {
             StringBuilder features = FeaturesVectorDateline.addFeaturesDateline(input);
             String res = label(features.toString());
@@ -76,7 +76,7 @@ public class DatelineParser extends AbstractParser {
             List<LayoutToken> tokenization = input.stream()
                 .map(token -> new LayoutToken(token.split(" ")[0]))
                 .collect(Collectors.toList());
-            
+
             // extract results from the processed file
             return resultExtraction(res, tokenization);
         } catch (Exception e) {
@@ -97,41 +97,41 @@ public class DatelineParser extends AbstractParser {
             }
             TaggingLabel clusterLabel = cluster.getTaggingLabel();
             Engine.getCntManager().i(clusterLabel);
-            
+
             String clusterText = LayoutTokensUtil.toText(cluster.concatTokens());
             if (clusterLabel.equals(MedicalLabels.DATELINE_PLACE_NAME)) {
                 if (isNotBlank(dateline.getPlaceName())) {
-                        if (dateline.isNotNull()) {
-                            datelines.add(dateline);
-                            dateline = new Dateline();
-                        }
-                        dateline.setPlaceName(clusterText);
+                    if (dateline.isNotNull()) {
+                        datelines.add(dateline);
+                        dateline = new Dateline();
+                    }
+                    dateline.setPlaceName(clusterText);
 
                 } else {
                     dateline.setPlaceName(clusterText);
                 }
             } else if (clusterLabel.equals(MedicalLabels.DATELINE_DATE)) {
                 if (isNotBlank(dateline.getDate())) {
-                        if (dateline.isNotNull()) {
-                            datelines.add(dateline);
-                            dateline = new Dateline();
-                        }
-                        dateline.setDate(clusterText);
+                    if (dateline.isNotNull()) {
+                        datelines.add(dateline);
+                        dateline = new Dateline();
+                    }
+                    dateline.setDate(clusterText);
                 } else {
                     dateline.setDate(clusterText);
                 }
-               
+
             } else if (clusterLabel.equals(MedicalLabels.DATELINE_TIME)) {
                 if (isNotBlank(dateline.getTimeString())) {
-                        if (dateline.isNotNull()) {
-                            datelines.add(dateline);
-                            dateline = new Dateline();
-                        }
-                        dateline.setTimeString(clusterText);
+                    if (dateline.isNotNull()) {
+                        datelines.add(dateline);
+                        dateline = new Dateline();
+                    }
+                    dateline.setTimeString(clusterText);
                 } else {
                     dateline.setTimeString(clusterText);
                 }
-            } 
+            }
         }
 
         if (dateline.isNotNull()) {
@@ -158,12 +158,12 @@ public class DatelineParser extends AbstractParser {
                 if (input == null)
                     continue;
 
-				tokenizations = analyzer.tokenizeWithLayoutToken(input, new Language("fr"));
-				
-				if (tokenizations.size() == 0)
+                tokenizations = analyzer.tokenizeWithLayoutToken(input, new Language("fr"));
+
+                if (tokenizations.size() == 0)
                     return null;
 
-				for(LayoutToken tok : tokenizations) {
+                for(LayoutToken tok : tokenizations) {
                     if (tok.getText().equals("\n")) {
                         datelineBlocks.add("@newline");
                     } else if (!tok.getText().equals(" ")) {
@@ -201,8 +201,7 @@ public class DatelineParser extends AbstractParser {
                     continue;
                 } else {
                     String theTok = tokenizations.get(q).getText();
-                    while (theTok.equals(" ")
-                        || theTok.equals("\u00A0")) {
+                    while (theTok.equals(" ")) {
                         addSpace = true;
                         q++;
                         theTok = tokenizations.get(q).getText();
@@ -220,7 +219,7 @@ public class DatelineParser extends AbstractParser {
                     if (i == 0) {
                         s2 = TextUtilities.HTMLEncode(s); // string
                     }
-					else if (i == ll - 1) {
+                    else if (i == ll - 1) {
                         s1 = s; // label
                     }
                     i++;
@@ -251,6 +250,7 @@ public class DatelineParser extends AbstractParser {
                 tagClosed = lastTag0 != null && testClosingTag(buffer, currentTag0, lastTag0);
 
                 String output = writeField(s1, lastTag0, s2, "<placeName>", "<placeName>", addSpace, 0);
+
                 if (output != null) {
                     if (lastTag0 != null) {
                         if (hasPlaceName && !lastTag0.equals("<placeName>")) {
@@ -307,7 +307,6 @@ public class DatelineParser extends AbstractParser {
                     lastTag = s1;
                     continue;
                 }
-
                 lastTag = s1;
             }
 

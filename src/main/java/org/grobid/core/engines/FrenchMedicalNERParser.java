@@ -16,9 +16,7 @@ import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.tagging.GenericTagger;
-import org.grobid.core.engines.tagging.GenericTaggerUtils;
-import org.grobid.core.engines.tagging.TaggerFactory;
+import org.grobid.core.engines.tagging.*;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeaturesVectorMedicalNER;
@@ -33,6 +31,7 @@ import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
+import org.grobid.core.utilities.counters.impl.CntManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * Tanti, 2021
  */
 
-
 public class FrenchMedicalNERParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
@@ -58,19 +56,14 @@ public class FrenchMedicalNERParser extends AbstractParser {
     protected Lexicon lexicon = Lexicon.getInstance();
     protected File tmpPath = null;
     protected EngineMedicalParsers parsers;
-    protected NERParsers nerParsers;
-    //private DeLFTTagger frMedicalNer;
-    private GenericTagger frenchMedicalNER;
 
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
+        //by default, we use CRF models
         super(GrobidModels.FR_MEDICAL_NER_QUAERO);
-        //super(GrobidModels.FULL_MEDICAL_TEXT);
+        // if we want to use DeLFT models
+        //super(GrobidModels.FR_MEDICAL_NER_QUAERO, CntManagerFactory.getNoOpCntManager(), GrobidCRFEngine.DELFT, "BidLSTM_CRF");
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO);
-        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FULL_MEDICAL_TEXT);
-        //frenchMedicalNER = new DeLFTTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, "BidLSTM_CRF");
-        //frenchMedicalNER = TaggerFactory.getTagger(GrobidModels.FR_MEDICAL_NER_QUAERO, GrobidCRFEngine.DELFT);
     }
 
     /**
