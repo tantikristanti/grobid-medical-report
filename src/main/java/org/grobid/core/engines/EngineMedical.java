@@ -39,18 +39,6 @@ public class EngineMedical extends Engine {
     }
 
     /**
-     * Parse a sequence of medics from a header, i.e. containing possibly
-     * reference markers.
-     *
-     * @param medicSequence - the string corresponding to a raw sequence of names
-     * @return the list of medics
-     */
-    public List<PersonMedical> processMedicsHeader(String medicSequence) throws Exception {
-        List<PersonMedical> result = parsers.getMedicParser().processingHeader(medicSequence);
-        return result;
-    }
-
-    /**
      * Apply a parsing model for the header of a PDF file based on CRF, using
      * first three pages of the PDF
      *

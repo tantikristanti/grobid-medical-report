@@ -47,7 +47,7 @@ public class TEIDatelineSaxParser extends DefaultHandler {
                            java.lang.String localName,
                            java.lang.String qName) throws SAXException {
         if (( (qName.equals("placeName")) || (qName.equals("date")) ||
-            (qName.equals("time"))) &
+            (qName.equals("time")) ||  (qName.equals("note"))) &&
             (currentTag != null)) {
             String text = getText();
             writeField(text);
@@ -82,6 +82,8 @@ public class TEIDatelineSaxParser extends DefaultHandler {
             currentTag = "<date>";
         } else if (qName.equals("time")) {
             currentTag = "<time>";
+        } else if (qName.equals("note")) {
+            currentTag = "<note>";
         } else if (qName.equals("dateline")) {
             n++;
         }

@@ -11,6 +11,7 @@ For the dateline model, we use the following TEI elements:
 * `<date>` for the date
 * `<time>` for the time information
 * `<placeName>` for the place names
+* `<note>` for the type of the dates
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
@@ -44,3 +45,10 @@ For example:
     <dateline><placeName>Paris</placeName>, <date>le 24 mai 2006</date></dateline> <lb/>
 ```
 
+### Notes
+Place names are enclosed in a [\<note\>](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-note.html) element.
+
+For example:
+```xml
+    <dateline><note>Date de l'examen</note> : <date>le 06 janvier 2000</date></dateline> <lb/>
+```

@@ -33,6 +33,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String DATE_LABEL = "<date>";
     public final static String DATELINE_LABEL = "<dateline>";
     public final static String TIME_LABEL = "<time>";
+    public final static String NOTE_LABEL = "<note>";
     public final static String MEDIC_LABEL = "<medic>";
     public final static String PATIENT_LABEL = "<patient>";
     public final static String AFFILIATION_LABEL = "<affiliation>";
@@ -127,25 +128,24 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
 
     // Medical personnel names
-    public static final TaggingLabel NAMES_MEDIC_MARKER = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, MARKER_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_TITLE = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, TITLE_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_FORENAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidModels.NAME_MEDIC, SUFFIX_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, TITLE_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, FORENAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, MIDDLENAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, SURNAME_LABEL);
+    public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, SUFFIX_LABEL);
 
     // Dateline
     public static final TaggingLabel DATELINE_PLACE_NAME = new TaggingLabelImpl(GrobidModels.DATELINE, PLACE_NAME_LABEL);
     public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
     public static final TaggingLabel DATELINE_TIME = new TaggingLabelImpl(GrobidModels.DATELINE, TIME_LABEL);
+    public static final TaggingLabel DATELINE_NOTE = new TaggingLabelImpl(GrobidModels.DATELINE, NOTE_LABEL);
 
     // Names
-    public static final TaggingLabel NAMES_PATIENT_MARKER = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, MARKER_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, TITLE_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_FORENAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SURNAME = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SUFFIX = new TaggingLabelImpl(GrobidModels.NAME_PATIENT, SUFFIX_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, TITLE_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, FORENAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, MIDDLENAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_SURNAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, SURNAME_LABEL);
+    public static final TaggingLabel NAMES_PATIENT_SUFFIX = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, SUFFIX_LABEL);
 
     static {
         // medical-report-segmenter
@@ -204,6 +204,7 @@ public class MedicalLabels extends TaggingLabels {
         register(DATELINE_PLACE_NAME);
         register(DATELINE_DATE);
         register(DATELINE_TIME);
+        register(DATELINE_NOTE);
     }
 
 }

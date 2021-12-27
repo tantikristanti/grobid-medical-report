@@ -156,27 +156,6 @@ public class FeaturesVectorDateline {
                 tag = line.substring(ind + 1, line.length());
             }
 
-            /*boolean filter = false;
-            if (text == null) {
-                filter = true;
-            } else if (text.length() == 0) {
-                filter = true;
-            } else if (text.startsWith("@IMAGE")) {
-                filter = true;
-            } else if (text.contains(".pbm")) {
-                filter = true;
-            } else if (text.contains(".svg")) {
-                filter = true;
-            } else if (text.contains(".jpg")) {
-                filter = true;
-            } else if (text.contains(".png")) {
-                filter = true;
-            }
-
-            if (filter) {
-                continue;
-            }*/
-
             features = new FeaturesVectorDateline();
             features.string = text;
 
@@ -303,12 +282,11 @@ public class FeaturesVectorDateline {
 
             features.wordShape = TextUtilities.wordShape(text);
 
-            if (tag.trim().equals("<dateline>")){
+            /*if (tag.trim().equals("<dateline>")){
                 features.label = "";
-            } else {
-
+            } else {*/
                 features.label = tag;
-            }
+            //}
 
             stringBuilder.append(features.printVector());
 

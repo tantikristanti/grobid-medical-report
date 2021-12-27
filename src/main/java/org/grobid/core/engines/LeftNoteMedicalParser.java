@@ -154,21 +154,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         if (medicSegments.size() > 1) {
                             fragmentedMedics = true;
                         }
-                        for (int k = 0; k < medicSegments.size(); k++) {
-                            if (medicSegments.get(k).size() == 0)
-                                continue;
-                            List<PersonMedical> localMedics = parsers.getMedicParser()
-                                .processingLeftNoteWithLayoutTokens(medicSegments.get(k), doc.getPDFAnnotations());
-                            if (localMedics != null) {
-                                for (PersonMedical pers : localMedics) {
-                                    resLeftNote.addFullMedic(pers);
-                                    if (pers.getMarkers() != null) {
-                                        hasMarker = true;
-                                    }
-                                    medicsBlocks.add(k);
-                                }
-                            }
-                        }
                     }
 
                     // remove invalid medics (no last name, noise, etc.)

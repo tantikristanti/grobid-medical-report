@@ -11,6 +11,7 @@ public class Dateline  {
     private String date = null;
     private int time = -1;
     private String timeString = null;
+    private String note = null;
 
     public Dateline() {
     }
@@ -20,6 +21,7 @@ public class Dateline  {
         this.date = fromDateline.date;
         this.time = fromDateline.time;
         this.timeString = fromDateline.timeString;
+        this.note = fromDateline.note;
     }
 
     public String getPlaceName() {
@@ -45,6 +47,10 @@ public class Dateline  {
     public void setTimeString(String timeString) {
         this.timeString = timeString;
     }
+
+    public String getNote() { return note; }
+
+    public void setNote(String note) { this.note = note; }
 
     public boolean isNotNull() {
         return (placeName != null) ||

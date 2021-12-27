@@ -3,6 +3,7 @@ package org.grobid.core.engines;
 import org.apache.commons.collections4.CollectionUtils;
 import org.grobid.core.GrobidModel;
 import org.grobid.core.GrobidModels;
+import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Dateline;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -15,15 +16,20 @@ import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.LayoutTokensUtil;
 import org.grobid.core.utilities.TextUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DatelineParser extends AbstractParser {
+    private static Logger LOGGER = LoggerFactory.getLogger(DatelineParser.class);
+    private static final Pattern NEWLINE_REGEX_PATTERN = Pattern.compile("[ \n]");
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
 
@@ -31,21 +37,18 @@ public class DatelineParser extends AbstractParser {
         super(GrobidModels.DATELINE);
     }
 
-    DatelineParser(GrobidModel model) {
-        super(model);
-    }
-
     public List<Dateline> process(String input) {
         List<String> datelineBlocks = new ArrayList<>();
         // force English language for the tokenization only
-        List<String> tokenizations = analyzer.tokenize(input, new Language("fr", 1.0));
-        if (CollectionUtils.isEmpty(tokenizations)) {
+        List<String> tokens = analyzer.tokenize(input, new Language("en", 1.0));
+        if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
 
-        for(String tok : tokenizations) {
+        for(String tok : tokens) {
             if (!" ".equals(tok) && !"\n".equals(tok)) {
-                tok = tok.replaceAll("[ \n]", "");
+                // sanitisation
+                tok = NEWLINE_REGEX_PATTERN.matcher(tok).replaceAll( "");
                 datelineBlocks.add(tok + " <dateline>");
             }
         }
@@ -106,9 +109,6 @@ public class DatelineParser extends AbstractParser {
                         dateline = new Dateline();
                     }
                     dateline.setPlaceName(clusterText);
-
-                } else {
-                    dateline.setPlaceName(clusterText);
                 }
             } else if (clusterLabel.equals(MedicalLabels.DATELINE_DATE)) {
                 if (isNotBlank(dateline.getDate())) {
@@ -116,8 +116,6 @@ public class DatelineParser extends AbstractParser {
                         datelines.add(dateline);
                         dateline = new Dateline();
                     }
-                    dateline.setDate(clusterText);
-                } else {
                     dateline.setDate(clusterText);
                 }
 
@@ -128,10 +126,16 @@ public class DatelineParser extends AbstractParser {
                         dateline = new Dateline();
                     }
                     dateline.setTimeString(clusterText);
-                } else {
-                    dateline.setTimeString(clusterText);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.DATELINE_NOTE)) {
+            if (isNotBlank(dateline.getNote())) {
+                if (dateline.isNotNull()) {
+                    datelines.add(dateline);
+                    dateline = new Dateline();
+                }
+                dateline.setNote(clusterText);
             }
+        }
         }
 
         if (dateline.isNotNull()) {
@@ -152,22 +156,22 @@ public class DatelineParser extends AbstractParser {
             if (inputs.size() == 0)
                 return null;
 
-            List<LayoutToken> tokenizations = null;
+            List<String> tokenizations = null;
             List<String> datelineBlocks = new ArrayList<String>();
             for (String input : inputs) {
                 if (input == null)
                     continue;
 
-                tokenizations = analyzer.tokenizeWithLayoutToken(input, new Language("fr"));
+                tokenizations = analyzer.tokenize(input);
 
                 if (tokenizations.size() == 0)
                     return null;
 
-                for(LayoutToken tok : tokenizations) {
-                    if (tok.getText().equals("\n")) {
+                for(String tok : tokenizations) {
+                    if (tok.equals("\n")) {
                         datelineBlocks.add("@newline");
-                    } else if (!tok.getText().equals(" ")) {
-                        datelineBlocks.add(tok.getText() + " <dateline>");
+                    } else if (!tok.equals(" ")) {
+                        datelineBlocks.add(tok + " <dateline>");
                     }
                 }
                 datelineBlocks.add("\n");
@@ -185,6 +189,7 @@ public class DatelineParser extends AbstractParser {
             boolean hasPlaceName = false;
             boolean hasDate = false;
             boolean hasTime = false;
+            boolean hasNote = false;
             String lastTag0;
             String currentTag0;
             boolean start = true;
@@ -200,11 +205,11 @@ public class DatelineParser extends AbstractParser {
                     buffer.append("\t<dateline>");
                     continue;
                 } else {
-                    String theTok = tokenizations.get(q).getText();
+                    String theTok = tokenizations.get(q);
                     while (theTok.equals(" ")) {
                         addSpace = true;
                         q++;
-                        theTok = tokenizations.get(q).getText();
+                        theTok = tokenizations.get(q);
                     }
                     q++;
                 }
@@ -217,10 +222,10 @@ public class DatelineParser extends AbstractParser {
                 while (st3.hasMoreTokens()) {
                     String s = st3.nextToken().trim();
                     if (i == 0) {
-                        s2 = TextUtilities.HTMLEncode(s); // string
+                        s2 = TextUtilities.HTMLEncode(s); // the string
                     }
                     else if (i == ll - 1) {
-                        s1 = s; // label
+                        s1 = s; // the label
                     }
                     i++;
                 }
@@ -257,6 +262,7 @@ public class DatelineParser extends AbstractParser {
                             buffer.append("</dateline>\n");
                             hasDate = false;
                             hasTime = false;
+                            hasNote = false;
                             buffer.append("\t<dateline>");
                         }
                     }
@@ -274,6 +280,7 @@ public class DatelineParser extends AbstractParser {
                             buffer.append("</dateline>\n");
                             hasPlaceName = false;
                             hasTime = false;
+                            hasNote = false;
                             buffer.append("\t<dateline>");
                         }
                     }
@@ -291,11 +298,30 @@ public class DatelineParser extends AbstractParser {
                             buffer.append("</dateline>\n");
                             hasPlaceName = false;
                             hasDate = false;
+                            hasNote = false;
                             buffer.append("\t<dateline>");
                         }
                     }
                     buffer.append(output);
                     hasTime = true;
+                    lastTag = s1;
+                    continue;
+                } else {
+                    output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
+                }
+
+                if (output != null) {
+                    if (lastTag0 != null) {
+                        if (hasTime && !lastTag0.equals("<note>")) {
+                            buffer.append("</dateline>\n");
+                            hasPlaceName = false;
+                            hasDate = false;
+                            hasTime = false;
+                            buffer.append("\t<dateline>");
+                        }
+                    }
+                    buffer.append(output);
+                    hasNote = true;
                     lastTag = s1;
                     continue;
                 } else {
@@ -321,7 +347,6 @@ public class DatelineParser extends AbstractParser {
                 buffer.append("</dateline>\n");
             }
         } catch (Exception e) {
-//			e.printStackTrace();
             throw new GrobidException("An exception occured while running Grobid.", e);
         }
         return buffer;
@@ -375,6 +400,8 @@ public class DatelineParser extends AbstractParser {
                 buffer.append("</date>");
             } else if (lastTag0.equals("<time>")) {
                 buffer.append("</time>");
+            } else if (lastTag0.equals("<note>")) {
+                buffer.append("</note>");
             } else {
                 res = false;
             }
