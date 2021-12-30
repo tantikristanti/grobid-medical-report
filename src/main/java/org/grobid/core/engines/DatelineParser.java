@@ -202,6 +202,7 @@ public class DatelineParser extends AbstractParser {
                     hasPlaceName = false;
                     hasDate = false;
                     hasTime = false;
+                    hasNote = false;
                     buffer.append("\t<dateline>");
                     continue;
                 } else {
