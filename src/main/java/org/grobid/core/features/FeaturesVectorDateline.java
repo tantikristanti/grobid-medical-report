@@ -282,11 +282,11 @@ public class FeaturesVectorDateline {
 
             features.wordShape = TextUtilities.wordShape(text);
 
-            /*if (tag.trim().equals("<dateline>")){
+            if (tag.trim().equals("<dateline>")){
                 features.label = "";
-            } else {*/
+            } else {
                 features.label = tag;
-            //}
+            }
 
             stringBuilder.append(features.printVector());
 

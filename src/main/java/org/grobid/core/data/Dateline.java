@@ -28,33 +28,35 @@ public class Dateline  {
         return placeName;
     }
 
-    public void setPlaceName(String placeName) {
-        this.placeName = placeName;
+    public void setPlaceName(String place) {
+        placeName = place;
     }
 
     public String getDate() { return date; }
 
-    public void setDate(String date) { this.date = date; }
+    public void setDate(String d) { date = d; }
 
     public int getTime() { return time; }
 
     public void setTime(int t) { time = t; }
 
     public String getTimeString() {
-        return this.timeString;
+        return timeString;
     }
 
-    public void setTimeString(String timeString) {
-        this.timeString = timeString;
+    public void setTimeString(String ts) {
+        timeString = ts;
     }
 
     public String getNote() { return note; }
 
-    public void setNote(String note) { this.note = note; }
+    public void setNote(String nt) { note = nt; }
 
     public boolean isNotNull() {
         return (placeName != null) ||
             (date != null) ||
-            (time != -1);
+            (timeString != null) ||
+            (time != -1)  ||
+            (note != null);
     }
 }

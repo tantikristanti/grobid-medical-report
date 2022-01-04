@@ -313,7 +313,7 @@ public class DatelineParser extends AbstractParser {
 
                 if (output != null) {
                     if (lastTag0 != null) {
-                        if (hasTime && !lastTag0.equals("<note>")) {
+                        if (hasNote && !lastTag0.equals("<note>")) {
                             buffer.append("</dateline>\n");
                             hasPlaceName = false;
                             hasDate = false;
