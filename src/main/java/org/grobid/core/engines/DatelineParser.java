@@ -40,7 +40,7 @@ public class DatelineParser extends AbstractParser {
     public List<Dateline> process(String input) {
         List<String> datelineBlocks = new ArrayList<>();
         // force English language for the tokenization only
-        List<String> tokens = analyzer.tokenize(input, new Language("en", 1.0));
+        List<String> tokens = analyzer.tokenize(input, new Language("fr", 1.0));
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
@@ -161,16 +161,16 @@ public class DatelineParser extends AbstractParser {
             for (String input : inputs) {
                 if (input == null)
                     continue;
-
-                tokenizations = analyzer.tokenize(input);
-
-                if (tokenizations.size() == 0)
+                // force English language for the tokenization only
+                tokenizations = analyzer.tokenize(input, new Language("en", 1.0));
+                if (CollectionUtils.isEmpty(tokenizations)) {
                     return null;
+                }
 
                 for(String tok : tokenizations) {
-                    if (tok.equals("\n")) {
-                        datelineBlocks.add("@newline");
-                    } else if (!tok.equals(" ")) {
+                    if (!" ".equals(tok) && !"\n".equals(tok)) {
+                        // sanitisation
+                        tok = NEWLINE_REGEX_PATTERN.matcher(tok).replaceAll( "");
                         datelineBlocks.add(tok + " <dateline>");
                     }
                 }
