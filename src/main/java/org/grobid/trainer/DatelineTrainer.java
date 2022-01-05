@@ -4,7 +4,10 @@ import org.grobid.core.GrobidModels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorDate;
 import org.grobid.core.features.FeaturesVectorDateline;
+import org.grobid.core.layout.LayoutToken;
+import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.trainer.sax.TEIDateSaxParser;
 import org.grobid.trainer.sax.TEIDatelineSaxParser;
 
@@ -55,6 +58,7 @@ public class DatelineTrainer extends AbstractTrainer {
 							final File evalOutputPath,
 							double splitRatio) {
 		int totalExamples = 0;
+        Lexicon lexicon = Lexicon.getInstance();
 		try {
 			System.out.println("sourcePathLabel: " + corpusDir);
 			if (trainingOutputPath != null)
@@ -95,6 +99,7 @@ public class DatelineTrainer extends AbstractTrainer {
 
 			// get a factory for SAX parser
 			SAXParserFactory spf = SAXParserFactory.newInstance();
+            List<OffsetPosition> locationsPositions;
 
 			int n = 0;
 			for (; n < refFiles.length; n++) {
@@ -108,28 +113,31 @@ public class DatelineTrainer extends AbstractTrainer {
 				final SAXParser p = spf.newSAXParser();
 				p.parse(teifile, parser2);
 
-				final List<String> labeled = parser2.getLabeledResult();
-				totalExamples += parser2.n;
+                final List<List<String>> allLabeled = parser2.getLabeledResult();
+                final List<List<LayoutToken>> allTokens = parser2.getTokensResult();
+				totalExamples += parser2.nbDatelines;
 
 				// we can now add the features
-				String headerDatelines = FeaturesVectorDateline.addFeaturesDateline(labeled).toString();
+                for(int i=0; i<allTokens.size(); i++) {
+                    // fix the offsets
+                    int pos = 0;
+                    for(LayoutToken token : allTokens.get(i)) {
+                        token.setOffset(pos);
+                        pos += token.getText().length();
+                    }
+                    locationsPositions = lexicon.tokenPositionsLocationNames(allTokens.get(i));
 
-				// format with features for sequence tagging...
-				// given the split ratio we write either in the training file or the evaluation file
-				String[] chunks = headerDatelines.split("\n \n");
+				    String headerDatelines = FeaturesVectorDateline.addFeaturesDateline(allTokens.get(i), allLabeled.get(i),locationsPositions);
 
-				for(int i=0; i<chunks.length; i++) {
-					String chunk = chunks[i];
-
-					if ( (writer2 == null) && (writer3 != null) )
-						writer3.write(chunk + "\n \n");
-					else if ( (writer2 != null) && (writer3 == null) )
-						writer2.write(chunk + "\n \n");
-					else {
-						if (Math.random() <= splitRatio)
-							writer2.write(chunk + "\n \n");
-						else
-							writer3.write(chunk + "\n \n");
+                    if ( (writer2 == null) && (writer3 != null) )
+                        writer3.write(headerDatelines + "\n \n");
+                    if ( (writer2 != null) && (writer3 == null) )
+                        writer2.write(headerDatelines + "\n \n");
+                    else {
+                        if (Math.random() <= splitRatio)
+                            writer2.write(headerDatelines + "\n \n");
+                        else
+                            writer3.write(headerDatelines + "\n \n");
 					}
 				}
 			}

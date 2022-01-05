@@ -1,6 +1,7 @@
 package org.grobid.core.engines;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModel;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
@@ -15,7 +16,10 @@ import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.LayoutTokensUtil;
+import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.utilities.TextUtilities;
+import org.grobid.core.utilities.UnicodeUtil;
+import org.grobid.core.utilities.counters.CntManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +33,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DatelineParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(DatelineParser.class);
-    private static final Pattern NEWLINE_REGEX_PATTERN = Pattern.compile("[ \n]");
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
 
@@ -37,51 +40,37 @@ public class DatelineParser extends AbstractParser {
         super(GrobidModels.DATELINE);
     }
 
+    public DatelineParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.DATELINE, cntManager);
+        this.parsers = parsers;
+    }
+
+    public DatelineParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.CITATION);
+        this.parsers = parsers;
+    }
+
     public List<Dateline> process(String input) {
         List<String> datelineBlocks = new ArrayList<>();
         // force English language for the tokenization only
-        List<String> tokens = analyzer.tokenize(input, new Language("fr", 1.0));
+        List<LayoutToken> tokens = analyzer.tokenizeWithLayoutToken(input);
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
 
-        for(String tok : tokens) {
-            if (!" ".equals(tok) && !"\n".equals(tok)) {
-                // sanitisation
-                tok = NEWLINE_REGEX_PATTERN.matcher(tok).replaceAll( "");
-                datelineBlocks.add(tok + " <dateline>");
-            }
-        }
-
-        return processCommon(datelineBlocks);
+        return processCommon(tokens);
     }
 
-    public List<Dateline> process(List<LayoutToken> input) {
-        List<String> datelineBlocks = new ArrayList<>();
-        for(LayoutToken tok : input) {
-            if (!" ".equals(tok.getText()) && !"\n".equals(tok.getText())) {
-                String normalizedText = tok.getText().replaceAll("[ \n]", "");
-                datelineBlocks.add(normalizedText + " <dateline>");
-            }
-        }
-
-        return processCommon(datelineBlocks);
-    }
-
-    protected List<Dateline> processCommon(List<String> input) {
+    protected List<Dateline> processCommon(List<LayoutToken> input) {
         if (CollectionUtils.isEmpty(input))
             return null;
-
+        List<OffsetPosition> placeNamePositions = lexicon.tokenPositionsLocationNames(input);
         try {
-            StringBuilder features = FeaturesVectorDateline.addFeaturesDateline(input);
-            String res = label(features.toString());
-
-            List<LayoutToken> tokenization = input.stream()
-                .map(token -> new LayoutToken(token.split(" ")[0]))
-                .collect(Collectors.toList());
+            String features = FeaturesVectorDateline.addFeaturesDateline(input, null, placeNamePositions);
+            String res = label(features);
 
             // extract results from the processed file
-            return resultExtraction(res, tokenization);
+            return resultExtraction(res, input);
         } catch (Exception e) {
             throw new GrobidException("An exception on " + this.getClass().getName() + " occured while running Grobid.", e);
         }
@@ -156,196 +145,120 @@ public class DatelineParser extends AbstractParser {
             if (inputs.size() == 0)
                 return null;
 
-            List<String> tokenizations = null;
-            List<String> datelineBlocks = new ArrayList<String>();
+            List<OffsetPosition> placeNamePositions = null;
+
             for (String input : inputs) {
                 if (input == null)
                     continue;
-                // force English language for the tokenization only
-                tokenizations = analyzer.tokenize(input, new Language("en", 1.0));
-                if (CollectionUtils.isEmpty(tokenizations)) {
+                List<LayoutToken> tokenizations = analyzer.tokenizeWithLayoutToken(input);
+                if (tokenizations.size() == 0)
                     return null;
-                }
 
-                for(String tok : tokenizations) {
-                    if (!" ".equals(tok) && !"\n".equals(tok)) {
-                        // sanitisation
-                        tok = NEWLINE_REGEX_PATTERN.matcher(tok).replaceAll( "");
-                        datelineBlocks.add(tok + " <dateline>");
-                    }
-                }
-                datelineBlocks.add("\n");
-            }
+                placeNamePositions = lexicon.tokenPositionsLocationNames(tokenizations);
 
-            StringBuilder headerDateline = FeaturesVectorDateline.addFeaturesDateline(datelineBlocks);
-            String res = label(headerDateline.toString());
+                String ress = FeaturesVectorDateline.addFeaturesDateline(tokenizations,
+                    null, placeNamePositions);
+                String res = label(ress);
 
-            //System.out.print(res.toString());
-            StringTokenizer st2 = new StringTokenizer(res, "\n");
-            String lastTag = null;
-            boolean tagClosed = false;
-            int q = 0;
-            boolean addSpace;
-            boolean hasPlaceName = false;
-            boolean hasDate = false;
-            boolean hasTime = false;
-            boolean hasNote = false;
-            String lastTag0;
-            String currentTag0;
-            boolean start = true;
-            while (st2.hasMoreTokens()) {
-                String line = st2.nextToken();
-                addSpace = false;
-                if ((line.trim().length() == 0)) {
-                    // new dateline
-                    buffer.append("</dateline>\n");
-                    hasPlaceName = false;
-                    hasDate = false;
-                    hasTime = false;
-                    hasNote = false;
-                    buffer.append("\t<dateline>");
-                    continue;
-                } else {
-                    String theTok = tokenizations.get(q);
-                    while (theTok.equals(" ")) {
-                        addSpace = true;
-                        q++;
-                        theTok = tokenizations.get(q);
-                    }
-                    q++;
-                }
-
-                StringTokenizer st3 = new StringTokenizer(line, "\t");
-                int ll = st3.countTokens();
-                int i = 0;
+                String lastTag = null;
+                String lastTag0 = null;
+                String currentTag0 = null;
+                boolean start = true;
                 String s1 = null;
                 String s2 = null;
-                while (st3.hasMoreTokens()) {
-                    String s = st3.nextToken().trim();
-                    if (i == 0) {
-                        s2 = TextUtilities.HTMLEncode(s); // the string
+                int p = 0;
+                boolean addSpace;
+                // extract results from the processed file
+                StringTokenizer st = new StringTokenizer(res, "\n");
+                while (st.hasMoreTokens()) {
+                    addSpace = false;
+                    String tok = st.nextToken().trim();
+                    if (tok.length() == 0) {
+                        // new dateline
+                        start = true;
+                        continue;
                     }
-                    else if (i == ll - 1) {
-                        s1 = s; // the label
+                    StringTokenizer stt = new StringTokenizer(tok, "\t");
+                    int i = 0;
+
+                    boolean newLine = false;
+                    int ll = stt.countTokens();
+                    while (stt.hasMoreTokens()) {
+                        String s = stt.nextToken().trim();
+                        if (i == 0) {
+                            s2 = TextUtilities.HTMLEncode(s); // the string
+
+                            boolean strop = false;
+                            while ((!strop) && (p < tokenizations.size())) {
+                                String tokOriginal = tokenizations.get(p).t();
+                                if (tokOriginal.equals(" ")
+                                    || tokOriginal.equals("\u00A0")) {
+                                    addSpace = true;
+                                } else if (tokOriginal.equals(s)) {
+                                    strop = true;
+                                }
+                                p++;
+                            }
+                        } else if (i == ll - 1) {
+                            s1 = s; // the label
+                        }
+                        i++;
                     }
-                    i++;
-                }
+                    if (start && (s1 != null)) {
+                        buffer.append("\t<dateline>");
+                        start = false;
+                    }
+                    // lastTag, lastTag0 (without I-)
+                    if (lastTag != null) {
+                        if (lastTag.startsWith("I-")) {
+                            lastTag0 = lastTag.substring(2, lastTag.length());
+                        } else {
+                            lastTag0 = lastTag;
+                        }
+                    }
+                    // currentTag, currentTag (without I-)
+                    if (s1 != null) {
+                        if (s1.startsWith("I-")) {
+                            currentTag0 = s1.substring(2, s1.length());
+                        } else {
+                            currentTag0 = s1;
+                        }
+                    }
+                    // close tag
+                    if ((lastTag0 != null) && (currentTag0 != null))
+                        testClosingTag(buffer, currentTag0, lastTag0);
 
-                if (start && (s1 != null)) {
-                    buffer.append("\t<dateline>");
-                    start = false;
-                }
+                    String output = writeField(s1, lastTag0, s2, "<placeName>", "<placeName>", addSpace, 0);
 
-                lastTag0 = null;
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<date>", "<date>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<time>", "<time>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
+                    }
+                    if (output != null) {
+                        buffer.append(output);
+                        lastTag = s1;
+                        continue;
+                    }
+                    lastTag = s1;
+                }
                 if (lastTag != null) {
                     if (lastTag.startsWith("I-")) {
                         lastTag0 = lastTag.substring(2, lastTag.length());
                     } else {
                         lastTag0 = lastTag;
                     }
+                    currentTag0 = "";
+                    testClosingTag(buffer, currentTag0, lastTag0);
+                    buffer.append("</dateline>\n");
                 }
-                currentTag0 = null;
-                if (s1 != null) {
-                    if (s1.startsWith("I-")) {
-                        currentTag0 = s1.substring(2, s1.length());
-                    } else {
-                        currentTag0 = s1;
-                    }
-                }
-
-                tagClosed = lastTag0 != null && testClosingTag(buffer, currentTag0, lastTag0);
-
-                String output = writeField(s1, lastTag0, s2, "<placeName>", "<placeName>", addSpace, 0);
-
-                if (output != null) {
-                    if (lastTag0 != null) {
-                        if (hasPlaceName && !lastTag0.equals("<placeName>")) {
-                            buffer.append("</dateline>\n");
-                            hasDate = false;
-                            hasTime = false;
-                            hasNote = false;
-                            buffer.append("\t<dateline>");
-                        }
-                    }
-                    hasPlaceName = true;
-                    buffer.append(output);
-                    lastTag = s1;
-                    continue;
-                } else {
-                    output = writeField(s1, lastTag0, s2, "<date>", "<date>", addSpace, 0);
-                }
-
-                if (output != null) {
-                    if (lastTag0 != null) {
-                        if (hasDate && !lastTag0.equals("<date>")) {
-                            buffer.append("</dateline>\n");
-                            hasPlaceName = false;
-                            hasTime = false;
-                            hasNote = false;
-                            buffer.append("\t<dateline>");
-                        }
-                    }
-                    buffer.append(output);
-                    hasDate = true;
-                    lastTag = s1;
-                    continue;
-                } else {
-                    output = writeField(s1, lastTag0, s2, "<time>", "<time>", addSpace, 0);
-                }
-
-                if (output != null) {
-                    if (lastTag0 != null) {
-                        if (hasTime && !lastTag0.equals("<time>")) {
-                            buffer.append("</dateline>\n");
-                            hasPlaceName = false;
-                            hasDate = false;
-                            hasNote = false;
-                            buffer.append("\t<dateline>");
-                        }
-                    }
-                    buffer.append(output);
-                    hasTime = true;
-                    lastTag = s1;
-                    continue;
-                } else {
-                    output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
-                }
-
-                if (output != null) {
-                    if (lastTag0 != null) {
-                        if (hasNote && !lastTag0.equals("<note>")) {
-                            buffer.append("</dateline>\n");
-                            hasPlaceName = false;
-                            hasDate = false;
-                            hasTime = false;
-                            buffer.append("\t<dateline>");
-                        }
-                    }
-                    buffer.append(output);
-                    hasNote = true;
-                    lastTag = s1;
-                    continue;
-                } else {
-                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 0);
-                }
-
-                if (output != null) {
-                    buffer.append(output);
-                    lastTag = s1;
-                    continue;
-                }
-                lastTag = s1;
-            }
-
-            if (lastTag != null) {
-                if (lastTag.startsWith("I-")) {
-                    lastTag0 = lastTag.substring(2, lastTag.length());
-                } else {
-                    lastTag0 = lastTag;
-                }
-                currentTag0 = "";
-                testClosingTag(buffer, currentTag0, lastTag0);
-                buffer.append("</dateline>\n");
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occured while running Grobid.", e);
