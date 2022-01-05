@@ -15,11 +15,11 @@ import java.util.List;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
- * SAX parser for dateline sequences encoded in the TEI format data.
+ * SAX parser for the XML format for dateline data.
  * Segmentation of tokens must be identical as the one from pdf2xml files to that
  * training and online input tokens are identical.
  *
- * Taken and adapted from TEIDateSaxParser class (@author Patrice Lopez)
+ * Taken and adapted from TEICitationSaxParser class (@author Patrice Lopez)
  *
  * Tanti, 2021
  */
@@ -27,14 +27,13 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 public class TEIDatelineSaxParser extends DefaultHandler {
     private StringBuffer accumulator = new StringBuffer(); // Accumulate parsed text
     private StringBuffer allContent = new StringBuffer();
-
-    private String output = null;
     private String currentTag = null;
 
     private List<String> labeled = null; // store token by token the labels
     private List<List<String>> allLabeled = null; // list of labels
     private List<LayoutToken> tokens = null;
     private List<List<LayoutToken>> allTokens = null; // list of LayoutToken segmentation
+
     public int nbDatelines = 0;
 
     public TEIDatelineSaxParser() {
@@ -66,7 +65,7 @@ public class TEIDatelineSaxParser extends DefaultHandler {
                            java.lang.String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("placeName")) || (qName.equals("date")) || (qName.equals("time")) ||
+        if ((qName.equals("placename")) || (qName.equals("date")) || (qName.equals("time")) ||
             (qName.equals("note"))
         ) {
             String text = getText();
@@ -104,8 +103,9 @@ public class TEIDatelineSaxParser extends DefaultHandler {
         }
         accumulator.setLength(0);
 
-        if (qName.equals("placeName")) {
-            currentTag = "<placeName>";
+        qName = qName.toLowerCase();
+        if (qName.equals("placename")) {
+            currentTag = "<place>";
         } else if (qName.equals("date")) {
             currentTag = "<date>";
         } else if (qName.equals("time")) {

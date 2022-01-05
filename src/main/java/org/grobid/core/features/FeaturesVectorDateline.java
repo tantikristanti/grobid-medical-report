@@ -36,6 +36,8 @@ public class FeaturesVectorDateline {
 
     // true if the token is part of a predefinied name (single or multi-token)
     public boolean isKnownLocation = false;
+    public boolean isKnownCountry = false;
+    public boolean isKnownCity = false;
 
     public String wordShape = null;
 
@@ -62,12 +64,6 @@ public class FeaturesVectorDateline {
         res.append(" " + TextUtilities.suffix(string, 3));
         res.append(" " + TextUtilities.suffix(string, 4));
 
-        // suffix (4)
-        res.append(" " + TextUtilities.suffix(string, 1));
-        res.append(" " + TextUtilities.suffix(string, 2));
-        res.append(" " + TextUtilities.suffix(string, 3));
-        res.append(" " + TextUtilities.suffix(string, 4));
-
         // line information (1)
         res.append(" " + lineStatus);
 
@@ -86,8 +82,18 @@ public class FeaturesVectorDateline {
         else
             res.append(" 0");
 
-        // lexical information (3)
+        // lexical information (5)
         if (isKnownLocation)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        if (isKnownCountry)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        if (isKnownCity)
             res.append(" 1");
         else
             res.append(" 0");
@@ -268,6 +274,14 @@ public class FeaturesVectorDateline {
 
             if (isLocationToken) {
                 features.isKnownLocation = true;
+            }
+
+            if (featureFactory.test_country(text)) {
+                features.isKnownCountry = true;
+            }
+
+            if (featureFactory.test_city(text)) {
+                features.isKnownCity = true;
             }
 
             features.label = tag;

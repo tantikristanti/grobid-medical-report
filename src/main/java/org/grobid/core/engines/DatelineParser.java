@@ -228,7 +228,7 @@ public class DatelineParser extends AbstractParser {
                     if ((lastTag0 != null) && (currentTag0 != null))
                         testClosingTag(buffer, currentTag0, lastTag0);
 
-                    String output = writeField(s1, lastTag0, s2, "<placeName>", "<placeName>", addSpace, 0);
+                    String output = writeField(s1, lastTag0, s2, "<place>", "<placeName>", addSpace, 0);
 
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
@@ -308,7 +308,7 @@ public class DatelineParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
-            } else if (lastTag0.equals("<placeName>")) {
+            } else if (lastTag0.equals("<place>")) {
                 buffer.append("</placeName>");
             } else if (lastTag0.equals("<date>")) {
                 buffer.append("</date>");
