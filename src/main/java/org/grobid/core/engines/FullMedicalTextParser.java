@@ -911,6 +911,7 @@ public class FullMedicalTextParser extends AbstractParser {
             for(LayoutToken txtline : tokenizations) {
                 rawtxt.append(txtline.getText());
             }
+            //write the text to the file
             //FileUtils.writeStringToFile(outputTextFile, rawtxt.toString(), StandardCharsets.UTF_8);
 
             // lastly, write the featurized and tagged data
@@ -1044,6 +1045,9 @@ public class FullMedicalTextParser extends AbstractParser {
                     if (input != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                        writer.write("<tei xml:space=\"preserve\">\n");
+                        writer.write("\t<teiHeader>\n");
+                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                         writer.write("<datelines>\n");
                         writer.write(input);
                         writer.write("\n</datelines>\n");
@@ -1051,27 +1055,33 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
                     //---------------------------------------
 
-                    if (bufferDateline != null) {
+                    /*if (bufferDateline != null) {
                         if (bufferDateline.length() > 0) {
-                            Writer writerDate = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                            writerDate.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                            writerDate.write("<datelines>\n");
-
-                            writerDate.write(bufferDateline.toString());
-
-                            writerDate.write("</datelines>\n");
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<datelines>\n");
+                            writer.write("\t\t\t\t<dateline>\n");
+                            writer.write(bufferDateline.toString());
+                            writer.write("\n\t\t\t\t</dateline>\n");
+                            writer.write("\t\t\t</datelines>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
                             writerDate.close();
                         }
-                    }
+                    }*/
 
                     // 5. MEDIC MODEL
                     // path for medic  model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic"));
 
-                    // buffer for the medic block
+                    // buffer for the medics block
                     StringBuilder bufferMedic = null;
-                    // we need to rebuild the found medics string as it appears
+                    // we need to rebuild the found date string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1090,6 +1100,11 @@ public class FullMedicalTextParser extends AbstractParser {
                             input += theTotalTok;
                         }
                         q++;
+                    }
+                    inputs = new ArrayList<String>();
+                    if (input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
                     }
 
                     // -------------if the models doesn't exist yet-------------
@@ -1138,14 +1153,33 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
                     //---------------------------------------
 
+                    /*if (bufferMedic != null) {
+                        if (bufferMedic.length() > 0) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<medics>\n");
+                            writer.write("\t\t\t\t<medic>\n");
+                            writer.write(bufferMedic.toString());
+                            writer.write("\n\t\t\t\t</medic>\n");
+                            writer.write("\t\t\t</medics>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writerDate.close();
+                        }
+                    }*/
+
                     // 6. PATIENT MODEL
                     // path for patient model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient"));
 
-                    // buffer for the patient block
-                    StringBuilder bufferPatient= null;
-                    // we need to rebuild the found patients string as it appears
+                    // buffer for the medics block
+                    StringBuilder bufferPatient = null;
+                    // we need to rebuild the found date string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1164,6 +1198,11 @@ public class FullMedicalTextParser extends AbstractParser {
                             input += theTotalTok;
                         }
                         q++;
+                    }
+                    inputs = new ArrayList<String>();
+                    if (input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
                     }
 
                     // -------------if the models doesn't exist yet-------------
@@ -1209,6 +1248,25 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.write("\t</teiHeader>\n");
                         writer.write("</tei>");
                         writer.close();
+                    }*/
+
+                    /*if (bufferPatient != null) {
+                        if (bufferPatient.length() > 0) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<patients>\n");
+                            writer.write("\t\t\t\t<patient>\n");
+                            writer.write(bufferPatient.toString());
+                            writer.write("\n\t\t\t\t</patient>\n");
+                            writer.write("\t\t\t</patients>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writerDate.close();
+                        }
                     }*/
                 }
             }

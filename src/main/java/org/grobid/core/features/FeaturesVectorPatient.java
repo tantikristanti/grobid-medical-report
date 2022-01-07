@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 /**
- * Class for adding features to dateline chunk.
+ * Class for features used for header parsing.
+ *
  */
-public class FeaturesVectorDateline {
-    // default bins for relative position, set experimentally (as for the citation features)
+public class FeaturesVectorPatient {
+    // default bins for relative position, set experimentally
     static private int nbBins = 12;
 
     public String string = null; // lexical feature
@@ -27,19 +28,22 @@ public class FeaturesVectorDateline {
     public String capitalisation = null; // one of INITCAP, ALLCAPS, NOCAPS
     public String digit;  // one of ALLDIGIT, CONTAINDIGIT, NODIGIT
     public boolean singleChar = false;
+    public boolean properName = false;
+    public boolean commonName = false;
+    public boolean firstName = false;
+    public boolean lastName = false;
 
     public boolean year = false;
     public boolean month = false;
+    public boolean http = false;
     public String punctType = null; // one of NOPUNCT, OPENBRACKET, ENDBRACKET, DOT, COMMA, HYPHEN, QUOTE, PUNCT (default)
     public boolean containPunct = false;
     public int relativePosition = -1;
 
     // true if the token is part of a predefinied name (single or multi-token)
+    public boolean isKnownTitle = false;
+    public boolean isKnownSuffix = false;
     public boolean isKnownLocation = false;
-    public boolean isKnownCountry = false;
-    public boolean isKnownCity = false;
-
-    public String wordShape = null;
 
     public String printVector() {
         if (string == null) return null;
@@ -50,7 +54,7 @@ public class FeaturesVectorDateline {
         res.append(string);
 
         // lowercase string (1)
-        res.append(" " + string.toLowerCase());
+        res.append(" ").append(string.toLowerCase());
 
         // prefix (4)
         res.append(" " + TextUtilities.prefix(string, 1));
@@ -65,16 +69,16 @@ public class FeaturesVectorDateline {
         res.append(" " + TextUtilities.suffix(string, 4));
 
         // line information (1)
-        res.append(" " + lineStatus);
+        res.append(" ").append(lineStatus);
 
         // capitalisation (1)
         if (digit.equals("ALLDIGIT"))
             res.append(" NOCAPS");
         else
-            res.append(" " + capitalisation);
+            res.append(" ").append(capitalisation);
 
         // digit information (1)
-        res.append(" " + digit);
+        res.append(" ").append(digit);
 
         // character information (1)
         if (singleChar)
@@ -82,18 +86,23 @@ public class FeaturesVectorDateline {
         else
             res.append(" 0");
 
-        // lexical information (5)
-        if (isKnownLocation)
+        // lexical information (9)
+        if (properName)
             res.append(" 1");
         else
             res.append(" 0");
 
-        if (isKnownCountry)
+        if (commonName)
             res.append(" 1");
         else
             res.append(" 0");
 
-        if (isKnownCity)
+        if (firstName)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        if (lastName)
             res.append(" 1");
         else
             res.append(" 0");
@@ -108,11 +117,23 @@ public class FeaturesVectorDateline {
         else
             res.append(" 0");
 
-        // punctuation information (1)
-        res.append(" " + punctType); // in case the token is a punctuation (NO otherwise)
+        if (isKnownTitle)
+            res.append(" 1");
+        else
+            res.append(" 0");
 
-        // word shape (1)
-        res.append(" ").append(wordShape);
+        if (isKnownSuffix)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        if (isKnownLocation)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        // punctuation information (1)
+        res.append(" ").append(punctType); // in case the token is a punctuation (NO otherwise)
 
         // relative position in the sequence (1)
         res.append(" ").append(relativePosition);
@@ -126,26 +147,39 @@ public class FeaturesVectorDateline {
         return res.toString();
     }
 
-    static public String addFeaturesDateline(List<LayoutToken> tokens,
+
+    /**
+     * Add feature for citation parsing.
+     */
+    static public String addFeaturesPatient(List<LayoutToken> tokens,
                                              List<String> labels,
-                                             List<OffsetPosition> locationPositions) throws Exception {
-        if (locationPositions == null) {
+                                             List<OffsetPosition> locationPositions,
+                                             List<OffsetPosition> titlePositions,
+                                             List<OffsetPosition> suffixPositions) throws Exception {
+        if ((locationPositions == null) ||
+            (titlePositions == null) ||
+            (suffixPositions == null)) {
             throw new GrobidException("At least one list of gazetter matches positions is null.");
         }
+
         FeatureFactory featureFactory = FeatureFactory.getInstance();
-        StringBuilder dateline = new StringBuilder();
+
+        StringBuilder patient = new StringBuilder();
 
         int currentLocationPositions = 0;
+        int currentTitlePositions = 0;
+        int currentSuffixPositions = 0;
+
         boolean isLocationToken;
+        boolean isTitleToken;
+        boolean isSuffixToken;
         boolean skipTest;
 
         String previousTag = null;
         String previousText = null;
-
-        FeaturesVectorDateline features = null;
-
+        FeaturesVectorPatient features = null;
         int sentenceLenth = tokens.size(); // length of the current sentence
-        for (int n=0; n < sentenceLenth; n++) {
+        for (int n=0; n < tokens.size(); n++) {
             LayoutToken token = tokens.get(n);
             String tag = null;
             if ( (labels != null) && (labels.size() > 0) && (n < labels.size()) )
@@ -153,14 +187,21 @@ public class FeaturesVectorDateline {
 
             boolean outputLineStatus = false;
             isLocationToken = false;
+            isTitleToken = false;
+            isSuffixToken = false;
             skipTest = false;
 
             String text = token.getText();
-            if (text.equals(" ") || text.equals("\n")) {
+            if (text.equals(" ")) {
                 continue;
             }
 
-            // remove any spaces from the tet
+            if (text.equals("\n")) {
+                // should not be the case for citation model
+                continue;
+            }
+
+            // parano normalisation
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
             if (text.trim().length() == 0 ) {
                 continue;
@@ -168,7 +209,7 @@ public class FeaturesVectorDateline {
 
             // check the position of matches for locations
             skipTest = false;
-            if (locationPositions != null) {
+            if (locationPositions != null && (locationPositions.size() > 0)) {
                 if (currentLocationPositions == locationPositions.size() - 1) {
                     if (locationPositions.get(currentLocationPositions).end < n) {
                         skipTest = true;
@@ -177,7 +218,7 @@ public class FeaturesVectorDateline {
                 if (!skipTest) {
                     for (int i = currentLocationPositions; i < locationPositions.size(); i++) {
                         if ((locationPositions.get(i).start <= n) &&
-                            (locationPositions.get(i).end >= n)) {
+                                (locationPositions.get(i).end >= n)) {
                             isLocationToken = true;
                             currentLocationPositions = i;
                             break;
@@ -189,14 +230,65 @@ public class FeaturesVectorDateline {
                     }
                 }
             }
+            // check the position of matches for collaboration
+            skipTest = false;
+            if ((titlePositions != null) && (titlePositions.size() > 0)) {
+                if (currentTitlePositions == titlePositions.size() - 1) {
+                    if (titlePositions.get(currentTitlePositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentTitlePositions; i < titlePositions.size(); i++) {
+                        if ((titlePositions.get(i).start <= n) &&
+                            (titlePositions.get(i).end >= n)) {
+                            isTitleToken = true;
+                            currentTitlePositions = i;
+                            break;
+                        } else if (titlePositions.get(i).start > n) {
+                            isTitleToken = false;
+                            currentTitlePositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matches for identifier
+            skipTest = false;
+            if (suffixPositions != null  && (suffixPositions.size() > 0)) {
+                if (currentSuffixPositions == suffixPositions.size() - 1) {
+                    if (suffixPositions.get(currentSuffixPositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentSuffixPositions; i < suffixPositions.size(); i++) {
+                        if ((suffixPositions.get(i).start <= n) &&
+                                (suffixPositions.get(i).end >= n)) {
+                            isSuffixToken = true;
+                            currentSuffixPositions = i;
+                            break;
+                        } else if (suffixPositions.get(i).start > n) {
+                            isSuffixToken = false;
+                            currentSuffixPositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (TextUtilities.filterLine(text)) {
                 continue;
             }
 
-            features = new FeaturesVectorDateline();
+            features = new FeaturesVectorPatient();
             features.string = text;
             features.relativePosition = featureFactory.linearScaling(n, sentenceLenth, nbBins);
 
+            if (n == 0) {
+                features.lineStatus = "LINESTART";
+                outputLineStatus = true;
+            }
             Matcher m0 = featureFactory.isPunct.matcher(text);
             if (m0.find()) {
                 features.punctType = "PUNCT";
@@ -226,7 +318,7 @@ public class FeaturesVectorDateline {
                     features.lineStatus = "LINEEND";
                     outputLineStatus = true;
                 }
-            }
+            } 
 
             if (!outputLineStatus) {
                 features.lineStatus = "LINEIN";
@@ -249,8 +341,24 @@ public class FeaturesVectorDateline {
                 features.digit = "CONTAINSDIGITS";
             }
 
+            if (featureFactory.test_common(text)) {
+                features.commonName = true;
+            }
+
+            if (featureFactory.test_names(text)) {
+                features.properName = true;
+            }
+
             if (featureFactory.test_month(text)) {
                 features.month = true;
+            }
+
+            if (featureFactory.test_last_names(text)) {
+                features.lastName = true;
+            }
+
+            if (featureFactory.test_first_names(text)) {
+                features.firstName = true;
             }
 
             Matcher m = featureFactory.isDigit.matcher(text);
@@ -276,21 +384,23 @@ public class FeaturesVectorDateline {
                 features.isKnownLocation = true;
             }
 
-            if (featureFactory.test_country(text)) {
-                features.isKnownCountry = true;
+            if (isTitleToken) {
+                features.isKnownTitle = true;
             }
 
-            if (featureFactory.test_city(text)) {
-                features.isKnownCity = true;
+            if (isSuffixToken) {
+                features.isKnownSuffix = true;
             }
 
             features.label = tag;
 
-            dateline.append(features.printVector());
+            patient.append(features.printVector());
 
             previousTag = tag;
             previousText = text;
         }
-        return dateline.toString();
+
+        return patient.toString();
     }
+
 }

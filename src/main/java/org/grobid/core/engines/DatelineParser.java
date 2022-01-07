@@ -1,16 +1,12 @@
 package org.grobid.core.engines;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.grobid.core.GrobidModel;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Dateline;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorDateline;
-import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
@@ -18,7 +14,6 @@ import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.LayoutTokensUtil;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.utilities.TextUtilities;
-import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.core.utilities.counters.CntManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +21,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/*A class for parsing phrases containing dates
+*
+* Tanti, 2021
+* */
 public class DatelineParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(DatelineParser.class);
     protected EngineMedicalParsers parsers;
@@ -51,7 +48,6 @@ public class DatelineParser extends AbstractParser {
     }
 
     public List<Dateline> process(String input) {
-        List<String> datelineBlocks = new ArrayList<>();
         // force English language for the tokenization only
         List<LayoutToken> tokens = analyzer.tokenizeWithLayoutToken(input);
         if (CollectionUtils.isEmpty(tokens)) {
@@ -70,13 +66,13 @@ public class DatelineParser extends AbstractParser {
             String res = label(features);
 
             // extract results from the processed file
-            return resultExtraction(res, input);
+            return resultExtractionLayoutTokens(res, input);
         } catch (Exception e) {
             throw new GrobidException("An exception on " + this.getClass().getName() + " occured while running Grobid.", e);
         }
     }
 
-    public List<Dateline> resultExtraction(String result, List<LayoutToken> tokenizations) {
+    public List<Dateline> resultExtractionLayoutTokens(String result, List<LayoutToken> tokenizations) {
         List<Dateline> datelines = new ArrayList<>();
         Dateline dateline = new Dateline();
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.DATELINE, result, tokenizations);

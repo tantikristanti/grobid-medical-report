@@ -15,7 +15,7 @@ import java.util.List;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
- * SAX parser for the XML format for dateline data.
+ * SAX parser for the XML format for the dateline data.
  * Segmentation of tokens must be identical as the one from pdf2xml files to that
  * training and online input tokens are identical.
  *

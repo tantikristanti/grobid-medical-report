@@ -27,6 +27,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final String ANNEX_LABEL = "<annex>";
 
     // grobid-medical-report specific labels
+    public final static String ID_NUMBER_LABEL = "<idno>";
     public final static String DOCNUM_LABEL = "<docnum>";
     public static final String DOCTYPE_LABEL = "<doctype>";
     public final static String TITLE_LABEL = "<title>";
@@ -38,14 +39,17 @@ public class MedicalLabels extends TaggingLabels {
     public final static String PATIENT_LABEL = "<patient>";
     public final static String AFFILIATION_LABEL = "<affiliation>";
     public final static String ADDRESS_LABEL = "<address>";
-    public final static String ORG_ABEL = "<org>";
+    public static final String INSTITUTION_LABEL = "<institution>";
+    public final static String ORG_LABEL = "<org>";
+    public static final String ORG_NAME_LABEL = "<orgName>";
     public final static String EMAIL_LABEL = "<email>";
     public final static String PHONE_LABEL = "<phone>";
     public final static String FAX_LABEL = "<fax>";
     public final static String WEB_LABEL = "<web>";
-    public final static String OTHER_LABEL = "<other>";
-    public final static String MARKER_LABEL = "<marker>";
     public static final String PLACE_NAME_LABEL = "<placeName>";
+    public static final String SETTLEMENT_LABEL = "<settlement>"; // the name of a settlement such as a city, town, or village
+    public static final String COUNTRY_LABEL = "<country>";
+    public static final String REGION_LABEL = "<region>"; // the name of an administrative unit such as a state, province, or county, larger than a settlement, but smaller than a country
 
     // full medical text
     public static final String PARAGRAPH_LABEL = "<paragraph>";
@@ -57,6 +61,12 @@ public class MedicalLabels extends TaggingLabels {
     public static final String TABLE_MARKER_LABEL = "<table_marker>";
     public static final String TABLE_LABEL = "<table>";
 
+    // person (medics, patient)
+    public static final String ROLE_LABEL = "<roleName>";
+    public static final String PERSON_NAME_LABEL = "<persName>";
+    public static final String PERSON_BIRTH_LABEL = "<birth>";
+    public static final String PERSON_DEATH_LABEL = "<death>";
+    
     // names
     public final static String FORENAME_LABEL = "<forename>";
     public final static String MIDDLENAME_LABEL = "<middlename>";
@@ -98,7 +108,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER_PATIENT = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, PATIENT_LABEL);
     public static final TaggingLabel HEADER_AFFILIATION = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, AFFILIATION_LABEL);
     public static final TaggingLabel HEADER_ADDRESS = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, ADDRESS_LABEL);
-    public static final TaggingLabel HEADER_ORG = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, ORG_ABEL);
+    public static final TaggingLabel HEADER_ORG = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, ORG_LABEL);
     public static final TaggingLabel HEADER_EMAIL = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel HEADER_PHONE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, PHONE_LABEL);
     public static final TaggingLabel HEADER_FAX = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, FAX_LABEL);
@@ -110,7 +120,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
-    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_ABEL);
+    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_LABEL);
     public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel LEFT_NOTE_PHONE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, PHONE_LABEL);
     public static final TaggingLabel LEFT_NOTE_FAX = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, FAX_LABEL);
@@ -139,6 +149,32 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
     public static final TaggingLabel DATELINE_TIME = new TaggingLabelImpl(GrobidModels.DATELINE, TIME_LABEL);
     public static final TaggingLabel DATELINE_NOTE = new TaggingLabelImpl(GrobidModels.DATELINE, NOTE_LABEL);
+
+    // Medics
+    public static final TaggingLabel MEDIC_ROLE = new TaggingLabelImpl(GrobidModels.MEDIC, ROLE_LABEL);
+    public static final TaggingLabel MEDIC_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, PERSON_NAME_LABEL);
+    public static final TaggingLabel MEDIC_AFFILIATION = new TaggingLabelImpl(GrobidModels.MEDIC, AFFILIATION_LABEL);
+    public static final TaggingLabel MEDIC_ORGANISATION = new TaggingLabelImpl(GrobidModels.MEDIC, ORG_NAME_LABEL);
+    public static final TaggingLabel MEDIC_INSTITUTION = new TaggingLabelImpl(GrobidModels.MEDIC, INSTITUTION_LABEL);
+    public static final TaggingLabel MEDIC_ADDRESS = new TaggingLabelImpl(GrobidModels.MEDIC, ADDRESS_LABEL);
+    public static final TaggingLabel MEDIC_COUNTRY = new TaggingLabelImpl(GrobidModels.MEDIC, COUNTRY_LABEL);
+    public static final TaggingLabel MEDIC_TOWN = new TaggingLabelImpl(GrobidModels.MEDIC, SETTLEMENT_LABEL);
+    public static final TaggingLabel MEDIC_EMAIL = new TaggingLabelImpl(GrobidModels.MEDIC, EMAIL_LABEL);
+    public static final TaggingLabel MEDIC_PHONE = new TaggingLabelImpl(GrobidModels.MEDIC, PHONE_LABEL);
+    public static final TaggingLabel MEDIC_FAX = new TaggingLabelImpl(GrobidModels.MEDIC, FAX_LABEL);
+    public static final TaggingLabel MEDIC_WEB = new TaggingLabelImpl(GrobidModels.MEDIC, WEB_LABEL);
+    public static final TaggingLabel MEDIC_NOTE = new TaggingLabelImpl(GrobidModels.MEDIC, NOTE_LABEL);
+
+    // Patient
+    public static final TaggingLabel PATIENT_ID = new TaggingLabelImpl(GrobidModels.PATIENT, ID_NUMBER_LABEL);
+    public static final TaggingLabel PATIENT_NAME = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_NAME_LABEL);
+    public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_LABEL);
+    public static final TaggingLabel PATIENT_DATE_DEATH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_DEATH_LABEL);
+    public static final TaggingLabel PATIENT_ADDRESS = new TaggingLabelImpl(GrobidModels.PATIENT, ADDRESS_LABEL);
+    public static final TaggingLabel PATIENT_COUNTRY = new TaggingLabelImpl(GrobidModels.PATIENT, COUNTRY_LABEL);
+    public static final TaggingLabel PATIENT_TOWN = new TaggingLabelImpl(GrobidModels.PATIENT, SETTLEMENT_LABEL);
+    public static final TaggingLabel PATIENT_PHONE = new TaggingLabelImpl(GrobidModels.PATIENT, PHONE_LABEL);
+    public static final TaggingLabel PATIENT_NOTE = new TaggingLabelImpl(GrobidModels.PATIENT, NOTE_LABEL);
 
     // Names
     public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, TITLE_LABEL);
@@ -205,6 +241,31 @@ public class MedicalLabels extends TaggingLabels {
         register(DATELINE_DATE);
         register(DATELINE_TIME);
         register(DATELINE_NOTE);
-    }
 
+        // medic
+        register(MEDIC_ROLE);
+        register(MEDIC_NAME);
+        register(MEDIC_AFFILIATION);
+        register(MEDIC_ORGANISATION);
+        register(MEDIC_INSTITUTION);
+        register(MEDIC_ADDRESS);
+        register(MEDIC_COUNTRY);
+        register(MEDIC_TOWN);
+        register(MEDIC_EMAIL);
+        register(MEDIC_PHONE);
+        register(MEDIC_FAX);
+        register(MEDIC_WEB);
+        register(MEDIC_NOTE);
+
+        // patient
+        register(PATIENT_ID);
+        register(PATIENT_NAME);
+        register(PATIENT_DATE_BIRTH);
+        register(PATIENT_DATE_DEATH);
+        register(PATIENT_ADDRESS);
+        register(PATIENT_COUNTRY);
+        register(PATIENT_TOWN);
+        register(PATIENT_PHONE);
+        register(PATIENT_NOTE);
+    }
 }
