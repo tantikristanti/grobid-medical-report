@@ -309,4 +309,12 @@ wrapper {
     gradleVersion "7.1.1"
 }
 
+processResources {
+    filesMatching('grobid-medical-version.txt') {
+        filter {
+            it.replace('project.version', project.property('version'))
+        }
+    }
+}
+
 build.dependsOn project.getSubprojects().collect({ it.getTasks().getByName("build") })

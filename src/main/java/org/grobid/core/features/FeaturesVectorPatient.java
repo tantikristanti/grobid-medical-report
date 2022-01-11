@@ -44,6 +44,8 @@ public class FeaturesVectorPatient {
     public boolean isKnownTitle = false;
     public boolean isKnownSuffix = false;
     public boolean isKnownLocation = false;
+    public boolean isKnownCountry = false;
+    public boolean isKnownCity = false;
 
     public String printVector() {
         if (string == null) return null;
@@ -86,7 +88,7 @@ public class FeaturesVectorPatient {
         else
             res.append(" 0");
 
-        // lexical information (9)
+        // lexical information (11)
         if (properName)
             res.append(" 1");
         else
@@ -132,6 +134,16 @@ public class FeaturesVectorPatient {
         else
             res.append(" 0");
 
+        if (isKnownCountry)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
+        if (isKnownCity)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
         // punctuation information (1)
         res.append(" ").append(punctType); // in case the token is a punctuation (NO otherwise)
 
@@ -149,7 +161,7 @@ public class FeaturesVectorPatient {
 
 
     /**
-     * Add feature for citation parsing.
+     * Add features for patient parsing
      */
     static public String addFeaturesPatient(List<LayoutToken> tokens,
                                              List<String> labels,
@@ -201,13 +213,13 @@ public class FeaturesVectorPatient {
                 continue;
             }
 
-            // parano normalisation
+            // remove blank spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
             if (text.trim().length() == 0 ) {
                 continue;
             }
 
-            // check the position of matches for locations
+            // check the position of matched locations
             skipTest = false;
             if (locationPositions != null && (locationPositions.size() > 0)) {
                 if (currentLocationPositions == locationPositions.size() - 1) {
@@ -230,7 +242,7 @@ public class FeaturesVectorPatient {
                     }
                 }
             }
-            // check the position of matches for collaboration
+            // check the position of matched titles
             skipTest = false;
             if ((titlePositions != null) && (titlePositions.size() > 0)) {
                 if (currentTitlePositions == titlePositions.size() - 1) {
@@ -253,7 +265,7 @@ public class FeaturesVectorPatient {
                     }
                 }
             }
-            // check the position of matches for identifier
+            // check the position of matched suffix
             skipTest = false;
             if (suffixPositions != null  && (suffixPositions.size() > 0)) {
                 if (currentSuffixPositions == suffixPositions.size() - 1) {
@@ -382,6 +394,14 @@ public class FeaturesVectorPatient {
 
             if (isLocationToken) {
                 features.isKnownLocation = true;
+            }
+
+            if (featureFactory.test_country(text)) {
+                features.isKnownCountry = true;
+            }
+
+            if (featureFactory.test_city(text)) {
+                features.isKnownCity = true;
             }
 
             if (isTitleToken) {

@@ -329,11 +329,9 @@ public class TEIFormatter {
         df.setTimeZone(tz);
         String dateISOString = df.format(new java.util.Date());
 
-        tei.append("\t\t\t\t<application version=\"" + GrobidProperties.getVersion() +
-            "\" ident=\"GROBID\" when=\"" + dateISOString + "\">\n");
-        tei.append("\t\t\t\t\t<desc>GROBID - A machine learning software for extracting information from scholarly documents.</desc>\n");
-        tei.append("\t\t\t\t\t<ref target=\"https://github.com/kermitt2/grobid\"/>\n");
-        tei.append("\t\t\t\t\t<desc>(grobid-medical-report) is a GROBID module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t<application version=\"" + MedicalReportProperties.getVersion() +
+            "\" ident=\"grobid-medical-report\" when=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
         tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
         tei.append("\t\t\t\t</application>\n");
         tei.append("\t\t\t</appInfo>\n");
@@ -584,11 +582,9 @@ public class TEIFormatter {
         df.setTimeZone(tz);
         String dateISOString = df.format(new java.util.Date());
 
-        tei.append("\t\t\t\t<application version=\"" + GrobidProperties.getVersion() +
-            "\" ident=\"GROBID\" when=\"" + dateISOString + "\">\n");
-        tei.append("\t\t\t\t\t<desc>GROBID - A machine learning software for extracting information from scholarly documents.</desc>\n");
-        tei.append("\t\t\t\t\t<ref target=\"https://github.com/kermitt2/grobid\"/>\n");
-        tei.append("\t\t\t\t\t<desc>(grobid-medical-report) is a GROBID module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t<application version=\"" + MedicalReportProperties.getVersion() +
+            "\" ident=\"grobid-medical-report\" when=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
         tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
         tei.append("\t\t\t\t</application>\n");
         tei.append("\t\t\t</appInfo>\n");

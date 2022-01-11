@@ -269,8 +269,6 @@ public class GrobidMedicalReportMain {
                 nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT)) {
                 nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER_HIGH_LEVEL)) {
-                nb = parsers.getHeaderMedicalParser().processHighLevelBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
                 nb = parsers.getHeaderMedicalParser().processHeaderDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {

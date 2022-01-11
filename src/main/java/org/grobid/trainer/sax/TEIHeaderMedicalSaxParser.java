@@ -133,29 +133,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
             currentTag = "<medic>";
         } else if (qName.equals("patient")) {
             currentTag = "<patient>";
-        } /*else if (qName.equals("person")) {
-            int length = atts.getLength();
-            currentTag = "<other>";
-
-            // Process each attribute
-            for (int i = 0; i < length; i++) {
-                // Get names and values for each attribute
-                String name = atts.getQName(i);
-                String value = atts.getValue(i);
-
-                if (name != null) {
-                    if (name.equals("type")) {
-                        if (value.equals("medic")) {
-                            currentTag = "<medic>";
-                        } else if (value.equals("patient")) {
-                            currentTag = "<patient>";
-                        }
-                        else
-                            currentTag = "<other>";
-                    }
-                }
-            }
-        }*/ else if (qName.equals("email")) {
+        } else if (qName.equals("email")) {
             currentTag = "<email>";
         } else if (qName.equals("phone")) {
             currentTag = "<phone>";
