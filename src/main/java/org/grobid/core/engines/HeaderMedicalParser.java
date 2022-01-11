@@ -333,6 +333,7 @@ public class HeaderMedicalParser extends AbstractParser {
         return null;
     }
 
+
     /**
      * Header and left-note processing after application of the medical-report segmentation model
      */
@@ -549,7 +550,14 @@ public class HeaderMedicalParser extends AbstractParser {
                                     List<Dateline> localDatelines = parsers.getDatelineParser()
                                         .processingWithLayoutTokens(datelineSegments.get(k));
                                     for (Dateline dateline : localDatelines){
-                                        resHeader.addDateline(dateline);
+                                        // normalization of dates
+                                        if (dateline.getDate() != null) {
+                                            Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
+                                            if (normalisedDate.isPresent()) {
+                                                dateline.setDate(toISOString(normalisedDate.get()));
+                                            }
+                                        }
+
                                         if(dateline.getPlaceName() != null){
                                             if(resHeader.getLocation() == null) {
                                                 resHeader.setLocation(dateline.getPlaceName());
@@ -560,11 +568,23 @@ public class HeaderMedicalParser extends AbstractParser {
                                                 resHeader.setDate(dateline.getDate());
                                             }
                                         }
+
+                                        // add new dateline to the datelines item
+                                        resHeader.addDateline(dateline);
                                     }
                                 }
                             }
                             resHeader.setFullDatelines(parsers.getDatelineParser().process(resHeader.getDateline()));
                         }
+                    }
+                    // normalization of dates
+                    if (resHeader.getDocumentDate() == null) {
+                        Optional<Date> normalisedPublicationDate = getNormalizedDate(resHeader.getDocumentDate());
+                        if (normalisedPublicationDate.isPresent()) {
+                            resHeader.setNormalizedDocumentDate(normalisedPublicationDate.get());
+                        }
+                    } else {
+                        resHeader.setDocumentDate(toISOString(resHeader.getNormalizedDocumentDate()));
                     }
                 }
 

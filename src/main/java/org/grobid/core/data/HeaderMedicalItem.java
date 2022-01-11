@@ -442,6 +442,7 @@ public class HeaderMedicalItem {
         fullPatients = null;
         fullAffiliations = null;
         dateline = null;
+        datelines = null;
         medicList = null;
         patientList = null;
         affiliationList = null;
@@ -721,17 +722,22 @@ public class HeaderMedicalItem {
                 if (dateline.getPlaceName() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
                     tei.append("<placeName>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</placeName> ");
+
                     if (dateline.getDate() != null) {
-                        tei.append(", le <date>").append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
+                        // the date has been in the ISO format using the Date model and parser
+                        tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">").
+                            append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
                     }
                     if (dateline.getTimeString() != null) {
-                        tei.append(", à <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>");
+                        tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>");
                     }
                 } else if (dateline.getNote() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
                     tei.append("<note>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</note> ");
                     if (dateline.getDate() != null) {
-                        tei.append(", du <date>").append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date>");
+                        // the date has been in the ISO format using the Date model and parser
+                        tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">").
+                            append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
                     }
                 }
                 tei.append("\n");

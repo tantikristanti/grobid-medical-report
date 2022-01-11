@@ -2,34 +2,25 @@ package org.grobid.core.document;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Text;
-
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.*;
 import org.grobid.core.data.Date;
+import org.grobid.core.data.*;
 import org.grobid.core.document.xml.XmlBuilderUtils;
 import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.FullMedicalTextParser;
 import org.grobid.core.engines.citations.CalloutAnalyzer;
-import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
+import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.lang.Language;
-import org.grobid.core.layout.BoundingBox;
-import org.grobid.core.layout.GraphicObject;
-import org.grobid.core.layout.LayoutToken;
-import org.grobid.core.layout.LayoutTokenization;
-import org.grobid.core.layout.Page;
+import org.grobid.core.layout.*;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
-
 import org.grobid.core.utilities.matching.EntityMatcherException;
 import org.grobid.core.utilities.matching.ReferenceMarkerMatcher;
 import org.slf4j.Logger;
@@ -147,7 +138,7 @@ public class TEIFormatter {
                 "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
                 SCHEMA_XSD_LOCATION +
                 "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
-//				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
+            //"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
             tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
@@ -401,7 +392,7 @@ public class TEIFormatter {
                 "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
                 SCHEMA_XSD_LOCATION +
                 "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
-//				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
+            //"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
             tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
@@ -545,12 +536,7 @@ public class TEIFormatter {
                 tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate())
                     + "</date>");
             } else if (headerItem.getDatelines() != null) {
-                // medics + affiliation
                 tei.append(headerItem.toTEIDatelineBlock(4, config));
-
-                /*tei.append("\t\t\t\t<dateline>");
-                tei.append(TextUtilities.HTMLEncode(headerItem.getDateline()));
-                tei.append("</dateline>\n");*/
             }
             tei.append("\t\t\t</publicationStmt>\n");
         } else {
