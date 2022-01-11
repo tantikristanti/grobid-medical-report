@@ -45,6 +45,7 @@ public class HeaderMedicalItem {
     private List<LayoutToken> titleLayoutTokens = new ArrayList<>();
     private List<LayoutToken> medicsLayoutTokens = new ArrayList<>();
     private List<LayoutToken> patientsLayoutTokens = new ArrayList<>();
+    private List<LayoutToken> datelinesLayoutTokens = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -56,8 +57,8 @@ public class HeaderMedicalItem {
             ", title='" + title + '\'' +
             ", document_date='" + document_date + '\'' +
             ", normalized_publication_date=" + normalized_document_date +
-            ", document_time='" + document_time + '\'' +
-            ", document_date_line='" + document_dateline + '\'' +
+            ", document_time='" + time + '\'' +
+            ", fullDatelines='" + fullDatelines + '\'' +
             ", fullMedics=" + fullMedics +
             ", medics='" + medics + '\'' +
             ", fullpatients=" + fullPatients +
@@ -83,11 +84,9 @@ public class HeaderMedicalItem {
     private String document_number = null; // print/default
     private String docNumGeneral = null;
     private String title = null;
-    private String document_date = null;
-    private String document_dateline = null;
-    private String document_time = null;
+
     private String document_type = null;
-    private Date normalized_document_date = null;
+
     private String affiliation = null;
     private String address = null;
     private String org = null;
@@ -101,9 +100,9 @@ public class HeaderMedicalItem {
     private String firstMedicSurname = null;
     private String patients = null;
     private String location = null;
+    private String note = null;
     private String pageRange = null;
     private String institution = null;
-
 
     // advanced grobid recognitions
     private List<String> medicList;
@@ -113,6 +112,8 @@ public class HeaderMedicalItem {
     private List<PersonMedical> fullMedics = null;
     private List<PersonMedical> fullPatients = null;
     private List<Affiliation> fullAffiliations = null;
+    private List<Dateline> fullDatelines = null;
+    private List<Dateline> datelines = null;
 
     public String affiliationAddressBlock = null;
 
@@ -127,6 +128,15 @@ public class HeaderMedicalItem {
     private String originalAffiliation = null;
     private String originalMedics = null;
     private String originalPatients = null;
+    private String originalDatelines = null;
+
+    // for dateline
+    private String dateline = null;
+    private String document_date = null;
+    private Date normalized_document_date = null;
+    
+    private String date = null;
+    private String time = null;
 
     public HeaderMedicalItem() {}
 
@@ -148,15 +158,13 @@ public class HeaderMedicalItem {
 
     public Date getNormalizedDocumentDate() { return normalized_document_date; }
 
-    public String getDocumentTime() { return this.document_time; }
+    public String getDocumentTime() { return this.time; }
 
-    public String getDocumentDateLine() {
-        return this.document_dateline;
-    }
+    public String getDateline() {return this.dateline;}
 
-    public String getMedics() {
-        return medics;
-    }
+    public List<Dateline> getDatelines() {return this.datelines;}
+
+    public String getMedics() {return medics;}
 
     public String getPatients() { return patients; }
 
@@ -203,9 +211,13 @@ public class HeaderMedicalItem {
     }
 
     public String getLocation() {
-        return location;
+        return this.location;
     }
 
+    public String getNote() {return this.note;}
+
+    public String getDate() {return this.date;}
+    
     public String getPageRange() {
         if (pageRange != null)
             return pageRange;
@@ -221,18 +233,19 @@ public class HeaderMedicalItem {
 
     public List<PersonMedical> getFullPatients() { return fullPatients; }
 
+    public List<Dateline> getFullDatelines() { return fullDatelines; }
+
     public List<Affiliation> getFullAffiliations() {
         return fullAffiliations;
     }
 
-    public List<LayoutToken> getMedicsTokens() {
-        return medicsLayoutTokens;
-    }
+    public List<LayoutToken> getMedicsTokens() {return medicsLayoutTokens;}
+
+    public List<LayoutToken> getDatelinesTokens() {return datelinesLayoutTokens;}
 
     public List<LayoutToken> getPatientsTokens() {
         return patientsLayoutTokens;
     }
-
 
     public void setLanguage(String theLanguage) {
         this.language = StringUtils.normalizeSpace(theLanguage);
@@ -250,9 +263,15 @@ public class HeaderMedicalItem {
 
     public void setDocumentDate(String theDate) { this.document_date = StringUtils.normalizeSpace(theDate); }
 
-    public void setDocumentTime(String theTime) { this.document_time = StringUtils.normalizeSpace(theTime); }
+    public void setDateline(String dateline) {this.dateline = StringUtils.normalizeSpace(dateline);}
 
-    public void setDocumentDateLine(String theDateLine) { this.document_dateline = StringUtils.normalizeSpace(theDateLine); }
+    public void setLocation(String location) {this.location = StringUtils.normalizeSpace(location); }
+
+    public void setDate(String date) {this.date = StringUtils.normalizeSpace(date);}
+
+    public void setNote(String note) { this.note = StringUtils.normalizeSpace(note); }
+
+    public void setDocumentTime(String theTime) { this.time = StringUtils.normalizeSpace(theTime); }
 
     public void setNormalizedDocumentDate(Date theDate) {
         this.normalized_document_date = theDate;
@@ -260,9 +279,7 @@ public class HeaderMedicalItem {
 
     public void setPatients(String thepatients) { this.patients = StringUtils.normalizeSpace(thepatients); }
 
-    public void setMedics(String themedics) {
-        this.medics = StringUtils.normalizeSpace(themedics);
-    }
+    public void setMedics(String themedics) {this.medics = StringUtils.normalizeSpace(themedics);}
 
     public void setBeginPage(int p) {
         beginPage = p;
@@ -272,9 +289,11 @@ public class HeaderMedicalItem {
         endPage = p;
     }
 
-    public void setFullMedics(List<PersonMedical> fMedics) { fullMedics = fMedics; }
+    public void setFullMedics(List<PersonMedical> fMedics) { this.fullMedics = fMedics; }
 
-    public void setFullPatients(List<PersonMedical> fPatients) { fullPatients = fPatients; }
+    public void setFullPatients(List<PersonMedical> fPatients) { this.fullPatients = fPatients; }
+
+    public void setFullDatelines(List<Dateline> dl) { this.fullDatelines = dl; }
 
     public void setFullAffiliations(List<Affiliation> full) {
         fullAffiliations = full;
@@ -300,6 +319,11 @@ public class HeaderMedicalItem {
         return this;
     }
 
+    public HeaderMedicalItem addDatelinesToken(LayoutToken lt) {
+        datelinesLayoutTokens.add(lt);
+        return this;
+    }
+
     public void addFullMedic(PersonMedical meds) {
         if (fullMedics == null)
             fullMedics = new ArrayList<PersonMedical>();
@@ -312,6 +336,13 @@ public class HeaderMedicalItem {
             fullPatients = new ArrayList<PersonMedical>();
         if (!fullPatients.contains(pats))
             fullPatients.add(pats);
+    }
+
+    public void addDateline(Dateline dateline) {
+        if (datelines == null)
+            datelines = new ArrayList<Dateline>();
+        if (!datelines.contains(dateline))
+            datelines.add(dateline);
     }
 
     public void setPageRange(String pages) {
@@ -345,13 +376,13 @@ public class HeaderMedicalItem {
         fax = f;
     }
 
-    public void setOriginalMedics(String medic) {
-        originalMedics = medic;
-    }
+    public void setOriginalMedics(String medic) {originalMedics = medic;}
 
     public void setOriginalPatients(String patient) {
         originalPatients = patient;
     }
+
+    public void setOriginalDatelines(String dateline) {originalDatelines = dateline;}
 
     /**
      * General string cleaining for SQL strings. This method might depend on the chosen
@@ -386,11 +417,11 @@ public class HeaderMedicalItem {
         document_number = null;
         docNumGeneral = null;
         location = null;
+        note = null;
         document_date = null;
         normalized_document_date = null;
-        document_dateline = null;
         document_type = null;
-        document_time = null;
+        time = null;
         medics = null;
         patients = null;
         day = null;
@@ -410,6 +441,7 @@ public class HeaderMedicalItem {
         fullMedics = null;
         fullPatients = null;
         fullAffiliations = null;
+        dateline = null;
         medicList = null;
         patientList = null;
         affiliationList = null;
@@ -418,6 +450,7 @@ public class HeaderMedicalItem {
         originalAffiliation = null;
         originalMedics = null;
         originalPatients = null;
+        originalDatelines = null;
     }
 
     /**
@@ -671,18 +704,44 @@ public class HeaderMedicalItem {
                     }
                 }
             }
-        } /*else if (nbmedics == nbAffiliations) {
-            // risky heuristics, we distribute in this case one affiliation per medic
-            // preserving medic
-            // sometimes 2 affiliations belong both to 2 medics, for these case, the layout
-            // positioning should be studied
-            for (int p = 0; p < nbmedics; p++) {
-                fullMedics.get(p).addAffiliation(fullAffiliations.get(p));
-                System.out.println("attachment: " + p);
-                System.out.println(fullMedics.get(p));
-                fullAffiliations.get(p).setFailAffiliation(false);
+        }
+    }
+
+    /**
+     * Create the TEI encoding for the dateline block for the current header object.
+     */
+    public String toTEIDatelineBlock(int nbTag, GrobidAnalysisConfig config) {
+        StringBuffer tei = new StringBuffer();
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("<datelines>\n");
+        for (Dateline dateline : datelines) {
+            if (dateline.getPlaceName() != null || dateline.getNote() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<dateline>").append("\n");
+                if (dateline.getPlaceName() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<placeName>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</placeName> ");
+                    if (dateline.getDate() != null) {
+                        tei.append(", le <date>").append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
+                    }
+                    if (dateline.getTimeString() != null) {
+                        tei.append(", à <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>");
+                    }
+                } else if (dateline.getNote() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<note>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</note> ");
+                    if (dateline.getDate() != null) {
+                        tei.append(", du <date>").append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date>");
+                    }
+                }
+                tei.append("\n");
+                TextUtilities.appendN(tei, '\t', nbTag +1);
+                tei.append("</dateline>").append("\n");
             }
-        }*/
+        }
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("</datelines>\n");
+        return tei.toString();
     }
 
     /**
@@ -1527,11 +1586,12 @@ public class HeaderMedicalItem {
         this.titleLayoutTokens.addAll(layoutTokens);
     }
 
-    public void addMedicsTokens(List<LayoutToken> layoutTokens) {
-        this.medicsLayoutTokens.addAll(layoutTokens);
-    }
+    public void addMedicsTokens(List<LayoutToken> layoutTokens) {this.medicsLayoutTokens.addAll(layoutTokens);}
 
     public void addPatientsTokens(List<LayoutToken> layoutTokens) {
         this.patientsLayoutTokens.addAll(layoutTokens);
+    }
+
+    public void addDatelinesTokens(List<LayoutToken> layoutTokens) { this.datelinesLayoutTokens.addAll(layoutTokens);
     }
 }

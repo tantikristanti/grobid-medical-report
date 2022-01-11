@@ -1,6 +1,10 @@
 package org.grobid.core.data;
 
+import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.TextUtilities;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class for representing a dateline.
@@ -12,6 +16,7 @@ public class Dateline  {
     private int time = -1;
     private String timeString = null;
     private String note = null;
+    private List<LayoutToken> layoutTokens = new ArrayList<>();
 
     public Dateline() {
     }
@@ -25,12 +30,10 @@ public class Dateline  {
     }
 
     public String getPlaceName() {
-        return placeName;
+        return this.placeName;
     }
 
-    public void setPlaceName(String place) {
-        placeName = place;
-    }
+    public void setPlaceName(String place) { placeName = place;}
 
     public String getDate() { return date; }
 
@@ -58,5 +61,47 @@ public class Dateline  {
             (timeString != null) ||
             (time != -1)  ||
             (note != null);
+    }
+
+    public List<LayoutToken> getLayoutTokens() {
+        return layoutTokens;
+    }
+
+    public void setLayoutTokens(List<LayoutToken> tokens) {
+        this.layoutTokens = tokens;
+    }
+
+    /**
+     * TEI serialization via xom.
+     */
+    public void addLayoutTokens(List<LayoutToken> theTokens) {
+        if (layoutTokens == null) {
+            layoutTokens = new ArrayList<LayoutToken>();
+        }
+        layoutTokens.addAll(theTokens);
+    }
+
+
+    /**
+     *  Remove invalid dates (and convert the date format into the format dd/mm/yyyy)
+     */
+    public static List<Dateline> sanityCheck(List<Dateline> datelines) {
+        if (datelines == null)
+            return null;
+        if (datelines.size() == 0)
+            return datelines;
+
+        List<Dateline> result = new ArrayList<>();
+
+        for(Dateline dateline : datelines) {
+            if (dateline.getDate() != null && dateline.getDate().trim().length() != 0) {
+                String originalDate = dateline.getDate();
+                String date = originalDate.replaceAll("."," ").replaceAll("\\s+","/");
+                dateline.setDate(date);
+                result.add(dateline);
+            }
+        }
+
+        return result;
     }
 }

@@ -185,7 +185,7 @@ public class TEIFormatter {
         if ((headerItem.getAffiliation() != null) || // fill in institutional information with affiliation
             (headerItem.getDocumentDate() != null) ||
             (headerItem.getNormalizedDocumentDate() != null) ||
-            (headerItem.getDocumentDateLine() != null) ||
+            (headerItem.getDateline() != null) ||
             (headerItem.getDocNum() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
 
@@ -290,10 +290,10 @@ public class TEIFormatter {
                 tei.append("\t\t\t\t<date type=\"issued\">");
                 tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate())
                     + "</date>");
-            } else if (headerItem.getDocumentDateLine() != null) {
+            } else if (headerItem.getDateline() != null) {
                 tei.append("\t\t\t\t<dateline>");
-                tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDateLine().replaceAll("\n","").replaceAll("\t", "; "))
-                    + "</dateline>\n");
+                tei.append(headerItem.getDateline()).append("\n");
+                tei.append("\t\t\t\t</dateline>");
             }
             tei.append("\t\t\t</publicationStmt>\n");
         } else {
@@ -439,7 +439,7 @@ public class TEIFormatter {
         if ((headerItem.getAffiliation() != null) || // fill in institutional information with affiliation
             (headerItem.getDocumentDate() != null) ||
             (headerItem.getNormalizedDocumentDate() != null) ||
-            (headerItem.getDocumentDateLine() != null) ||
+            (headerItem.getDateline() != null) ||
             (headerItem.getDocNum() != null)) {
             tei.append("\t\t\t<publicationStmt>\n");
 
@@ -544,10 +544,13 @@ public class TEIFormatter {
                 tei.append("\t\t\t\t<date type=\"issued\">");
                 tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate())
                     + "</date>");
-            } else if (headerItem.getDocumentDateLine() != null) {
-                tei.append("\t\t\t\t<dateline>");
-                tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDateLine().replaceAll("\n","").replaceAll("\t", "; "))
-                    + "</dateline>\n");
+            } else if (headerItem.getDatelines() != null) {
+                // medics + affiliation
+                tei.append(headerItem.toTEIDatelineBlock(4, config));
+
+                /*tei.append("\t\t\t\t<dateline>");
+                tei.append(TextUtilities.HTMLEncode(headerItem.getDateline()));
+                tei.append("</dateline>\n");*/
             }
             tei.append("\t\t\t</publicationStmt>\n");
         } else {

@@ -4,15 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidMedicalReportModels;
-import org.grobid.core.data.Date;
+import org.grobid.core.data.*;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.HeaderMedicalItem;
-import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.PersonMedical;
+import org.grobid.core.data.Date;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
+import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
@@ -398,6 +397,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     boolean fragmentedMedics = false;
                     boolean hasMarker = false;
                     List<Integer> medicsBlocks = new ArrayList<Integer>();
+                    List<Integer> datelinesBlocks = new ArrayList<Integer>();
                     List<List<LayoutToken>> medicSegments = new ArrayList<>();
                     List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
                     if (isNotEmpty(medicLayoutTokens)) {
@@ -477,7 +477,6 @@ public class HeaderMedicalParser extends AbstractParser {
                         // TBD: consider segments also for patiens, like for medics above
                         //resHeader.setFullPatients(parsers.getMedicParser().processingHeader(resHeader.getPatients()));
 
-
                         resHeader.setOriginalPatients(resHeader.getPatients());
                         resHeader.getPatientsTokens();
 
@@ -523,6 +522,49 @@ public class HeaderMedicalParser extends AbstractParser {
 
                         // remove duplicated patients
                         resHeader.setFullPatients(PersonMedical.deduplicate(resHeader.getFullPatients()));
+
+                        // datelines processing
+                        if (resHeader.getDateline() != null) {
+                            resHeader.setOriginalDatelines(resHeader.getDateline());
+                            List<LayoutToken> datelineLayoutTokens = resHeader.getDatelinesTokens();
+                            List<List<LayoutToken>> datelineSegments = new ArrayList<>();
+                            if (isNotEmpty(datelineLayoutTokens)) {
+                                List<LayoutToken> currentSegment = new ArrayList<>();
+                                for(LayoutToken theToken : datelineLayoutTokens) {
+                                    // split the list of layout tokens when token "\n" is met
+                                    if (theToken.getText() != null && theToken.getText().equals("\t")) {
+                                        if (currentSegment.size() > 0)
+                                            datelineSegments.add(currentSegment);
+                                        currentSegment = new ArrayList<>();
+                                    } else
+                                        currentSegment.add(theToken);
+                                }
+                                // last segment
+                                if (currentSegment.size() > 0)
+                                    datelineSegments.add(currentSegment);
+
+                                for (int k = 0; k < datelineSegments.size(); k++) {
+                                    if (datelineSegments.get(k).size() == 0)
+                                        continue;
+                                    List<Dateline> localDatelines = parsers.getDatelineParser()
+                                        .processingWithLayoutTokens(datelineSegments.get(k));
+                                    for (Dateline dateline : localDatelines){
+                                        resHeader.addDateline(dateline);
+                                        if(dateline.getPlaceName() != null){
+                                            if(resHeader.getLocation() == null) {
+                                                resHeader.setLocation(dateline.getPlaceName());
+                                            }
+                                        }
+                                        if(dateline.getDate() != null){
+                                            if(resHeader.getDate() == null) {
+                                                resHeader.setDate(dateline.getDate());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            resHeader.setFullDatelines(parsers.getDatelineParser().process(resHeader.getDateline()));
+                        }
                     }
                 }
 
@@ -548,7 +590,7 @@ public class HeaderMedicalParser extends AbstractParser {
                 } else
                     return null;
             }
-        } catch (Exception e) {
+    } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
         return null;
@@ -1064,10 +1106,18 @@ public class HeaderMedicalParser extends AbstractParser {
                 else if (medical.getDocumentDate() == null)
                     medical.setDocumentDate(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_DATELINE)) {
-                if (medical.getDocumentDateLine() != null && medical.getDocumentDateLine().length() < clusterNonDehypenizedContent.length())
-                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDateLine() == null)
-                    medical.setDocumentDateLine(clusterNonDehypenizedContent);
+                if (medical.getDateline() != null) {
+                    medical.setDateline(medical.getDateline() + "\t" + clusterNonDehypenizedContent);
+                    medical.addDatelinesToken(new LayoutToken("\t", MedicalLabels.HEADER_DATELINE));
+
+                    List<LayoutToken> tokens = cluster.concatTokens();
+                    medical.addDatelinesTokens(tokens);
+                } else {
+                    medical.setDateline(clusterNonDehypenizedContent);
+
+                    List<LayoutToken> tokens = cluster.concatTokens();
+                    medical.addDatelinesTokens(tokens);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_MEDIC)) {
                 if (medical.getMedics() != null) {
                     medical.setMedics(medical.getMedics() + "\t" + clusterNonDehypenizedContent);

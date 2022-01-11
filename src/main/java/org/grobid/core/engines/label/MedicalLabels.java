@@ -46,7 +46,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String PHONE_LABEL = "<phone>";
     public final static String FAX_LABEL = "<fax>";
     public final static String WEB_LABEL = "<web>";
-    public static final String PLACE_NAME_LABEL = "<placeName>";
+    public static final String PLACE_NAME_LABEL = "<place>";
     public static final String SETTLEMENT_LABEL = "<settlement>"; // the name of a settlement such as a city, town, or village
     public static final String COUNTRY_LABEL = "<country>";
     public static final String REGION_LABEL = "<region>"; // the name of an administrative unit such as a state, province, or county, larger than a settlement, but smaller than a country
