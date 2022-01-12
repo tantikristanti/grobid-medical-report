@@ -10,6 +10,7 @@ public class Patient {
     private String dateBirth = null;
     private String dateDeath = null;
     private String persName = null;
+    private String sex = null;
     private String address = null;
     private String country = null;
     private String town = null;
@@ -51,6 +52,15 @@ public class Patient {
 
     public void setFullName(String persName) {
         this.persName = persName;
+    }
+
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
     }
 
     public String getAddress() {

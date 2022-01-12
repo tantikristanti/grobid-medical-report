@@ -721,7 +721,7 @@ public class HeaderMedicalItem {
                 tei.append("<dateline>").append("\n");
                 if (dateline.getPlaceName() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<placeName>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</placeName> ");
+                    tei.append("<placeName>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</placeName>");
 
                     if (dateline.getDate() != null) {
                         // the date has been in the ISO format using the Date model and parser
@@ -733,7 +733,7 @@ public class HeaderMedicalItem {
                     }
                 } else if (dateline.getNote() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<note>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</note> ");
+                    tei.append("<note>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</note>");
                     if (dateline.getDate() != null) {
                         // the date has been in the ISO format using the Date model and parser
                         tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">").

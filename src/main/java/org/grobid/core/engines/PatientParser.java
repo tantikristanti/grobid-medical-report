@@ -121,6 +121,14 @@ public class PatientParser extends AbstractParser {
                     }
                     patient.setPersName(clusterContent);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
+                if (isNotBlank(patient.getSex())) {
+                    if (patient.isNotNull()) {
+                        patients.add(patient);
+                        patient = new Patient();
+                    }
+                    patient.setSex(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
                 if (isNotBlank(patient.getDateBirth())) {
                     if (patient.isNotNull()) {

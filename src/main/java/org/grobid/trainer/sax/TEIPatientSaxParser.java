@@ -70,9 +70,9 @@ public class TEIPatientSaxParser extends DefaultHandler {
                            java.lang.String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("idno")) || (qName.equals("persName")) || (qName.equals("birth")) ||
-            (qName.equals("death")) || (qName.equals("address")) || (qName.equals("country")) ||
-            (qName.equals("settlement")) || (qName.equals("phone")) || (qName.equals("note"))
+        if ((qName.equals("idno")) || (qName.equals("persName")) || (qName.equals("sex")) ||
+            (qName.equals("birth")) || (qName.equals("death")) || (qName.equals("address")) ||
+            (qName.equals("country")) || (qName.equals("settlement")) || (qName.equals("phone")) || (qName.equals("note"))
         ) {
             String text = getText();
             writeField(text);
@@ -113,6 +113,8 @@ public class TEIPatientSaxParser extends DefaultHandler {
             currentTag = "<idno>";
         } else if ((qName.equals("persName")) || (qName.equals("name"))) {
             currentTag = "<persName>";
+        } else if (qName.equals("sex")) {
+            currentTag = "<sex>";
         } else if (qName.equals("birth")) {
             currentTag = "<birth>";
         } else if (qName.equals("death")) {

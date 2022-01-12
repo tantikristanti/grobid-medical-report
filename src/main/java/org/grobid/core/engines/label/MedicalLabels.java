@@ -64,6 +64,7 @@ public class MedicalLabels extends TaggingLabels {
     // person (medics, patient)
     public static final String ROLE_LABEL = "<roleName>";
     public static final String PERSON_NAME_LABEL = "<persName>";
+    public static final String PERSON_SEX_LABEL = "<sex>";
     public static final String PERSON_BIRTH_LABEL = "<birth>";
     public static final String PERSON_DEATH_LABEL = "<death>";
     
@@ -169,6 +170,7 @@ public class MedicalLabels extends TaggingLabels {
     // Patient
     public static final TaggingLabel PATIENT_ID = new TaggingLabelImpl(GrobidModels.PATIENT, ID_NUMBER_LABEL);
     public static final TaggingLabel PATIENT_NAME = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_NAME_LABEL);
+    public static final TaggingLabel PATIENT_SEX = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_SEX_LABEL);
     public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_LABEL);
     public static final TaggingLabel PATIENT_DATE_DEATH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_DEATH_LABEL);
     public static final TaggingLabel PATIENT_ADDRESS = new TaggingLabelImpl(GrobidModels.PATIENT, ADDRESS_LABEL);
@@ -260,6 +262,7 @@ public class MedicalLabels extends TaggingLabels {
 
         // patient
         register(PATIENT_ID);
+        register(PATIENT_SEX);
         register(PATIENT_NAME);
         register(PATIENT_DATE_BIRTH);
         register(PATIENT_DATE_DEATH);

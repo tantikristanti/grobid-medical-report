@@ -29,9 +29,9 @@ public class MedicalReportProperties {
 	}
 
     /**
-     * Returns the current version of GROBID
+     * Returns the current version of grobid-medical-report
      *
-     * @return GROBID version
+     * @return grobid-medical-report version
      */
     public static String getVersion() {
         if (GROBID_MEDICAL_VERSION == null) {

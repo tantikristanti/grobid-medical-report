@@ -17,10 +17,7 @@ import org.grobid.core.engines.label.TaggingLabels;
 import org.grobid.core.engines.tagging.GenericTaggerUtils;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
-import org.grobid.core.features.FeatureFactory;
-import org.grobid.core.features.FeaturesVectorDateline;
-import org.grobid.core.features.FeaturesVectorFullMedicalText;
-import org.grobid.core.features.FeaturesVectorName;
+import org.grobid.core.features.*;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.*;
 import org.grobid.core.lexicon.Lexicon;
@@ -62,6 +59,8 @@ public class FullMedicalTextParser extends AbstractParser {
     private static final int LINESCALE = 10;
 
     protected EngineMedicalParsers parsers;
+
+    private Lexicon lexicon = Lexicon.getInstance();
 
     /**
      */
@@ -1101,13 +1100,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                         q++;
                     }
-                    inputs = new ArrayList<String>();
-                    if (input.trim().length() > 1) {
-                        inputs.add(input.trim());
-                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
-                    }
 
-                    // -------------if the models doesn't exist yet-------------
                     // force analyser with English, to avoid bad surprise
                     List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
                     List<String> tokenizationMedic = analyzer.tokenize(input);
@@ -1123,19 +1116,24 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // we write the featured medic
-                    List<OffsetPosition> titlePositions = Lexicon.getInstance().tokenPositionsPersonTitle(tokens);
-                    List<OffsetPosition> suffixPositions = Lexicon.getInstance().tokenPositionsPersonSuffix(tokens);
+                    List<OffsetPosition> locationPositions  = lexicon.tokenPositionsLocationNames(tokens);
+                    List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                    List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                    List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                    List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
 
-                    String featuredMedic = FeaturesVectorName.addFeaturesName(tokens, null, titlePositions, suffixPositions);
+                    String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
+                        locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
 
                     /*if (featuredMedic != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                         writer.write(featuredMedic + "\n");
                         writer.close();
-                    }
+                    }*/
 
+                    // -------------if the models doesn't exist yet-------------
                     // we write the medics data yet unlabeled
-                    if (input.length() > 0) {
+                    /*if (input.length() > 0) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                         writer.write("<tei xml:space=\"preserve\">\n");
@@ -1143,7 +1141,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                         writer.write("\t\t\t<medics>\n");
                         writer.write("\t\t\t\t<medic>\n");
-                        writer.write(input);
+                        writer.write(input); // unlabeled data
                         writer.write("\n\t\t\t\t</medic>\n");
                         writer.write("\t\t\t</medics>\n");
                         writer.write("\t\t</fileDesc>\n");
@@ -1153,6 +1151,12 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
                     //---------------------------------------
 
+                    // -------------if the models exist already-------------
+                     /*inputs = new ArrayList<String>();
+                    if (input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        //bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+                    }*/
                     /*if (bufferMedic != null) {
                         if (bufferMedic.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
@@ -1171,6 +1175,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writerDate.close();
                         }
                     }*/
+                    //---------------------------------------
 
                     // 6. PATIENT MODEL
                     // path for patient model
@@ -1199,13 +1204,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                         q++;
                     }
-                    inputs = new ArrayList<String>();
-                    if (input.trim().length() > 1) {
-                        inputs.add(input.trim());
-                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
-                    }
 
-                    // -------------if the models doesn't exist yet-------------
                     // force analyser with English, to avoid bad surprise
                     tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
                     List<String> tokenizationPatient = analyzer.tokenize(input);
@@ -1221,19 +1220,18 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // we write the featured patient
-                    titlePositions = Lexicon.getInstance().tokenPositionsPersonTitle(tokens);
-                    suffixPositions = Lexicon.getInstance().tokenPositionsPersonSuffix(tokens);
-
-                    String featuredPatient = FeaturesVectorName.addFeaturesName(tokens, null, titlePositions, suffixPositions);
+                    String featuredPatient = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
+                        locationPositions,titlePositions, suffixPositions);
 
                     /*if (featuredPatient != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                         writer.write(featuredPatient + "\n");
                         writer.close();
-                    }
+                    }*/
 
+                    // -------------if the models doesn't exist yet-------------
                     // we write the patients data yet unlabeled
-                    if (input.length() > 0) {
+                    /*if (input.length() > 0) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                         writer.write("<tei xml:space=\"preserve\">\n");
@@ -1248,6 +1246,13 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.write("\t</teiHeader>\n");
                         writer.write("</tei>");
                         writer.close();
+                    }*/
+
+                    // -------------if the models exist already-------------
+                     /*inputs = new ArrayList<String>();
+                    if (input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
                     }*/
 
                     /*if (bufferPatient != null) {

@@ -87,3 +87,26 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
+
+
+  - name: "medic"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    #engine: "delft"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+
+
+  - name: "patient"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    #engine: "delft"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+
