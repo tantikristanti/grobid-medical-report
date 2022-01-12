@@ -1182,7 +1182,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient"));
 
-                    // buffer for the medics block
+                    // buffer for the patients block
                     StringBuilder bufferPatient = null;
                     // we need to rebuild the found date string as it appears
                     input = "";
@@ -1249,13 +1249,13 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
 
                     // -------------if the models exist already-------------
-                     /*inputs = new ArrayList<String>();
+                     inputs = new ArrayList<String>();
                     if (input.trim().length() > 1) {
                         inputs.add(input.trim());
                         bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
-                    }*/
+                    }
 
-                    /*if (bufferPatient != null) {
+                    if (bufferPatient != null) {
                         if (bufferPatient.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -1270,9 +1270,9 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t\t</fileDesc>\n");
                             writer.write("\t</teiHeader>\n");
                             writer.write("</tei>");
-                            writerDate.close();
+                            writer.close();
                         }
-                    }*/
+                    }
                 }
             }
 
