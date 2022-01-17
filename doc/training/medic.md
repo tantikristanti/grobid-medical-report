@@ -10,11 +10,19 @@ For identifying the exact pieces of information to be part of the `header-medica
 
 For the medic model, we use the following TEI elements:
 
+* `<roleName>` for the role of medics
 * `<persName>` for the name of medics 
+* `<affiliation>` for the affiliation attached directly to medics
+* `<orgName>` for the organization attached directly to medics
+* `<institution>` for the institution attached directly to medics
+* `<address>` for the address of medics
+* `<country>` for the country
+* `<settlement>` for the city
 * `<email>` for the email information
 * `<phone>` for the phone number
 * `<fax>` for the fax number
 * `<ptr type="web">` for the web URL 
+* `<note>` for the notes concerning the medics
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
 > It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-trainer/resources/dataset/medic`) to see some examples of how these elements should be used.

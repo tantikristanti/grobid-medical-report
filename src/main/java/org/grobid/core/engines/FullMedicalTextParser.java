@@ -1081,7 +1081,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     // buffer for the medics block
                     StringBuilder bufferMedic = null;
                     // we need to rebuild the found date string as it appears
-                    /*input = "";
+                    input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
                     while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
@@ -1101,7 +1101,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         q++;
                     }
 
-                    inputs = new ArrayList<String>();
+                    /*inputs = new ArrayList<String>();
                     if (input != null && input.trim().length() > 1) {
                         inputs.add(input.trim());
                         bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
@@ -1138,7 +1138,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // -------------if the models doesn't exist yet-------------
                     // we write the medics data yet unlabeled
-                    /*if (input.length() > 0) {
+                    /*if (input != null && input.length() > 0) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                         writer.write("<tei xml:space=\"preserve\">\n");
@@ -1157,7 +1157,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     //---------------------------------------
 
                     // -------------if the models exist already-------------
-                    /*if (bufferMedic != null) {
+                    if (bufferMedic != null) {
                         if (bufferMedic.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -1165,16 +1165,14 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t<teiHeader>\n");
                             writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                             writer.write("\t\t\t<medics>\n");
-                            writer.write("\t\t\t\t<medic>\n");
                             writer.write("\t\t\t" + bufferMedic.toString());
-                            writer.write("\n\t\t\t\t</medic>\n");
                             writer.write("\t\t\t</medics>\n");
                             writer.write("\t\t</fileDesc>\n");
                             writer.write("\t</teiHeader>\n");
                             writer.write("</tei>");
-                            writerDate.close();
+                            writer.close();
                         }
-                    }*/
+                    }
                     //---------------------------------------
 
                     // 6. PATIENT MODEL
@@ -1257,7 +1255,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
 
                     // -------------if the models exist already-------------
-                    if (bufferPatient != null) {
+                    /*if (bufferPatient != null) {
                         if (bufferPatient.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -1272,7 +1270,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("</tei>");
                             writer.close();
                         }
-                    }
+                    }*/
                 }
             }
 
