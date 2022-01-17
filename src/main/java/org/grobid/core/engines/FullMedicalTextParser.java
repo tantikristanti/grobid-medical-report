@@ -1101,7 +1101,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         q++;
                     }
 
-                    /*inputs = new ArrayList<String>();
+                    inputs = new ArrayList<String>();
                     if (input != null && input.trim().length() > 1) {
                         inputs.add(input.trim());
                         bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
@@ -1128,7 +1128,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         // we write the featured medic
                         String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
                             locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
-                    }*/
+                    }
 
                     /*if (featuredMedic != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
