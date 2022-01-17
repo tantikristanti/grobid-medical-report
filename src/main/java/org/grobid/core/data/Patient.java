@@ -116,6 +116,7 @@ public class Patient {
             (dateBirth != null) ||
             (dateDeath != null) ||
             (persName != null) ||
+            (sex != null) ||
             (address != null) ||
             (country != null) ||
             (town != null) ||

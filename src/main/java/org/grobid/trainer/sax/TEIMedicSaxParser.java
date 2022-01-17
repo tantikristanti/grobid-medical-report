@@ -65,8 +65,8 @@ public class TEIMedicSaxParser extends DefaultHandler {
                            java.lang.String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("roleName")) || (qName.equals("persName")) || (qName.equals("affiliation")) ||
-            (qName.equals("orgName")) || (qName.equals("institution")) || (qName.equals("address")) ||
+        if ((qName.equals("rolename")) || (qName.equals("persname")) || (qName.equals("affiliation")) ||
+            (qName.equals("orgname")) || (qName.equals("institution")) || (qName.equals("address")) ||
             (qName.equals("country")) || (qName.equals("settlement")) || (qName.equals("email")) ||
             (qName.equals("phone")) || (qName.equals("fax")) || (qName.equals("web")) ||
             (qName.equals("note")) || (qName.equals("ptr"))
@@ -106,13 +106,13 @@ public class TEIMedicSaxParser extends DefaultHandler {
         accumulator.setLength(0);
 
         qName = qName.toLowerCase();
-        if ((qName.equals("roleName")) || (qName.equals("role"))) {
+        if ((qName.equals("rolename")) || (qName.equals("role"))) {
             currentTag = "<roleName>";
-        } else if (qName.equals("persName") || (qName.equals("name"))) {
+        } else if (qName.equals("persname") || (qName.equals("name"))) {
             currentTag = "<persName>";
         } else if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
-        } else if ((qName.equals("orgName")) || (qName.equals("institution"))) {
+        } else if ((qName.equals("orgname")) || (qName.equals("institution"))) {
             currentTag = "<orgName>";
         } else if (qName.equals("address")) {
             currentTag = "<address>";
