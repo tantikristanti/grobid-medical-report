@@ -162,7 +162,7 @@ public class PatientParser extends AbstractParser {
                     patient.setAddress(clusterContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
-                if (isNotBlank(patient.getCountry())) {
+                if (isNotBlank(patient.getTown())) {
                     if (patient.isNotNull()) {
                         patients.add(patient);
                         patient = new Patient();
@@ -303,6 +303,9 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<sex>", "<sex>", addSpace, 0);
+                    }
+                    if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persName>", "<persName>", addSpace, 0);
                     }
                     if (output == null) {
@@ -324,7 +327,7 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"patient\">", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
                     }
                     if (output != null) {
                         buffer.append(output);
@@ -386,6 +389,8 @@ public class PatientParser extends AbstractParser {
                 buffer.append("</idno>");
             } else if (lastTag0.equals("<persName>")) {
                 buffer.append("</persName>");
+            } else if (lastTag0.equals("<sex>")) {
+                buffer.append("</sex>");
             } else if (lastTag0.equals("<birth>")) {
                 buffer.append("</birth>");
             } else if (lastTag0.equals("<death>")) {

@@ -961,7 +961,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     /*writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(header + "\n");
                     writer.close();*/
-                    
+
                     // featured and labeled (tagged) data
                     String rese = parsers.getHeaderMedicalParser().label(header);
 
@@ -1081,7 +1081,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     // buffer for the medics block
                     StringBuilder bufferMedic = null;
                     // we need to rebuild the found date string as it appears
-                    input = "";
+                    /*input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
                     while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
@@ -1101,29 +1101,34 @@ public class FullMedicalTextParser extends AbstractParser {
                         q++;
                     }
 
-                    // force analyser with English, to avoid bad surprise
-                    List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
-                    List<String> tokenizationMedic = analyzer.tokenize(input);
-                    List<String> medicBlocks = new ArrayList<String>();
-                    if (tokenizationMedic.size() == 0)
-                        return null;
-                    for(String tok : tokenizationMedic) {
-                        if (tok.equals("\n")) {
-                            medicBlocks.add("@newline");
-                        } else if (!tok.equals(" ")) {
-                            medicBlocks.add(tok + " <medic>");
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                        List<String> tokenizationMedic = analyzer.tokenize(input);
+                        List<String> medicBlocks = new ArrayList<String>();
+                        if (tokenizationMedic.size() == 0)
+                            return null;
+                        for (String tok : tokenizationMedic) {
+                            if (tok.equals("\n")) {
+                                medicBlocks.add("@newline");
+                            } else if (!tok.equals(" ")) {
+                                medicBlocks.add(tok + " <medic>");
+                            }
                         }
-                    }
 
-                    // we write the featured medic
-                    List<OffsetPosition> locationPositions  = lexicon.tokenPositionsLocationNames(tokens);
-                    List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
-                    List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
-                    List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
-                    List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
-
-                    String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
-                        locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the featured medic
+                        String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                    }*/
 
                     /*if (featuredMedic != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
@@ -1152,11 +1157,6 @@ public class FullMedicalTextParser extends AbstractParser {
                     //---------------------------------------
 
                     // -------------if the models exist already-------------
-                     /*inputs = new ArrayList<String>();
-                    if (input.trim().length() > 1) {
-                        inputs.add(input.trim());
-                        //bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
-                    }*/
                     /*if (bufferMedic != null) {
                         if (bufferMedic.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
@@ -1205,8 +1205,13 @@ public class FullMedicalTextParser extends AbstractParser {
                         q++;
                     }
 
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 1) {
+                        inputs.add(input.trim());
+                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
+
                     // force analyser with English, to avoid bad surprise
-                    tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                    List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
                     List<String> tokenizationPatient = analyzer.tokenize(input);
                     List<String> patientBlocks = new ArrayList<String>();
                     if (tokenizationPatient.size() == 0)
@@ -1219,10 +1224,13 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }
 
+                    List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                    List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                    List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
                     // we write the featured patient
                     String featuredPatient = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
                         locationPositions,titlePositions, suffixPositions);
-
+                    }
                     /*if (featuredPatient != null) {
                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                         writer.write(featuredPatient + "\n");
@@ -1249,12 +1257,6 @@ public class FullMedicalTextParser extends AbstractParser {
                     }*/
 
                     // -------------if the models exist already-------------
-                     inputs = new ArrayList<String>();
-                    if (input.trim().length() > 1) {
-                        inputs.add(input.trim());
-                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
-                    }
-
                     if (bufferPatient != null) {
                         if (bufferPatient.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
