@@ -171,6 +171,8 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
                         if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
                             value.equals("documentType") || value.equals("articleType")) {
                             currentTag = "<doctype>";
+                        } else if (value.equals("short")) {
+                            currentTag = "<note>";
                         } else
                             currentTag = "<other>";
                     }

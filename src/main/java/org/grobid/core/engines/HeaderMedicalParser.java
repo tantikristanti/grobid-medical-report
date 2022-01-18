@@ -1413,6 +1413,9 @@ public class HeaderMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<note>", "<note type=\"short\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
             }
 
@@ -1465,6 +1468,8 @@ public class HeaderMedicalParser extends AbstractParser {
                 buffer.append("</ptr>\n");
             } else if (lastTag0.equals("<org>")) {
                 buffer.append("</org>\n");
+            } else if (lastTag0.equals("<note>")) {
+                buffer.append("</note>\n");
             }
         }
     }
