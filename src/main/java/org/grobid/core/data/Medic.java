@@ -1,15 +1,20 @@
 package org.grobid.core.data;
 
+import org.grobid.core.layout.LayoutToken;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class for representing and exchanging medics information.
  *
  */
 
 public class Medic {
-    private String role = null;
+    private String roleName = null;
     private String persName = null;
     private String affiliation = null;
-    private String organisation = null;
+    private String orgName = null;
     private String institution = null;
     private String address = null;
     private String country = null;
@@ -20,12 +25,14 @@ public class Medic {
     private String note = null;
     private String web = null;
 
+    private List<LayoutToken> layoutTokens = new ArrayList<>();
+
     public String getRole() {
-        return role;
+        return roleName;
     }
 
     public void setRole(String role) {
-        this.role = role;
+        this.roleName = role;
     }
 
     public String getPersName() {
@@ -41,11 +48,11 @@ public class Medic {
     }
 
     public String getOrganisation() {
-        return organisation;
+        return orgName;
     }
 
     public void setOrganisation(String organisation) {
-        this.organisation = organisation;
+        this.orgName = organisation;
     }
 
     public void setAffiliation(String affiliation) {
@@ -125,9 +132,10 @@ public class Medic {
     }
 
     public boolean isNotNull() {
-        return (role != null) ||
+        return (roleName != null) ||
             (persName != null) ||
             (affiliation != null) ||
+            (orgName != null) ||
             (institution != null) ||
             (address != null) ||
             (country != null) ||
@@ -138,4 +146,23 @@ public class Medic {
             (web != null) ||
             (note != null);
     }
+
+    public List<LayoutToken> getLayoutTokens() {
+        return layoutTokens;
+    }
+
+    public void setLayoutTokens(List<LayoutToken> tokens) {
+        this.layoutTokens = tokens;
+    }
+
+    /**
+     * TEI serialization via xom.
+     */
+    public void addLayoutTokens(List<LayoutToken> theTokens) {
+        if (layoutTokens == null) {
+            layoutTokens = new ArrayList<LayoutToken>();
+        }
+        layoutTokens.addAll(theTokens);
+    }
+
 }

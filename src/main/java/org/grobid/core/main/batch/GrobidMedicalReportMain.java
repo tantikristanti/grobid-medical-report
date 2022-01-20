@@ -25,11 +25,17 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  */
 public class GrobidMedicalReportMain {
     private static Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportMain.class);
-
+    // commands for creating training data (for annotators)
+    private static final String COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK = "createTrainingSegmentationBlank";
     private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
+    private static final String COMMAND_CREATE_TRAINING_FULL_BLANK = "createTrainingFullBlank";
+    private static final String COMMAND_CREATE_TRAINING_FULL = "createTrainingFull";
+    private static final String COMMAND_CREATE_TRAINING_HEADER_BLANK = "createTrainingHeaderBlank";
     private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
+    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK = "createTrainingLeftNoteBlank";
     private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
-    private static final String COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT = "createTrainingFullMedicalText";
+
+    // commands for processing the data (for end-users)
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
     private static final String COMMAND_PROCESS_HEADER = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
@@ -38,14 +44,19 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_EXTRACT_NER = "extractNER";
 
     private static List<String> availableCommands = Arrays.asList(
+        COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK,
         COMMAND_CREATE_TRAINING_SEGMENTATION,
+        COMMAND_CREATE_TRAINING_FULL_BLANK,
+        COMMAND_CREATE_TRAINING_FULL,
+        COMMAND_CREATE_TRAINING_HEADER_BLANK,
         COMMAND_CREATE_TRAINING_HEADER,
+        COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK,
         COMMAND_CREATE_TRAINING_LEFT_NOTE,
-        COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT,
+
+        COMMAND_PROCESS_FULL_TEXT,
         COMMAND_PROCESS_HEADER_HIGH_LEVEL,
         COMMAND_PROCESS_HEADER,
         COMMAND_PROCESS_LEFT_NOTE,
-        COMMAND_PROCESS_FULL_TEXT,
         COMMAND_CREATE_MEDICAL_NER_TRAINING,
         COMMAND_EXTRACT_NER
     );
@@ -261,26 +272,35 @@ public class GrobidMedicalReportMain {
 
             EngineMedicalParsers parsers = new EngineMedicalParsers();
 
-            if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+            if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK)) {
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),true, -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false,-1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_BLANK)) {
+                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true, -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL)) {
+                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false, -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER_BLANK)) {
+                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true, -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
-                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false, -1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK)) {
+                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true,-1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
-                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_MEDICAL_TEXT)) {
-                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
+                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false,-1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_FULL_TEXT)) {
+                nb = parsers.getFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
+                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
                 nb = parsers.getHeaderMedicalParser().processHeaderDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().processLeftNoteDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_FULL_TEXT)) {
-                nb = parsers.getFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
-                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
-                // create training data using French Medical NER model (built with the Corpus QUAERO)
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
+                // create training data using French Medical NER model (built with the Corpus QUAERO)
                 nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-                // process NER using grobid-ner model
+
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_EXTRACT_NER)) {
+                // process NER using grobid-ner model
                 nb = parsers.getFrMedicalNERParser().processNERBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else {
                 throw new RuntimeException("Command not yet implemented.");

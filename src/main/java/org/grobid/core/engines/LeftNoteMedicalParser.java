@@ -982,6 +982,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
     public int createTrainingMedicalLeftNoteBatch(String inputDirectory,
                                                 String outputDirectory,
+                                                boolean blank,
                                                 int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
@@ -1014,8 +1015,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    createTrainingFromPDF(file, outputDirectory, n);
-                    //createBlankTrainingFromPDF(file, outputDirectory, n);
+                    if (blank) {
+                        // create blank training data for the left-note (organization) model
+                        createBlankTrainingFromPDF(file, outputDirectory, n);
+                    } else {
+                        // create pre-annotated training data based on existing left-note (organization) model
+                        createTrainingFromPDF(file, outputDirectory, n);
+                    }
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);

@@ -1,14 +1,20 @@
 package org.grobid.core.engines;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
+import org.grobid.core.analyzers.GrobidAnalyzer;
+import org.grobid.core.data.Dateline;
 import org.grobid.core.data.Medic;
+import org.grobid.core.data.Person;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorDateline;
 import org.grobid.core.features.FeaturesVectorMedic;
+import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
+import org.grobid.core.layout.PDFAnnotation;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
@@ -52,35 +58,174 @@ public class MedicParser extends AbstractParser {
         this.parsers = parsers;
     }
 
-    public List<Medic> process(String input) {
-        // force English language for the tokenization only
-        List<LayoutToken> tokens = analyzer.tokenizeWithLayoutToken(input);
+    /**
+     * Processing of medics in the header part
+     */
+    public List<Medic> processing(String input) throws Exception {
+        if (StringUtils.isEmpty(input)) {
+            return null;
+        }
+
+        // for language to English for the analyser to avoid any bad surprises
+        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+        return processing(tokens);
+    }
+
+
+    public List<Medic> processingWithLayoutTokens(List<LayoutToken> inputs) {
+        return processing(inputs);
+    }
+
+    /**
+     * Common processing of medics (mostly for the header part, but it can be used in other parts, such as for the body part)
+     *
+     * @param tokens list of LayoutToken object to process
+     * @return List of identified Medic entites as POJO.
+     */
+    public List<Medic> processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-
-        return processCommon(tokens);
-    }
-
-    protected List<Medic> processCommon(List<LayoutToken> input) {
-        if (CollectionUtils.isEmpty(input))
-            return null;
-        List<OffsetPosition> locationsPositions = lexicon.tokenPositionsLocationNames(input);
-        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(input);
-        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(input);
-        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(input);
-        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(input);
-
+        List<Medic> fullMedics = new ArrayList<>();
+        Medic medic = null;
         try {
-            String features = FeaturesVectorMedic.addFeaturesMedic(input, null, locationsPositions, titlePositions,
-                suffixPositions, emailPositions, urlPositions);
-            String res = label(features);
+            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+            List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+            List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+            List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+            List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+            // get the features for the medic
+            String sequence = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
+                locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
 
-            // extract results from the processed file
-            return resultExtractionLayoutTokens(res, input);
+            if (StringUtils.isEmpty(sequence))
+                return null;
+            // labelling the featured data
+            String res = label(sequence);
+            //System.out.println(res);
+
+            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.MEDIC, res, tokens);
+            medic = new Medic();
+
+            List<TaggingTokenCluster> clusters = clusteror.cluster();
+            for (TaggingTokenCluster cluster : clusters) {
+                if (cluster == null) {
+                    continue;
+                }
+
+                TaggingLabel clusterLabel = cluster.getTaggingLabel();
+                Engine.getCntManager().i(clusterLabel);
+                String clusterContent = StringUtils.normalizeSpace(LayoutTokensUtil.toText(cluster.concatTokens()));
+                String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
+                if (clusterContent.trim().length() == 0)
+                    continue;
+
+                if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
+                    if (medic.getRole() != null) {
+                        medic.setRole(medic.getRole() + "\t" + clusterContent);
+                    } else {
+                        medic.setRole(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
+                    if (medic.getPersName() != null) {
+                        medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+                    } else {
+                        medic.setPersName(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
+                    if (medic.getAffiliation() != null) {
+                        medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+                    } else {
+                        medic.setAffiliation(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
+                    if (medic.getOrganisation() != null) {
+                        medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+                    } else {
+                        medic.setOrganisation(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
+                    if (medic.getInstitution() != null) {
+                        medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+                    } else {
+                        medic.setInstitution(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
+                    if (medic.getAddress() != null) {
+                        medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+                    } else {
+                        medic.setAddress(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
+                    if (medic.getCountry() != null) {
+                        medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+                    } else {
+                        medic.setCountry(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
+                    if (medic.getTown() != null) {
+                        medic.setTown(medic.getTown() + "\t" + clusterContent);
+                    } else {
+                        medic.setTown(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
+                    if (medic.getEmail() != null) {
+                        medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+                    } else {
+                        medic.setEmail(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
+                    if (medic.getPhone() != null) {
+                        medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+                    } else {
+                        medic.setPhone(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
+                    if (medic.getFax() != null) {
+                        medic.setFax(medic.getFax() + "\t" + clusterContent);
+                    } else {
+                        medic.setFax(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
+                    if (medic.getWeb() != null) {
+                        medic.setWeb(medic.getFax() + "\t" + clusterContent);
+                    } else {
+                        medic.setWeb(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
+                    if (medic.getNote() != null) {
+                        medic.setNote(medic.getNote() + "\t" + clusterContent);
+                    } else {
+                        medic.setNote(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                }
+
+            }
+            // add the dateline to the list
+            if (medic.getRole() != null || medic.getPersName() != null || medic.getAffiliation() != null ||
+                medic.getOrganisation() != null || medic.getInstitution() != null || medic.getAddress() != null ||
+                medic.getCountry() != null || medic.getTown() != null || medic.getEmail() != null ||
+                medic.getPhone() != null || medic.getFax() != null ||
+                medic.getWeb() != null || medic.getNote() != null){
+                fullMedics.add(medic);
+            }
         } catch (Exception e) {
-            throw new GrobidException("An exception on " + this.getClass().getName() + " occured while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running Grobid.", e);
         }
+        return fullMedics;
     }
     
     /**

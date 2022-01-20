@@ -376,7 +376,6 @@ public class PersonMedical {
             return true;
     }
 
-
     /**
      *  Deduplicate person names, optionally attached to affiliations, based 
      *  on common forename/surname, taking into account abbreviated forms

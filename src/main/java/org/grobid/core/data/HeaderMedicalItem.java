@@ -109,8 +109,8 @@ public class HeaderMedicalItem {
     private List<String> patientList;
     private List<String> affiliationList;
 
-    private List<PersonMedical> fullMedics = null;
-    private List<PersonMedical> fullPatients = null;
+    private List<Medic> fullMedics = null;
+    private List<Patient> fullPatients = null;
     private List<Affiliation> fullAffiliations = null;
     private List<Dateline> fullDatelines = null;
     private List<Dateline> datelines = null;
@@ -227,11 +227,11 @@ public class HeaderMedicalItem {
             return null;
     }
 
-    public List<PersonMedical> getFullMedics() {
+    public List<Medic> getFullMedics() {
         return fullMedics;
     }
 
-    public List<PersonMedical> getFullPatients() { return fullPatients; }
+    public List<Patient> getFullPatients() { return fullPatients; }
 
     public List<Dateline> getFullDatelines() { return fullDatelines; }
 
@@ -289,9 +289,9 @@ public class HeaderMedicalItem {
         endPage = p;
     }
 
-    public void setFullMedics(List<PersonMedical> fMedics) { this.fullMedics = fMedics; }
+    public void setFullMedics(List<Medic> fMedics) { this.fullMedics = fMedics; }
 
-    public void setFullPatients(List<PersonMedical> fPatients) { this.fullPatients = fPatients; }
+    public void setFullPatients(List<Patient> fPatients) { this.fullPatients = fPatients; }
 
     public void setFullDatelines(List<Dateline> dl) { this.fullDatelines = dl; }
 
@@ -324,18 +324,18 @@ public class HeaderMedicalItem {
         return this;
     }
 
-    public void addFullMedic(PersonMedical meds) {
+    public void addMedic(Medic medic) {
         if (fullMedics == null)
-            fullMedics = new ArrayList<PersonMedical>();
-        if (!fullMedics.contains(meds))
-            fullMedics.add(meds);
+            fullMedics = new ArrayList<Medic>();
+        if (!fullMedics.contains(medic))
+            fullMedics.add(medic);
     }
 
-    public void addFullPatient(PersonMedical pats) {
+    public void addPatient(Patient patient) {
         if (fullPatients == null)
-            fullPatients = new ArrayList<PersonMedical>();
-        if (!fullPatients.contains(pats))
-            fullPatients.add(pats);
+            fullPatients = new ArrayList<Patient>();
+        if (!fullPatients.contains(patient))
+            fullPatients.add(patient);
     }
 
     public void addDateline(Dateline dateline) {
@@ -472,53 +472,8 @@ public class HeaderMedicalItem {
     }
 
     /**
-     * Return the surname of the first author.
-     */
-    public String getFirstAuthorSurname() {
-        if (this.firstMedicSurname != null) {
-            return this.firstMedicSurname;
-        }
-
-        if (fullMedics != null) {
-            if (fullMedics.size() > 0) {
-                PersonMedical aut = fullMedics.get(0);
-                String sur = aut.getLastName();
-                if (sur != null) {
-                    if (sur.length() > 0) {
-                        this.firstMedicSurname = sur;
-                        return sur;
-                    }
-                }
-            }
-        }
-
-        if (medics != null) {
-            StringTokenizer st = new StringTokenizer(medics, ";");
-            if (st.countTokens() > 0) {
-                if (st.hasMoreTokens()) { // we take just the first author
-                    String author = st.nextToken();
-                    if (author != null)
-                        author = author.trim();
-                    int ind = author.lastIndexOf(" ");
-                    if (ind != -1) {
-                        this.firstMedicSurname = author.substring(ind + 1);
-                        //return TextUtilities.HTMLEncode(author.substring(ind + 1));
-                        return author.substring(ind + 1);
-                    } else {
-                        this.firstMedicSurname = author;
-                        //return TextUtilities.HTMLEncode(author);
-                        return author;
-                    }
-                }
-            }
-
-        }
-        return null;
-    }
-
-    /**
      * Attach existing recognized emails to medics (default) or patients
-     */
+     *//*
     public void attachEmails() {
         attachEmails(fullMedics);
     }
@@ -543,17 +498,17 @@ public class HeaderMedicalItem {
         }
     }
 
-    /**
+    *//**
      * Attach existing recognized emails to authors
-     */
+     *//*
     public void attachMedicEmails() {
         attachEmails(fullMedics);
-    }
+    }*/
 
     /**
      * Attach existing recognized affiliations to medics
      */
-    public void attachAffiliations() {
+    /*public void attachAffiliations() {
         if (fullAffiliations == null) {
             return;
         }
@@ -706,7 +661,7 @@ public class HeaderMedicalItem {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Create the TEI encoding for the dateline block for the current header object.
@@ -828,169 +783,6 @@ public class HeaderMedicalItem {
             tei.append("</listPerson>\n");
 
         }
-        // ===================original version===================
-        /*StringBuffer tei = new StringBuffer();
-        int nbmedics = 0;
-        int nbAffiliations = 0;
-        int nbAddresses = 0;
-
-        boolean withCoordinates = false;
-        if (config != null && config.getGenerateTeiCoordinates() != null) {
-            withCoordinates = config.getGenerateTeiCoordinates().contains("persName");
-        }
-
-        // uncomment below when collaboration will be concretely added to headers
-        *//*
-        if ( (collaboration != null) &&
-            ( (fullMedics == null) || (fullMedics.size() == 0) ) ) {
-            // collaboration plays at the same time the role of medic and affiliation
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("<medic>").append("\n");
-            TextUtilities.appendN(tei, '\t', nbTag+1);
-            tei.append("<orgName type=\"collaboration\"");
-            if (withCoordinates && (labeledTokens != null) ) {
-                List<LayoutToken> collabTokens = labeledTokens.get("<collaboration>");
-                if (withCoordinates && (collabTokens != null) && (!collabTokens.isEmpty())) {
-                   tei.append(" coords=\"" + LayoutTokensUtil.getCoordsString(collabTokens) + "\"");
-               }
-            }
-            tei.append(">").append(TextUtilities.HTMLEncode(collaboration)).append("</orgName>").append("\n");
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("</medic>").append("\n");
-            return tei.toString();
-        }
-        *//*
-
-        List<PersonMedical> medics = fullMedics;
-
-        Lexicon lexicon = Lexicon.getInstance();
-
-        List<Affiliation> affs = fullAffiliations;
-        if (affs == null)
-            nbAffiliations = 0;
-        else
-            nbAffiliations = affs.size();
-
-        if (medics == null)
-            nbmedics = 0;
-        else
-            nbmedics = medics.size();
-        boolean failAffiliation = true;
-
-        //if (getmedics() != null) {
-        if (medics != null) {
-            failAffiliation = false;
-            if (nbmedics > 0) {
-                int autRank = 0;
-                int contactAut = -1;
-                //check if we have a single medic of contact
-                for (PersonMedical medic : medics) {
-                    if (medic.getEmail() != null) {
-                        if (contactAut == -1)
-                            contactAut = autRank;
-                        else {
-                            contactAut = -1;
-                            break;
-                        }
-                    }
-                    autRank++;
-                }
-                autRank = 0;
-                for (PersonMedical medic : medics) {
-                    if (medic.getLastName() != null) {
-                        if (medic.getLastName().length() < 2)
-                            continue;
-                    }
-
-                    if ((medic.getFirstName() == null) && (medic.getMiddleName() == null) &&
-                        (medic.getLastName() == null)) {
-                        continue;
-                    }
-
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("<medic");
-
-                    if (autRank == contactAut) {
-                        tei.append(" role=\"corresp\">\n");
-                    } else
-                        tei.append(">\n");
-
-                    TextUtilities.appendN(tei, '\t', nbTag + 1);
-
-                    String localString = medic.toTEI(withCoordinates);
-                    localString = localString.replace(" xmlns=\"http://www.tei-c.org/ns/1.0\"", "");
-                    tei.append(localString).append("\n");
-                    if (medic.getEmail() != null) {
-                        TextUtilities.appendN(tei, '\t', nbTag + 1);
-                        tei.append("<email>" + TextUtilities.HTMLEncode(medic.getEmail()) + "</email>\n");
-                    }
-
-                    if (medic.getAffiliations() != null) {
-                        for (Affiliation aff : medic.getAffiliations()) {
-                            this.appendAffiliation(tei, nbTag + 1, aff, config, lexicon);
-                        }
-                    }
-
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("</medic>\n");
-                    autRank++;
-                }
-            }
-        }
-
-        // if the affiliations were not outputted with the medics, we add them here
-        // (better than nothing!)
-        if (affs != null) {
-            for (Affiliation aff : affs) {
-                if (aff.getFailAffiliation()) {
-                    // dummy <medic> for TEI conformance
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("<medic>\n");
-                    this.appendAffiliation(tei, nbTag + 1, aff, config, lexicon);
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("</medic>\n");
-                }
-            }
-        } else if (affiliation != null) {
-            StringTokenizer st2 = new StringTokenizer(affiliation, ";");
-            int affiliationRank = 0;
-            while (st2.hasMoreTokens()) {
-                String aff = st2.nextToken();
-                TextUtilities.appendN(tei, '\t', nbTag);
-                tei.append("<medic>\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("<affiliation>\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<orgName>" + TextUtilities.HTMLEncode(aff) + "</orgName>\n");
-                if (nbAddresses == nbAffiliations) {
-                    int addressRank = 0;
-                    if (address != null) {
-                        StringTokenizer st3 = new StringTokenizer(address, ";");
-                        while (st3.hasMoreTokens()) {
-                            String add = st3.nextToken();
-                            if (addressRank == affiliationRank) {
-                                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                                tei.append("<address><addrLine>" + TextUtilities.HTMLEncode(add)
-                                    + "</addrLine></address>\n");
-                                break;
-                            }
-                            addressRank++;
-                        }
-                    }
-                }
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("</affiliation>\n");
-
-                TextUtilities.appendN(tei, '\t', nbTag);
-                tei.append("</medic>\n");
-
-                affiliationRank++;
-            }
-        }
-
-        return tei.toString();
-        */
-
         return tei.toString();
     }
 
@@ -1401,122 +1193,6 @@ public class HeaderMedicalItem {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Correct fields of the first medical item based on the second one and the reference string
-     */
-    public static void correct(HeaderMedicalItem med, HeaderMedicalItem medic) {
-        if (medic.getMedics() != null)
-            med.setMedics(medic.getMedics());
-        if (medic.getPatients() != null)
-            med.setPatients(medic.getPatients());
-        if (medic.getBeginPage() != -1)
-            med.setBeginPage(medic.getBeginPage());
-        if (medic.getEndPage() != -1)
-            med.setEndPage(medic.getEndPage());
-        if (medic.getPageRange() != null)
-            med.setPageRange(medic.getPageRange());
-        if (medic.getDocumentDate() != null)
-            med.setDocumentDate(medic.getDocumentDate());
-        if (medic.getDocumentTime() != null)
-            med.setDocumentDate(medic.getDocumentDate());
-        if (medic.getTitle() != null)
-            med.setTitle(medic.getTitle());
-        if (medic.getDocNum() != null)
-            med.setDocNum(medic.getDocNum());
-
-        // medics present in fullMedics list should be in the existing resources
-        // at least the corresponding medic
-        if (!CollectionUtils.isEmpty(medic.getFullMedics())) {
-            if (CollectionUtils.isEmpty(med.getFullMedics()))
-                med.setFullMedics(medic.getFullMedics());
-            else if (medic.getFullMedics().size() == 1) {
-                // we have the corresponding medic
-                // check if the medic exists in the obtained list
-                PersonMedical auto = (PersonMedical) medic.getFullMedics().get(0);
-                List<PersonMedical> medics = med.getFullMedics();
-                if (medics != null) {
-                    for (PersonMedical aut : medics) {
-                        if (StringUtils.isNotBlank(aut.getLastName()) && StringUtils.isNotBlank(auto.getLastName())) {
-                            if (aut.getLastName().toLowerCase().equals(auto.getLastName().toLowerCase())) {
-                                if (StringUtils.isBlank(aut.getFirstName()) ||
-                                    (auto.getFirstName() != null &&
-                                        aut.getFirstName().length() <= auto.getFirstName().length() &&
-                                        auto.getFirstName().toLowerCase().startsWith(aut.getFirstName().toLowerCase()))) {
-                                    aut.setFirstName(auto.getFirstName());
-                                    aut.setCorresp(true);
-                                    if (StringUtils.isNotBlank(auto.getEmail()))
-                                        aut.setEmail(auto.getEmail());
-                                    // should we also check the country ? affiliation?
-                                    if (StringUtils.isNotBlank(auto.getMiddleName()) && (StringUtils.isBlank(aut.getMiddleName())))
-                                        aut.setMiddleName(auto.getMiddleName());
-                                }
-                            }
-                        }
-                    }
-                }
-            } else if (medic.getFullMedics().size() > 1) {
-                // we have the complete list of medics so we can take them from the second
-                // biblio item and merge some possible extra from the first when a match is
-                // reliable
-                for (PersonMedical per : medic.getFullMedics()) {
-                    // try to find the medic in the first item (we know it's not empty)
-                    for (PersonMedical per2 : med.getFullMedics()) {
-
-
-                        if (StringUtils.isNotBlank(per2.getLastName())) {
-                            String aut2_lastname = per2.getLastName().toLowerCase();
-
-                            if (StringUtils.isNotBlank(per.getLastName())) {
-                                String aut_lastname = per.getLastName().toLowerCase();
-
-                                if (aut_lastname.equals(aut2_lastname)) {
-                                    // check also first name if present - at least for the initial
-                                    if (StringUtils.isBlank(per2.getFirstName()) ||
-                                        (StringUtils.isNotBlank(per2.getFirstName()) && StringUtils.isNotBlank(per.getFirstName()))) {
-                                        // we have no first name or a match (full first name)
-
-                                        if (StringUtils.isBlank(per2.getFirstName())
-                                            ||
-                                            per.getFirstName().equals(per2.getFirstName())
-                                            ||
-                                            (per.getFirstName().length() == 1 &&
-                                                per.getFirstName().equals(per2.getFirstName().substring(0, 1)))
-                                        ) {
-                                            // we have a match (full or initial)
-                                            if (StringUtils.isNotBlank(per2.getFirstName()) &&
-                                                per2.getFirstName().length() > per.getFirstName().length())
-                                                per.setFirstName(per2.getFirstName());
-                                            if (StringUtils.isBlank(per.getMiddleName()))
-                                                per.setMiddleName(per2.getMiddleName());
-                                            if (StringUtils.isBlank(per.getTitle()))
-                                                per.setTitle(per2.getTitle());
-                                            if (StringUtils.isBlank(per.getSuffix()))
-                                                per.setSuffix(per2.getSuffix());
-                                            if (StringUtils.isBlank(per.getEmail()))
-                                                per.setEmail(per2.getEmail());
-                                            if (!CollectionUtils.isEmpty(per2.getAffiliations()))
-                                                per.setAffiliations(per2.getAffiliations());
-                                            if (!CollectionUtils.isEmpty(per2.getAffiliationBlocks()))
-                                                per.setAffiliationBlocks(per2.getAffiliationBlocks());
-                                            if (!CollectionUtils.isEmpty(per2.getAffiliationMarkers()))
-                                                per.setAffiliationMarkers(per2.getAffiliationMarkers());
-                                            if (!CollectionUtils.isEmpty(per2.getMarkers()))
-                                                per.setMarkers(per2.getMarkers());
-                                            if (!CollectionUtils.isEmpty(per2.getLayoutTokens()))
-                                                per.setLayoutTokens(per2.getLayoutTokens());
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                med.setFullMedics(medic.getFullMedics());
             }
         }
     }

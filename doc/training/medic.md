@@ -22,7 +22,7 @@ For the medic model, we use the following TEI elements:
 * `<phone>` for the phone number
 * `<fax>` for the fax number
 * `<ptr type="web">` for the web URL 
-* `<note>` for the notes concerning the medics
+* `<note type="short">` for the notes concerning the medics
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
 > It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-trainer/resources/dataset/medic`) to see some examples of how these elements should be used.

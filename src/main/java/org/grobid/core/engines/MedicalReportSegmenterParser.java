@@ -643,6 +643,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
     public int createTrainingMedicalSegmentationBatch(String inputDirectory,
                                                       String outputDirectory,
+                                                      boolean blank,
                                                       int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
@@ -675,10 +676,14 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    createTrainingMedicalSegmentation(file.getAbsolutePath(), outputDirectory, n);
-
-                    // uncomment this command to create files containing features and blank training without any label
-                    // createBlankTrainingFromPDF(file.getAbsolutePath(), outputDirectory, n);
+                    if (blank) {
+                        // create blank training data for the segmentation model 
+                        createBlankTrainingFromPDF(file.getAbsolutePath(), outputDirectory, n);
+                    } else {
+                        // create pre-annotated training data based on existing medical segmentation model
+                        createTrainingMedicalSegmentation(file.getAbsolutePath(), outputDirectory, n);
+                    }
+                    
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -794,7 +799,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
             // we write the full text untagged (but featurized)
             String outPathFulltext = outputFile + File.separator +
-                PDFFileName.replace(".pdf", ".training.medical.blank");
+                PDFFileName.replace(".pdf", ".training.medical");
             Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outPathFulltext), false), "UTF-8");
             writer.write(fulltext + "\n");
             writer.close();

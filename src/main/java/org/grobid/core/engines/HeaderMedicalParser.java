@@ -82,14 +82,14 @@ public class HeaderMedicalParser extends AbstractParser {
     /**
      * Processing with application of the medical-report segmentation model
      */
-    public Pair<String, Document> processing(File input, HeaderMedicalItem resHeader,
+    public Pair<String, Document> processing(File input, HeaderMedicalItem resHeader, LeftNoteMedicalItem resLeftNote,
                                              GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, -1, -1, true, true, true);
             Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
-            String tei = processingHeaderSection(config, doc, resHeader, true);
+            String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -99,6 +99,7 @@ public class HeaderMedicalParser extends AbstractParser {
     }
 
     public Pair<String, Document> processing(File input, String md5Str, HeaderMedicalItem resHeader,
+                                             LeftNoteMedicalItem resLeftNote,
                                              GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
@@ -106,7 +107,7 @@ public class HeaderMedicalParser extends AbstractParser {
             documentSource.setMD5(md5Str);
             Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
-            String tei = processingHeaderSection(config, doc, resHeader, true);
+            String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -114,273 +115,6 @@ public class HeaderMedicalParser extends AbstractParser {
             }
         }
     }
-
-    /**
-     * Header processing after application of the medical-report segmentation model
-     */
-    public String processingHeaderSection(GrobidAnalysisConfig config, Document doc, HeaderMedicalItem resHeader, boolean serialize) {
-        try {
-            // retreive only the header (front) part
-            SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
-            List<LayoutToken> tokenizations = doc.getTokenizations();
-
-            if (documentHeaderParts != null) {
-                Pair<String, List<LayoutToken>> featuredHeader = getSectionHeaderFeatured(doc, documentHeaderParts);
-                String header = featuredHeader.getLeft();
-                List<LayoutToken> headerTokenization = featuredHeader.getRight();
-                String res = null;
-                if (StringUtils.isNotBlank(header)) {
-                    res = label(header);
-                    resHeader = resultExtraction(res, headerTokenization, resHeader);
-                }
-
-                // language identification
-                StringBuilder contentSample = new StringBuilder();
-                if (resHeader.getDocumentType() != null) {
-                    contentSample.append(resHeader.getDocumentType());
-                }
-
-                if (contentSample.length() < 200) {
-                    // we can exploit more textual content to ensure that the language identification will be
-                    // correct
-                    SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
-                    if (documentBodyParts != null) {
-                        String stringSample = Document.getTokenizationParts(documentBodyParts, tokenizations)
-                            .stream().map(LayoutToken::toString)
-                            .collect(Collectors.joining(" "));
-
-                        contentSample.append(stringSample);
-                    }
-                }
-                Language langu = languageUtilities.runLanguageId(contentSample.toString());
-                if (langu != null) {
-                    String lang = langu.getLang();
-                    doc.setLanguage(lang);
-                    resHeader.setLanguage(lang);
-                } else {
-                    resHeader.setLanguage("fr"); // by default it's French as medical reports are in French
-                }
-
-                if (resHeader != null) {
-
-                    // document type
-                    resHeader.setDocumentType(resHeader.getDocumentType());
-
-                    // document title
-                    resHeader.setTitle(resHeader.getTitle());
-
-                    // medics
-                    resHeader.setOriginalMedics(resHeader.getMedics());
-
-                    boolean fragmentedMedics = false;
-                    boolean hasMarker = false;
-                    List<Integer> medicsBlocks = new ArrayList<Integer>();
-                    List<Integer> datelinesBlocks = new ArrayList<Integer>();
-                    List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                    List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
-                    if (isNotEmpty(medicLayoutTokens)) {
-                        // split the list of layout tokens when token "\t" is met
-                        List<LayoutToken> currentSegment = new ArrayList<>();
-                        for (LayoutToken theToken : medicLayoutTokens) {
-                            if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                if (currentSegment.size() > 0)
-                                    medicSegments.add(currentSegment);
-                                currentSegment = new ArrayList<>();
-                            } else
-                                currentSegment.add(theToken);
-                        }
-                        // last segment
-                        if (currentSegment.size() > 0)
-                            medicSegments.add(currentSegment);
-
-                        if (medicSegments.size() > 1) {
-                            fragmentedMedics = true;
-                        }
-                        // the model of Medic names not implemented yet
-                        /*for (int k = 0; k < medicSegments.size(); k++) {
-                            if (medicSegments.get(k).size() == 0)
-                                continue;
-                            List<PersonMedical> localMedics = parsers.getMedicParser()
-                                .processingHeaderWithLayoutTokens(medicSegments.get(k), doc.getPDFAnnotations());
-                            if (localMedics != null) {
-                                for (PersonMedical pers : localMedics) {
-                                    resHeader.addFullMedic(pers);
-                                    if (pers.getMarkers() != null) {
-                                        hasMarker = true;
-                                    }
-                                    medicsBlocks.add(k);
-                                }
-                            }
-                        }*/
-                    }
-
-                    // remove invalid medics (no last name, noise, etc.)
-                    resHeader.setFullMedics(PersonMedical.sanityCheck(resHeader.getFullMedics()));
-                    // affiliation
-                    resHeader.setFullAffiliations(
-                        parsers.getAffiliationAddressParser().processReflow(res, tokenizations));
-                    resHeader.attachEmails();
-                    boolean attached = false;
-                    if (fragmentedMedics && !hasMarker) {
-                        if (resHeader.getFullAffiliations() != null) {
-                            if (medicSegments != null) {
-                                if (resHeader.getFullAffiliations().size() == medicSegments.size()) {
-                                    int k = 0;
-                                    List<PersonMedical> persons = resHeader.getFullMedics();
-                                    for (PersonMedical pers : persons) {
-                                        if (k < medicsBlocks.size()) {
-                                            int indd = medicsBlocks.get(k);
-                                            if (indd < resHeader.getFullAffiliations().size()) {
-                                                pers.addAffiliation(resHeader.getFullAffiliations().get(indd));
-                                            }
-                                        }
-                                        k++;
-                                    }
-                                    attached = true;
-                                    resHeader.setFullAffiliations(null);
-                                    resHeader.setAffiliation(null);
-                                }
-                            }
-                        }
-                    }
-                    if (!attached) {
-                        resHeader.attachAffiliations();
-                    }
-
-                    // remove duplicated medics
-                    resHeader.setFullMedics(PersonMedical.deduplicate(resHeader.getFullMedics()));
-
-                    // patients
-                    if (resHeader.getPatients() != null) {
-                        // TBD: consider segments also for patiens, like for medics above
-                        //resHeader.setFullPatients(parsers.getMedicParser().processingHeader(resHeader.getPatients()));
-
-                        resHeader.setOriginalPatients(resHeader.getPatients());
-                        resHeader.getPatientsTokens();
-
-                        boolean fragmentedPatients = false;
-                        boolean hasMarkerPatient = false;
-                        List<Integer> patientsBlocks = new ArrayList<Integer>();
-                        List<List<LayoutToken>> patientSegments = new ArrayList<>();
-                        if (resHeader.getPatientsTokens() != null) {
-                            // split the list of layout tokens when token "\t" is met
-                            List<LayoutToken> currentSegment = new ArrayList<>();
-                            for (LayoutToken theToken : resHeader.getPatientsTokens()) {
-                                if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                    if (currentSegment.size() > 0)
-                                        patientSegments.add(currentSegment);
-                                    currentSegment = new ArrayList<>();
-                                } else
-                                    currentSegment.add(theToken);
-                            }
-                            // last segment
-                            if (currentSegment.size() > 0)
-                                patientSegments.add(currentSegment);
-
-                            if (patientSegments.size() > 1) {
-                                fragmentedPatients = true;
-                            }
-                            // the model of Patient names not implemented yet
-                        /*for (int k = 0; k < patientSegments.size(); k++) {
-                            if (patientSegments.get(k).size() == 0)
-                                continue;
-                            List<PersonMedical> localPatients = parsers.getPatientParser()
-                                .processingHeaderWithLayoutTokens(patientSegments.get(k), doc.getPDFAnnotations());
-                            if (localPatients != null) {
-                                for (PersonMedical pers : localPatients) {
-                                    resHeader.addFullPatient(pers);
-                                    patientsBlocks.add(k);
-                                }
-                            }
-                        }*/
-                        }
-
-                        // remove invalid patients (no last name, noise, etc.)
-                        resHeader.setFullPatients(PersonMedical.sanityCheck(resHeader.getFullPatients()));
-
-                        // remove duplicated patients
-                        resHeader.setFullPatients(PersonMedical.deduplicate(resHeader.getFullPatients()));
-
-                        // datelines processing
-                        if (resHeader.getDateline() != null) {
-                            resHeader.setOriginalDatelines(resHeader.getDateline());
-                            List<LayoutToken> datelineLayoutTokens = resHeader.getDatelinesTokens();
-                            List<List<LayoutToken>> datelineSegments = new ArrayList<>();
-                            if (isNotEmpty(datelineLayoutTokens)) {
-                                List<LayoutToken> currentSegment = new ArrayList<>();
-                                for(LayoutToken theToken : datelineLayoutTokens) {
-                                    // split the list of layout tokens when token "\n" is met
-                                    if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                        if (currentSegment.size() > 0)
-                                            datelineSegments.add(currentSegment);
-                                        currentSegment = new ArrayList<>();
-                                    } else
-                                        currentSegment.add(theToken);
-                                }
-                                // last segment
-                                if (currentSegment.size() > 0)
-                                    datelineSegments.add(currentSegment);
-
-                                for (int k = 0; k < datelineSegments.size(); k++) {
-                                    if (datelineSegments.get(k).size() == 0)
-                                        continue;
-                                    List<Dateline> localDatelines = parsers.getDatelineParser()
-                                        .processingWithLayoutTokens(datelineSegments.get(k));
-                                    for (Dateline dateline : localDatelines){
-                                        // normalization of dates
-                                        if (dateline.getDate() != null) {
-                                            Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
-                                            if (normalisedDate.isPresent()) {
-                                                dateline.setDate(toISOString(normalisedDate.get()));
-                                            }
-                                        }
-
-                                        if(dateline.getPlaceName() != null){
-                                            if(resHeader.getLocation() == null) {
-                                                resHeader.setLocation(dateline.getPlaceName());
-                                            }
-                                        }
-                                        if(dateline.getDate() != null){
-                                            if(resHeader.getDate() == null) {
-                                                resHeader.setDate(dateline.getDate());
-                                            }
-                                        }
-
-                                        // add new dateline to the datelines item
-                                        resHeader.addDateline(dateline);
-                                    }
-                                }
-                            }
-                            resHeader.setFullDatelines(parsers.getDatelineParser().process(resHeader.getDateline()));
-                        }
-                    }
-                    // normalization of dates
-                    if (resHeader.getDocumentDate() == null) {
-                        Optional<Date> normalisedPublicationDate = getNormalizedDate(resHeader.getDocumentDate());
-                        if (normalisedPublicationDate.isPresent()) {
-                            resHeader.setNormalizedDocumentDate(normalisedPublicationDate.get());
-                        }
-                    } else {
-                        resHeader.setDocumentDate(toISOString(resHeader.getNormalizedDocumentDate()));
-                    }
-                }
-
-                // we don't need to serialize if we process the full text (it would be done 2 times)
-                if (serialize) {
-                    TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeader(resHeader, null, null, config);
-                    tei.append("\t</text>\n");
-                    tei.append("</TEI>\n");
-                    return tei.toString();
-                } else
-                    return null;
-            }
-        } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
-        }
-        return null;
-    }
-
 
     /**
      * Header and left-note processing after application of the medical-report segmentation model
@@ -439,137 +173,78 @@ public class HeaderMedicalParser extends AbstractParser {
                     // document title
                     resHeader.setTitle(resHeader.getTitle());
 
-                    // medics
-                    resHeader.setOriginalMedics(resHeader.getMedics());
+                    // medics processing
+                    if (resHeader.getMedics() != null) {
+                        resHeader.setOriginalMedics(resHeader.getMedics());
 
-                    boolean fragmentedMedics = false;
-                    boolean hasMarker = false;
-                    List<Integer> medicsBlocks = new ArrayList<Integer>();
-                    List<Integer> datelinesBlocks = new ArrayList<Integer>();
-                    List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                    List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
-                    if (isNotEmpty(medicLayoutTokens)) {
-                        // split the list of layout tokens when token "\t" is met
-                        List<LayoutToken> currentSegment = new ArrayList<>();
-                        for (LayoutToken theToken : medicLayoutTokens) {
-                            if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                if (currentSegment.size() > 0)
-                                    medicSegments.add(currentSegment);
-                                currentSegment = new ArrayList<>();
-                            } else
-                                currentSegment.add(theToken);
-                        }
-                        // last segment
-                        if (currentSegment.size() > 0)
-                            medicSegments.add(currentSegment);
-
-                        if (medicSegments.size() > 1) {
-                            fragmentedMedics = true;
-                        }
-                        // the model of Medic names not implemented yet
-                        /*for (int k = 0; k < medicSegments.size(); k++) {
-                            if (medicSegments.get(k).size() == 0)
-                                continue;
-                            List<PersonMedical> localMedics = parsers.getMedicParser()
-                                .processingHeaderWithLayoutTokens(medicSegments.get(k), doc.getPDFAnnotations());
-                            if (localMedics != null) {
-                                for (PersonMedical pers : localMedics) {
-                                    resHeader.addFullMedic(pers);
-                                    if (pers.getMarkers() != null) {
-                                        hasMarker = true;
-                                    }
-                                    medicsBlocks.add(k);
-                                }
-                            }
-                        }*/
-                    }
-
-                    // remove invalid medics (no last name, noise, etc.)
-                    resHeader.setFullMedics(PersonMedical.sanityCheck(resHeader.getFullMedics()));
-                    // affiliation
-                    resHeader.setFullAffiliations(
-                        parsers.getAffiliationAddressParser().processReflow(res, tokenizations));
-                    resHeader.attachEmails();
-                    boolean attached = false;
-                    if (fragmentedMedics && !hasMarker) {
-                        if (resHeader.getFullAffiliations() != null) {
-                            if (medicSegments != null) {
-                                if (resHeader.getFullAffiliations().size() == medicSegments.size()) {
-                                    int k = 0;
-                                    List<PersonMedical> persons = resHeader.getFullMedics();
-                                    for (PersonMedical pers : persons) {
-                                        if (k < medicsBlocks.size()) {
-                                            int indd = medicsBlocks.get(k);
-                                            if (indd < resHeader.getFullAffiliations().size()) {
-                                                pers.addAffiliation(resHeader.getFullAffiliations().get(indd));
-                                            }
-                                        }
-                                        k++;
-                                    }
-                                    attached = true;
-                                    resHeader.setFullAffiliations(null);
-                                    resHeader.setAffiliation(null);
-                                }
-                            }
-                        }
-                    }
-                    if (!attached) {
-                        resHeader.attachAffiliations();
-                    }
-
-                    // remove duplicated medics
-                    resHeader.setFullMedics(PersonMedical.deduplicate(resHeader.getFullMedics()));
-
-                    // patients
-                    if (resHeader.getPatients() != null) {
-                        // TBD: consider segments also for patiens, like for medics above
-                        //resHeader.setFullPatients(parsers.getMedicParser().processingHeader(resHeader.getPatients()));
-
-                        resHeader.setOriginalPatients(resHeader.getPatients());
-                        resHeader.getPatientsTokens();
-
-                        boolean fragmentedPatients = false;
-                        boolean hasMarkerPatient = false;
-                        List<Integer> patientsBlocks = new ArrayList<Integer>();
-                        List<List<LayoutToken>> patientSegments = new ArrayList<>();
-                        if (resHeader.getPatientsTokens() != null) {
-                            // split the list of layout tokens when token "\t" is met
+                        List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
+                        List<List<LayoutToken>> medicSegments = new ArrayList<>();
+                        if (isNotEmpty(medicLayoutTokens)) {
                             List<LayoutToken> currentSegment = new ArrayList<>();
-                            for (LayoutToken theToken : resHeader.getPatientsTokens()) {
+                            for(LayoutToken theToken : medicLayoutTokens) {
+                                // split the list of layout tokens when token "\t" is met
                                 if (theToken.getText() != null && theToken.getText().equals("\t")) {
                                     if (currentSegment.size() > 0)
-                                        patientSegments.add(currentSegment);
+                                        medicSegments.add(currentSegment);
                                     currentSegment = new ArrayList<>();
                                 } else
                                     currentSegment.add(theToken);
                             }
                             // last segment
                             if (currentSegment.size() > 0)
-                                patientSegments.add(currentSegment);
+                                medicSegments.add(currentSegment);
 
-                            if (patientSegments.size() > 1) {
-                                fragmentedPatients = true;
-                            }
-                            // the model of Patient names not implemented yet
-                        /*for (int k = 0; k < patientSegments.size(); k++) {
-                            if (patientSegments.get(k).size() == 0)
-                                continue;
-                            List<PersonMedical> localPatients = parsers.getPatientParser()
-                                .processingHeaderWithLayoutTokens(patientSegments.get(k), doc.getPDFAnnotations());
-                            if (localPatients != null) {
-                                for (PersonMedical pers : localPatients) {
-                                    resHeader.addFullPatient(pers);
-                                    patientsBlocks.add(k);
+                            for (int k = 0; k < medicSegments.size(); k++) {
+                                if (medicSegments.get(k).size() == 0)
+                                    continue;
+                                List<Medic> localMedics = parsers.getMedicParser()
+                                    .processingWithLayoutTokens(medicSegments.get(k));
+
+                                for (Medic medic : localMedics){
+                                    // TBD : remove duplicate names and information related to it
+                                    //see how it works wit PersonMedical.deduplicate()
+                                    // add new medic to the medics item
+                                    resHeader.addMedic(medic);
                                 }
                             }
-                        }*/
                         }
+                    }
 
-                        // remove invalid patients (no last name, noise, etc.)
-                        resHeader.setFullPatients(PersonMedical.sanityCheck(resHeader.getFullPatients()));
+                    // patients
+                    if (resHeader.getPatients() != null) {
+                        resHeader.setOriginalMedics(resHeader.getMedics());
 
-                        // remove duplicated patients
-                        resHeader.setFullPatients(PersonMedical.deduplicate(resHeader.getFullPatients()));
+                        List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
+                        List<List<LayoutToken>> medicSegments = new ArrayList<>();
+                        if (isNotEmpty(medicLayoutTokens)) {
+                            List<LayoutToken> currentSegment = new ArrayList<>();
+                            for(LayoutToken theToken : medicLayoutTokens) {
+                                // split the list of layout tokens when token "\t" is met
+                                if (theToken.getText() != null && theToken.getText().equals("\t")) {
+                                    if (currentSegment.size() > 0)
+                                        medicSegments.add(currentSegment);
+                                    currentSegment = new ArrayList<>();
+                                } else
+                                    currentSegment.add(theToken);
+                            }
+                            // last segment
+                            if (currentSegment.size() > 0)
+                                medicSegments.add(currentSegment);
+
+                            for (int k = 0; k < medicSegments.size(); k++) {
+                                if (medicSegments.get(k).size() == 0)
+                                    continue;
+                                List<Medic> localMedics = parsers.getMedicParser()
+                                    .processingWithLayoutTokens(medicSegments.get(k));
+
+                                for (Medic medic : localMedics){
+                                    // TBD : remove duplicate names and information related to it
+                                    //see how it works wit PersonMedical.deduplicate()
+                                    // add new medic to the medics item
+                                    resHeader.addMedic(medic);
+                                }
+                            }
+                        }
 
                         // datelines processing
                         if (resHeader.getDateline() != null) {
@@ -579,7 +254,7 @@ public class HeaderMedicalParser extends AbstractParser {
                             if (isNotEmpty(datelineLayoutTokens)) {
                                 List<LayoutToken> currentSegment = new ArrayList<>();
                                 for(LayoutToken theToken : datelineLayoutTokens) {
-                                    // split the list of layout tokens when token "\n" is met
+                                    // split the list of layout tokens when token "\t" is met
                                     if (theToken.getText() != null && theToken.getText().equals("\t")) {
                                         if (currentSegment.size() > 0)
                                             datelineSegments.add(currentSegment);
@@ -1511,6 +1186,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
     public int createTrainingMedicalHeaderBatch(String inputDirectory,
                                                 String outputDirectory,
+                                                boolean blank,
                                                 int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
@@ -1543,10 +1219,13 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    createTrainingFromPDF(file, outputDirectory, n);
-
-                    // uncomment this command to create files containing features and blank training without any label
-                    // createBlankTrainingFromPDF(file, outputDirectory, n);
+                    if (blank) {
+                        // create blank training data for the header model
+                        createBlankTrainingFromPDF(file, outputDirectory, n);
+                    } else {
+                        // create pre-annotated training data based on existing header model
+                        createTrainingFromPDF(file, outputDirectory, n);
+                    }
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -1708,8 +1387,7 @@ public class HeaderMedicalParser extends AbstractParser {
                     writer.write(header + "\n");
                     writer.close();
 
-                    // write the training TEI file for the header which reflects the extract layout of the text as
-                    // extracted from the pdf
+                    // write the unlabeled training TEI file for the header
                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                     writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                         + pdfFileName.replace(".pdf", "")
@@ -1780,7 +1458,7 @@ public class HeaderMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    processingHeader(file, outputDirectory, n);
+                    processingHeaderLeftNote(file, outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -1802,7 +1480,7 @@ public class HeaderMedicalParser extends AbstractParser {
      * @param outputFile path to fulltext
      * @param id         id
      */
-    public void processingHeader(File inputFile,
+    public void processingHeaderLeftNote(File inputFile,
                                      String outputFile,
                                      int id) {
         if (tmpPath == null) {
@@ -1817,6 +1495,7 @@ public class HeaderMedicalParser extends AbstractParser {
         Document doc = null;
         GrobidAnalysisConfig config = null;
         HeaderMedicalItem resHeader = null;
+        LeftNoteMedicalItem resLeftNote = null;
 
         try {
             config = GrobidAnalysisConfig.defaultInstance();
@@ -1832,14 +1511,16 @@ public class HeaderMedicalParser extends AbstractParser {
             File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".header.medical.tei.xml"));
             Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
 
-            Pair<String, Document> resultTEI = processing(inputFile, resHeader, config);
+            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
+
+            String resultTEI = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, true);
 
             // TBD: language identifier here on content text sample
             Language lang = new Language("fr");
 
             StringBuilder tei = new StringBuilder();
-            tei.append(resultTEI.getLeft());
-            writer.write(tei.toString());
+            tei.append(resultTEI);
             writer.close();
 
         } catch (Exception e) {
