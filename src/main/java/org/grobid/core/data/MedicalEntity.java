@@ -180,13 +180,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         if (stringType.toUpperCase().contains("OTHER")) {
             this.stringType = "OTHER";
         } else if (stringType.toUpperCase().contains("PERSON")) {
-            this.stringType = "PERSON";
+            this.stringType = "LIVB";
         } else if (stringType.toUpperCase().contains("LOCATION")) {
-            this.stringType = "LOCATION";
+            this.stringType = "GEOG";
         } else if (stringType.toUpperCase().contains("ORGANISATION")) {
-            this.stringType = "ORGANISATION";
+            this.stringType = "GEOG";
         } else if (stringType.toUpperCase().contains("ANIMAL")) {
-            this.stringType = "ANIMAL";
+            this.stringType = "LIVB";
         } else if (stringType.toUpperCase().contains("MEASURE")) {
             this.stringType = "MEASURE";
         } else if (stringType.toUpperCase().contains("LEGAL")) {
@@ -194,13 +194,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         } else if (stringType.toUpperCase().contains("IDENTIFIER")) {
             this.stringType = "IDENTIFIER";
         } else if (stringType.toUpperCase().contains("INSTALLATION")) {
-            this.stringType = "INSTALLATION";
+            this.stringType = "GEOG";
         } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
-            this.stringType = "SUBSTANCE";
+            this.stringType = "CHEM";
         } else if (stringType.toUpperCase().contains("DRUG")) {
-            this.stringType = "DRUG";
+            this.stringType = "CHEM";
         } else if (stringType.toUpperCase().contains("PLANT")) {
-            this.stringType = "PLANT";
+            this.stringType = "LIVB";
         } else if (stringType.toUpperCase().contains("PERIOD")) {
             this.stringType = "PERIOD";
         } else if (stringType.toUpperCase().contains("TITLE")) {
@@ -208,21 +208,21 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         } else if (stringType.toUpperCase().contains("WEBSITE")) {
             this.stringType = "WEBSITE";
         } else if (stringType.toUpperCase().contains("ANATOMY")) {
-            this.stringType = "ANATOMY";
+            this.stringType = "ANAT";
         } else if (stringType.toUpperCase().contains("DEVICE")) {
-            this.stringType = "DEVICE";
+            this.stringType = "DEVI";
         } else if (stringType.toUpperCase().contains("DISORDER")) {
-            this.stringType = "DISORDER";
+            this.stringType = "DISO";
         } else if (stringType.toUpperCase().contains("LIVING")) {
-            this.stringType = "LIVING";
+            this.stringType = "LIVB";
         } else if (stringType.toUpperCase().contains("OBJECT")) {
-            this.stringType = "OBJECT";
+            this.stringType = "OBJC";
         } else if (stringType.toUpperCase().contains("PHENOMENA")) {
-            this.stringType = "PHENOMENA";
+            this.stringType = "PHEN";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
-            this.stringType = "PHYSIOLOGY";
+            this.stringType = "PHYS";
         } else if (stringType.toUpperCase().contains("PROCEDURE")) {
-            this.stringType = "PROCEDURE";
+            this.stringType = "PROC";
         }
     }
 

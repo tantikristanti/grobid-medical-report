@@ -39,34 +39,24 @@ public class EngineMedical extends Engine {
     }
 
     /**
-     * Parse a sequence of medics from a header, i.e. containing possibly
-     * reference markers.
-     *
-     * @param medicSequence - the string corresponding to a raw sequence of names
-     * @return the list of medics
-     */
-    public List<PersonMedical> processMedicsHeader(String medicSequence) throws Exception {
-        List<PersonMedical> result = parsers.getMedicParser().processingHeader(medicSequence);
-        return result;
-    }
-
-    /**
      * Apply a parsing model for the header of a PDF file based on CRF, using
      * first three pages of the PDF
      *
-     * @param inputFile   the path of the PDF file to be processed
-     * @param consolidate the consolidation option allows GROBID to exploit Crossref web services for improving header
-     *                    information. 0 (no consolidation, default value), 1 (consolidate the citation and inject extra
-     *                    metadata) or 2 (consolidate the citation and inject DOI only)
-     * @param result      bib result
-     * @return the TEI representation of the extracted bibliographical
+     * @param inputFile         the path of the PDF file to be processed
+     * @param consolidate       the consolidation option allows GROBID to exploit Crossref web services for improving header
+     *                          information. 0 (no consolidation, default value), 1 (consolidate the citation and inject extra
+     *                          metadata) or 2 (consolidate the citation and inject DOI only)
+     * @param resultHeader      result from the header parser
+     * @param resultLeftNote    result from the left-note parser
+     * @return the TEI representation of the extracted header and left-note items
      * information
      */
-    public String processHeaderMedicalReport(
+    public String processHeaderLeftNoteMedicalReport(
         String inputFile,
         int consolidate,
         boolean includeRawAffiliations,
-        HeaderMedicalItem result
+        HeaderMedicalItem resultHeader,
+        LeftNoteMedicalItem resultLeftNote
     ) {
         GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
             .startPage(0)
@@ -74,7 +64,7 @@ public class EngineMedical extends Engine {
             .consolidateHeader(consolidate)
             .includeRawAffiliations(includeRawAffiliations)
             .build();
-        return processHeaderMedicalReport(inputFile, config, result);
+        return processHeaderLeftNoteMedicalReport(inputFile, config, resultHeader, resultLeftNote);
     }
 
     /**
@@ -86,11 +76,11 @@ public class EngineMedical extends Engine {
      * @return the TEI representation of the extracted bibliographical
      * information
      */
-    public String processHeaderMedicalReport(String inputFile, int consolidate, HeaderMedicalItem resultHeader) {
-        return processHeaderMedicalReport(inputFile, GrobidAnalysisConfig.defaultInstance(), resultHeader);
+    public String processHeaderLeftNoteMedicalReport(String inputFile, int consolidate, HeaderMedicalItem resultHeader, LeftNoteMedicalItem resultLeftNote) {
+        return processHeaderLeftNoteMedicalReport(inputFile, GrobidAnalysisConfig.defaultInstance(), resultHeader, resultLeftNote);
     }
 
-    public String processHeaderMedicalReport(String inputFile, GrobidAnalysisConfig config, HeaderMedicalItem resultHeader) {
+    public String processHeaderLeftNoteMedicalReport(String inputFile, GrobidAnalysisConfig config, HeaderMedicalItem resultHeader , LeftNoteMedicalItem resultLeftNote) {
         // normally the medical items must not be null, but if it is the
         // case, we still continue
         // with a new instance, so that the resulting TEI string is still
@@ -98,7 +88,10 @@ public class EngineMedical extends Engine {
         if (resultHeader == null) {
             resultHeader = new HeaderMedicalItem();
         }
-        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), resultHeader, config);
+        if (resultLeftNote == null) {
+            resultLeftNote = new LeftNoteMedicalItem();
+        }
+        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), resultHeader, resultLeftNote, config);
         return resultTEI.getLeft();
     }
 

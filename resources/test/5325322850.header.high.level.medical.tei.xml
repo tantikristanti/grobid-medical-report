@@ -5,8 +5,10 @@
 
 	<lb/>
 	<person>
-	<patient>Madame TEST TEST<lb/> test test<lb/> 93160 NOISY LE GRAND<lb/> 54-56, rue Pascal<lb/> 75013 PARIS<lb/></patient>
+	<patient>Madame TEST TEST<lb/> test test<lb/> 93160 NOISY LE GRAND<lb/></patient>
 	</person>
+
+	<address>54-56, rue Pascal<lb/> 75013 PARIS<lb/></address>
 
 	Standard :
 	<phone>01 44 08 30 00<lb/></phone>
@@ -17,7 +19,7 @@
 	<dateline>du 26/09/2018<lb/></dateline>
 
 	Objet :<lb/>
-	<dateline>, le<lb/> Paris<lb/> 26/09/2018 </dateline>
+	<dateline>, le<lb/> Paris<lb/> 26/09/2018</dateline>
 
 	</teiHeader>
 
@@ -25,5 +27,3 @@
 		
 	</text>
 </tei>
-
-

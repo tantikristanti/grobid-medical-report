@@ -17,10 +17,11 @@ public class EngineMedicalParsers extends EngineParsers {
     private FullMedicalTextParser fullTextParser = null;
     private FrenchMedicalNERParser frenchMedicalNERParser = null;
     private FrMedicalNERParser frMedicalNERParser = null;
+    private AffiliationAddressParser affiliationAddressParser = null;
+    private DatelineParser datelineParser = null;
+    private DateParser dateParser = null;
     private MedicParser medicParser = null;
     private PatientParser patientParser = null;
-    private AffiliationAddressParser affiliationAddressParser = null;
-    private DateParser dateParser = null;
     private NEREnParser nerParser = null;
     private NERFrParser nerFrParser = null;
 
@@ -112,6 +113,39 @@ public class EngineMedicalParsers extends EngineParsers {
         return nerFrParser;
     }
 
+    public AffiliationAddressParser getAffiliationAddressParser() {
+        if (affiliationAddressParser == null) {
+            synchronized (this) {
+                if (affiliationAddressParser == null) {
+                    affiliationAddressParser = new AffiliationAddressParser();
+                }
+            }
+        }
+        return affiliationAddressParser;
+    }
+
+    public DatelineParser getDatelineParser() {
+        if (datelineParser == null) {
+            synchronized (this) {
+                if (datelineParser == null) {
+                    datelineParser = new DatelineParser();
+                }
+            }
+        }
+        return datelineParser;
+    }
+
+    public DateParser getDateParser() {
+        if (dateParser == null) {
+            synchronized (this) {
+                if (dateParser == null) {
+                    dateParser = new DateParser();
+                }
+            }
+        }
+        return dateParser;
+    }
+
     public MedicParser getMedicParser() {
         if (medicParser == null) {
             synchronized (this) {
@@ -134,29 +168,6 @@ public class EngineMedicalParsers extends EngineParsers {
         return patientParser;
     }
 
-    public AffiliationAddressParser getAffiliationAddressParser() {
-        if (affiliationAddressParser == null) {
-            synchronized (this) {
-                if (affiliationAddressParser == null) {
-                    affiliationAddressParser = new AffiliationAddressParser();
-                }
-            }
-        }
-        return affiliationAddressParser;
-    }
-
-    public DateParser getDateParser() {
-        if (dateParser == null) {
-            synchronized (this) {
-                if (dateParser == null) {
-                    dateParser = new DateParser();
-                }
-            }
-        }
-        return dateParser;
-    }
-
-
     /**
      * Init all model, this will also load the model into memory
      */
@@ -167,7 +178,12 @@ public class EngineMedicalParsers extends EngineParsers {
         fullTextParser = getFullMedicalTextParser();
         frenchMedicalNERParser = getFrenchMedicalNERParser();
         affiliationAddressParser = getAffiliationAddressParser();
+        datelineParser = getDatelineParser();
         dateParser = getDateParser();
+        medicParser = getMedicParser();
+        patientParser = getPatientParser();
+        nerParser = getNerParser();
+        nerFrParser = getNerFrParser();
     }
 
     @Override
@@ -210,10 +226,28 @@ public class EngineMedicalParsers extends EngineParsers {
             LOGGER.debug("CLOSING affiliationAddressParser");
         }
 
+        if (datelineParser != null) {
+            datelineParser.close();
+            datelineParser = null;
+            LOGGER.debug("CLOSING datelineParser");
+        }
+
         if (dateParser != null) {
             dateParser.close();
             dateParser = null;
             LOGGER.debug("CLOSING dateParser");
+        }
+
+        if (medicParser != null) {
+            medicParser.close();
+            medicParser = null;
+            LOGGER.debug("CLOSING medicParser");
+        }
+
+        if (patientParser != null) {
+            patientParser.close();
+            patientParser = null;
+            LOGGER.debug("CLOSING patientParser");
         }
 
         if (nerParser != null) {

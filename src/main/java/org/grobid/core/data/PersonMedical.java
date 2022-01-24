@@ -1,8 +1,10 @@
 package org.grobid.core.data;
 
+import org.apache.commons.lang3.StringUtils;
+
 import nu.xom.Attribute;
 import nu.xom.Element;
-import org.apache.commons.lang3.StringUtils;
+
 import org.grobid.core.document.xml.XmlBuilderUtils;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.LayoutTokensUtil;
@@ -14,11 +16,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Class for representing and exchanging person information, e.g. medical personnels, patients
+ * Class for representing and exchanging person information (medics and patients).
  *
- * This class is adapted from the class Person (@author Patrice Lopez) to the needs of the medical report cases.
- *
- * Tanti, 2020
  */
 public class PersonMedical {
     private String firstName = null;
@@ -27,7 +26,6 @@ public class PersonMedical {
     private String title = null;
     private String suffix = null;
     private String rawName = null; // raw full name if relevant/available, e.g. name exactly as displayed
-    private String orcid = null;
     private boolean corresp = false;
 
     private List<LayoutToken> layoutTokens = new ArrayList<>();
@@ -63,11 +61,11 @@ public class PersonMedical {
     }
 
     public String getRawName() {
-         return rawName;
+        return rawName;
     }
 
     public void setRawName(String name) {
-         rawName = name;
+        rawName = name;
     }
 
     public String getTitle() {
@@ -103,20 +101,7 @@ public class PersonMedical {
     public void setCorresp(boolean b) {
         corresp = b;
     }
-
-    public String getORCID() {
-        return orcid;
-    }
-
-    public void setORCID(String id) {
-        if (id == null)
-            return;
-        if (id.startsWith("http://orcid.org/"))
-            id = id.replace("http://orcid.org/", "");
-        else if (id.startsWith("https://orcid.org/"))
-            id = id.replace("https://orcid.org/", "");
-        orcid = id;
-    }
+    
 
     public List<String> getAffiliationBlocks() {
         return affiliationBlocks;
@@ -132,11 +117,11 @@ public class PersonMedical {
         affiliationBlocks.add(f);
     }
 
-    public List<Affiliation> getAffiliations() {
+    public List<org.grobid.core.data.Affiliation> getAffiliations() {
         return affiliations;
     }
 
-    public void addAffiliation(Affiliation f) {
+    public void addAffiliation(org.grobid.core.data.Affiliation f) {
         if (affiliations == null)
             affiliations = new ArrayList<>();
         affiliations.add(f);
@@ -156,7 +141,7 @@ public class PersonMedical {
         affiliationMarkers.add(s);
     }
 
-    public void setAffiliations(List<Affiliation> f) {
+    public void setAffiliations(List<org.grobid.core.data.Affiliation> f) {
         affiliations = f;
     }
 
@@ -171,7 +156,7 @@ public class PersonMedical {
     public void addMarker(String f) {
         if (markers == null)
             markers = new ArrayList<String>();
-		f = f.replace(" ", "");
+        f = f.replace(" ", "");
         markers.add(f);
     }
 
@@ -185,10 +170,10 @@ public class PersonMedical {
 
     public boolean notNull() {
         if ((firstName == null) &&
-                (middleName == null) &&
-                (lastName == null) &&
-                (title == null)
-                )
+            (middleName == null) &&
+            (lastName == null) &&
+            (title == null)
+        )
             return false;
         else
             return true;
@@ -198,29 +183,26 @@ public class PersonMedical {
      * Create a new instance of Person object from current instance (shallow copy)
      */
     public PersonMedical clonePerson() {
-        PersonMedical person = new PersonMedical();
-        person.firstName = this.firstName ;
-        person.middleName = this.middleName;
-        person.lastName = this.lastName;
-        person.title = this.title;
-        person.suffix = this.suffix;
-        person.rawName = this.rawName; 
-        person.orcid = this.orcid;
-        person.corresp = this.corresp;
-        person.email = this.email;
+        PersonMedical personMedical = new PersonMedical();
+        personMedical.firstName = this.firstName ;
+        personMedical.middleName = this.middleName;
+        personMedical.lastName = this.lastName;
+        personMedical.title = this.title;
+        personMedical.suffix = this.suffix;
+        personMedical.rawName = this.rawName;
+        personMedical.corresp = this.corresp;
+        personMedical.email = this.email;
 
         if (this.layoutTokens != null)
-            person.layoutTokens = new ArrayList<>(this.layoutTokens);
+            personMedical.layoutTokens = new ArrayList<>(this.layoutTokens);
         if (this.affiliationBlocks != null)
-            person.affiliationBlocks = new ArrayList<>(this.affiliationBlocks);
+            personMedical.affiliationBlocks = new ArrayList<>(this.affiliationBlocks);
         if (this.affiliations != null)
-            person.affiliations = new ArrayList<>(this.affiliations);
+            personMedical.affiliations = new ArrayList<>(this.affiliations);
         if (this.affiliationMarkers != null)
-            person.affiliationMarkers = new ArrayList<>(this.affiliationMarkers);
-        if (this.markers != null)
-            person.markers = new ArrayList<>(this.markers);
+            personMedical.affiliationMarkers = new ArrayList<>(this.affiliationMarkers);
 
-        return person;
+        return personMedical;
     }
 
     public String toString() {
@@ -237,9 +219,6 @@ public class PersonMedical {
             res += suffix;
         if (email != null) {
             res += " (email:" + email + ")";
-        }
-        if (orcid != null) {
-            res += " (orcid:" + orcid + ")";
         }
         if (affiliations != null) {
             for(Affiliation aff : affiliations) {
@@ -269,7 +248,7 @@ public class PersonMedical {
 
     public String toTEI(boolean withCoordinates) {
         if ( (firstName == null) && (middleName == null) &&
-                (lastName == null) ) {
+            (lastName == null) ) {
             return null;
         }
 
@@ -366,182 +345,36 @@ public class PersonMedical {
     }
 
     // list of character delimiters for capitalising names
- 	private static final String NAME_DELIMITERS = "-.,;:/_ ";
-
-    /*static public String normalizeName(String inputName) {
-		return TextUtilities.capitalizeFully(inputName, NAME_DELIMITERS);
-    }*/
+    private static final String NAME_DELIMITERS = "-.,;:/_ ";
 
     /**
      * This normalisation takes care of uniform case for name components and for 
      * transforming agglutinated initials (like "JM" in JM Smith)
      * which are put into the firstname into separate initials in first and middle names. 
-     * 
+     *
      */
     public void normalizeName() {
-        if (StringUtils.isEmpty(middleName) && !StringUtils.isEmpty(firstName) && 
+        if (StringUtils.isEmpty(middleName) && !StringUtils.isEmpty(firstName) &&
             (firstName.length() == 2) && (TextUtilities.isAllUpperCase(firstName)) ) {
             middleName = firstName.substring(1,2);
             firstName = firstName.substring(0,1);
-        } 
+        }
 
         firstName = TextUtilities.capitalizeFully(firstName, NAME_DELIMITERS);
         middleName = TextUtilities.capitalizeFully(middleName, NAME_DELIMITERS);
         lastName = TextUtilities.capitalizeFully(lastName, NAME_DELIMITERS);
     }
-	
-    // assume never more than 3 initials
-    //private Pattern initials = Pattern.compile("([A-Z])(?:\\.)\\s?(?:([A-Z])(?:\\.))?\\s?(?:([A-Z])(?:\\.))?");
 
     /**
-     * First names coming from CrossRef are clearly heavily impacted by the original puslisher 
-     * formats and a large variety of forms can be seen, with some information lost apparently.
-     */ 
-    public void normalizeCrossRefFirstName() {
-        // first name can be initial with a dot, e.g. "M." or without a dot
-        // <forename type="first">H</forename>
-
-        // fistname can be intials with appended middlename also as initials, 
-        // with or without space, e.g. "M. L." or
-        // <forename type="first">L.S.</forename>
-
-        // normal full first name can be appended with middlename initials with dots but 
-        // no space e.g. "Nicholas J.", "John W.S."
-
-        // we have sldo destructive case normalization done at CrossRef or by publishers 
-        // like "Zs. Biró" 
-
-        String first = null;
-        String middle = null;
-
-        /*Matcher m = initials.matcher(firstName);
-        while(m.find()) {
-            count++;
-            System.out.println("Match number "+count);
-            System.out.println("start(): "+m.start());
-            System.out.println("end(): "+m.end());
-            if (count != 0) {
-
-            }
-        }*/
-
-        firstName = firstName.replace(".", ". ");
-        firstName = StringUtils.normalizeSpace(firstName);
-
-        // check first the specific case "Zs. Biró" - given the we've never observed three 
-        // letters first name like "Zsv. Biró"
-        if ( firstName.endsWith(".") && (firstName.length() == 3) &&
-            Character.isUpperCase(firstName.charAt(0)) && Character.isLowerCase(firstName.charAt(1)) ) {
-            middleName = firstName.substring(1,2);
-            firstName = firstName.substring(0,1);
-        }
-
-        // check the specific case of composed forenames which are often but not always lost  
-        // ex: "J.-L. Arsuag"
-        if ( (firstName.indexOf("-") != -1) ) {
-            String tokens[] = firstName.replace(" ", "").split("-");
-            if (tokens.length == 2) {
-                if (tokens[0].endsWith(".") && (tokens[0].length() == 2))
-                    first = ""+tokens[0].charAt(0);
-                else if (tokens[0].length() == 1)
-                    first = tokens[0];
-                if (tokens[1].endsWith(".") && (tokens[1].length() == 2))
-                    first += "-" + tokens[1].charAt(0);
-                else if (tokens[1].length() == 1)
-                    first += "-" + tokens[1];
-            }
-        } else { 
-            String tokens[] = firstName.split(" ");
-            for(int i=tokens.length-1; i>=0; i--) {
-                if (i != 0) {
-                    if (first != null) {
-                        if (tokens[i].endsWith(".") && (tokens[i].length() == 2)) {
-                            // (case "G. Arjen")
-                            first = tokens[i].charAt(0) + " " + first;
-                        } else {
-                            // multiple token first name
-                            first = tokens[i] + " " + first;
-                        }
-                    } else if ( (tokens[i].endsWith(".") && (tokens[i].length() == 2)) || 
-                        (tokens[i].length() == 1) ) {
-                        // we have an initials in secondary position, this is a middle name
-                        if (middle == null)
-                            middle = ""+tokens[i].charAt(0);
-                        else
-                           middle = tokens[i].charAt(0) + " " + middle;
-                    } else {
-                        if (middle == null)
-                            middle = tokens[i];
-                        else
-                           middle = tokens[i] + " " + middle;
-                    }
-                } else {                
-                    // we check if we have an initial at the beginning (case "G. Arjen")
-                    if (tokens[i].endsWith(".") && (tokens[i].length() == 2)) {
-                        if (first == null)
-                            first = ""+tokens[i].charAt(0);
-                        else
-                            first = tokens[i] + " " + first;
-                    } else {
-                        if (first == null)
-                            first = tokens[i];
-                        else
-                            first = tokens[i] + " " + first;
-                    }
-                }
-            }
-        }
-
-        if (first != null)
-            firstName = first;
-        if (middle != null)
-            middleName = middle;
-
-        // dirty case <forename type="first">HermanHG</forename><surname>Teerink</surname>
-        if ( (firstName != null) && (middleName == null) && (firstName.length()>2) && 
-             Character.isUpperCase(firstName.charAt(firstName.length()-1)) && 
-             Character.isLowerCase(firstName.charAt(1)) ) {
-            int i = firstName.length()-1;
-            while(i>1) {
-                if (Character.isUpperCase(firstName.charAt(i))) {
-                    if (middleName == null)
-                        middleName = ""+firstName.charAt(i);
-                    else
-                        middleName = firstName.charAt(i) + " " + middleName;
-                } else 
-                    break;
-                i--;
-            }
-            firstName = firstName.substring(0, i+1);
-        } 
-
-
-        // for cases like JM Smith and for case normalisation
-        normalizeName();
-
-        // cleaning for CrossRef middlenames
-        if (middleName != null) {
-            middleName = middleName.replace(".", ". ");
-            middleName = middleName.replace("  ", " ");
-        }
-        
-        // other weird stuff: <forename type="first">G. Arjen</forename><surname>de Groot</surname>
-
-        // also note that language specific case practice are usually not rexpected
-        // e.g. H Von Allmen, J De  
+     *  Return true if the person structure is a valid person name, in our case
+     *  with at least a lastname or a raw name.
+     */
+    public boolean isValid() {
+        if ( (lastName == null) && (rawName == null) )
+            return false;
+        else
+            return true;
     }
-
-	/**
-	 *  Return true if the person structure is a valid person name, in our case
-	 *  with at least a lastname or a raw name.
-	 */
-	public boolean isValid() {
-		if ( (lastName == null) && (rawName == null) )
-			return false;
-		else 
-			return true;
-	}
-
 
     /**
      *  Deduplicate person names, optionally attached to affiliations, based 
@@ -555,7 +388,7 @@ public class PersonMedical {
 
         // we create a signature per person based on lastname and first name first letter
         Map<String,List<PersonMedical>> signatures = new TreeMap<String,List<PersonMedical>>();
-        
+
         for(PersonMedical person : persons) {
             if (person.getLastName() == null || person.getLastName().trim().length() == 0) {
                 // the minimal information to deduplicate is not available
@@ -568,7 +401,7 @@ public class PersonMedical {
             List<PersonMedical> localPersons = signatures.get(signature);
             if (localPersons == null) {
                 localPersons = new ArrayList<PersonMedical>();
-            } 
+            }
             localPersons.add(person);
             signatures.put(signature, localPersons);
         }
@@ -592,7 +425,7 @@ public class PersonMedical {
                         localMiddleName = localMiddleName.replaceAll("[\\-\\.]", "");
                     }
                     int nbClash = 0;
-                    for(int k=0; k < localPersons.size(); k++) {                        
+                    for(int k=0; k < localPersons.size(); k++) {
                         boolean clash = false;
                         if (k == j)
                             continue;
@@ -615,10 +448,10 @@ public class PersonMedical {
                                     clash = true;
                                 }
                             } else {
-                                if (!localFirstName.equals(otherFirstName) && 
-                                    !localFirstName.startsWith(otherFirstName) && 
+                                if (!localFirstName.equals(otherFirstName) &&
+                                    !localFirstName.startsWith(otherFirstName) &&
                                     !otherFirstName.startsWith(localFirstName)
-                                    ) {
+                                ) {
                                     clash = true;
                                 }
                             }
@@ -632,12 +465,12 @@ public class PersonMedical {
                                         clash = true;
                                     }
                                 } else {
-                                    if (!localMiddleName.equals(otherMiddleName) && 
-                                        !localMiddleName.startsWith(otherMiddleName) && 
+                                    if (!localMiddleName.equals(otherMiddleName) &&
+                                        !localMiddleName.startsWith(otherMiddleName) &&
                                         !otherMiddleName.startsWith(localMiddleName)
                                     ) {
-                                    clash = true;
-                                }
+                                        clash = true;
+                                    }
                                 }
                             }
                         }
@@ -645,12 +478,12 @@ public class PersonMedical {
                         if (clash) {
                             // increase the clash number for index j
                             nbClash++;
-                        } 
+                        }
                     }
 
                     if (nbClash == 0) {
                         newLocalPersons.add(localPerson);
-                    } 
+                    }
                 }
 
                 localPersons = newLocalPersons;
@@ -688,37 +521,33 @@ public class PersonMedical {
                         if (otherSuffix != null)
                             otherSuffix = otherSuffix.toLowerCase();
 
-                        if ((localFirstName == null && otherFirstName != null) || 
+                        if ((localFirstName == null && otherFirstName != null) ||
                             (localFirstName != null && otherFirstName != null &&
-                            otherFirstName.length() > localFirstName.length())) {
+                                otherFirstName.length() > localFirstName.length())) {
                             localPerson.setFirstName(otherPerson.getFirstName());
                             localFirstName = localPerson.getFirstName().toLowerCase();
                         }
 
                         if ((localMiddleName == null && otherMiddleName != null) ||
                             (localMiddleName != null && otherMiddleName != null &&
-                            otherMiddleName.length() > localMiddleName.length())) {
+                                otherMiddleName.length() > localMiddleName.length())) {
                             localPerson.setMiddleName(otherPerson.getMiddleName());
                             localMiddleName = localPerson.getMiddleName().toLowerCase();
                         }
 
                         if ((localTitle == null && otherTitle != null) ||
                             (localTitle != null && otherTitle != null &&
-                            otherTitle.length() > localTitle.length())) {
+                                otherTitle.length() > localTitle.length())) {
                             localPerson.setTitle(otherPerson.getTitle());
                             localTitle = localPerson.getTitle().toLowerCase();
                         }
 
                         if ((localSuffix == null && otherSuffix != null) ||
                             (localSuffix != null && otherSuffix != null &&
-                            otherSuffix.length() > localSuffix.length())) {
+                                otherSuffix.length() > localSuffix.length())) {
                             localPerson.setSuffix(otherPerson.getSuffix());
                             localSuffix = localPerson.getSuffix().toLowerCase();
                         }
-
-                        String otherOrcid = otherPerson.getORCID();
-                        if (otherOrcid != null)
-                            localPerson.setORCID(otherOrcid);
 
                         if (otherPerson.getAffiliations() != null) {
                             for(Affiliation affOther : otherPerson.getAffiliations()) {
@@ -761,11 +590,11 @@ public class PersonMedical {
             return null;
         if (persons.size() == 0)
             return persons;
-        
+
         List<PersonMedical> result = new ArrayList<PersonMedical>();
 
         for(PersonMedical person : persons) {
-            if (person.getLastName() == null || person.getLastName().trim().length() == 0) 
+            if (person.getLastName() == null || person.getLastName().trim().length() == 0)
                 continue;
             else
                 result.add(person);

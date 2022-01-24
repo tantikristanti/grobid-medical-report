@@ -10,10 +10,16 @@ For identifying the exact pieces of information to be part of the `header-medica
 
 For the patient model, we use the following TEI elements:
 
+* `<idno>` for the ID number of patients
 * `<persName>` for the name of patients
-* `<address>` for the address elements of patients  
-* `<email>` for the email information
+* `<sex>` for the sex type of patients
+* `<birth>` for the birth date and place of birth of patients
+* `<death>` for the death date of patients
+* `<address>` for the address elements of patients
+* `<country>` for the country 
+* `<settlement>` for the city
 * `<phone>` for the phone number
+* `<note type="short">` for the notes concerning the patients
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
 > It is recommended to study first the existing training documents for the __patient__ model (`grobid/grobid-trainer/resources/dataset/patient`) to see some examples of how these elements should be used.
@@ -29,6 +35,17 @@ Spaces and a new line in the XML annotated files are not significant and will be
 
 Similarly, line break tags `<lb/>` are present in the generated XML training data, but they will be considered as a default separator by the XML parser. They are indicated to help the annotator to identify a piece of text in the original PDF if necessary. Actual line breaks are identified in the PDF and added by aligning the XML/TEI with the feature file generated in parallel which contains all the PDF layout information. 
 
+
+### Strong identifiers
+
+[\<idno\>](https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-idno.html) is used to identify strong identifiers of the document.
+
+The identifier name is kept with the identifier value so that Grobid can classify more easily the type of identifier:
+
+```xml
+    NIP : <idno type="patient">1234567890</idno>
+```
+
 ### Personal names
 
 All the mentions of person names are labeled under `<persName>`. [Person name](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-persName.html) provides information about an identifiable person name.
@@ -39,6 +56,17 @@ All the mentions of person names are labeled under `<persName>`. [Person name](h
 ```
 
 As illustrated above, titles and roles (e.g. Madame, Monsieur) must be **included** in the patient field.
+
+
+### Sex type
+
+All the mentions of sex type are labeled under `<sex>`. [Sex type](https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-sex.html) provides information about an identifiable sex type.
+
+
+```xml
+    <sex>F</sex>
+```
+
 
 ### Address
 
@@ -53,15 +81,6 @@ Addresses are labeled with their own tag `<address>`.
         75014 Paris <lb/>
     </address>
 ```
-
-### Emails
-
-Email must be tagged in a way that is limited to an actual [\<email\>](https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-email.html), excluding the "Email" word, punctuations, and person name information.
-
-```xml
-    Email: 
-    <email>chaterine.belle@google.com</email> 
-```   
 
 ### Phone numbers
 

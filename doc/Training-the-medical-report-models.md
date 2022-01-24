@@ -18,17 +18,19 @@ The models prepared are:
 
 - [x] French medical NER 
 
+- [x] dateline
+
 - [ ] organization-medical-report
 
-- [ ] medic
+- [x] medic
 
-- [ ] patient
+- [x] patient
 
 - [ ] name-medic
 
 - [ ] name-patient
 
-- [ ] dateline
+
 
 Note:
 - [x] (A completed model)
@@ -80,6 +82,11 @@ An example of a command for training the __train_full_medical_text__ model:
 > ./gradlew train_full_medical_text
 ```
 
+An example of a command for training the __train_dateline__ model:
+```bash
+> ./gradlew train_dateline
+```
+
 An example of a command for training the __french_medical_ner__ model:
 ```bash
 > ./gradlew train_french_medical_ner
@@ -108,7 +115,6 @@ Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eva
 By default, the training and evaluation data partition is 80:20 (i.e., the datasets are under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus`). To change it, add the `-s` parameter or change the `-s` `build.gradle` to the desired proportion.
 
 ## Generation of training data
-
 For each input Pdf file, __grobid-medical-report__ generates XML files according to the models adopted since each model uses different training data (e.g., *.training.medical.tei.xml, *.training.header.medical.tei.xml, *.training.left.note.medical.tei.xml). To use these automatically-generated XML files as a gold standard,  we need first to check and correct them.
 
 When the models use PDF layout features, __grobid-medical-report__ generates additional feature files (e.g., *.training.medical, *.training.header.medical, *.training.left.note.medical).
@@ -119,11 +125,23 @@ To generate a new training data, under the project directory `grobid/grobid-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
-Generation of training data commands are: `createTrainingSegmentation`, `createTrainingHeader`, `createTrainingLeftNote`, `createMedicalNerTraining`.
+Generation of training data commands are: `createTrainingSegmentationBlank`, `createTrainingSegmentation`, `createTrainingFullBlank`, `createTrainingFull` .
+
+
+<!---
+An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentationBlank
+```
 
 An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
+```
+
+An example of a command for generating a new training data for the __header-medical-report__ model: 
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeaderBlank
 ```
 
 An example of a command for generating a new training data for the __header-medical-report__ model: 
@@ -135,26 +153,27 @@ An example of a command for generating a new training data for the __left-note-m
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
+--->
 
-An example of a command for generating a new training data for the __full-medical-text__ model:
+An example of a command for generating blank training data for all models (including the segmentation model):   
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullBlank
 ```
+
+An example of a command for generating pre-annotated training data for all models (including the segmentation model):
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFull
+```
+
+With this command, for each PDF file as input, for each model, two types of files will be generated. They are files containing features (extention without *.xml) and files containing pre-annotated data using existing trained models (e.g., medical-report-segmenter model, header-medical-report model). 
+These files can then be corrected and be used for re-training new models. Only pre-annotated TEI files can be revised while the feature files cannot be corrected manually.
+
+Depending on what model we want to retrain, these files will then need to be placed under grobid-trainer directory (`grobid-trainer/resources/dataset/*MODEL*/`), especially under `grobid-trainer/resources/dataset/*MODEL*/corpus` for training data and under `grobid-trainer/resources/dataset/*MODEL*/evaluation` for evaluation data. The corrected TEI files need to be put under `grobid-trainer/resources/dataset/*MODEL*/corpus/tei` and the feature files under `grobid-trainer/resources/dataset/*MODEL*/corpus/raw`.
 
 An example of a command for generating a new training data for the __fr-medical-NER__ model:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createMedicalNerTraining
 ```
-
-<!---Note for developers:
-
-To create new blank training data (files containing the features and the text without any label), we need to uncomment createBlankTrainingFromPDF method in batch processing for each model. For example:
-- uncomment createBlankTrainingFromPDF method in the createTrainingMedicalSegmentationBatch in MedicalReportParser class;
-OR 
-- uncomment createBlankTrainingFromPDF method in the createTrainingMedicalHeaderBatch in HeaderMedicalParser class 
-etc...
-
---->
 
 ## Training guidelines
 

@@ -25,7 +25,9 @@ The so-called "GROBID home" in GROBID is the path to `grobid-home` (by default `
 
 ### Create training
 
-#### createTrainingSegmentation
+We can generate training data individually for each model (e.g., medical report segmenter model, the header medical report model). We can also actually generate new training data for the entire model with one command as follows:
+
+#### 1. createTrainingSegmentation
 `createTrainingSegmentation` batch command will generate the __grobid-medical-report__ training dataset for the medical report segmentation model from PDF files. The needed parameters are:
 
 * -gH: path to grobid-home directory
@@ -39,7 +41,7 @@ Example:
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
 ```
 
-#### createTrainingHeader
+#### 2. createTrainingHeader
 `createTrainingHeader` batch command will generate the __grobid-medical-report__ training dataset for the header model from PDF files. The needed parameters are:
 
 * -gH: path to grobid-home directory
@@ -53,7 +55,7 @@ Example:
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
 ```
 
-#### createTrainingLeftNote
+#### 3. createTrainingLeftNote
 `createTrainingHeader` batch command will generate the __grobid-medical-report__ training dataset for the header model from PDF files. The needed parameters are:
 
 * -gH: path to grobid-home directory
@@ -67,7 +69,15 @@ Example:
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
 ```
 
-### processHeader
+#### 4. createTrainingFullMedicalText
+However, we can also actually generate new training data for the entire models of grobid-medical-report with one command as follows:
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullMedicalText
+```
+
+### Process files
+
+#### processHeader
 'processHeader' batch command will extract, structure and normalise the header part of medical reports in TEI format. The output is a TEI file corresponding to the structured report header.
 The needed parameters for that command are:
 

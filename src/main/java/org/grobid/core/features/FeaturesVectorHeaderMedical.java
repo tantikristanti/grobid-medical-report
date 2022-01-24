@@ -1,10 +1,5 @@
 package org.grobid.core.features;
 
-import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.TextUtilities;
 

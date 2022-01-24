@@ -22,11 +22,9 @@ The exact list of generated files depends on the structures occurring in the art
 | :------------- | :---- | :------------- |
 | `*.training.medical.tei.xml` | medical-report-segmenter | for the initial model used to segment a complete article into the principal zones |
 | `*.training.header.medical.tei.xml` | header-medical-report | a pre-annotated file for the header model |
-| `*.training.left.note.medical.tei.xml` | left-note-medical-report | a pre-annotated file for the left-note model |
-| `*.training.full.medical.text.tei.xml` | full-medical-text | a pre-annotated file for the header model |
-| `*.training.affiliation.tei.xml` | affiliation-address | for the detailed affiliation and address recognition |
-| `*.training.medics.tei.xml` | medics | for the detailed medics recognition |
-| `*.training.patients.tei.xml` | patients | for the detailed patients' recognition |
+| `*.training.left.medical.tei.xml` | left-note-medical-report | a pre-annotated file for the left-note model |
+| `*.training.medic.tei.xml` | medics | for the detailed medics recognition |
+| `*.training.patient.tei.xml` | patients | for the detailed patients' recognition |
 | `*.training.dateline.xml` | dateline | for the detailed structure of dates appearing with place names or other types of phrases |
 | `*.training.full.medical.text.tei.xml` | full-medical-text | for the whole structured body |
 
@@ -40,22 +38,7 @@ There are two exceptions to this main rule:
 
 * Actual __end-of-lines__ from the PDF files are indicated by element `<lb/>`. These tags should be considered as part of the stream of text, and they should not be moved or removed concerning the overall text stream. 
 
-* In the TEI/XML files, end-of-line is equivalent to a space character. It is possible to add or remove end-of-line characters, as long as the spacing is preserved. For instance:
-
-```xml
- 	<title level="a">In XML training files, end-of-line and space are the same</title> <lb/> <author>Kermitt Jr</author> <lb/> <date>2017</date> 
-```
-
-is equivalent to 
-
-```xml
-<title level="a">In XML training files, end-of-line and space are 
-	the same</title> <lb/> 
-	<author>Kermitt Jr</author> 
-	<lb/> 
-	
-	<date>2017</date> 
-```
+* In the TEI/XML files, end-of-line is equivalent to a space character. It is possible to add or remove end-of-line characters, as long as the spacing is preserved. 
 
 In the standard Grobid installation, examples of existing annotations for each model is under `grobid/grobid-trainer/resources/dataset/*MODEL*/`. 
 

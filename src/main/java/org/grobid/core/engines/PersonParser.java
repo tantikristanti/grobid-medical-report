@@ -1,29 +1,25 @@
 package org.grobid.core.engines;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
-
+import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.Person;
+import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.PersonMedical;
+import org.grobid.core.engines.label.MedicalLabels;
+import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.engines.tagging.GenericTagger;
 import org.grobid.core.engines.tagging.TaggerFactory;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorName;
-import org.grobid.core.layout.BoundingBox;
+import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.layout.PDFAnnotation;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.LayoutTokensUtil;
-import org.grobid.core.utilities.TextUtilities;
 import org.grobid.core.utilities.OffsetPosition;
-import org.grobid.core.analyzers.GrobidAnalyzer;
-import org.grobid.core.lang.Language;
-import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.label.TaggingLabels;
-
+import org.grobid.core.utilities.TextUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,26 +27,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 
-/**
- * A class to parse person (e.g. medical personnels, patients) names.
- * This class is adapted to the needs of extracting medical personnels from the class of Person (@author Patrice Lopez)
- */
-public class PersonMedicalParser {
-    private static Logger LOGGER = LoggerFactory.getLogger(PersonMedicalParser.class);
-    private final GenericTagger namesHeaderParser;
-    private final GenericTagger namesCitationParser;
+public class PersonParser {
+	private static Logger LOGGER = LoggerFactory.getLogger(PersonParser.class);
+    private final GenericTagger namesMedicParser;
+    private final GenericTagger namesPatientParser;
 
-    public PersonMedicalParser() {
-        namesHeaderParser = TaggerFactory.getTagger(GrobidModels.NAMES_HEADER);
-        namesCitationParser = TaggerFactory.getTagger(GrobidModels.NAMES_CITATION);
+    public PersonParser() {
+        namesMedicParser = TaggerFactory.getTagger(GrobidModels.NAMES_MEDIC);
+        namesPatientParser = TaggerFactory.getTagger(GrobidModels.NAMES_PATIENT);
     }
 
     /**
-     * Processing of person in medical reports
+     * Processing of patients
      */
-    public List<PersonMedical> processingCitation(String input) throws Exception {
+    public List<PersonMedical> processingPatient(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -58,11 +49,11 @@ public class PersonMedicalParser {
         input = input.trim().replaceAll("et\\.? al\\.?.*$", " ");
 
         // for language to English for the analyser to avoid any bad surprises
-        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("fr", 1.0));
         return processing(tokens, null, false);
     }
 
-    public List<PersonMedical> processingCitationLayoutTokens(List<LayoutToken> tokens) throws Exception {
+    public List<PersonMedical> processingPatientLayoutTokens(List<LayoutToken> tokens) throws Exception {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
@@ -70,9 +61,9 @@ public class PersonMedicalParser {
     }
 
     /**
-     * Processing of authors in authors
+     * Processing of medics
      */
-    public List<PersonMedical> processingHeader(String input) throws Exception {
+    public List<PersonMedical> processingMedic(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -80,73 +71,43 @@ public class PersonMedicalParser {
         input = input.trim().replaceAll("et\\.? al\\.?.*$", " ");
 
         // for language to English for the analyser to avoid any bad surprises
-        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("fr", 1.0));
         return processing(tokens, null, true);
     }
-
-    public List<PersonMedical> processingHeaderWithLayoutTokens(List<LayoutToken> inputs, List<PDFAnnotation> pdfAnnotations) {
-        return processing(inputs, pdfAnnotations, true);
-    }
-
-    public List<PersonMedical> processingLeftNoteWithLayoutTokens(List<LayoutToken> inputs, List<PDFAnnotation> pdfAnnotations) {
+       
+    public List<PersonMedical> processingMedicWithLayoutTokens(List<LayoutToken> inputs, List<PDFAnnotation> pdfAnnotations) {
         return processing(inputs, pdfAnnotations, true);
     }
 
     /**
-     * Common processing of authors in header or citation
+     * Common processing of medics and patients
      *
      * @param tokens list of LayoutToken object to process
-     * @param head - if true use the model for header's name, otherwise the model for names in citation
-     * @return List of identified Person entites as POJO.
+     * @param head - if true use the model for medic's name, otherwise the model for patient's' name
+     * @return List of identified Person entities as POJO.
      */
     public List<PersonMedical> processing(List<LayoutToken> tokens, List<PDFAnnotation> pdfAnnotations, boolean head) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<PersonMedical> fullAuthors = null;
+        List<PersonMedical> fullMedics = null;
         try {
             List<OffsetPosition> titlePositions = Lexicon.getInstance().tokenPositionsPersonTitle(tokens);
             List<OffsetPosition> suffixPositions = Lexicon.getInstance().tokenPositionsPersonSuffix(tokens);
 
-            String sequence = FeaturesVectorName.addFeaturesName(tokens, null,
+            String sequence = FeaturesVectorName.addFeaturesName(tokens, null, 
                 titlePositions, suffixPositions);
             if (StringUtils.isEmpty(sequence))
                 return null;
-            GenericTagger tagger = head ? namesHeaderParser : namesCitationParser;
+            GenericTagger tagger = head ? namesMedicParser : namesPatientParser;
             String res = tagger.label(sequence);
-//System.out.println(res);
-            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(head ? GrobidModels.NAMES_HEADER : GrobidModels.NAMES_CITATION, res, tokens);
+            //System.out.println(res);
+            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(head ? GrobidModels.NAMES_MEDIC : GrobidModels.NAMES_PATIENT, res, tokens);
             PersonMedical aut = new PersonMedical();
-            boolean newMarker = false;
-            String currentMarker = null;
             List<TaggingTokenCluster> clusters = clusteror.cluster();
             for (TaggingTokenCluster cluster : clusters) {
                 if (cluster == null) {
                     continue;
-                }
-
-                if(pdfAnnotations != null) {
-                    for (LayoutToken authorsToken : cluster.concatTokens()) {
-                        for (PDFAnnotation pdfAnnotation : pdfAnnotations) {
-                            BoundingBox intersectBox = pdfAnnotation.getIntersectionBox(authorsToken);
-                            if (intersectBox != null) {
-                                BoundingBox authorsBox = BoundingBox.fromLayoutToken(authorsToken);
-                                if (intersectBox.equals(authorsBox)) {
-                                } else {
-                                    double pixPerChar = authorsToken.getWidth() / authorsToken.getText().length();
-                                    int charsCovered = (int) ((intersectBox.getWidth() / pixPerChar) + 0.5);
-                                    if (pdfAnnotation.getDestination() != null && pdfAnnotation.getDestination().length() > 0) {
-                                        Matcher orcidMatcher = TextUtilities.ORCIDPattern.matcher(pdfAnnotation.getDestination());
-                                        if (orcidMatcher.find()) {
-                                            // !! here we consider the annot is at the tail or end of the names
-                                            String newToken = authorsToken.getText().substring(0, authorsToken.getText().length() - charsCovered);
-                                            authorsToken.setText(newToken);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
 
                 TaggingLabel clusterLabel = cluster.getTaggingLabel();
@@ -155,37 +116,13 @@ public class PersonMedicalParser {
                 String clusterContent = StringUtils.normalizeSpace(LayoutTokensUtil.toText(cluster.concatTokens()));
                 if (clusterContent.trim().length() == 0)
                     continue;
-                if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_MARKER)) {
-                    // a marker introduces a new author, and the marker could be attached to the previous (usual)
-                    // or following author (rare)
-                    currentMarker = clusterContent;
-                    newMarker = true;
-                    boolean markerAssigned = false;
-                    if (aut.notNull()) {
-                        if (fullAuthors == null) {
-                            fullAuthors = new ArrayList<PersonMedical>();
-                        }
-                        aut.addMarker(currentMarker);
-                        markerAssigned = true;
-
-                        if (!fullAuthors.contains(aut)) {
-                            fullAuthors.add(aut);
-                            aut = new PersonMedical();
-                        }
-                    }
-                    if (!markerAssigned) {
-                        aut.addMarker(currentMarker);
-                    }
-                } else if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_TITLE) ||
-                    clusterLabel.equals(TaggingLabels.NAMES_CITATION_TITLE)) {
-                    if (newMarker) {
-                        aut.setTitle(clusterContent);
-                        newMarker = false;
-                    } else if (aut.getTitle() != null) {
+                if (clusterLabel.equals(MedicalLabels.NAMES_MEDIC_TITLE) ||
+                            clusterLabel.equals(MedicalLabels.NAMES_PATIENT_TITLE)) {
+                    if (aut.getTitle() != null) {
                         if (aut.notNull()) {
-                            if (fullAuthors == null)
-                                fullAuthors = new ArrayList<PersonMedical>();
-                            fullAuthors.add(aut);
+                            if (fullMedics == null)
+                                fullMedics = new ArrayList<PersonMedical>();
+                            fullMedics.add(aut);
                         }
                         aut = new PersonMedical();
                         aut.setTitle(clusterContent);
@@ -193,17 +130,14 @@ public class PersonMedicalParser {
                         aut.setTitle(clusterContent);
                     }
                     aut.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_FORENAME) ||
-                    clusterLabel.equals(TaggingLabels.NAMES_CITATION_FORENAME)) {
-                    if (newMarker) {
-                        aut.setFirstName(clusterContent);
-                        newMarker = false;
-                    } else if (aut.getFirstName() != null) {
-                        // new author
+                } else if (clusterLabel.equals(MedicalLabels.NAMES_MEDIC_FORENAME) ||
+                            clusterLabel.equals(MedicalLabels.NAMES_PATIENT_FORENAME)) {
+                    if (aut.getFirstName() != null) {
+                        // new medic
                         if (aut.notNull()) {
-                            if (fullAuthors == null)
-                                fullAuthors = new ArrayList<PersonMedical>();
-                            fullAuthors.add(aut);
+                            if (fullMedics == null)
+                                fullMedics = new ArrayList<PersonMedical>();
+                            fullMedics.add(aut);
                         }
                         aut = new PersonMedical();
                         aut.setFirstName(clusterContent);
@@ -211,28 +145,22 @@ public class PersonMedicalParser {
                         aut.setFirstName(clusterContent);
                     }
                     aut.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_MIDDLENAME) ||
-                    clusterLabel.equals(TaggingLabels.NAMES_CITATION_MIDDLENAME)) {
-                    if (newMarker) {
-                        aut.setMiddleName(clusterContent);
-                        newMarker = false;
-                    } else if (aut.getMiddleName() != null) {
+                } else if (clusterLabel.equals(MedicalLabels.NAMES_MEDIC_MIDDLENAME) ||
+                            clusterLabel.equals(MedicalLabels.NAMES_PATIENT_MIDDLENAME)) {
+                    if (aut.getMiddleName() != null) {
                         aut.setMiddleName(aut.getMiddleName() + " " + clusterContent);
                     } else {
                         aut.setMiddleName(clusterContent);
                     }
                     aut.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_SURNAME) ||
-                    clusterLabel.equals(TaggingLabels.NAMES_CITATION_SURNAME)) {
-                    if (newMarker) {
-                        aut.setLastName(clusterContent);
-                        newMarker = false;
-                    } else if (aut.getLastName() != null) {
+                } else if (clusterLabel.equals(MedicalLabels.NAMES_MEDIC_SURNAME) ||
+                            clusterLabel.equals(MedicalLabels.NAMES_PATIENT_SURNAME)) {
+                    if (aut.getLastName() != null) {
                         // new author
                         if (aut.notNull()) {
-                            if (fullAuthors == null)
-                                fullAuthors = new ArrayList<PersonMedical>();
-                            fullAuthors.add(aut);
+                            if (fullMedics == null)
+                                fullMedics = new ArrayList<PersonMedical>();
+                            fullMedics.add(aut);
                         }
                         aut = new PersonMedical();
                         aut.setLastName(clusterContent);
@@ -240,12 +168,8 @@ public class PersonMedicalParser {
                         aut.setLastName(clusterContent);
                     }
                     aut.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(TaggingLabels.NAMES_HEADER_SUFFIX) ||
-                    clusterLabel.equals(TaggingLabels.NAMES_CITATION_SUFFIX)) {
-                    /*if (newMarker) {
-                        aut.setSuffix(clusterContent);
-                        newMarker = false;
-                    } else*/
+                } else if (clusterLabel.equals(MedicalLabels.NAMES_MEDIC_SUFFIX) ||
+                            clusterLabel.equals(MedicalLabels.NAMES_MEDIC_SUFFIX)) {
                     if (aut.getSuffix() != null) {
                         aut.setSuffix(aut.getSuffix() + " " + clusterContent);
                     } else {
@@ -255,25 +179,25 @@ public class PersonMedicalParser {
                 }
             }
 
-            // add last built author
+            // add last built medic
             if (aut.notNull()) {
-                if (fullAuthors == null) {
-                    fullAuthors = new ArrayList<PersonMedical>();
+                if (fullMedics == null) {
+                    fullMedics = new ArrayList<PersonMedical>();
                 }
-                fullAuthors.add(aut);
+                fullMedics.add(aut);
             }
 
             // some more person name normalisation
-            if (fullAuthors != null) {
-                for(PersonMedical author : fullAuthors) {
+            if (fullMedics != null) {
+                for(PersonMedical author : fullMedics) {
                     author.normalizeName();
                 }
-            }
+            } 
 
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return fullAuthors;
+        return fullMedics;
     }
 
     private boolean nameLabel(String label) {
@@ -282,13 +206,13 @@ public class PersonMedicalParser {
 
     /**
      * Extract results from a list of name strings in the training format without any string modification.
-     *
-     * @param input - the sequence of author names to be processed as a string.
-     * @param head - if true use the model for header's name, otherwise the model for names in citation
-     * @return the pseudo-TEI training data
-     */
+	 *
+	 * @param input - the sequence of author names to be processed as a string.
+	 * @param medic - if true use the model for medic's name, otherwise the model for names of patients
+	 * @return the pseudo-TEI training data
+	 */
     public StringBuilder trainingExtraction(String input,
-                                            boolean head) {
+                                            boolean medic) {
         if (StringUtils.isEmpty(input))
             return null;
         // force analyser with English, to avoid bad surprise
@@ -305,7 +229,7 @@ public class PersonMedicalParser {
             String sequence = FeaturesVectorName.addFeaturesName(tokens, null, titlePositions, suffixPositions);
             if (StringUtils.isEmpty(sequence))
                 return null;
-            GenericTagger tagger = head ? namesHeaderParser : namesCitationParser;
+            GenericTagger tagger = medic ? namesMedicParser : namesPatientParser;
             String res = tagger.label(sequence);
 
             // extract results from the processed file
@@ -324,12 +248,12 @@ public class PersonMedicalParser {
                 String line = st2.nextToken();
                 addSpace = false;
                 if ((line.trim().length() == 0)) {
-                    // new author
-                    if (head)
-                        buffer.append("/t<author>\n");
-                    else {
-                        //buffer.append("<author>");
-                    }
+                    // new medic
+					if (medic)
+                    	buffer.append("/t<medic>\n");
+					else {
+						buffer.append("/t<patient>\n");
+					}
                     continue;
                 } else {
                     String theTok = tokens.get(q).getText();
@@ -384,7 +308,7 @@ public class PersonMedicalParser {
                     }
                 }
 
-                tagClosed = lastTag0 != null && testClosingTag(buffer, currentTag0, lastTag0, head);
+                tagClosed = lastTag0 != null && testClosingTag(buffer, currentTag0, lastTag0, medic);
 
                 if (newLine) {
                     if (tagClosed) {
@@ -395,17 +319,17 @@ public class PersonMedicalParser {
 
                 }
 
-                String output = writeField(s1, lastTag0, s2, "<marker>", "<marker>", addSpace, 8, head);
+                String output = writeField(s1, lastTag0, s2, "<marker>", "<marker>", addSpace, 8, medic);
                 if (output != null) {
                     if (hasMarker) {
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t</persName>\n");
                         } else {
                             //buffer.append("</author>\n");
                         }
                         hasForename = false;
                         hasSurname = false;
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t<persName>\n");
                         } else {
                             //buffer.append("<author>\n");
@@ -416,10 +340,10 @@ public class PersonMedicalParser {
                     lastTag = s1;
                     continue;
                 } else {
-                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<other>", "<other>", addSpace, 8, medic);
                 }
                 if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<forename>", "<forename>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<forename>", "<forename>", addSpace, 8, medic);
                 } else {
                     if (buffer.length() > 0) {
                         if (buffer.charAt(buffer.length() - 1) == '\n') {
@@ -431,20 +355,20 @@ public class PersonMedicalParser {
                     continue;
                 }
                 if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<middlename>", "<middlename>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<middlename>", "<middlename>", addSpace, 8, medic);
                 } else {
                     if (hasForename && !currentTag0.equals(lastTag0)) {
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t</persName>\n");
                         } else {
-                            //buffer.append("</author>\n");
+                            //buffer.append("</medic>\n");
                         }
                         hasMarker = false;
                         hasSurname = false;
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t<persName>\n");
                         } else {
-                            //buffer.append("<author>\n");
+                            //buffer.append("<medic>\n");
                         }
                     }
                     hasForename = true;
@@ -453,27 +377,27 @@ public class PersonMedicalParser {
                     continue;
                 }
                 if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<surname>", "<surname>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<surname>", "<surname>", addSpace, 8, medic);
                 } else {
                     buffer.append(output);
                     lastTag = s1;
                     continue;
                 }
                 if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<title>", "<roleName>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<title>", "<roleName>", addSpace, 8, medic);
                 } else {
                     if (hasSurname && !currentTag0.equals(lastTag0)) {
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t</persName>\n");
                         } else {
-                            //buffer.append("</author>\n");
+                            //buffer.append("</medic>\n");
                         }
                         hasMarker = false;
                         hasForename = false;
-                        if (head) {
+                        if (medic) {
                             buffer.append("\t\t\t\t\t\t\t<persName>\n");
                         } else {
-                            //buffer.append("<author>\n");
+                            //buffer.append("<medic>\n");
                         }
                     }
                     hasSurname = true;
@@ -482,7 +406,7 @@ public class PersonMedicalParser {
                     continue;
                 }
                 if (output == null) {
-                    output = writeField(s1, lastTag0, s2, "<suffix>", "<suffix>", addSpace, 8, head);
+                    output = writeField(s1, lastTag0, s2, "<suffix>", "<suffix>", addSpace, 8, medic);
                 } else {
                     buffer.append(output);
                     lastTag = s1;
@@ -504,10 +428,9 @@ public class PersonMedicalParser {
                     lastTag0 = lastTag;
                 }
                 currentTag0 = "";
-                testClosingTag(buffer, currentTag0, lastTag0, head);
+                testClosingTag(buffer, currentTag0, lastTag0, medic);
             }
         } catch (Exception e) {
-//			e.printStackTrace();
             throw new GrobidException("An exception occured while running Grobid.", e);
         }
         return buffer;
@@ -519,8 +442,8 @@ public class PersonMedicalParser {
                               String field,
                               String outField,
                               boolean addSpace,
-                              int nbIndent,
-                              boolean head) {
+                              int nbIndent, 
+							  boolean head) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             if ((s1.equals("<other>") || s1.equals("I-<other>"))) {
@@ -535,15 +458,15 @@ public class PersonMedicalParser {
                     result = s2;
             } else {
                 result = "";
-                if (head) {
-                    for (int i = 0; i < nbIndent; i++) {
-                        result += "\t";
-                    }
-                }
-                if (addSpace)
-                    result += " " + outField + s2;
-                else
-                    result += outField + s2;
+				if (head) {
+	                for (int i = 0; i < nbIndent; i++) {
+	                    result += "\t";
+	                }
+				}
+				if (addSpace)
+					result += " " + outField + s2;
+				else		
+ 					result += outField + s2;
             }
         }
         return result;
@@ -552,38 +475,38 @@ public class PersonMedicalParser {
     private boolean testClosingTag(StringBuilder buffer,
                                    String currentTag0,
                                    String lastTag0,
-                                   boolean head) {
+								   boolean head) {
         boolean res = false;
         if (!currentTag0.equals(lastTag0)) {
             res = true;
             // we close the current tag
             if (lastTag0.equals("<other>")) {
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<forename>")) {
                 buffer.append("</forename>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<middlename>")) {
                 buffer.append("</middlename>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<surname>")) {
                 buffer.append("</surname>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<title>")) {
                 buffer.append("</roleName>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<suffix>")) {
                 buffer.append("</suffix>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else if (lastTag0.equals("<marker>")) {
                 buffer.append("</marker>");
-                if (head)
-                    buffer.append("\n");
+				if (head)
+					buffer.append("\n");
             } else {
                 res = false;
             }
