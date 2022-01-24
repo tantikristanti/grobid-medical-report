@@ -244,7 +244,7 @@ public class TEIFormatter {
                 }
                 // phone if it exists
                 if (headerItem.getPhone() != null) {
-                    tei.append("\t\t\t\t\t<phone>" + TextUtilities.HTMLEncode(headerItem.getPhone().replaceAll("\t", "; ")));
+                    tei.append("\t\t\t\t\t<phone>" + TextUtilities.HTMLEncode(headerItem.getPhone().replaceAll("\t", "; ").replaceAll("\n", "")));
                     tei.append("</phone>\n");
                 }
                 // fax if it exists
