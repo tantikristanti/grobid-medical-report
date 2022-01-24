@@ -127,84 +127,96 @@ public class MedicParser extends AbstractParser {
                         medic.setRole(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
                     if (medic.getPersName() != null) {
                         medic.setPersName(medic.getPersName() + "\t" + clusterContent);
                     } else {
                         medic.setPersName(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
                     if (medic.getAffiliation() != null) {
                         medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
                     } else {
                         medic.setAffiliation(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
                     if (medic.getOrganisation() != null) {
                         medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
                     } else {
                         medic.setOrganisation(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
                     if (medic.getInstitution() != null) {
                         medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
                     } else {
                         medic.setInstitution(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
                     if (medic.getAddress() != null) {
                         medic.setAddress(medic.getAddress() + "\t" + clusterContent);
                     } else {
                         medic.setAddress(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
                     if (medic.getCountry() != null) {
                         medic.setCountry(medic.getCountry() + "\t" + clusterContent);
                     } else {
                         medic.setCountry(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
                     if (medic.getTown() != null) {
                         medic.setTown(medic.getTown() + "\t" + clusterContent);
                     } else {
                         medic.setTown(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
                     if (medic.getEmail() != null) {
                         medic.setEmail(medic.getEmail() + "\t" + clusterContent);
                     } else {
                         medic.setEmail(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
                     if (medic.getPhone() != null) {
                         medic.setPhone(medic.getPhone() + "\t" + clusterContent);
                     } else {
                         medic.setPhone(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
                     if (medic.getFax() != null) {
                         medic.setFax(medic.getFax() + "\t" + clusterContent);
                     } else {
                         medic.setFax(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
                     if (medic.getWeb() != null) {
                         medic.setWeb(medic.getFax() + "\t" + clusterContent);
                     } else {
                         medic.setWeb(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
-                } else if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
                     if (medic.getNote() != null) {
                         medic.setNote(medic.getNote() + "\t" + clusterContent);
                     } else {
@@ -212,15 +224,9 @@ public class MedicParser extends AbstractParser {
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
                 }
-
-            }
-            // add the medic to the list
-            if (medic.getRole() != null || medic.getPersName() != null || medic.getAffiliation() != null ||
-                medic.getOrganisation() != null || medic.getInstitution() != null || medic.getAddress() != null ||
-                medic.getCountry() != null || medic.getTown() != null || medic.getEmail() != null ||
-                medic.getPhone() != null || medic.getFax() != null ||
-                medic.getWeb() != null || medic.getNote() != null){
-                fullMedics.add(medic);
+                if (medic != null){
+                    fullMedics.add(medic);
+                }
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
@@ -253,109 +259,111 @@ public class MedicParser extends AbstractParser {
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
-                if (isNotBlank(medic.getRole())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                if (medic.getRole() != null) {
+                    medic.setRole(medic.getRole() + "\t" + clusterContent);
+                } else {
                     medic.setRole(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
-                if (isNotBlank(medic.getPersName())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
+                if (medic.getPersName() != null) {
+                    medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+                } else {
                     medic.setPersName(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
-                if (isNotBlank(medic.getAffiliation())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
+                if (medic.getAffiliation() != null) {
+                    medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+                } else {
                     medic.setAffiliation(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
-                if (isNotBlank(medic.getOrganisation())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
+                if (medic.getOrganisation() != null) {
+                    medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+                } else {
                     medic.setOrganisation(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
-                if (isNotBlank(medic.getInstitution())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
+                if (medic.getInstitution() != null) {
+                    medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+                } else {
                     medic.setInstitution(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
-                if (isNotBlank(medic.getAddress())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
+                if (medic.getAddress() != null) {
+                    medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+                } else {
                     medic.setAddress(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
-                if (isNotBlank(medic.getCountry())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
+                if (medic.getCountry() != null) {
+                    medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+                } else {
                     medic.setCountry(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
-                if (isNotBlank(medic.getTown())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
+                if (medic.getTown() != null) {
+                    medic.setTown(medic.getTown() + "\t" + clusterContent);
+                } else {
                     medic.setTown(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
-                if (isNotBlank(medic.getEmail())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
+                if (medic.getEmail() != null) {
+                    medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+                } else {
                     medic.setEmail(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
-                if (isNotBlank(medic.getPhone())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
+                if (medic.getPhone() != null) {
+                    medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+                } else {
                     medic.setPhone(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
-                if (isNotBlank(medic.getFax())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
+                if (medic.getFax() != null) {
+                    medic.setFax(medic.getFax() + "\t" + clusterContent);
+                } else {
                     medic.setFax(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
-                if (isNotBlank(medic.getWeb())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
+                if (medic.getWeb() != null) {
+                    medic.setWeb(medic.getFax() + "\t" + clusterContent);
+                } else {
                     medic.setWeb(clusterContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
-                if (isNotBlank(medic.getNote())) {
-                    if (medic.isNotNull()) {
-                        medics.add(medic);
-                        medic = new Medic();
-                    }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
+                if (medic.getNote() != null) {
+                    medic.setNote(medic.getNote() + "\t" + clusterContent);
+                } else {
                     medic.setNote(clusterContent);
                 }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
+            if (medic != null){
+                medics.add(medic);
             }
         }
         return medics;
@@ -478,13 +486,13 @@ public class MedicParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<persName>", "<persName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
                     } 
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<affiliation>", "<affiliation>", addSpace, 0);
                     } 
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<orgName>", "<orgName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
                     } 
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<institution>", "<orgName>", addSpace, 0);
@@ -569,13 +577,13 @@ public class MedicParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
-            } else if (lastTag0.equals("<roleName>")) {
+            } else if (lastTag0.equals("<rolename>")) {
                 buffer.append("</roleName>");
-            } else if (lastTag0.equals("<persName>")) {
+            } else if (lastTag0.equals("<persname>")) {
                 buffer.append("</persName>");
             } else if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>");
-            } else if (lastTag0.equals("<orgName>")) {
+            } else if (lastTag0.equals("<orgname>")) {
                 buffer.append("</orgName>");
             } else if (lastTag0.equals("<institution>")) {
                 buffer.append("</orgName>");

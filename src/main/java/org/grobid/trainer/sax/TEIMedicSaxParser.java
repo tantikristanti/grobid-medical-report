@@ -107,13 +107,13 @@ public class TEIMedicSaxParser extends DefaultHandler {
 
         qName = qName.toLowerCase();
         if ((qName.equals("rolename")) || (qName.equals("role"))) {
-            currentTag = "<roleName>";
+            currentTag = "<rolename>";
         } else if (qName.equals("persname") || (qName.equals("name"))) {
-            currentTag = "<persName>";
+            currentTag = "<persname>";
         } else if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
         } else if ((qName.equals("orgname")) || (qName.equals("institution"))) {
-            currentTag = "<orgName>";
+            currentTag = "<orgname>";
         } else if (qName.equals("address")) {
             currentTag = "<address>";
         } else if (qName.equals("country")) {

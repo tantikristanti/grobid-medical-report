@@ -86,12 +86,11 @@ public class PatientParser extends AbstractParser {
             return null;
         }
         List<Patient> fullPatients = new ArrayList<>();
-        Patient patient = null;
+
         try {
             List<OffsetPosition>  locationsPositions = lexicon.tokenPositionsLocationNames(tokens);
             List<OffsetPosition>  titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
             List<OffsetPosition>  suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
-
             // get the features for the patient
             String sequence = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
                 locationsPositions, titlePositions, suffixPositions);
@@ -103,10 +102,10 @@ public class PatientParser extends AbstractParser {
             //System.out.println(res);
 
             TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.PATIENT, res, tokens);
-            patient = new Patient();
 
             List<TaggingTokenCluster> clusters = clusteror.cluster();
             for (TaggingTokenCluster cluster : clusters) {
+                Patient patient = new Patient();
                 if (cluster == null) {
                     continue;
                 }
@@ -127,7 +126,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
                     if (isNotBlank(patient.getPersName())) {
                         if (patient.isNotNull()) {
                             patient.setPersName(patient.getPersName() + "\t" + clusterContent);
@@ -136,7 +136,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
                     if (isNotBlank(patient.getSex())) {
                         if (patient.isNotNull()) {
                             patient.setSex(patient.getSex() + "\t" + clusterContent);
@@ -145,7 +146,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
                     if (isNotBlank(patient.getDateBirth())) {
                         if (patient.isNotNull()) {
                             patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
@@ -154,7 +156,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
                     if (isNotBlank(patient.getDateDeath())) {
                         if (patient.isNotNull()) {
                             patient.setDateDeath(patient.getDateDeath() + "\t" + clusterContent);
@@ -163,7 +166,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
                     if (isNotBlank(patient.getAddress())) {
                         if (patient.isNotNull()) {
                             patient.setAddress(patient.getAddress() + "\t" + clusterContent);
@@ -172,7 +176,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
                     if (isNotBlank(patient.getCountry())) {
                         if (patient.isNotNull()) {
                             patient.setCountry(patient.getCountry() + "\t" + clusterContent);
@@ -181,7 +186,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
                     if (isNotBlank(patient.getTown())) {
                         if (patient.isNotNull()) {
                             patient.setTown(patient.getTown() + "\t" + clusterContent);
@@ -190,7 +196,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
                     if (isNotBlank(patient.getPhone())) {
                         if (patient.isNotNull()) {
                             patient.setPhone(patient.getPhone() + "\t" + clusterContent);
@@ -199,7 +206,8 @@ public class PatientParser extends AbstractParser {
                         }
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
-                } else if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                     if (isNotBlank(patient.getNote())) {
                         if (patient.isNotNull()) {
                             patient.setNote(patient.getNote() + "\t" + clusterContent);
@@ -209,13 +217,9 @@ public class PatientParser extends AbstractParser {
                         patient.addLayoutTokens(cluster.concatTokens());
                     }
                 }
-            }
-            // add the dateline to the list
-            if (patient.getID() != null || patient.getPersName() != null || patient.getSex() != null ||
-                patient.getDateBirth() != null || patient.getDateDeath() != null || patient.getAddress() != null ||
-                patient.getCountry() != null || patient.getTown() != null || patient.getPhone() != null ||
-                patient.getNote() != null){
-                fullPatients.add(patient);
+                if(patient != null) {
+                    fullPatients.add(patient);
+                }
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
@@ -250,83 +254,105 @@ public class PatientParser extends AbstractParser {
             if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
                 if (isNotBlank(patient.getID())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setID(patient.getID() + "\t" + clusterContent);
+                    } else {
+                        patient.setID(clusterContent);
                     }
-                    patient.setID(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
                 if (isNotBlank(patient.getPersName())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setPersName(patient.getPersName() + "\t" + clusterContent);
+                    } else {
+                        patient.setPersName(clusterContent);
                     }
-                    patient.setPersName(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
                 if (isNotBlank(patient.getSex())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setSex(patient.getSex() + "\t" + clusterContent);
+                    } else {
+                        patient.setSex(clusterContent);
                     }
-                    patient.setSex(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
                 if (isNotBlank(patient.getDateBirth())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
+                    } else {
+                        patient.setDateBirth(clusterContent);
                     }
-                    patient.setDateBirth(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
                 if (isNotBlank(patient.getDateDeath())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setDateDeath(patient.getDateDeath() + "\t" + clusterContent);
+                    } else {
+                        patient.setDateDeath(clusterContent);
                     }
-                    patient.setDateDeath(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
                 if (isNotBlank(patient.getAddress())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setAddress(patient.getAddress() + "\t" + clusterContent);
+                    } else {
+                        patient.setAddress(clusterContent);
                     }
-                    patient.setAddress(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
                 if (isNotBlank(patient.getCountry())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setCountry(patient.getCountry() + "\t" + clusterContent);
+                    } else {
+                        patient.setCountry(clusterContent);
                     }
-                    patient.setAddress(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
                 if (isNotBlank(patient.getTown())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setTown(patient.getTown() + "\t" + clusterContent);
+                    } else {
+                        patient.setTown(clusterContent);
                     }
-                    patient.setTown(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
                 if (isNotBlank(patient.getPhone())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setPhone(patient.getPhone() + "\t" + clusterContent);
+                    } else {
+                        patient.setPhone(clusterContent);
                     }
-                    patient.setPhone(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
-            } else if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                 if (isNotBlank(patient.getNote())) {
                     if (patient.isNotNull()) {
-                        patients.add(patient);
-                        patient = new Patient();
+                        patient.setNote(patient.getNote() + "\t" + clusterContent);
+                    } else {
+                        patient.setNote(clusterContent);
                     }
-                    patient.setNote(clusterContent);
+                    patient.addLayoutTokens(cluster.concatTokens());
                 }
+            }
+            if(patient != null) {
+                patients.add(patient);
             }
         }
         return patients;
@@ -448,7 +474,7 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<sex>", "<sex>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<persName>", "<persName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<birth>", "<birth>", addSpace, 0);
@@ -529,7 +555,7 @@ public class PatientParser extends AbstractParser {
                 buffer.append("");
             } else if (lastTag0.equals("<idno>")) {
                 buffer.append("</idno>");
-            } else if (lastTag0.equals("<persName>")) {
+            } else if (lastTag0.equals("<persname>")) {
                 buffer.append("</persName>");
             } else if (lastTag0.equals("<sex>")) {
                 buffer.append("</sex>");

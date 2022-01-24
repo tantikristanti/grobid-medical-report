@@ -41,7 +41,7 @@ public class MedicalLabels extends TaggingLabels {
     public final static String ADDRESS_LABEL = "<address>";
     public static final String INSTITUTION_LABEL = "<institution>";
     public final static String ORG_LABEL = "<org>";
-    public static final String ORG_NAME_LABEL = "<orgName>";
+    public static final String ORG_NAME_LABEL = "<orgname>";
     public final static String EMAIL_LABEL = "<email>";
     public final static String PHONE_LABEL = "<phone>";
     public final static String FAX_LABEL = "<fax>";
@@ -62,8 +62,8 @@ public class MedicalLabels extends TaggingLabels {
     public static final String TABLE_LABEL = "<table>";
 
     // person (medics, patient)
-    public static final String ROLE_LABEL = "<roleName>";
-    public static final String PERSON_NAME_LABEL = "<persName>";
+    public static final String ROLE_LABEL = "<rolename>";
+    public static final String PERSON_NAME_LABEL = "<persname>";
     public static final String PERSON_SEX_LABEL = "<sex>";
     public static final String PERSON_BIRTH_LABEL = "<birth>";
     public static final String PERSON_DEATH_LABEL = "<death>";

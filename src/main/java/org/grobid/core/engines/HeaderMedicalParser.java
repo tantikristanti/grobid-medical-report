@@ -182,7 +182,6 @@ public class HeaderMedicalParser extends AbstractParser {
                     }
 
                     // if the date doesn't exist, we use the information from the dateline
-                    // datelines processing
                     if (resHeader.getDateline() != null) {
                         List<LayoutToken> datelineLayoutTokens = resHeader.getDatelinesTokens();
                         List<List<LayoutToken>> datelineSegments = new ArrayList<>();
@@ -204,6 +203,8 @@ public class HeaderMedicalParser extends AbstractParser {
                             for (int k = 0; k < datelineSegments.size(); k++) {
                                 if (datelineSegments.get(k).size() == 0)
                                     continue;
+
+                                // further datelines processing with the Dateline model
                                 List<Dateline> localDatelines = parsers.getDatelineParser()
                                     .processingWithLayoutTokens(datelineSegments.get(k));
                                 for (Dateline dateline : localDatelines) {
@@ -251,6 +252,7 @@ public class HeaderMedicalParser extends AbstractParser {
                             for (int k = 0; k < medicSegments.size(); k++) {
                                 if (medicSegments.get(k).size() == 0)
                                     continue;
+                                // further medics processing with the Medic model
                                 List<Medic> localMedics = parsers.getMedicParser()
                                     .processingWithLayoutTokens(medicSegments.get(k));
 
@@ -286,6 +288,8 @@ public class HeaderMedicalParser extends AbstractParser {
                             for (int k = 0; k < patientSegments.size(); k++) {
                                 if (patientSegments.get(k).size() == 0)
                                     continue;
+
+                                // further patient processing with the Patient model
                                 List<Patient> localPatients = parsers.getPatientParser()
                                     .processingWithLayoutTokens(patientSegments.get(k));
 

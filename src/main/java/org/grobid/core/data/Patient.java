@@ -34,7 +34,7 @@ public class Patient {
     }
 
     public String getDateDeath() {
-        return dateDeath;
+        return this.dateDeath;
     }
 
     public void setDateDeath(String dateDeath) {
@@ -46,7 +46,7 @@ public class Patient {
     }
 
     public String getDateBirth() {
-        return dateBirth;
+        return this.dateBirth;
     }
 
     public void setDateBirth(String dateBirth) {
@@ -54,16 +54,12 @@ public class Patient {
     }
 
     public String getPersName() {
-        return persName;
-    }
-
-    public void setFullName(String persName) {
-        this.persName = persName;
+        return this.persName;
     }
 
 
     public String getSex() {
-        return sex;
+        return this.sex;
     }
 
     public void setSex(String sex) {
@@ -71,7 +67,7 @@ public class Patient {
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public void setAddress(String address) {
@@ -79,7 +75,7 @@ public class Patient {
     }
 
     public String getCountry() {
-        return country;
+        return this.country;
     }
 
     public void setCountry(String country) {
@@ -87,7 +83,7 @@ public class Patient {
     }
 
     public String getTown() {
-        return town;
+        return this.town;
     }
 
     public void setTown(String town) {
@@ -95,7 +91,7 @@ public class Patient {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -103,7 +99,7 @@ public class Patient {
     }
 
     public String getPhone() {
-        return phone;
+        return this.phone;
     }
 
     public void setPhone(String phone) {
@@ -111,7 +107,7 @@ public class Patient {
     }
 
     public String getNote() {
-        return note;
+        return this.note;
     }
 
     public void setNote(String note) {
