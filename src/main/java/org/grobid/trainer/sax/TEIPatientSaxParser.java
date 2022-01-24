@@ -112,7 +112,7 @@ public class TEIPatientSaxParser extends DefaultHandler {
         if (qName.equals("idno")) {
             currentTag = "<idno>";
         } else if ((qName.equals("persname") || (qName.equals("name")))) {
-            currentTag = "<persName>";
+            currentTag = "<persname>";
         } else if (qName.equals("sex")) {
             currentTag = "<sex>";
         } else if (qName.equals("birth")) {
