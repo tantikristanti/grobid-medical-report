@@ -1,5 +1,10 @@
 package org.grobid.core.data;
 
+import org.grobid.core.layout.LayoutToken;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class for representing and exchanging patient information.
  *
@@ -17,6 +22,8 @@ public class Patient {
     private String email = null;
     private String phone = null;
     private String note = null;
+
+    private List<LayoutToken> layoutTokens = new ArrayList<>();
 
     public String getID() {
         return ID;
@@ -124,4 +131,23 @@ public class Patient {
             (phone != null) ||
             (note != null);
     }
+
+    public List<LayoutToken> getLayoutTokens() {
+        return layoutTokens;
+    }
+
+    public void setLayoutTokens(List<LayoutToken> tokens) {
+        this.layoutTokens = tokens;
+    }
+
+    /**
+     * TEI serialization via xom.
+     */
+    public void addLayoutTokens(List<LayoutToken> theTokens) {
+        if (layoutTokens == null) {
+            layoutTokens = new ArrayList<LayoutToken>();
+        }
+        layoutTokens.addAll(theTokens);
+    }
+
 }

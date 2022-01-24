@@ -1,12 +1,10 @@
 package org.grobid.core.data;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.util.ClassicPersonEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
 import org.grobid.core.data.util.MedicEmailAssigner;
-import org.grobid.core.document.Document;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.layout.BoundingBox;
@@ -14,12 +12,14 @@ import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
-import org.grobid.core.utilities.LanguageUtilities;
 import org.grobid.core.utilities.TextUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,15 +31,11 @@ import java.util.regex.Pattern;
 public class HeaderMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalItem.class);
 
-    private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     private MedicEmailAssigner medicEmailAssigner = new ClassicPersonEmailAssigner();
     private EmailSanitizer emailSanitizer = new EmailSanitizer();
-    private String teiId;
-    //TODO: keep in sync with teiId - now teiId is generated in many different places
-    private Integer ordinal;
     private List<BoundingBox> coordinates = null;
 
-    // map of labels (e.g. <title> or <abstract>) to LayoutToken
+    // map of labels (e.g. <title> or <affiliation>) to LayoutToken
     private Map<String, List<LayoutToken>> labeledTokens;
 
     private List<LayoutToken> titleLayoutTokens = new ArrayList<>();
@@ -47,102 +43,71 @@ public class HeaderMedicalItem {
     private List<LayoutToken> patientsLayoutTokens = new ArrayList<>();
     private List<LayoutToken> datelinesLayoutTokens = new ArrayList<>();
 
+    // information regarding the document
+    private String language = null;
+    private int nbPages = -1;
+    private String document_number = null;
+    private String document_type = null;
+    private String title = null;
+    private String document_date = null;
+    private Date normalized_document_date = null;
+    private String time = null;
+    private String dateline = null;
+    private String location = null;
+
+    // information regarding the publisher (organization/institution who issues the document)
+    private String affiliation = null;
+    private String address = null;
+    private String email = null;
+    private String phone = null;
+    private String fax = null;
+    private String web = null;
+    private String org = null; // information from header or left-note
+
+    // information regarding of person (medics, patients)
+    private String medics = null;
+    private String patients = null;
+
+    // short note in the header
+    private String note = null;
+
+    // list of medics, patients, datelines, affiliations for further process with related models
+    private List<Medic> listMedics = null;
+    private List<Patient> listPatients = null;
+    private List<Affiliation> fullAffiliations = null;
+    private List<Dateline> listDatelines = null;
+
     @Override
     public String toString() {
         return "HeaderItem{" +
-            "  languageUtilities=" + languageUtilities +
-            ", language='" + language + '\'' +
+            " language='" + language + '\'' +
+            ", number_pages=" + nbPages +
+            ", publisher='" + affiliation + '\'' +
+            ", address='" + address + '\'' +
+            ", email_publisher='" + email + '\'' +
+            ", phone_publisher='" + phone + '\'' +
+            ", fax_publisher='" + fax + '\'' +
+            ", web_publisher='" + web + '\'' +
+            ", org='" + org + '\'' +
             ", document_number='" + document_number + '\'' +
             ", document_type='" + document_type + '\'' +
             ", title='" + title + '\'' +
             ", document_date='" + document_date + '\'' +
-            ", normalized_publication_date=" + normalized_document_date +
             ", document_time='" + time + '\'' +
-            ", fullDatelines='" + fullDatelines + '\'' +
-            ", fullMedics=" + fullMedics +
+            ", dateline'" + dateline + '\'' +
+            ", location'" + location + '\'' +
             ", medics='" + medics + '\'' +
-            ", fullpatients=" + fullPatients +
             ", patients='" + patients + '\'' +
-            ", affiliationList=" + affiliationList +
-            ", affiliation='" + affiliation + '\'' +
-            ", address='" + address + '\'' +
-            ", fullAffiliations=" + fullAffiliations +
-            ", affiliationAddressBlock='" + affiliationAddressBlock + '\'' +
-            ", org='" + org + '\'' +
-            ", email='" + email + '\'' +
-            ", phone='" + phone + '\'' +
-            ", fax='" + fax + '\'' +
-            ", web='" + web + '\'' +
-            ", pageRange='" + pageRange + '\'' +
-            ", beginPage=" + beginPage +
-            ", endPage=" + endPage +
-            ", path='" + path + '\'' +
             '}';
     }
-
-    private String language = null;
-    private String document_number = null; // print/default
-    private String docNumGeneral = null;
-    private String title = null;
-
-    private String document_type = null;
-
-    private String affiliation = null;
-    private String address = null;
-    private String org = null;
-    private String email = null;
-    private String phone = null;
-    private String web = null;
-    private String fax = null;
-    private String day = null;
-    private String month = null;
-    private String medics = null;
-    private String firstMedicSurname = null;
-    private String patients = null;
-    private String location = null;
-    private String note = null;
-    private String pageRange = null;
-    private String institution = null;
-
-    // advanced grobid recognitions
-    private List<String> medicList;
-    private List<String> patientList;
-    private List<String> affiliationList;
-
-    private List<Medic> fullMedics = null;
-    private List<Patient> fullPatients = null;
-    private List<Affiliation> fullAffiliations = null;
-    private List<Dateline> fullDatelines = null;
-    private List<Dateline> datelines = null;
-
-    public String affiliationAddressBlock = null;
-
-    // just for articles
-    private int beginPage = -1;
-    private int endPage = -1;
-    private String year = null; // default is publication date on print media
-    private String medicString = null;
-    private String path = "";
-
-    // for OCR post-corrections
-    private String originalAffiliation = null;
-    private String originalMedics = null;
-    private String originalPatients = null;
-    private String originalDatelines = null;
-
-    // for dateline
-    private String dateline = null;
-    private String document_date = null;
-    private Date normalized_document_date = null;
-    
-    private String date = null;
-    private String time = null;
 
     public HeaderMedicalItem() {}
 
     public String getLanguage() {
         return this.language;
     }
+
+    public int getNbPages() {return nbPages;}
 
     public String getDocNum() { return this.document_number; }
 
@@ -152,25 +117,17 @@ public class HeaderMedicalItem {
 
     public String getDocumentDate() { return this.document_date; }
 
-    public String getDay() {
-        return day;
-    }
-
     public Date getNormalizedDocumentDate() { return normalized_document_date; }
 
     public String getDocumentTime() { return this.time; }
 
     public String getDateline() {return this.dateline;}
 
-    public List<Dateline> getDatelines() {return this.datelines;}
-
     public String getMedics() {return medics;}
 
     public String getPatients() { return patients; }
 
     public String getAffiliation() { return affiliation; }
-
-    public String getInstitution() { return institution; }
 
     public String getAddress() {
         return address;
@@ -194,46 +151,17 @@ public class HeaderMedicalItem {
         return web;
     }
 
-    public String getMonth() {
-        return this.month;
-    }
-
-    public int getBeginPage() {
-        return beginPage;
-    }
-
-    public int getEndPage() {
-        return endPage;
-    }
-
-    public String getYear() {
-        return year;
-    }
-
     public String getLocation() {
         return this.location;
     }
 
     public String getNote() {return this.note;}
 
-    public String getDate() {return this.date;}
-    
-    public String getPageRange() {
-        if (pageRange != null)
-            return pageRange;
-        else if ((beginPage != -1) && (endPage != -1))
-            return "" + beginPage + "--" + endPage;
-        else
-            return null;
-    }
+    public List<Medic> getListMedics() {return listMedics;}
 
-    public List<Medic> getFullMedics() {
-        return fullMedics;
-    }
+    public List<Patient> getListPatients() { return listPatients; }
 
-    public List<Patient> getFullPatients() { return fullPatients; }
-
-    public List<Dateline> getFullDatelines() { return fullDatelines; }
+    public List<Dateline> getListDatelines() { return listDatelines; }
 
     public List<Affiliation> getFullAffiliations() {
         return fullAffiliations;
@@ -251,9 +179,9 @@ public class HeaderMedicalItem {
         this.language = StringUtils.normalizeSpace(theLanguage);
     }
 
-    public void setDocNum(String idno) { this.document_number = StringUtils.normalizeSpace(idno); }
+    public void setNbPages(int nb) { this.nbPages = nb;}
 
-    public void setDocNumGeneral(String docNumGeneral) { docNumGeneral = StringUtils.normalizeSpace(docNumGeneral); }
+    public void setDocNum(String idno) { this.document_number = StringUtils.normalizeSpace(idno); }
 
     public void setDocumentType(String theDocumentType) { this.document_type = StringUtils.normalizeSpace(theDocumentType); }
 
@@ -267,8 +195,6 @@ public class HeaderMedicalItem {
 
     public void setLocation(String location) {this.location = StringUtils.normalizeSpace(location); }
 
-    public void setDate(String date) {this.date = StringUtils.normalizeSpace(date);}
-
     public void setNote(String note) { this.note = StringUtils.normalizeSpace(note); }
 
     public void setDocumentTime(String theTime) { this.time = StringUtils.normalizeSpace(theTime); }
@@ -281,19 +207,9 @@ public class HeaderMedicalItem {
 
     public void setMedics(String themedics) {this.medics = StringUtils.normalizeSpace(themedics);}
 
-    public void setBeginPage(int p) {
-        beginPage = p;
-    }
+    public void setListMedics(List<Medic> fMedics) { this.listMedics = fMedics; }
 
-    public void setEndPage(int p) {
-        endPage = p;
-    }
-
-    public void setFullMedics(List<Medic> fMedics) { this.fullMedics = fMedics; }
-
-    public void setFullPatients(List<Patient> fPatients) { this.fullPatients = fPatients; }
-
-    public void setFullDatelines(List<Dateline> dl) { this.fullDatelines = dl; }
+    public void setListPatients(List<Patient> fPatients) { this.listPatients = fPatients; }
 
     public void setFullAffiliations(List<Affiliation> full) {
         fullAffiliations = full;
@@ -309,6 +225,12 @@ public class HeaderMedicalItem {
         }
     }
 
+    public HeaderMedicalItem addDatelinesToken(LayoutToken lt) {
+        datelinesLayoutTokens.add(lt);
+        return this;
+    }
+
+
     public HeaderMedicalItem addMedicsToken(LayoutToken lt) {
         medicsLayoutTokens.add(lt);
         return this;
@@ -319,34 +241,25 @@ public class HeaderMedicalItem {
         return this;
     }
 
-    public HeaderMedicalItem addDatelinesToken(LayoutToken lt) {
-        datelinesLayoutTokens.add(lt);
-        return this;
+    public void addDateline(Dateline dateline) {
+        if (listDatelines == null)
+            listDatelines = new ArrayList<Dateline>();
+        if (!listDatelines.contains(dateline))
+            listDatelines.add(dateline);
     }
 
     public void addMedic(Medic medic) {
-        if (fullMedics == null)
-            fullMedics = new ArrayList<Medic>();
-        if (!fullMedics.contains(medic))
-            fullMedics.add(medic);
+        if (listMedics == null)
+            listMedics = new ArrayList<Medic>();
+        if (!listMedics.contains(medic))
+            listMedics.add(medic);
     }
 
     public void addPatient(Patient patient) {
-        if (fullPatients == null)
-            fullPatients = new ArrayList<Patient>();
-        if (!fullPatients.contains(patient))
-            fullPatients.add(patient);
-    }
-
-    public void addDateline(Dateline dateline) {
-        if (datelines == null)
-            datelines = new ArrayList<Dateline>();
-        if (!datelines.contains(dateline))
-            datelines.add(dateline);
-    }
-
-    public void setPageRange(String pages) {
-        pageRange = StringUtils.normalizeSpace(pages);
+        if (listPatients == null)
+            listPatients = new ArrayList<Patient>();
+        if (!listPatients.contains(patient))
+            listPatients.add(patient);
     }
 
     public void setAffiliation(String a) {
@@ -376,99 +289,36 @@ public class HeaderMedicalItem {
         fax = f;
     }
 
-    public void setOriginalMedics(String medic) {originalMedics = medic;}
-
-    public void setOriginalPatients(String patient) {
-        originalPatients = patient;
-    }
-
-    public void setOriginalDatelines(String dateline) {originalDatelines = dateline;}
-
-    /**
-     * General string cleaining for SQL strings. This method might depend on the chosen
-     * relational database.
-     */
-    public static String cleanSQLString(String str) {
-        if (str == null)
-            return null;
-        if (str.length() == 0)
-            return null;
-        String cleanedString = "";
-        boolean special = false;
-        for (int index = 0; (index < str.length()); index++) {
-            char currentCharacter = str.charAt(index);
-            if ((currentCharacter == '\'') || (currentCharacter == '%') || (currentCharacter == '_')) {
-                special = true;
-                cleanedString += '\\';
-            }
-            cleanedString += currentCharacter;
-        }
-
-        return cleanedString;
-    }
-
 
     /**
      * Reinit all the values of the current bibliographical item
      */
     public void reset() {
         language = null;
-        title = null;
-        document_number = null;
-        docNumGeneral = null;
-        location = null;
-        note = null;
-        document_date = null;
-        normalized_document_date = null;
-        document_type = null;
-        time = null;
-        medics = null;
-        patients = null;
-        day = null;
-        month = null;
-        year = null;
-        pageRange = null;
-        institution = null;
+        nbPages = -1;
         affiliation = null;
         address = null;
-        org = null;
         email = null;
         phone = null;
         fax = null;
         web = null;
-        beginPage = -1;
-        endPage = -1;
-        fullMedics = null;
-        fullPatients = null;
-        fullAffiliations = null;
+        org = null;
+        document_number = null;
+        document_type = null;
+        title = null;
+        document_date = null;
+        normalized_document_date = null;
+        time = null;
         dateline = null;
-        datelines = null;
-        medicList = null;
-        patientList = null;
-        affiliationList = null;
-        affiliationAddressBlock = null;
-        medicString = null;
-        originalAffiliation = null;
-        originalMedics = null;
-        originalPatients = null;
-        originalDatelines = null;
-    }
+        location = null;
+        medics = null;
+        patients = null;
+        note = null;
 
-    /**
-     * Check if the identifier pubnum is a document number. If yes, instanciate
-     * the corresponding field and reset the generic pubnum field.
-     */
-    public void checkIdentifier() {
-        // document number
-        if (!StringUtils.isEmpty(docNumGeneral) && StringUtils.isEmpty(document_number)) {
-            docNumGeneral = TextUtilities.cleanField(docNumGeneral, true);
-            setDocNum(docNumGeneral);
-            setDocNumGeneral(null);
-        }
-    }
-
-    public void setFirstAuthorSurname(String firstMedicSurname) {
-        this.firstMedicSurname = firstMedicSurname;
+        listMedics = null;
+        listPatients = null;
+        fullAffiliations = null;
+        listDatelines = null;
     }
 
     /**
@@ -670,7 +520,7 @@ public class HeaderMedicalItem {
         StringBuffer tei = new StringBuffer();
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("<datelines>\n");
-        for (Dateline dateline : datelines) {
+        for (Dateline dateline : listDatelines) {
             if (dateline.getPlaceName() != null || dateline.getNote() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 1);
                 tei.append("<dateline>").append("\n");
@@ -680,20 +530,38 @@ public class HeaderMedicalItem {
 
                     if (dateline.getDate() != null) {
                         // the date has been in the ISO format using the Date model and parser
-                        tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">").
-                            append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
+                        tei.append(" <date type=\"issued\" when=\"" + dateline.getDate() + "\">" +
+                            TextUtilities.HTMLEncode(dateline.getDate()));
+                        tei.append("</date>");
                     }
                     if (dateline.getTimeString() != null) {
-                        tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>");
+                        tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
                     }
                 } else if (dateline.getNote() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
                     tei.append("<note>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</note>");
                     if (dateline.getDate() != null) {
                         // the date has been in the ISO format using the Date model and parser
-                        tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">").
-                            append(TextUtilities.HTMLEncode(dateline.getDate())).append("</date> ");
+                        tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
+                            TextUtilities.HTMLEncode(dateline.getDate()));
+                        tei.append("</date>");
                     }
+                    if (dateline.getTimeString() != null) {
+                        tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
+                    }
+                } else if (dateline.getDate() != null && dateline.getTimeString() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    // the date has been in the ISO format using the Date model and parser
+                    tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
+                        TextUtilities.HTMLEncode(dateline.getDate()));
+                    tei.append("</date>");
+                    tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
+                } else if (dateline.getDate() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    // the date has been in the ISO format using the Date model and parser
+                    tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
+                        TextUtilities.HTMLEncode(dateline.getDate()));
+                    tei.append("</date>");
                 }
                 tei.append("\n");
                 TextUtilities.appendN(tei, '\t', nbTag +1);
@@ -706,83 +574,72 @@ public class HeaderMedicalItem {
     }
 
     /**
-     * Create the TEI encoding for the medic+affiliation block for the current header object.
-     */
-    public String toTEIMedicBlock(int nbTag) {
-        return toTEIMedicBlock(nbTag, GrobidAnalysisConfig.defaultInstance());
-    }
-
-    /**
-     * Create the TEI encoding for the medic+affiliation block for the current header object.
+     * Create the TEI encoding for the medics for the current header object.
      */
     public String toTEIMedicBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
-        if (medics != null || affiliation != null || address != null ||
-            phone != null || fax != null || email != null || web != null ||
-            org != null) {
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("<listPerson type=\"medics\">\n");
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("<listPerson type=\"medics\">\n");
+        for (Medic medic : listMedics) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<medic>").append("\n");
-            if(medics != null) {
+            if (medic.getRole() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append(TextUtilities.HTMLEncode(medics) + "\n");
+                tei.append("<roleName>").append(TextUtilities.HTMLEncode(medic.getRole())).append("</roleName>\n");
             }
-
-            if(org != null){
+            if (medic.getPersName() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<org>").append("\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append(TextUtilities.HTMLEncode(org) + "\n");
+                tei.append("<persName>").append(TextUtilities.HTMLEncode(medic.getPersName())).append("</persName>\n");
+            }
+            if (medic.getAffiliation() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("</org>\n");
+                tei.append("<affiliation>").append(TextUtilities.HTMLEncode(medic.getAffiliation())).append("</affiliation>\n");
             }
-
-
-            TextUtilities.appendN(tei, '\t', nbTag + 2);
-            tei.append("<affiliation>").append("\n");
-            if(affiliation != null){
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append(TextUtilities.HTMLEncode(affiliation) + "\n");
+            if (medic.getOrganisation() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<orgName>").append(TextUtilities.HTMLEncode(medic.getOrganisation())).append("</orgName>\n");
             }
-            if(address != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("<address>").append("\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 4);
-                tei.append("<addrLine>").append("\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 5);
-                tei.append(TextUtilities.HTMLEncode(address) + "\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 4);
-                tei.append("</addrLine>").append("\n");
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("</address>").append("\n");
+            if (medic.getInstitution() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<institution>").append(TextUtilities.HTMLEncode(medic.getInstitution())).append("</institution>\n");
             }
-            if(phone != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("<phone>" + TextUtilities.HTMLEncode(phone.replaceAll("\\n", "")) + "</phone>\n");
+            if (medic.getAddress() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<address>").append(TextUtilities.HTMLEncode(medic.getAddress())).append("</address>\n");
             }
-            if(fax != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("<fax>" + TextUtilities.HTMLEncode(fax.replaceAll("\\n", "")) + "</fax>\n");
+            if (medic.getCountry() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<country>").append(TextUtilities.HTMLEncode(medic.getCountry())).append("</country>\n");
             }
-            if(email != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("<email>" + TextUtilities.HTMLEncode(email.replaceAll("\\n", "")) + "</email>\n");
+            if (medic.getTown() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<settlement>").append(TextUtilities.HTMLEncode(medic.getTown())).append("</settlement>\n");
             }
-            if(web != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 3);
-                tei.append("<web>" + TextUtilities.HTMLEncode(web.replaceAll("\\n", "")) + "</web>\n");
+            if (medic.getEmail() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<email>").append(TextUtilities.HTMLEncode(medic.getEmail())).append("</email>\n");
             }
-            TextUtilities.appendN(tei, '\t', nbTag + 2);
-            tei.append("</affiliation>\n");
-
+            if (medic.getPhone() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<phone>").append(TextUtilities.HTMLEncode(medic.getPhone())).append("</phone>\n");
+            }
+            if (medic.getFax() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<fax>").append(TextUtilities.HTMLEncode(medic.getFax())).append("</fax>\n");
+            }
+            if (medic.getWeb() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<ptr type=\"web\">").append(TextUtilities.HTMLEncode(medic.getWeb())).append("</ptr>\n");
+            }
+            if (medic.getNote() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<note type=\"medic\">").append(TextUtilities.HTMLEncode(medic.getNote())).append("</note>\n");
+            }
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("</medic>\n");
-
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("</listPerson>\n");
-
         }
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("</listPerson>\n");
         return tei.toString();
     }
 
@@ -791,423 +648,66 @@ public class HeaderMedicalItem {
      */
     public String toTEIPatientBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
-        if (patients != null) {
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("<listPerson type=\"patients\">\n");
-
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("<listPerson type=\"patients\">\n");
+        for (Patient patient : listPatients) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<patient>").append("\n");
-
-            if(patients != null) {
+            if (patient.getID() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append(TextUtilities.HTMLEncode(patients) + "\n");
+                tei.append("<idno>").append(TextUtilities.HTMLEncode(patient.getID())).append("</idno>\n");
             }
-
+            if (patient.getPersName() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<persName>").append(TextUtilities.HTMLEncode(patient.getPersName())).append("</persName>\n");
+            }
+            if (patient.getSex() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<sex type=\"" + TextUtilities.HTMLEncode(patient.getSex()) + "\">").append(TextUtilities.HTMLEncode(patient.getSex()));
+                tei.append("</sex>\n");
+            }
+            if (patient.getDateBirth() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<birth when=\">" + TextUtilities.HTMLEncode(patient.getDateBirth()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateBirth()));
+                    tei.append("</birth>\n");
+            }
+            if (patient.getDateDeath() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<death when=\">" + TextUtilities.HTMLEncode(patient.getDateDeath()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateDeath()));
+                tei.append("</death>\n");
+            }
+            if (patient.getAddress() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<address>").append(TextUtilities.HTMLEncode(patient.getAddress())).append("</address>\n");
+            }
+            if (patient.getCountry() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<country>").append(TextUtilities.HTMLEncode(patient.getCountry())).append("</country>\n");
+            }
+            if (patient.getTown() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<settlement>").append(TextUtilities.HTMLEncode(patient.getTown())).append("</settlement>\n");
+            }
+            if (patient.getPhone() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<phone>").append(TextUtilities.HTMLEncode(patient.getPhone())).append("</phone>\n");
+            }
+            if (patient.getNote() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<note type=\"patient\">").append(TextUtilities.HTMLEncode(patient.getNote())).append("</note>\n");
+            }
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("</patient>\n");
-
-            TextUtilities.appendN(tei, '\t', nbTag);
-            tei.append("</listPerson>\n");
-
         }
-        // ===================original version===================
-        /*StringBuffer tei = new StringBuffer();
-        int nbpatients = 0;
-        int nbAffiliations = 0;
-        int nbAddresses = 0;
-
-        boolean withCoordinates = false;
-        if (config != null && config.getGenerateTeiCoordinates() != null) {
-            withCoordinates = config.getGenerateTeiCoordinates().contains("persName");
-        }
-
-        List<PersonMedical> patients = fullPatients;
-
-        Lexicon lexicon = Lexicon.getInstance();
-
-        if (patients == null)
-            nbpatients = 0;
-        else
-            nbpatients = patients.size();
-
-        if (patients != null) {
-            if (nbpatients > 0) {
-                int autRank = 0;
-                int contactAut = -1;
-                //check if we have a single patient of contact
-                for (PersonMedical patient : patients) {
-                    if (patient.getAddress() != null) {
-                        if (contactAut == -1)
-                            contactAut = autRank;
-                        else {
-                            contactAut = -1;
-                            break;
-                        }
-                    }
-                    autRank++;
-                }
-                autRank = 0;
-                for (PersonMedical patient : patients) {
-                    if (patient.getLastName() != null) {
-                        if (patient.getLastName().length() < 2)
-                            continue;
-                    }
-
-                    if ((patient.getFirstName() == null) && (patient.getMiddleName() == null) &&
-                        (patient.getLastName() == null)) {
-                        continue;
-                    }
-
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("<patient");
-
-                    if (autRank == contactAut) {
-                        tei.append(" role=\"corresp\">\n");
-                    } else
-                        tei.append(">\n");
-
-                    TextUtilities.appendN(tei, '\t', nbTag + 1);
-
-                    String localString = patient.toTEI(withCoordinates);
-                    localString = localString.replace(" xmlns=\"http://www.tei-c.org/ns/1.0\"", "");
-                    tei.append(localString).append("\n");
-                    if (patient.getAddress() != null) {
-                        TextUtilities.appendN(tei, '\t', nbTag + 1);
-                        tei.append("<address><addrLine>" + TextUtilities.HTMLEncode(patient.getAddress()) + "</addrLine></address>\n");
-                    }
-
-                    TextUtilities.appendN(tei, '\t', nbTag);
-                    tei.append("</patient>\n");
-                    autRank++;
-                }
-            }
-        }
-
-        return tei.toString();*/
-
+        TextUtilities.appendN(tei, '\t', nbTag);
+        tei.append("</listPerson>\n");
         return tei.toString();
-
-    }
-
-    private void appendAffiliation(
-        StringBuffer tei,
-        int nbTag,
-        Affiliation aff,
-        GrobidAnalysisConfig config,
-        Lexicon lexicon
-    ) {
-        TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("<affiliation");
-        if (aff.getKey() != null)
-            tei.append(" key=\"").append(aff.getKey()).append("\"");
-        tei.append(">\n");
-
-        if (
-            config.getIncludeRawAffiliations()
-                && !StringUtils.isEmpty(aff.getRawAffiliationString())
-        ) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            String encodedRawAffiliationString = TextUtilities.HTMLEncode(
-                aff.getRawAffiliationString()
-            );
-            tei.append("<note type=\"raw_affiliation\">");
-            LOGGER.debug("marker: {}", aff.getMarker());
-            if (StringUtils.isNotEmpty(aff.getMarker())) {
-                tei.append("<label>");
-                tei.append(aff.getMarker());
-                tei.append("</label> ");
-            }
-            tei.append(encodedRawAffiliationString);
-            tei.append("</note>\n");
-        }
-
-        if (aff.getDepartments() != null) {
-            if (aff.getDepartments().size() == 1) {
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("<orgName type=\"department\">" +
-                    TextUtilities.HTMLEncode(aff.getDepartments().get(0)) + "</orgName>\n");
-            } else {
-                int q = 1;
-                for (String depa : aff.getDepartments()) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 1);
-                    tei.append("<orgName type=\"department\" key=\"dep" + q + "\">" +
-                        TextUtilities.HTMLEncode(depa) + "</orgName>\n");
-                    q++;
-                }
-            }
-        }
-
-        if (aff.getLaboratories() != null) {
-            if (aff.getLaboratories().size() == 1) {
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("<orgName type=\"laboratory\">" +
-                    TextUtilities.HTMLEncode(aff.getLaboratories().get(0)) + "</orgName>\n");
-            } else {
-                int q = 1;
-                for (String labo : aff.getLaboratories()) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 1);
-                    tei.append("<orgName type=\"laboratory\" key=\"lab" + q + "\">" +
-                        TextUtilities.HTMLEncode(labo) + "</orgName>\n");
-                    q++;
-                }
-            }
-        }
-
-        if (aff.getInstitutions() != null) {
-            if (aff.getInstitutions().size() == 1) {
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("<orgName type=\"institution\">" +
-                    TextUtilities.HTMLEncode(aff.getInstitutions().get(0)) + "</orgName>\n");
-            } else {
-                int q = 1;
-                for (String inst : aff.getInstitutions()) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 1);
-                    tei.append("<orgName type=\"institution\" key=\"instit" + q + "\">" +
-                        TextUtilities.HTMLEncode(inst) + "</orgName>\n");
-                    q++;
-                }
-            }
-        }
-
-        if ((aff.getAddressString() != null) ||
-            (aff.getAddrLine() != null) ||
-            (aff.getPostBox() != null) ||
-            (aff.getPostCode() != null) ||
-            (aff.getSettlement() != null) ||
-            (aff.getRegion() != null) ||
-            (aff.getCountry() != null)) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-
-            tei.append("<address>\n");
-            if (aff.getAddressString() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<addrLine>" + TextUtilities.HTMLEncode(aff.getAddressString()) +
-                    "</addrLine>\n");
-            }
-            if (aff.getAddrLine() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<addrLine>" + TextUtilities.HTMLEncode(aff.getAddrLine()) +
-                    "</addrLine>\n");
-            }
-            if (aff.getPostBox() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<postBox>" + TextUtilities.HTMLEncode(aff.getPostBox()) +
-                    "</postBox>\n");
-            }
-            if (aff.getPostCode() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<postCode>" + TextUtilities.HTMLEncode(aff.getPostCode()) +
-                    "</postCode>\n");
-            }
-            if (aff.getSettlement() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<settlement>" + TextUtilities.HTMLEncode(aff.getSettlement()) +
-                    "</settlement>\n");
-            }
-            if (aff.getRegion() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<region>" + TextUtilities.HTMLEncode(aff.getRegion()) +
-                    "</region>\n");
-            }
-            if (aff.getCountry() != null) {
-                String code = lexicon.getCountryCode(aff.getCountry());
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<country");
-                if (code != null)
-                    tei.append(" key=\"" + code + "\"");
-                tei.append(">" + TextUtilities.HTMLEncode(aff.getCountry()) +
-                    "</country>\n");
-            }
-
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("</address>\n");
-        }
-
-        TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("</affiliation>\n");
     }
 
     private static volatile String possiblePreFixPageNumber = "[A-Ze]?";
     private static volatile String possiblePostFixPageNumber = "[A-Z]?";
     private static volatile Pattern page = Pattern.compile("(" + possiblePreFixPageNumber + "\\d+" + possiblePostFixPageNumber + ")");
     private static volatile Pattern pageDigits = Pattern.compile("\\d+");
-
-    /**
-     * Try to normalize the page range, which can be expressed in abbreviated forms and with letter prefix.
-     */
-    public void postProcessPages() {
-        if (pageRange != null) {
-            Matcher matcher = page.matcher(pageRange);
-            if (matcher.find()) {
-
-                // below for the string form of the page numbers
-                String firstPage = null;
-                String lastPage = null;
-
-                // alphaPrefix or alphaPostfix are for storing possible alphabetical prefix or postfix to page number,
-                // e.g. "L" in Smith, G. P., Mazzotta, P., Okabe, N., et al. 2016, MNRAS, 456, L74
-                // or "D" in  "Am J Cardiol. 1999, 83:143D-150D. 10.1016/S0002-9149(98)01016-9"
-                String alphaPrefixStart = null;
-                String alphaPrefixEnd = null;
-                String alphaPostfixStart = null;
-                String alphaPostfixEnd = null;
-
-                // below for the integer form of the page numbers (part in case alphaPrefix is not null)
-                int beginPage = -1;
-                int endPage = -1;
-
-                if (matcher.groupCount() > 0) {
-                    firstPage = matcher.group(0);
-                }
-
-                if (firstPage != null) {
-                    try {
-                        beginPage = Integer.parseInt(firstPage);
-                    } catch (Exception e) {
-                        beginPage = -1;
-                    }
-                    if (beginPage != -1) {
-                        pageRange = "" + beginPage;
-                    } else {
-                        pageRange = firstPage;
-
-                        // try to get the numerical part of the page number, useful for later
-                        Matcher matcher2 = pageDigits.matcher(firstPage);
-                        if (matcher2.find()) {
-                            try {
-                                beginPage = Integer.parseInt(matcher2.group());
-                                if (firstPage.length() > 0) {
-                                    alphaPrefixStart = firstPage.substring(0, 1);
-                                    // is it really alphabetical character?
-                                    if (!Pattern.matches(possiblePreFixPageNumber, alphaPrefixStart)) {
-                                        alphaPrefixStart = null;
-                                        // look at postfix
-                                        alphaPostfixStart = firstPage.substring(firstPage.length() - 1, firstPage.length());
-                                        if (!Pattern.matches(possiblePostFixPageNumber, alphaPostfixStart)) {
-                                            alphaPostfixStart = null;
-                                        }
-                                    }
-                                }
-                            } catch (Exception e) {
-                                beginPage = -1;
-                            }
-                        }
-                    }
-
-                    if (matcher.find()) {
-                        if (matcher.groupCount() > 0) {
-                            lastPage = matcher.group(0);
-                        }
-
-                        if (lastPage != null) {
-                            try {
-                                endPage = Integer.parseInt(lastPage);
-                            } catch (Exception e) {
-                                endPage = -1;
-                            }
-
-                            if (endPage == -1) {
-                                // try to get the numerical part of the page number, to be used for later
-                                Matcher matcher2 = pageDigits.matcher(lastPage);
-                                if (matcher2.find()) {
-                                    try {
-                                        endPage = Integer.parseInt(matcher2.group());
-                                        if (lastPage.length() > 0) {
-                                            alphaPrefixEnd = lastPage.substring(0, 1);
-                                            // is it really alphabetical character?
-                                            if (!Pattern.matches(possiblePreFixPageNumber, alphaPrefixEnd)) {
-                                                alphaPrefixEnd = null;
-                                                // look at postfix
-                                                alphaPostfixEnd = lastPage.substring(lastPage.length() - 1, lastPage.length());
-                                                if (!Pattern.matches(possiblePostFixPageNumber, alphaPostfixEnd)) {
-                                                    alphaPostfixEnd = null;
-                                                }
-                                            }
-                                        }
-                                    } catch (Exception e) {
-                                        endPage = -1;
-                                    }
-                                }
-                            }
-
-                            if ((endPage != -1) && (endPage < beginPage)) {
-                                // there are two possibilities:
-                                // - the substitution, e.g. 433–8 -> 433--438, for example American Medical Association citation style
-                                // - the addition, e.g. 433–8 -> 433--441
-                                // unfortunately, it depends on the citation style
-
-                                // we try to guess/refine the re-composition of pages
-
-                                if (endPage >= 50) {
-                                    // we assume no journal articles have more than 49 pages and is expressed as addition,
-                                    // so it's a substitution
-                                    int upperBound = firstPage.length() - lastPage.length();
-                                    if (upperBound < firstPage.length() && upperBound > 0)
-                                        lastPage = firstPage.substring(0, upperBound) + lastPage;
-                                    pageRange += "--" + lastPage;
-                                } else {
-                                    if (endPage < 10) {
-                                        // case 1 digit for endPage
-
-                                        // last digit of begin page
-                                        int lastDigitBeginPage = beginPage % 10;
-
-                                        // if digit of lastPage lower than last digit of beginPage, it's an addition for sure
-                                        if (endPage < lastDigitBeginPage)
-                                            endPage = beginPage + endPage;
-                                        else {
-                                            // otherwise defaulting to substitution
-                                            endPage = beginPage - lastDigitBeginPage + endPage;
-                                        }
-                                    } else if (endPage < 50) {
-                                        // case 2 digit for endPage, we apply a similar heuristics
-                                        int lastDigitBeginPage = beginPage % 100;
-                                        if (endPage < lastDigitBeginPage)
-                                            endPage = beginPage + endPage;
-                                        else {
-                                            // otherwise defaulting to substitution
-                                            endPage = beginPage - lastDigitBeginPage + endPage;
-                                        }
-                                    }
-
-                                    // we assume there is no article of more than 99 pages expressed in this abbreviated way
-                                    // (which are for journal articles only, so short animals)
-
-                                    if (alphaPrefixEnd != null)
-                                        pageRange += "--" + alphaPrefixEnd + endPage;
-                                    else if (alphaPostfixEnd != null)
-                                        pageRange += "--" + endPage + alphaPostfixEnd;
-                                    else
-                                        pageRange += "--" + endPage;
-                                }
-                            } else if ((endPage != -1)) {
-                                if (alphaPrefixEnd != null)
-                                    pageRange += "--" + alphaPrefixEnd + endPage;
-                                else if (alphaPostfixEnd != null)
-                                    pageRange += "--" + endPage + alphaPostfixEnd;
-                                else
-                                    pageRange += "--" + lastPage;
-                            } else {
-                                pageRange += "--" + lastPage;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public String getTeiId() {
-        return teiId;
-    }
-
-    public int getOrdinal() {
-        return ordinal;
-    }
-
-    public void setOrdinal(int ordinal) {
-        this.ordinal = ordinal;
-    }
 
     public void setCoordinates(List<BoundingBox> coordinates) {
         this.coordinates = coordinates;

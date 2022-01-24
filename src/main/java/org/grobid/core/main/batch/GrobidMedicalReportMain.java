@@ -39,7 +39,7 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
     private static final String COMMAND_PROCESS_HEADER = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
-    private static final String COMMAND_PROCESS_FULL_TEXT = "processFulltextMedical";
+    private static final String COMMAND_PROCESS_FULL_TEXT = "processFullMedical";
     private static final String COMMAND_CREATE_MEDICAL_NER_TRAINING = "createMedicalNerTraining";
     private static final String COMMAND_EXTRACT_NER = "extractNER";
 

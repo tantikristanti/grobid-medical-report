@@ -214,7 +214,7 @@ public class MedicParser extends AbstractParser {
                 }
 
             }
-            // add the dateline to the list
+            // add the medic to the list
             if (medic.getRole() != null || medic.getPersName() != null || medic.getAffiliation() != null ||
                 medic.getOrganisation() != null || medic.getInstitution() != null || medic.getAddress() != null ||
                 medic.getCountry() != null || medic.getTown() != null || medic.getEmail() != null ||

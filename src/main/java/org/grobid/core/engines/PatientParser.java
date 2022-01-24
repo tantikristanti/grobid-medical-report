@@ -1,7 +1,9 @@
 package org.grobid.core.engines;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
+import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Medic;
 import org.grobid.core.data.Patient;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -10,6 +12,7 @@ import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorDateline;
 import org.grobid.core.features.FeaturesVectorMedic;
 import org.grobid.core.features.FeaturesVectorPatient;
+import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
@@ -54,31 +57,170 @@ public class PatientParser extends AbstractParser {
         this.parsers = parsers;
     }
 
-    public List<Patient> process(String input) {
-        // force English language for the tokenization only
-        List<LayoutToken> tokens = analyzer.tokenizeWithLayoutToken(input);
+    /**
+     * Processing of patients in the header part
+     */
+    public List<Patient> processing(String input) throws Exception {
+        if (StringUtils.isEmpty(input)) {
+            return null;
+        }
+
+        // for language to English for the analyser to avoid any bad surprises
+        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+        return processing(tokens);
+    }
+
+
+    public List<Patient> processingWithLayoutTokens(List<LayoutToken> inputs) {
+        return processing(inputs);
+    }
+
+    /**
+     * Common processing of patients (mostly for the header part, but it can be used in other parts, such as for the body part)
+     *
+     * @param tokens list of LayoutToken object to process
+     * @return List of identified Patient entites as POJO.
+     */
+    public List<Patient> processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-
-        return processCommon(tokens);
-    }
-
-    protected List<Patient> processCommon(List<LayoutToken> input) {
-        if (CollectionUtils.isEmpty(input))
-            return null;
-        List<OffsetPosition> locationsPositions = lexicon.tokenPositionsLocationNames(input);
-        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(input);
-        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(input);
+        List<Patient> fullPatients = new ArrayList<>();
+        Patient patient = null;
         try {
-            String features = FeaturesVectorPatient.addFeaturesPatient(input, null, locationsPositions, titlePositions, suffixPositions);
-            String res = label(features);
+            List<OffsetPosition>  locationsPositions = lexicon.tokenPositionsLocationNames(tokens);
+            List<OffsetPosition>  titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+            List<OffsetPosition>  suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
 
-            // extract results from the processed file
-            return resultExtractionLayoutTokens(res, input);
+            // get the features for the patient
+            String sequence = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
+                locationsPositions, titlePositions, suffixPositions);
+
+            if (StringUtils.isEmpty(sequence))
+                return null;
+            // labelling the featured data
+            String res = label(sequence);
+            //System.out.println(res);
+
+            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.PATIENT, res, tokens);
+            patient = new Patient();
+
+            List<TaggingTokenCluster> clusters = clusteror.cluster();
+            for (TaggingTokenCluster cluster : clusters) {
+                if (cluster == null) {
+                    continue;
+                }
+
+                TaggingLabel clusterLabel = cluster.getTaggingLabel();
+                Engine.getCntManager().i(clusterLabel);
+                String clusterContent = StringUtils.normalizeSpace(LayoutTokensUtil.toText(cluster.concatTokens()));
+                String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
+                if (clusterContent.trim().length() == 0)
+                    continue;
+
+                if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
+                    if (isNotBlank(patient.getID())) {
+                        if (patient.isNotNull()) {
+                            patient.setID(patient.getID() + "\t" + clusterContent);
+                        } else {
+                            patient.setID(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
+                    if (isNotBlank(patient.getPersName())) {
+                        if (patient.isNotNull()) {
+                            patient.setPersName(patient.getPersName() + "\t" + clusterContent);
+                        } else {
+                            patient.setPersName(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
+                    if (isNotBlank(patient.getSex())) {
+                        if (patient.isNotNull()) {
+                            patient.setSex(patient.getSex() + "\t" + clusterContent);
+                        } else {
+                            patient.setSex(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
+                    if (isNotBlank(patient.getDateBirth())) {
+                        if (patient.isNotNull()) {
+                            patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
+                        } else {
+                            patient.setDateBirth(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
+                    if (isNotBlank(patient.getDateDeath())) {
+                        if (patient.isNotNull()) {
+                            patient.setDateDeath(patient.getDateDeath() + "\t" + clusterContent);
+                        } else {
+                            patient.setDateDeath(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
+                    if (isNotBlank(patient.getAddress())) {
+                        if (patient.isNotNull()) {
+                            patient.setAddress(patient.getAddress() + "\t" + clusterContent);
+                        } else {
+                            patient.setAddress(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
+                    if (isNotBlank(patient.getCountry())) {
+                        if (patient.isNotNull()) {
+                            patient.setCountry(patient.getCountry() + "\t" + clusterContent);
+                        } else {
+                            patient.setCountry(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
+                    if (isNotBlank(patient.getTown())) {
+                        if (patient.isNotNull()) {
+                            patient.setTown(patient.getTown() + "\t" + clusterContent);
+                        } else {
+                            patient.setTown(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
+                    if (isNotBlank(patient.getPhone())) {
+                        if (patient.isNotNull()) {
+                            patient.setPhone(patient.getPhone() + "\t" + clusterContent);
+                        } else {
+                            patient.setPhone(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                } else if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
+                    if (isNotBlank(patient.getNote())) {
+                        if (patient.isNotNull()) {
+                            patient.setNote(patient.getNote() + "\t" + clusterContent);
+                        } else {
+                            patient.setNote(clusterContent);
+                        }
+                        patient.addLayoutTokens(cluster.concatTokens());
+                    }
+                }
+            }
+            // add the dateline to the list
+            if (patient.getID() != null || patient.getPersName() != null || patient.getSex() != null ||
+                patient.getDateBirth() != null || patient.getDateDeath() != null || patient.getAddress() != null ||
+                patient.getCountry() != null || patient.getTown() != null || patient.getPhone() != null ||
+                patient.getNote() != null){
+                fullPatients.add(patient);
+            }
         } catch (Exception e) {
-            throw new GrobidException("An exception on " + this.getClass().getName() + " occured while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running Grobid.", e);
         }
+        return fullPatients;
     }
     
     /**

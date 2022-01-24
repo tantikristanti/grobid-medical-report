@@ -1376,7 +1376,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                         + pdfFileName.replace(".pdf", "")
                         + "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
-                    writer.write("\n\t\t<front>\n");
+                    writer.write("\t\t<front>\n");
                     StringBuilder bufferHeader = new StringBuilder();
 
                     for (LayoutToken token : headerTokenization) {
@@ -1384,7 +1384,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     writer.write(bufferHeader.toString());
-                    writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
+                    writer.write("\t\t</front>\n\t</text>\n</tei>\n");
                     writer.close();
                 }
             }
@@ -1455,7 +1455,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 writer.write("\t\t\t\t<dateline>\n");
                 writer.write(input); // unlabeled data
                 writer.write("\n\t\t\t\t</dateline>\n");
-                writer.write("\n\t\t\t</datelines>\n");
+                writer.write("\t\t\t</datelines>\n");
                 writer.close();
             }
 
@@ -2507,8 +2507,6 @@ System.out.println("majorityEquationarkerType: " + majorityEquationarkerType);*/
             // header  and left-note
             tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
 
-            //System.out.println(rese);
-            //int mode = config.getFulltextProcessingMode();
             // body
             tei = teiFormatter.toTEIBody(tei, reseBody, resHeader, layoutTokenization, figures, tables, markerTypes, doc, config);
 
@@ -2686,7 +2684,7 @@ System.out.println("majorityEquationarkerType: " + majorityEquationarkerType);*/
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".medical.high.level.tei.xml"));
+            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".medical.tei.xml"));
             Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
 
             if (inputFile.getName().toLowerCase().endsWith(".pdf")) {

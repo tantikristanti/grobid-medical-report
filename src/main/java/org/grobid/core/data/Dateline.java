@@ -1,10 +1,12 @@
 package org.grobid.core.data;
 
+import org.grobid.core.engines.EngineMedicalParsers;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.TextUtilities;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * Class for representing a dateline.
