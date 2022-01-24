@@ -29,11 +29,17 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 				</publisher>
 			</publicationStmt>
 			<sourceDesc>
+				<listPerson type="patients">
+					<patient>
+						<persName>Madame TEST TEST</persName>
+						<address>test test 93160 NOISY LE GRAND</address>
+					</patient>
+				</listPerson>
 			</sourceDesc>
 		</fileDesc>
 		<encodingDesc>
 			<appInfo>
-				<application version="0.0.1" ident="grobid-medical-report" when="2022-01-24T13:24+0000">
+				<application version="0.0.1" ident="grobid-medical-report" when="2022-01-24T15:58+0000">
 					<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>
 					<ref target="https://github.com/tantikristanti/grobid-medical-report"/>
 				</application>
