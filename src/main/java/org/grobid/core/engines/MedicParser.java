@@ -4,17 +4,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
-import org.grobid.core.data.Dateline;
 import org.grobid.core.data.Medic;
-import org.grobid.core.data.Person;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.features.FeaturesVectorDateline;
 import org.grobid.core.features.FeaturesVectorMedic;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
-import org.grobid.core.layout.PDFAnnotation;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
@@ -29,8 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
 * A class for parsing medics information

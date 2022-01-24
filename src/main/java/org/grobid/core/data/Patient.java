@@ -25,6 +25,7 @@ public class Patient {
 
     private List<LayoutToken> layoutTokens = new ArrayList<>();
 
+
     public String getID() {
         return ID;
     }
@@ -33,33 +34,32 @@ public class Patient {
         this.ID = ID;
     }
 
-    public String getDateDeath() {
-        return this.dateDeath;
-    }
-
-    public void setDateDeath(String dateDeath) {
-        this.dateDeath = dateDeath;
-    }
-
-    public void setPersName(String persName) {
-        this.persName = persName;
-    }
-
     public String getDateBirth() {
-        return this.dateBirth;
+        return dateBirth;
     }
 
     public void setDateBirth(String dateBirth) {
         this.dateBirth = dateBirth;
     }
 
-    public String getPersName() {
-        return this.persName;
+    public String getDateDeath() {
+        return dateDeath;
     }
 
+    public void setDateDeath(String dateDeath) {
+        this.dateDeath = dateDeath;
+    }
+
+    public String getPersName() {
+        return persName;
+    }
+
+    public void setPersName(String persName) {
+        this.persName = persName;
+    }
 
     public String getSex() {
-        return this.sex;
+        return sex;
     }
 
     public void setSex(String sex) {
@@ -67,7 +67,7 @@ public class Patient {
     }
 
     public String getAddress() {
-        return this.address;
+        return address;
     }
 
     public void setAddress(String address) {
@@ -75,7 +75,7 @@ public class Patient {
     }
 
     public String getCountry() {
-        return this.country;
+        return country;
     }
 
     public void setCountry(String country) {
@@ -83,7 +83,7 @@ public class Patient {
     }
 
     public String getTown() {
-        return this.town;
+        return town;
     }
 
     public void setTown(String town) {
@@ -91,7 +91,7 @@ public class Patient {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -99,7 +99,7 @@ public class Patient {
     }
 
     public String getPhone() {
-        return this.phone;
+        return phone;
     }
 
     public void setPhone(String phone) {
@@ -107,12 +107,21 @@ public class Patient {
     }
 
     public String getNote() {
-        return this.note;
+        return note;
     }
 
     public void setNote(String note) {
         this.note = note;
     }
+
+    public List<LayoutToken> getLayoutTokens() {
+        return layoutTokens;
+    }
+
+    public void setLayoutTokens(List<LayoutToken> layoutTokens) {
+        this.layoutTokens = layoutTokens;
+    }
+
 
     public boolean isNotNull() {
         return (ID != null) ||
@@ -128,13 +137,6 @@ public class Patient {
             (note != null);
     }
 
-    public List<LayoutToken> getLayoutTokens() {
-        return layoutTokens;
-    }
-
-    public void setLayoutTokens(List<LayoutToken> tokens) {
-        this.layoutTokens = tokens;
-    }
 
     /**
      * TEI serialization via xom.
