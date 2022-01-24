@@ -74,7 +74,7 @@ public class PatientParser extends AbstractParser {
      * Common processing of patients (mostly for the header part, but it can be used in other parts, such as for the body part)
      *
      * @param tokens list of LayoutToken object to process
-     * @return List of identified Patient entites as POJO.
+     * @return List of identified Patient entities as POJO.
      */
     public List<Patient> processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {

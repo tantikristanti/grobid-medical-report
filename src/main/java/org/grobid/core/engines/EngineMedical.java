@@ -4,7 +4,6 @@ package org.grobid.core.engines;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.data.HeaderMedicalItem;
 import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.PersonMedical;
 import org.grobid.core.document.Document;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.utilities.crossref.CrossrefClient;

@@ -16,25 +16,47 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Class for representing and exchanging person information (medics and patients).
+ * Class for representing and exchanging person information, e.g. medics or patients.
+ *
+ *
+ * Tanti, 2022
  *
  */
-public class PersonMedical {
+public class PersonName {
+    private String rawName = null; // raw full name if relevant/available, e.g. name exactly as displayed
+    private String title = null;
     private String firstName = null;
     private String middleName = null;
     private String lastName = null;
-    private String title = null;
     private String suffix = null;
-    private String rawName = null; // raw full name if relevant/available, e.g. name exactly as displayed
-    private boolean corresp = false;
 
     private List<LayoutToken> layoutTokens = new ArrayList<>();
-    private List<String> affiliationBlocks = null;
-    private List<Affiliation> affiliations = null;
-    private List<String> affiliationMarkers = null;
-    private List<String> markers = null;
 
-    private String email = null;
+    public String getRawName() {
+        return rawName;
+    }
+
+    public void setRawName(String name) {
+        rawName = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String tit) {
+        if (tit != null) {
+            while (tit.startsWith("(")) {
+                tit = tit.substring(1,tit.length());
+            }
+
+            while (tit.endsWith(")")) {
+                tit = tit.substring(0,tit.length()-1);
+            }
+        }
+
+        title = tit;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -60,119 +82,30 @@ public class PersonMedical {
         lastName = f;
     }
 
-    public String getRawName() {
-        return rawName;
-    }
-
-    public void setRawName(String name) {
-        rawName = name;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String f) {
-        if (f != null) {
-            while (f.startsWith("(")) {
-                f = f.substring(1,f.length());
-            }
-
-            while (f.endsWith(")")) {
-                f = f.substring(0,f.length()-1);
-            }
-        }
-
-        title = f;
-    }
-
     public String getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(String s) {
-        suffix = s;
-    }
+    public void setSuffix(String suf) {
+        if (suf != null) {
+            while (suf.startsWith("(")) {
+                suf = suf.substring(1,suf.length());
+            }
 
-    public boolean getCorresp() {
-        return corresp;
-    }
+            while (suf.endsWith(")")) {
+                suf = suf.substring(0,suf.length()-1);
+            }
+        }
 
-    public void setCorresp(boolean b) {
-        corresp = b;
-    }
-    
-
-    public List<String> getAffiliationBlocks() {
-        return affiliationBlocks;
-    }
-
-    public void setAffiliationBlocks(List<String> blocks) {
-        this.affiliationBlocks = blocks;
-    }
-
-    public void addAffiliationBlocks(String f) {
-        if (affiliationBlocks == null)
-            affiliationBlocks = new ArrayList<String>();
-        affiliationBlocks.add(f);
-    }
-
-    public List<org.grobid.core.data.Affiliation> getAffiliations() {
-        return affiliations;
-    }
-
-    public void addAffiliation(org.grobid.core.data.Affiliation f) {
-        if (affiliations == null)
-            affiliations = new ArrayList<>();
-        affiliations.add(f);
-    }
-
-    public List<String> getAffiliationMarkers() {
-        return affiliationMarkers;
-    }
-
-    public void setAffiliationMarkers(List<String> affiliationMarkers) {
-        this.affiliationMarkers = affiliationMarkers;
-    }
-
-    public void addAffiliationMarker(String s) {
-        if (affiliationMarkers == null)
-            affiliationMarkers = new ArrayList<String>();
-        affiliationMarkers.add(s);
-    }
-
-    public void setAffiliations(List<org.grobid.core.data.Affiliation> f) {
-        affiliations = f;
-    }
-
-    public List<String> getMarkers() {
-        return markers;
-    }
-
-    public void setMarkers(List<String> markers) {
-        this.markers = markers;
-    }
-
-    public void addMarker(String f) {
-        if (markers == null)
-            markers = new ArrayList<String>();
-        f = f.replace(" ", "");
-        markers.add(f);
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String f) {
-        email = f;
+        title = suf;
     }
 
     public boolean notNull() {
         if ((firstName == null) &&
             (middleName == null) &&
             (lastName == null) &&
-            (title == null)
+            (title == null) &&
+             (suffix == null)
         )
             return false;
         else
@@ -182,27 +115,16 @@ public class PersonMedical {
     /**
      * Create a new instance of Person object from current instance (shallow copy)
      */
-    public PersonMedical clonePerson() {
-        PersonMedical personMedical = new PersonMedical();
-        personMedical.firstName = this.firstName ;
-        personMedical.middleName = this.middleName;
-        personMedical.lastName = this.lastName;
-        personMedical.title = this.title;
-        personMedical.suffix = this.suffix;
-        personMedical.rawName = this.rawName;
-        personMedical.corresp = this.corresp;
-        personMedical.email = this.email;
+    public PersonName clonePerson() {
+        PersonName person = new PersonName();
+        person.title = this.title;
+        person.rawName = this.rawName;
+        person.firstName = this.firstName ;
+        person.middleName = this.middleName;
+        person.lastName = this.lastName;
+        person.suffix = this.suffix;
 
-        if (this.layoutTokens != null)
-            personMedical.layoutTokens = new ArrayList<>(this.layoutTokens);
-        if (this.affiliationBlocks != null)
-            personMedical.affiliationBlocks = new ArrayList<>(this.affiliationBlocks);
-        if (this.affiliations != null)
-            personMedical.affiliations = new ArrayList<>(this.affiliations);
-        if (this.affiliationMarkers != null)
-            personMedical.affiliationMarkers = new ArrayList<>(this.affiliationMarkers);
-
-        return personMedical;
+        return person;
     }
 
     public String toString() {
@@ -217,14 +139,6 @@ public class PersonMedical {
             res += lastName + " ";
         if (suffix != null)
             res += suffix;
-        if (email != null) {
-            res += " (email:" + email + ")";
-        }
-        if (affiliations != null) {
-            for(Affiliation aff : affiliations) {
-                res += " (affiliation: " + aff.toString() + ") ";
-            }
-        }
         return res.trim();
     }
 
@@ -237,7 +151,7 @@ public class PersonMedical {
     }
 
     /**
-     * TEI serialization via xom. 
+     * TEI serialization via xom.
      */
     public void addLayoutTokens(List<LayoutToken> theTokens) {
         if (layoutTokens == null) {
@@ -348,9 +262,9 @@ public class PersonMedical {
     private static final String NAME_DELIMITERS = "-.,;:/_ ";
 
     /**
-     * This normalisation takes care of uniform case for name components and for 
+     * This normalisation takes care of uniform case for name components and for
      * transforming agglutinated initials (like "JM" in JM Smith)
-     * which are put into the firstname into separate initials in first and middle names. 
+     * which are put into the firstname into separate initials in first and middle names.
      *
      */
     public void normalizeName() {
@@ -365,6 +279,7 @@ public class PersonMedical {
         lastName = TextUtilities.capitalizeFully(lastName, NAME_DELIMITERS);
     }
 
+
     /**
      *  Return true if the person structure is a valid person name, in our case
      *  with at least a lastname or a raw name.
@@ -376,20 +291,21 @@ public class PersonMedical {
             return true;
     }
 
+
     /**
-     *  Deduplicate person names, optionally attached to affiliations, based 
+     *  Deduplicate person names, optionally attached to affiliations, based
      *  on common forename/surname, taking into account abbreviated forms
      */
-    public static List<PersonMedical> deduplicate(List<PersonMedical> persons) {
+    public static List<PersonName> deduplicate(List<PersonName> persons) {
         if (persons == null)
             return null;
         if (persons.size() == 0)
             return persons;
 
         // we create a signature per person based on lastname and first name first letter
-        Map<String,List<PersonMedical>> signatures = new TreeMap<String,List<PersonMedical>>();
+        Map<String,List<PersonName>> signatures = new TreeMap<String,List<PersonName>>();
 
-        for(PersonMedical person : persons) {
+        for(PersonName person : persons) {
             if (person.getLastName() == null || person.getLastName().trim().length() == 0) {
                 // the minimal information to deduplicate is not available
                 continue;
@@ -398,22 +314,22 @@ public class PersonMedical {
             if (person.getFirstName() != null && person.getFirstName().trim().length() != 0) {
                 signature += "_" + person.getFirstName().substring(0,1);
             }
-            List<PersonMedical> localPersons = signatures.get(signature);
+            List<PersonName> localPersons = signatures.get(signature);
             if (localPersons == null) {
-                localPersons = new ArrayList<PersonMedical>();
+                localPersons = new ArrayList<PersonName>();
             }
             localPersons.add(person);
             signatures.put(signature, localPersons);
         }
 
         // match signature and check possible affiliation information
-        for (Map.Entry<String,List<PersonMedical>> entry : signatures.entrySet()) {
-            List<PersonMedical> localPersons = entry.getValue();
+        for (Map.Entry<String,List<PersonName>> entry : signatures.entrySet()) {
+            List<PersonName> localPersons = entry.getValue();
             if (localPersons.size() > 1) {
                 // candidate for deduplication, check full forenames and middlenames to check if there is a clash
-                List<PersonMedical> newLocalPersons = new ArrayList<PersonMedical>();
+                List<PersonName> newLocalPersons = new ArrayList<PersonName>();
                 for(int j=0; j < localPersons.size(); j++) {
-                    PersonMedical localPerson =  localPersons.get(j);
+                    PersonName localPerson =  localPersons.get(j);
                     String localFirstName = localPerson.getFirstName();
                     if (localFirstName != null) {
                         localFirstName = localFirstName.toLowerCase();
@@ -429,7 +345,7 @@ public class PersonMedical {
                         boolean clash = false;
                         if (k == j)
                             continue;
-                        PersonMedical otherPerson = localPersons.get(k);
+                        PersonName otherPerson = localPersons.get(k);
                         String otherFirstName = otherPerson.getFirstName();
                         if (otherFirstName != null) {
                             otherFirstName = otherFirstName.toLowerCase();
@@ -490,8 +406,8 @@ public class PersonMedical {
 
                 if (localPersons.size() > 1) {
                     // if identified duplication, keep the most complete person form and the most complete
-                    // affiliation information 
-                    PersonMedical localPerson =  localPersons.get(0);
+                    // affiliation information
+                    PersonName localPerson =  localPersons.get(0);
                     String localFirstName = localPerson.getFirstName();
                     if (localFirstName != null)
                         localFirstName = localFirstName.toLowerCase();
@@ -504,9 +420,8 @@ public class PersonMedical {
                     String localSuffix = localPerson.getSuffix();
                     if (localSuffix != null)
                         localSuffix = localSuffix.toLowerCase();
-                    List<Affiliation> aff = localPerson.getAffiliations();
                     for (int i=1; i<localPersons.size(); i++) {
-                        PersonMedical otherPerson = localPersons.get(i);
+                        PersonName otherPerson = localPersons.get(i);
                         // try to enrich first Person object
                         String otherFirstName = otherPerson.getFirstName();
                         if (otherFirstName != null)
@@ -549,28 +464,6 @@ public class PersonMedical {
                             localSuffix = localPerson.getSuffix().toLowerCase();
                         }
 
-                        if (otherPerson.getAffiliations() != null) {
-                            for(Affiliation affOther : otherPerson.getAffiliations()) {
-                                localPerson.addAffiliation(affOther);
-                            }
-                        }
-
-                        if (otherPerson.getAffiliationBlocks() != null) {
-                            for(String block : otherPerson.getAffiliationBlocks()) {
-                                localPerson.addAffiliationBlocks(block);
-                            }
-                        }
-
-                        if (otherPerson.getMarkers() != null) {
-                            for(String marker : otherPerson.getMarkers()) {
-                                if (localPerson.getMarkers() == null || !localPerson.getMarkers().contains(marker))
-                                    localPerson.addMarker(marker);
-                            }
-                        }
-
-                        if (localPerson.getEmail() == null)
-                            localPerson.setEmail(otherPerson.getEmail());
-
                         if (persons.contains(otherPerson))
                             persons.remove(otherPerson);
                     }
@@ -581,19 +474,18 @@ public class PersonMedical {
         return persons;
     }
 
-
     /**
      *  Remove invalid/impossible person names (no last names, noise, etc.)
      */
-    public static List<PersonMedical> sanityCheck(List<PersonMedical> persons) {
+    public static List<PersonName> sanityCheck(List<PersonName> persons) {
         if (persons == null)
             return null;
         if (persons.size() == 0)
             return persons;
 
-        List<PersonMedical> result = new ArrayList<PersonMedical>();
+        List<PersonName> result = new ArrayList<PersonName>();
 
-        for(PersonMedical person : persons) {
+        for(PersonName person : persons) {
             if (person.getLastName() == null || person.getLastName().trim().length() == 0)
                 continue;
             else

@@ -139,13 +139,6 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel FIGURE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, FIGURE_LABEL);
     public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
 
-    // Medical personnel names
-    public static final TaggingLabel NAMES_MEDIC_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, TITLE_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SURNAME = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_MEDIC_SUFFIX = new TaggingLabelImpl(GrobidModels.NAMES_MEDIC, SUFFIX_LABEL);
-
     // Dateline
     public static final TaggingLabel DATELINE_PLACE_NAME = new TaggingLabelImpl(GrobidModels.DATELINE, PLACE_NAME_LABEL);
     public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
@@ -180,11 +173,11 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel PATIENT_NOTE = new TaggingLabelImpl(GrobidModels.PATIENT, NOTE_LABEL);
 
     // Names
-    public static final TaggingLabel NAMES_PATIENT_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, TITLE_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, FORENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, MIDDLENAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SURNAME = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, SURNAME_LABEL);
-    public static final TaggingLabel NAMES_PATIENT_SUFFIX = new TaggingLabelImpl(GrobidModels.NAMES_PATIENT, SUFFIX_LABEL);
+    public static final TaggingLabel NAMES_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, TITLE_LABEL);
+    public static final TaggingLabel NAMES_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, FORENAME_LABEL);
+    public static final TaggingLabel NAMES_MIDDLENAME = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, MIDDLENAME_LABEL);
+    public static final TaggingLabel NAMES_SURNAME = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, SURNAME_LABEL);
+    public static final TaggingLabel NAMES_SUFFIX = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, SUFFIX_LABEL);
 
     static {
         // medical-report-segmenter
@@ -271,5 +264,12 @@ public class MedicalLabels extends TaggingLabels {
         register(PATIENT_TOWN);
         register(PATIENT_PHONE);
         register(PATIENT_NOTE);
+
+        // person's name
+        register(NAMES_TITLE);
+        register(NAMES_FORENAME);
+        register(NAMES_MIDDLENAME);
+        register(NAMES_SURNAME);
+        register(NAMES_SUFFIX);
     }
 }

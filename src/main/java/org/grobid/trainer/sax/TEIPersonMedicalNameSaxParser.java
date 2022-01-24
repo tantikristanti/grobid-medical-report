@@ -11,18 +11,17 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 /**
- * SAX parser for medics names sequences encoded in the TEI format data.
- * Segmentation of tokens must be identical as the one from pdf2xml files to that
- * training and online input tokens are identical.
+ * SAX parser for person names sequences encoded in the TEI format data.
  *
- * Taken and adapted from TEIAuthorSaxParser (@author Patrice Lopez)
- *
- * Tanti, 2021
+ * Tanti, 2022
  */
-public class TEIPatientNameSaxParser extends DefaultHandler {
+public class TEIPersonMedicalNameSaxParser extends DefaultHandler {
 
     private StringBuffer accumulator = new StringBuffer(); // Accumulate parsed text
+    private StringBuffer allContent = new StringBuffer();
 
     private String output = null;
     private String currentTag = null;
@@ -31,22 +30,18 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
     private List<List<String>> allLabeled = null; // list of labels
     private List<LayoutToken> tokens = null;
     private List<List<LayoutToken>> allTokens = null; // list of LayoutToken segmentation
+    public int nbNames = 0;
 
-    private String title = null;
-    private String affiliation = null;
-    private String address = null;
-    private String note = null;
-    private String keywords = null;
-
-    public int n = 0;
-
-    public TEIPatientNameSaxParser() {
+    public TEIPersonMedicalNameSaxParser() {
         allTokens = new ArrayList<List<LayoutToken>>();
         allLabeled = new ArrayList<List<String>>();
     }
 
     public void characters(char[] buffer, int start, int length) {
         accumulator.append(buffer, start, length);
+        if (allContent != null) {
+            allContent.append(buffer, start, length);
+        }
     }
 
     public String getText() {
@@ -61,13 +56,14 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
         return allTokens;
     }
 
-    public void endElement(String uri,
-                           String localName,
-                           String qName) throws SAXException {
-        if ((
-            (qName.equals("title")) || (qName.equals("forename")) || (qName.equals("middlename")) ||
-                (qName.equals("suffix")) || (qName.equals("surname")) || (qName.equals("lastname"))  
-        ) & (currentTag != null)) {
+    public void endElement(java.lang.String uri,
+                           java.lang.String localName,
+                           java.lang.String qName) throws SAXException {
+        qName = qName.toLowerCase();
+
+        if ((qName.equals("title")) || (qName.equals("forename")) || (qName.equals("middlename")) ||
+            (qName.equals("surname")) || (qName.equals("suffix")))
+        {
             String text = getText();
             writeField(text);
         } else if (qName.equals("lb")) {
@@ -75,16 +71,18 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
             accumulator.append(" +L+ ");
         } else if (qName.equals("pb")) {
             accumulator.append(" +PAGE+ ");
-        } else if (qName.equals("persName")) {
+        } else if (qName.equals("name")) {
             String text = getText();
+            currentTag = "<other>";
             if (text.length() > 0) {
-                currentTag = "<other>";
                 writeField(text);
             }
+            nbNames++;
             allLabeled.add(labeled);
             allTokens.add(tokens);
-            n++;
+            allContent = null;
         }
+
         accumulator.setLength(0);
     }
 
@@ -92,8 +90,7 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
                              String localName,
                              String qName,
                              Attributes atts)
-            throws SAXException {
-
+        throws SAXException {
         String text = getText();
         if (text.length() > 0) {
             currentTag = "<other>";
@@ -101,52 +98,46 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
         }
         accumulator.setLength(0);
 
+        qName = qName.toLowerCase();
         if (qName.equals("title")) {
             currentTag = "<title>";
-        } else if (qName.equals("forename") || qName.equals("firstname")) {
+        } else if ((qName.equals("forename"))) {
             currentTag = "<forename>";
         } else if (qName.equals("middlename")) {
             currentTag = "<middlename>";
-        } else if ((qName.equals("surname")) | (qName.equals("lastname"))) {
+        } else if (qName.equals("surname")) {
             currentTag = "<surname>";
         } else if (qName.equals("suffix")) {
             currentTag = "<suffix>";
-        } else if (qName.equals("persName")) {
+        } else if (qName.equals("name")) {
             accumulator = new StringBuffer();
+            allContent = new StringBuffer();
             labeled = new ArrayList<String>();
             tokens = new ArrayList<LayoutToken>();
-        } else if (!qName.equals("analytic") && !qName.equals("biblStruct") &&
-            !qName.equals("sourceDesc") && !qName.equals("fileDesc") &&
-            !qName.equals("teiHeader") && !qName.equals("TEI") &&
-            !qName.equals("tei") && !qName.equals("lb") &&
-            !qName.equals("title") && !qName.equals("forename") && !qName.equals("middlename") &&
-            !qName.equals("surname") && !qName.equals("suffix") && !qName.equals("firstname") &&
-            !qName.equals("lastname") && !qName.equals("roleName") && !qName.equals("persName")) {
-            System.out.println("Warning, invalid tag: <" + qName + ">");
         }
+        accumulator.setLength(0);
     }
 
     private void writeField(String text) {
-        // we segment the text
-        //List<String> tokens = TextUtilities.segment(text, TextUtilities.punctuations);
-        List<LayoutToken> localTokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text);
-        if ( (localTokens == null) || (localTokens.size() == 0) )
-            localTokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language("fr", 1.0));
-        if  ( (localTokens == null) || (localTokens.size() == 0) )
+        if (tokens == null) {
+            // nothing to do, text must be ignored
             return;
+        }
+
+        // we segment the text
+        List<LayoutToken> localTokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text);
+
+        // force English for tokenizing
+        if (isEmpty(localTokens)) {
+            localTokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language("en", 1.0));
+        }
+
+        if (isEmpty(localTokens)) {
+            return;
+        }
 
         boolean begin = true;
         for (LayoutToken token : localTokens) {
-            if (tokens == null) {
-                // should not be the case, it can indicate a structure problem in the training XML file
-                tokens = new ArrayList<LayoutToken>();
-                System.out.println("Warning: list of LayoutToken not initialized properly, parsing continue... ");
-            }
-            if (labeled == null) {
-                // should not be the case, it can indicate a structure problem in the training XML file
-                labeled = new ArrayList<String>();
-                System.out.println("Warning: list of labels not initialized properly, parsing continue... ");
-            }
             tokens.add(token);
             String content = token.getText();
             if (content.equals(" ") || content.equals("\n")) {
@@ -155,7 +146,7 @@ public class TEIPatientNameSaxParser extends DefaultHandler {
             }
 
             content = UnicodeUtil.normaliseTextAndRemoveSpaces(content);
-            if (content.trim().length() == 0) { 
+            if (content.trim().length() == 0) {
                 labeled.add(null);
                 continue;
             }

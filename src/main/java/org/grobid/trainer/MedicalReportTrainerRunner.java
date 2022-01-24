@@ -24,7 +24,7 @@ public class MedicalReportTrainerRunner {
     private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportTrainerRunner.class);
 
     private static final List<String> models = Arrays.asList("medical-report-segmenter", "full-medical-text", "header-medical-report",
-        "left-note-medical-report", "dateline", "fr-medical-ner", "medic", "patient", "name-medic", "name-patient");
+        "left-note-medical-report", "dateline", "fr-medical-ner", "medic", "patient", "person-name-medical", "organization");
     private static final List<String> options = Arrays.asList("0 - train", "1 - evaluate", "2 - split, train and evaluate", "3 - n-fold evaluation");
 
     private enum RunType {
@@ -134,10 +134,8 @@ public class MedicalReportTrainerRunner {
             trainer = new MedicTrainer();
         } else if (model.equals("patient")) {
             trainer = new PatientTrainer();
-        } else if (model.equals("name-medic")) {
-            trainer = new NameMedicTrainer();
-        } else if (model.equals("name-patient")) {
-            trainer = new NamePatientTrainer();
+        } else if (model.equals("person-name-medical")) {
+            trainer = new PersonNameMedicalTrainer();
         } else {
             throw new IllegalStateException("The model " + model + " is unknown.");
         }

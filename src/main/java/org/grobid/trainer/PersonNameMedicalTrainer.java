@@ -7,17 +7,17 @@ import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.trainer.sax.TEIMedicNameSaxParser;
+import org.grobid.trainer.sax.TEIPersonMedicalNameSaxParser;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.*;
 
-public class NameMedicTrainer extends AbstractTrainer {
+public class PersonNameMedicalTrainer extends AbstractTrainer {
 
-    public NameMedicTrainer() {
-        super(GrobidModels.NAMES_MEDIC);
+    public PersonNameMedicalTrainer() {
+        super(GrobidModels.NAMES_PERSON_MEDICAL);
     }
 
     /**
@@ -103,7 +103,7 @@ public class NameMedicTrainer extends AbstractTrainer {
                 String name = teifile.getName();
                 System.out.println(name);
 
-                final TEIMedicNameSaxParser parser2 = new TEIMedicNameSaxParser();
+                final TEIPersonMedicalNameSaxParser parser2 = new TEIPersonMedicalNameSaxParser();
 
                 // get a new instance of parser
                 final SAXParser p = spf.newSAXParser();
@@ -111,7 +111,7 @@ public class NameMedicTrainer extends AbstractTrainer {
 
                 final List<List<String>> allLabeled = parser2.getLabeledResult();
                 final List<List<LayoutToken>> allTokens = parser2.getTokensResult();
-                totalExamples += parser2.n;
+                totalExamples += parser2.nbNames;
 
                 // we can now add the features
                 for(int i=0; i<allTokens.size(); i++) {
@@ -165,7 +165,7 @@ public class NameMedicTrainer extends AbstractTrainer {
      */
     public static void main(String[] args) throws Exception {
         GrobidProperties.getInstance();
-        Trainer trainer = new NameMedicTrainer();
+        Trainer trainer = new PersonNameMedicalTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));
         System.exit(0);

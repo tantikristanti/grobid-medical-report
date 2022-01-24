@@ -1075,7 +1075,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // buffer for the medics block
                     StringBuilder bufferMedic = null;
-                    // we need to rebuild the found date string as it appears
+                    // we need to rebuild the found string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1131,8 +1131,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }
 
-                    if (bufferMedic != null) {
-                        if (bufferMedic.length() > 0) {
+                    if ((bufferMedic != null) && (bufferMedic.length() > 0)) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                             writer.write("<tei xml:space=\"preserve\">\n");
@@ -1146,7 +1145,6 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("</tei>");
                             writer.close();
                         }
-                    }
 
                     // 5. PATIENT MODEL
                     // path for patient model
@@ -1155,7 +1153,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // buffer for the patients block
                     StringBuilder bufferPatient = null;
-                    // we need to rebuild the found date string as it appears
+                    // we need to rebuild the found string as it appears
                     input = "";
                     q = 0;
                     st = new StringTokenizer(rese, "\n");
@@ -1181,26 +1179,26 @@ public class FullMedicalTextParser extends AbstractParser {
                         inputs.add(input.trim());
                         bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
 
-                    // force analyser with English, to avoid bad surprise
-                    List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
-                    List<String> tokenizationPatient = analyzer.tokenize(input);
-                    List<String> patientBlocks = new ArrayList<String>();
-                    if (tokenizationPatient.size() == 0)
-                        return null;
-                    for(String tok : tokenizationPatient) {
-                        if (tok.equals("\n")) {
-                            patientBlocks.add("@newline");
-                        } else if (!tok.equals(" ")) {
-                            patientBlocks.add(tok + " <patient>");
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                        List<String> tokenizationPatient = analyzer.tokenize(input);
+                        List<String> patientBlocks = new ArrayList<String>();
+                        if (tokenizationPatient.size() == 0)
+                            return null;
+                        for(String tok : tokenizationPatient) {
+                            if (tok.equals("\n")) {
+                                patientBlocks.add("@newline");
+                            } else if (!tok.equals(" ")) {
+                                patientBlocks.add(tok + " <patient>");
+                            }
                         }
-                    }
 
-                    List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
-                    List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
-                    List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
-                    // we write the featured patient
-                    String featuredPatient = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
-                        locationPositions,titlePositions, suffixPositions);
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        // we write the featured patient
+                        String featuredPatient = FeaturesVectorPatient.addFeaturesPatient(tokens, null,
+                            locationPositions,titlePositions, suffixPositions);
 
                         if (featuredPatient != null) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
@@ -1209,8 +1207,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }
 
-                    if (bufferPatient != null) {
-                        if (bufferPatient.length() > 0) {
+                    if ((bufferPatient != null) && (bufferPatient.length() > 0)) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                             writer.write("<tei xml:space=\"preserve\">\n");
@@ -1224,7 +1221,6 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("</tei>");
                             writer.close();
                         }
-                    }
                 }
             }
 
@@ -1464,7 +1460,7 @@ public class FullMedicalTextParser extends AbstractParser {
             outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic.blank.tei.xml"));
             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic"));
 
-            // we need to rebuild the found date string as it appears
+            // we need to rebuild the found string as it appears
             input = "";
             q = 0;
             st = new StringTokenizer(rese, "\n");
@@ -1523,6 +1519,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 writer.write("\t</teiHeader>\n");
                 writer.write("</tei>");
                 writer.close();
+
             }
 
             // 5. PATIENT MODEL
@@ -1532,7 +1529,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             // buffer for the patients block
             StringBuilder bufferPatient = null;
-            // we need to rebuild the found date string as it appears
+            // we need to rebuild the found string as it appears
             input = "";
             q = 0;
             st = new StringTokenizer(rese, "\n");
@@ -1577,31 +1574,31 @@ public class FullMedicalTextParser extends AbstractParser {
 
                 // we write the featured patient
                 if (featuredPatient != null) {
-                        writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
-                        writer.write(featuredPatient + "\n");
-                        writer.close();
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(featuredPatient + "\n");
+                    writer.close();
                 }
 
                 // we write the patients data yet unlabeled
                 if (input.length() > 0) {
-                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                        writer.write("<tei xml:space=\"preserve\">\n");
-                        writer.write("\t<teiHeader>\n");
-                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
-                        writer.write("\t\t\t<patients>\n");
-                        writer.write("\t\t\t\t<patient>\n");
-                        writer.write(input);
-                        writer.write("\n\t\t\t\t</patient>\n");
-                        writer.write("\t\t\t</patients>\n");
-                        writer.write("\t\t</fileDesc>\n");
-                        writer.write("\t</teiHeader>\n");
-                        writer.write("</tei>");
-                        writer.close();
-                    }
+                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                    writer.write("<tei xml:space=\"preserve\">\n");
+                    writer.write("\t<teiHeader>\n");
+                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                    writer.write("\t\t\t<patients>\n");
+                    writer.write("\t\t\t\t<patient>\n");
+                    writer.write(input);
+                    writer.write("\n\t\t\t\t</patient>\n");
+                    writer.write("\t\t\t</patients>\n");
+                    writer.write("\t\t</fileDesc>\n");
+                    writer.write("\t</teiHeader>\n");
+                    writer.write("</tei>");
+                    writer.close();
+                }
             }
 
-            // 5. FULL-MEDICAL-TEXT MODEL
+            // 6. FULL-MEDICAL-TEXT MODEL
             // path for blank full-medical-text model
             outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.blank.tei.xml"));
             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text"));
@@ -2428,7 +2425,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 if (refText.trim().length() == 0)
                     continue;
 
-               if (clusterLabel.equals(TaggingLabels.FIGURE_MARKER)) {
+                if (clusterLabel.equals(TaggingLabels.FIGURE_MARKER)) {
                     if (figureMarkerSeen.contains(refText)) {
                         // already seen reference marker sequence, we skip it
                         continue;

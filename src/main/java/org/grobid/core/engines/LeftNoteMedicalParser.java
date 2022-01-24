@@ -2,10 +2,9 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.PersonMedical;
+import org.grobid.core.data.PersonName;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -157,7 +156,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     }
 
                     // remove invalid medics (no last name, noise, etc.)
-                    resLeftNote.setFullMedics(PersonMedical.sanityCheck(resLeftNote.getFullMedics()));
+                    resLeftNote.setFullMedics(PersonName.sanityCheck(resLeftNote.getFullMedics()));
 
                     resLeftNote.setFullAffiliations(
                         parsers.getAffiliationAddressParser().processReflow(res, tokenizations));
@@ -168,12 +167,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                             if (medicSegments != null) {
                                 if (resLeftNote.getFullAffiliations().size() == medicSegments.size()) {
                                     int k = 0;
-                                    List<PersonMedical> persons = resLeftNote.getFullMedics();
-                                    for (PersonMedical pers : persons) {
+                                    List<PersonName> persons = resLeftNote.getFullMedics();
+                                    for (PersonName pers : persons) {
                                         if (k < medicsBlocks.size()) {
                                             int indd = medicsBlocks.get(k);
                                             if (indd < resLeftNote.getFullAffiliations().size()) {
-                                                pers.addAffiliation(resLeftNote.getFullAffiliations().get(indd));
+                                                //pers.addAffiliation(resLeftNote.getFullAffiliations().get(indd));
                                             }
                                         }
                                         k++;
@@ -190,7 +189,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     }
 
                     // remove duplicated medics
-                    resLeftNote.setFullMedics(PersonMedical.deduplicate(resLeftNote.getFullMedics()));
+                    resLeftNote.setFullMedics(PersonName.deduplicate(resLeftNote.getFullMedics()));
 
 
                 }

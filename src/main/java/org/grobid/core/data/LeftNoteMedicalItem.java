@@ -3,9 +3,7 @@ package org.grobid.core.data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.util.ClassicPersonEmailAssigner;
 import org.grobid.core.data.util.EmailSanitizer;
-import org.grobid.core.data.util.MedicEmailAssigner;
 import org.grobid.core.document.Document;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -32,7 +30,6 @@ public class LeftNoteMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(LeftNoteMedicalItem.class);
 
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    private MedicEmailAssigner medicEmailAssigner = new ClassicPersonEmailAssigner();
     private EmailSanitizer emailSanitizer = new EmailSanitizer();
     private String teiId;
     //TODO: keep in sync with teiId - now teiId is generated in many different places
@@ -106,7 +103,7 @@ public class LeftNoteMedicalItem {
     private List<String> phoneList;
     private List<String> faxList;
 
-    private List<PersonMedical> fullMedics = null;
+    private List<PersonName> fullMedics = null;
     private List<Affiliation> fullAffiliations = null;
 
     public String affiliationAddressBlock = null;
@@ -187,7 +184,7 @@ public class LeftNoteMedicalItem {
         return fax;
     }
 
-    public List<PersonMedical> getFullMedics() {
+    public List<PersonName> getFullMedics() {
         return fullMedics;
     }
 
@@ -211,7 +208,7 @@ public class LeftNoteMedicalItem {
         year = StringUtils.normalizeSpace(y);
     }
 
-    public void setFullMedics(List<PersonMedical> fullMedics) {
+    public void setFullMedics(List<PersonName> fullMedics) {
         fullMedics = fullMedics;
     }
 
@@ -256,9 +253,9 @@ public class LeftNoteMedicalItem {
             medicList.add(aut);
     }
 
-    public void addFullMedic(PersonMedical meds) {
+    public void addFullMedic(PersonName meds) {
         if (fullMedics == null)
-            fullMedics = new ArrayList<PersonMedical>();
+            fullMedics = new ArrayList<PersonName>();
         if (!fullMedics.contains(meds))
             fullMedics.add(meds);
     }
@@ -433,7 +430,7 @@ public class LeftNoteMedicalItem {
         attachEmails(fullMedics);
     }
 
-    public void attachEmails(List<PersonMedical> folks) {
+    public void attachEmails(List<PersonName> folks) {
         // do we have an email field recognized?
         if (email == null)
             return;
@@ -448,9 +445,6 @@ public class LeftNoteMedicalItem {
 
         List<String> sanitizedEmails = emailSanitizer.splitAndClean(emailles);
 
-        if (sanitizedEmails != null) {
-            medicEmailAssigner.assign(folks, sanitizedEmails);
-        }
     }
 
     /**
@@ -487,15 +481,15 @@ public class LeftNoteMedicalItem {
         if (nbAffiliations == 1) {
             // we distribute this affiliation to each medic
             Affiliation aff = fullAffiliations.get(0);
-            for (PersonMedical pers : fullMedics) {
-                pers.addAffiliation(aff);
+            for (PersonName pers : fullMedics) {
+                //pers.addAffiliation(aff);
             }
             aff.setFailAffiliation(false);
         } else if ((nbmedics == 1) && (nbAffiliations > 1)) {
             // we put all the affiliations to the single medic
-            PersonMedical pers = fullMedics.get(0);
+            PersonName pers = fullMedics.get(0);
             for (Affiliation aff : fullAffiliations) {
-                pers.addAffiliation(aff);
+                //pers.addAffiliation(aff);
                 aff.setFailAffiliation(false);
             }
         } else if (hasMarker) {
@@ -582,7 +576,7 @@ public class LeftNoteMedicalItem {
                             int best = -1;
                             int ind2 = -1;
                             int bestDistance = 1000;
-                            for (PersonMedical pers : fullMedics) {
+                            for (PersonName pers : fullMedics) {
                                 if (!winners.contains(Integer.valueOf(p))) {
                                     String lastname = pers.getLastName();
 
@@ -601,7 +595,7 @@ public class LeftNoteMedicalItem {
 
                             // and we associate this affiliation to this medic
                             if (best != -1) {
-                                fullMedics.get(best).addAffiliation(aff);
+                                //fullMedics.get(best).addAffiliation(aff);
                                 aff.setFailAffiliation(false);
                                 winners.add(Integer.valueOf(best));
                             }
@@ -672,7 +666,7 @@ public class LeftNoteMedicalItem {
         }
         */
 
-        List<PersonMedical> medics = fullMedics;
+        List<PersonName> medics = fullMedics;
 
         Lexicon lexicon = Lexicon.getInstance();
 
@@ -695,19 +689,19 @@ public class LeftNoteMedicalItem {
                 int autRank = 0;
                 int contactAut = -1;
                 //check if we have a single medic of contact
-                for (PersonMedical medic : medics) {
-                    if (medic.getEmail() != null) {
+                for (PersonName medic : medics) {
+                    /*if (medic.getEmail() != null) {
                         if (contactAut == -1)
                             contactAut = autRank;
                         else {
                             contactAut = -1;
                             break;
                         }
-                    }
+                    }*/
                     autRank++;
                 }
                 autRank = 0;
-                for (PersonMedical medic : medics) {
+                for (PersonName medic : medics) {
                     if (medic.getLastName() != null) {
                         if (medic.getLastName().length() < 2)
                             continue;
@@ -731,16 +725,16 @@ public class LeftNoteMedicalItem {
                     String localString = medic.toTEI(withCoordinates);
                     localString = localString.replace(" xmlns=\"http://www.tei-c.org/ns/1.0\"", "");
                     tei.append(localString).append("\n");
-                    if (medic.getEmail() != null) {
+                    /*if (medic.getEmail() != null) {
                         TextUtilities.appendN(tei, '\t', nbTag + 1);
                         tei.append("<email>" + TextUtilities.HTMLEncode(medic.getEmail()) + "</email>\n");
-                    }
+                    }*/
 
-                    if (medic.getAffiliations() != null) {
+                    /*if (medic.getAffiliations() != null) {
                         for (Affiliation aff : medic.getAffiliations()) {
                             this.appendAffiliation(tei, nbTag + 1, aff, config, lexicon);
                         }
-                    }
+                    }*/
 
                     TextUtilities.appendN(tei, '\t', nbTag);
                     tei.append("</medic>\n");
@@ -1030,10 +1024,10 @@ public class LeftNoteMedicalItem {
             else if (medic.getFullMedics().size() == 1) {
                 // we have the corresponding medic
                 // check if the medic exists in the obtained list
-                PersonMedical auto = (PersonMedical) medic.getFullMedics().get(0);
-                List<PersonMedical> medics = med.getFullMedics();
+                PersonName auto = (PersonName) medic.getFullMedics().get(0);
+                List<PersonName> medics = med.getFullMedics();
                 if (medics != null) {
-                    for (PersonMedical aut : medics) {
+                    for (PersonName aut : medics) {
                         if (StringUtils.isNotBlank(aut.getLastName()) && StringUtils.isNotBlank(auto.getLastName())) {
                             if (aut.getLastName().toLowerCase().equals(auto.getLastName().toLowerCase())) {
                                 if (StringUtils.isBlank(aut.getFirstName()) ||
@@ -1041,9 +1035,9 @@ public class LeftNoteMedicalItem {
                                         aut.getFirstName().length() <= auto.getFirstName().length() &&
                                         auto.getFirstName().toLowerCase().startsWith(aut.getFirstName().toLowerCase()))) {
                                     aut.setFirstName(auto.getFirstName());
-                                    aut.setCorresp(true);
-                                    if (StringUtils.isNotBlank(auto.getEmail()))
-                                        aut.setEmail(auto.getEmail());
+                                    //aut.setCorresp(true);
+                                    /*if (StringUtils.isNotBlank(auto.getEmail()))
+                                        aut.setEmail(auto.getEmail());*/
                                     // should we also check the country ? affiliation?
                                     if (StringUtils.isNotBlank(auto.getMiddleName()) && (StringUtils.isBlank(aut.getMiddleName())))
                                         aut.setMiddleName(auto.getMiddleName());
@@ -1056,9 +1050,9 @@ public class LeftNoteMedicalItem {
                 // we have the complete list of medics so we can take them from the second
                 // biblio item and merge some possible extra from the first when a match is
                 // reliable
-                for (PersonMedical per : medic.getFullMedics()) {
+                for (PersonName per : medic.getFullMedics()) {
                     // try to find the medic in the first item (we know it's not empty)
-                    for (PersonMedical per2 : med.getFullMedics()) {
+                    for (PersonName per2 : med.getFullMedics()) {
 
 
                         if (StringUtils.isNotBlank(per2.getLastName())) {
@@ -1090,16 +1084,16 @@ public class LeftNoteMedicalItem {
                                                 per.setTitle(per2.getTitle());
                                             if (StringUtils.isBlank(per.getSuffix()))
                                                 per.setSuffix(per2.getSuffix());
-                                            if (StringUtils.isBlank(per.getEmail()))
-                                                per.setEmail(per2.getEmail());
-                                            if (!CollectionUtils.isEmpty(per2.getAffiliations()))
+                                            /*if (StringUtils.isBlank(per.getEmail()))
+                                                per.setEmail(per2.getEmail());*/
+                                            /*if (!CollectionUtils.isEmpty(per2.getAffiliations()))
                                                 per.setAffiliations(per2.getAffiliations());
                                             if (!CollectionUtils.isEmpty(per2.getAffiliationBlocks()))
                                                 per.setAffiliationBlocks(per2.getAffiliationBlocks());
                                             if (!CollectionUtils.isEmpty(per2.getAffiliationMarkers()))
                                                 per.setAffiliationMarkers(per2.getAffiliationMarkers());
                                             if (!CollectionUtils.isEmpty(per2.getMarkers()))
-                                                per.setMarkers(per2.getMarkers());
+                                                per.setMarkers(per2.getMarkers());*/
                                             if (!CollectionUtils.isEmpty(per2.getLayoutTokens()))
                                                 per.setLayoutTokens(per2.getLayoutTokens());
                                             break;

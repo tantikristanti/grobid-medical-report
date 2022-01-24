@@ -2,14 +2,10 @@ package org.grobid.core.data;
 
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.data.util.ClassicPersonEmailAssigner;
-import org.grobid.core.data.util.EmailSanitizer;
-import org.grobid.core.data.util.MedicEmailAssigner;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.layout.BoundingBox;
 import org.grobid.core.layout.LayoutToken;
-import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.TextUtilities;
@@ -20,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -31,8 +26,6 @@ import java.util.regex.Pattern;
 public class HeaderMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalItem.class);
 
-    private MedicEmailAssigner medicEmailAssigner = new ClassicPersonEmailAssigner();
-    private EmailSanitizer emailSanitizer = new EmailSanitizer();
     private List<BoundingBox> coordinates = null;
 
     // map of labels (e.g. <title> or <affiliation>) to LayoutToken

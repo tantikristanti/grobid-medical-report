@@ -74,7 +74,7 @@ public class MedicParser extends AbstractParser {
      * Common processing of medics (mostly for the header part, but it can be used in other parts, such as for the body part)
      *
      * @param tokens list of LayoutToken object to process
-     * @return List of identified Medic entites as POJO.
+     * @return List of identified Medic entities as POJO.
      */
     public List<Medic> processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
