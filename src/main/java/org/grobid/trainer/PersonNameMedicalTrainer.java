@@ -3,6 +3,7 @@ package org.grobid.trainer;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorName;
+import org.grobid.core.features.FeaturesVectorPersonName;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.layout.LayoutToken;
@@ -125,7 +126,7 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
                     titlePositions = Lexicon.getInstance().tokenPositionsPersonTitle(allTokens.get(i));
                     suffixPositions = Lexicon.getInstance().tokenPositionsPersonSuffix(allTokens.get(i));
 
-                    final String names = FeaturesVectorName.addFeaturesName(allTokens.get(i),
+                    final String names = FeaturesVectorPersonName.addFeaturesName(allTokens.get(i),
                         allLabeled.get(i), titlePositions, suffixPositions);
 
                     if ( (writer2 == null) && (writer3 != null) )

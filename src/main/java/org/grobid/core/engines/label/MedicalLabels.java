@@ -118,15 +118,16 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER_NOTE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, NOTE_LABEL);
 
     // Left-Note Medical Report Model
-    public static final TaggingLabel LEFT_NOTE_DOCNUM = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DOCNUM_LABEL);
-    public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
-    public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
     public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_LABEL);
-    public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
+    public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
+    public static final TaggingLabel LEFT_NOTE_COUNTRY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, COUNTRY_LABEL);
+    public static final TaggingLabel LEFT_NOTE_TOWN = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SETTLEMENT_LABEL);
     public static final TaggingLabel LEFT_NOTE_PHONE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, PHONE_LABEL);
     public static final TaggingLabel LEFT_NOTE_FAX = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, FAX_LABEL);
+    public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel LEFT_NOTE_WEB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, WEB_LABEL);
+    public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
 
     // Full medical model
     public static final TaggingLabel TABLE_MARKER = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_MARKER_LABEL);
@@ -211,15 +212,16 @@ public class MedicalLabels extends TaggingLabels {
         register(HEADER_DOCTYPE);
 
         // left-note
-        register(LEFT_NOTE_DOCNUM);
-        register(LEFT_NOTE_MEDIC);
         register(LEFT_NOTE_AFFILIATION);
-        register(LEFT_NOTE_ADDRESS);
         register(LEFT_NOTE_ORG);
-        register(LEFT_NOTE_EMAIL);
+        register(LEFT_NOTE_ADDRESS);
+        register(LEFT_NOTE_COUNTRY);
+        register(LEFT_NOTE_TOWN);
         register(LEFT_NOTE_PHONE);
         register(LEFT_NOTE_FAX);
+        register(LEFT_NOTE_EMAIL);
         register(LEFT_NOTE_WEB);
+        register(LEFT_NOTE_MEDIC);
 
         // full-medical-report
         register(TABLE_MARKER);

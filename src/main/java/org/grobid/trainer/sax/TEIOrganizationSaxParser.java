@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * <p>
  * Tanti, 2020
  */
-public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
+public class TEIOrganizationSaxParser extends DefaultHandler {
 
     private StringBuffer accumulator = new StringBuffer(); // Accumulate parsed text
 
@@ -32,15 +32,15 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "medic", "affiliation", "address", "org",
-        "email", "phone", "fax", "ptr");
+    private List<String> endTags = Arrays.asList("affiliation", "address", "orgName", "institution", "department",
+        "email", "phone", "fax", "ptr", "medic");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "teiLeftNote",
+    private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "org",
         "fileDesc", "text", "person", "p");
 
-    private List<String> ignoredTags = Arrays.asList("page", "institution", "location");
+    private List<String> ignoredTags = Arrays.asList("page", "location");
 
-    public TEILeftNoteMedicalSaxParser() {
+    public TEIOrganizationSaxParser() {
         labeled = new ArrayList<String>();
     }
 
@@ -52,9 +52,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
         return accumulator.toString().trim();
     }
 
-    public void setFileName(String name) {
-        fileName = name;
-    }
+    public void setFileName(String name) {fileName = name;}
 
     public String getPDFName() {
         return pdfName;
@@ -70,7 +68,7 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
         if (endTags.contains(qName)) {
             writeData();
             accumulator.setLength(0);
-        } else if (qName.equals("front")) {
+        } else if (qName.equals("org")) {
             // write remaining test as <other>
             String text = getText();
             if (text != null) {
@@ -108,26 +106,46 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         }
 
-        if (qName.equals("idno")) {
-            currentTag = "<docnum>";
-        } else if (qName.equals("affiliation")) {
+        if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
+        } else if (qName.equals("orgName")) {
+            int length = atts.getLength();
+
+            // Process each attribute
+            for (int i = 0; i < length; i++) {
+                // Get names and values for each attribute
+                String name = atts.getQName(i);
+                String value = atts.getValue(i);
+
+                if (name != null) {
+                    if (name.equals("type")) {
+                        if (value.equals("institution")) {
+                            currentTag = "<institution>";
+                        }
+                    }
+                } else if (name != null) {
+                    if (name.equals("type")) {
+                        if (value.equals("department")) {
+                            currentTag = "<department>";
+                        }
+                    }
+                } else
+                    currentTag = "<other>";
+            }
         } else if (qName.equals("institution")) {
             currentTag = "<institution>";
+        } else if (qName.equals("department")) {
+            currentTag = "<department>";
         } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
-        } else if (qName.equals("medic")) {
-            currentTag = "<medic>";
-        } else if (qName.equals("org")) {
-            currentTag = "<org>";
-        } else if (qName.equals("email")) {
-            currentTag = "<email>";
         } else if (qName.equals("phone")) {
             currentTag = "<phone>";
         } else if (qName.equals("fax")) {
             currentTag = "<fax>";
+        } else if (qName.equals("email")) {
+            currentTag = "<email>";
         } else if (qName.equals("ptr")) {
             int length = atts.getLength();
 
@@ -146,6 +164,8 @@ public class TEILeftNoteMedicalSaxParser extends DefaultHandler {
                 } else
                     currentTag = "<other>";
             }
+        } else if (qName.equals("medic")) {
+            currentTag = "<medic>";
         } else if (qName.equals("fileDesc")) {
             int length = atts.getLength();
 

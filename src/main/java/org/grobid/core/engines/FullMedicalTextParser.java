@@ -4,12 +4,12 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.*;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.citations.CalloutAnalyzer;
+import org.grobid.core.engines.citations.CalloutAnalyzer.MarkerType;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -24,7 +24,6 @@ import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
-import org.grobid.core.engines.citations.CalloutAnalyzer.MarkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2308,7 +2307,6 @@ public class FullMedicalTextParser extends AbstractParser {
 
         return results;
     }
-
 
     /**
      * Create training data for the table as identified by the full text model.

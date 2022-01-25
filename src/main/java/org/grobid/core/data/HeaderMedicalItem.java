@@ -61,7 +61,7 @@ public class HeaderMedicalItem {
     private String medics = null;
     private String patients = null;
 
-    // short note in the header
+    // header short note
     private String note = null;
 
     // list of medics, patients, datelines, affiliations for further process with related models

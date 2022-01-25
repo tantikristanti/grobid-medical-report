@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.PersonName;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -40,6 +39,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
 
+    protected EngineMedicalParsers parsers;
+
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
 
@@ -56,13 +57,10 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
     private File tmpPath = null;
 
-    protected EngineMedicalParsers parsers;
-
     public LeftNoteMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
         super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        // GrobidProperties.getInstance();
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
@@ -92,6 +90,25 @@ public class LeftNoteMedicalParser extends AbstractParser {
     }
 
     /**
+     * Processing with application of the segmentation model
+     */
+    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, GrobidAnalysisConfig config) {
+        DocumentSource documentSource = null;
+        try {
+            documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
+            documentSource.setMD5(md5Str);
+            Document doc = parsers.getSegmentationParser().processing(documentSource, config);
+
+            String tei = processingLeftNoteSection(config, doc, resLeftNote, true);
+            return new ImmutablePair<String, Document>(tei, doc);
+        } finally {
+            if (documentSource != null) {
+                documentSource.close(true, true, true);
+            }
+        }
+    }
+
+    /**
      * Left-Note processing after application of the medical-report segmentation model
      */
     public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, boolean serialize) {
@@ -100,23 +117,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             if (documentLeftNoteParts != null) {
-                List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
-
-                for (DocumentPiece docPiece : documentLeftNoteParts) {
-                    DocumentPointer dp1 = docPiece.getLeft();
-                    DocumentPointer dp2 = docPiece.getRight();
-
-                    int tokens = dp1.getTokenDocPos();
-                    int tokene = dp2.getTokenDocPos();
-                    for (int i = tokens; i < tokene; i++) {
-                        tokenizationsLeftNote.add(tokenizations.get(i));
-                    }
-                }
-
-                //String leftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts, true);
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
-                String leftNote = featuredLeftNote.getLeft();
-                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
+                String leftNote = featuredLeftNote.getLeft(); // data with features
+                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight(); // tokens
                 String res = null;
                 if ((leftNote != null) && (leftNote.trim().length() > 0)) {
                     res = label(leftNote);
@@ -126,78 +129,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 // For the language, by default in French because there is not enough text to test to obtain the id language
                 resLeftNote.setLanguage("fr");
 
-                if (resLeftNote != null) {
-
-                    resLeftNote.setOriginalMedics(resLeftNote.getMedics());
-                    resLeftNote.getMedicsTokens();
-
-                    boolean fragmentedMedics = false;
-                    boolean hasMarker = false;
-                    List<Integer> medicsBlocks = new ArrayList<Integer>();
-                    List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                    if (resLeftNote.getMedicsTokens() != null) {
-                        // split the list of layout tokens when token "\t" is met
-                        List<LayoutToken> currentSegment = new ArrayList<>();
-                        for(LayoutToken theToken : resLeftNote.getMedicsTokens()) {
-                            if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                if (currentSegment.size() > 0)
-                                    medicSegments.add(currentSegment);
-                                currentSegment = new ArrayList<>();
-                            } else
-                                currentSegment.add(theToken);
-                        }
-                        // last segment
-                        if (currentSegment.size() > 0)
-                            medicSegments.add(currentSegment);
-
-                        if (medicSegments.size() > 1) {
-                            fragmentedMedics = true;
-                        }
-                    }
-
-                    // remove invalid medics (no last name, noise, etc.)
-                    resLeftNote.setFullMedics(PersonName.sanityCheck(resLeftNote.getFullMedics()));
-
-                    resLeftNote.setFullAffiliations(
-                        parsers.getAffiliationAddressParser().processReflow(res, tokenizations));
-                    resLeftNote.attachEmails();
-                    boolean attached = false;
-                    if (fragmentedMedics && !hasMarker) {
-                        if (resLeftNote.getFullAffiliations() != null) {
-                            if (medicSegments != null) {
-                                if (resLeftNote.getFullAffiliations().size() == medicSegments.size()) {
-                                    int k = 0;
-                                    List<PersonName> persons = resLeftNote.getFullMedics();
-                                    for (PersonName pers : persons) {
-                                        if (k < medicsBlocks.size()) {
-                                            int indd = medicsBlocks.get(k);
-                                            if (indd < resLeftNote.getFullAffiliations().size()) {
-                                                //pers.addAffiliation(resLeftNote.getFullAffiliations().get(indd));
-                                            }
-                                        }
-                                        k++;
-                                    }
-                                    attached = true;
-                                    resLeftNote.setFullAffiliations(null);
-                                    resLeftNote.setAffiliation(null);
-                                }
-                            }
-                        }
-                    }
-                    if (!attached) {
-                        resLeftNote.attachAffiliations();
-                    }
-
-                    // remove duplicated medics
-                    resLeftNote.setFullMedics(PersonName.deduplicate(resLeftNote.getFullMedics()));
-
-
-                }
+                //  TBD : remove invalid medics (no last name, noise, etc.) with PersonName.sanityCheck
 
                 // we don't need to serialize if we process the full text (it would be done 2 times)
                 if (serialize) {
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEILeftNote(resLeftNote, null, null, config);
+                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, null, null, config);
                     tei.append("\t</text>\n");
                     tei.append("</TEI>\n");
                     return tei.toString();
@@ -238,6 +175,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
         List<LayoutToken> leftNoteTokenizations = new ArrayList<LayoutToken>();
 
         // find the largest, smallest and average size font on the left-note section
+        // note: only  largest font size information is used currently
         double largestFontSize = 0.0;
         double smallestFontSize = 100000.0;
         double averageFontSize;
@@ -270,13 +208,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
         }
         averageFontSize = accumulatedFontSize / nbTokens;
-
-        // TBD: this would need to be made more efficient, by applying the regex only to a limited
-        // part of the tokens
-        /*List<LayoutToken> tokenizations = doc.getTokenizations();
-        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokenizations);
-        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokenizations);
-        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokenizations);*/
 
         for (DocumentPiece docPiece : documentLeftNoteParts) {
             DocumentPointer dp1 = docPiece.getLeft();
@@ -323,22 +254,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         maxLineLength = lines[p].length();
                 }
 
-                /*for (int li = 0; li < lines.length; li++) {
-                    String line = lines[li];
-
-                    features.lineLength = featureFactory
-                            .linearScaling(line.length(), maxLineLength, LINESCALE);
-
-                    features.punctuationProfile = TextUtilities.punctuationProfile(line);
-                }*/
-
                 List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
                 List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
                 List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
-
-                /*for (OffsetPosition position : emailPositions) {
-                    System.out.println(position.start + " " + position.end + " / " + tokens.get(position.start) + " ... " + tokens.get(position.end));
-                }*/
 
                 while (n < tokens.size()) {
                     if (blockIndex == dp2.getBlockPtr()) {
@@ -372,7 +290,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     if (previousNewline) {
                         newline = true;
                         previousNewline = false;
-                        if (token != null && previousFeatures != null) {
+                        if (previousFeatures != null) {
                             double previousLineStartX = lineStartX;
                             lineStartX = token.getX();
                             double characterWidth = token.width / token.getText().length();
@@ -605,11 +523,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     if (features.punctType == null)
                         features.punctType = "NOPUNCT";
 
-                    /*if (spacingPreviousBlock != 0.0) {
-                        features.spacingWithPreviousBlock = featureFactory
-                            .linearScaling(spacingPreviousBlock-doc.getMinBlockSpacing(), doc.getMaxBlockSpacing()-doc.getMinBlockSpacing(), NBBINS_SPACE);
-                    }*/
-
                     if (density != -1.0) {
                         features.characterDensity = featureFactory
                             .linearScaling(density-doc.getMinCharacterDensity(), doc.getMaxCharacterDensity()-doc.getMinCharacterDensity(), NBBINS_DENSITY);
@@ -630,8 +543,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     previousFeatures = null;
                 }
             }
-
-
         }
 
         return Pair.of(leftNote.toString(), leftNoteTokenizations);
@@ -642,16 +553,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
      *
      * @param result        result
      * @param tokenizations list of tokens
-     * @param medical        medical item
-     * @return a medical item
+     * @param leftNoteItem  left-note item
+     * @return              left-note item
      */
-    public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem medical, Document doc) {
-
-        TaggingLabel lastClusterLabel = null;
+    public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem leftNoteItem, Document doc) {
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
-
-        String tokenLabel = null;
         List<TaggingTokenCluster> clusters = clusteror.cluster();
+        leftNoteItem.generalResultMapping(result, tokenizations);
         for (TaggingTokenCluster cluster : clusters) {
             if (cluster == null) {
                 continue;
@@ -661,68 +569,69 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DOCNUM)) {
-                if (medical.getDocNum() != null && isDifferentandNotIncludedContent(medical.getDocNum(), clusterContent)) {
-                    String currentDocNum = medical.getDocNum();
-                    medical.setDocNum(clusterContent);
-                    medical.checkIdentifier();
-                    medical.setDocNum(currentDocNum);
+            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
+                if (leftNoteItem.getAffiliation() != null) {
+                    leftNoteItem.setAffiliation(leftNoteItem.getAffiliation() + "\n" + clusterNonDehypenizedContent);
                 } else {
-                    medical.setDocNum(clusterContent);
-                    medical.checkIdentifier();
+                    leftNoteItem.setAffiliation(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
+                if (leftNoteItem.getOrganization() != null) {
+                    leftNoteItem.setOrganization(leftNoteItem.getOrganization() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setOrganization(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
+                if (leftNoteItem.getAddress() != null) {
+                    leftNoteItem.setAddress(leftNoteItem.getAddress() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setAddress(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_COUNTRY)) {
+                if (leftNoteItem.getCountry() != null) {
+                    leftNoteItem.setCountry(leftNoteItem.getCountry() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setCountry(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_TOWN)) {
+                if (leftNoteItem.getSettlement() != null) {
+                    leftNoteItem.setSettlement(leftNoteItem.getSettlement() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setSettlement(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_PHONE)) {
+                if (leftNoteItem.getPhone() != null) {
+                    leftNoteItem.setPhone(leftNoteItem.getPhone() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setPhone(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_FAX)) {
+                if (leftNoteItem.getFax() != null) {
+                    leftNoteItem.setFax(leftNoteItem.getFax() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setFax(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_EMAIL)) {
+                if (leftNoteItem.getEmail() != null) {
+                    leftNoteItem.setEmail(leftNoteItem.getEmail() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setEmail(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_WEB)) {
+                if (leftNoteItem.getWeb() != null) {
+                    leftNoteItem.setWeb(leftNoteItem.getWeb() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setWeb(clusterNonDehypenizedContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_MEDIC)) {
-                if (medical.getMedics() != null) {
-                    medical.setMedics(medical.getMedics() + "\t" + clusterNonDehypenizedContent);
-                    medical.addMedicsToken(new LayoutToken("\t", MedicalLabels.LEFT_NOTE_MEDIC));
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addMedicsTokens(tokens);
+                if (leftNoteItem.getMedics() != null) {
+                    leftNoteItem.setMedics(leftNoteItem.getMedics() + "\n" + clusterNonDehypenizedContent);
                 } else {
-                    medical.setMedics(clusterNonDehypenizedContent);
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addMedicsTokens(tokens);
+                    leftNoteItem.setMedics(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
-                // affiliation **makers** should be marked SINGLECHAR LINESTART
-                if (medical.getAffiliation() != null) {
-                    medical.setAffiliation(medical.getAffiliation() + " ; " + clusterContent);
-                } else
-                    medical.setAffiliation(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
-                if (medical.getAddress() != null) {
-                    medical.setAddress(medical.getAddress() + " " + clusterContent);
-                } else
-                    medical.setAddress(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
-                if (medical.getOrg() != null) {
-                    medical.setOrg(medical.getOrg() + " " + clusterContent);
-                } else
-                    medical.setOrg(clusterContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_EMAIL)) {
-                if (medical.getEmail() != null) {
-                    medical.setEmail(medical.getEmail() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    medical.setEmail(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_PHONE)) {
-                if (medical.getPhone() != null) {
-                    medical.setPhone(medical.getPhone() + clusterNonDehypenizedContent);
-                } else
-                    medical.setPhone(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_FAX)) {
-                if (medical.getFax() != null) {
-                    medical.setWeb(medical.getFax() + clusterNonDehypenizedContent);
-                } else
-                    medical.setWeb(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_WEB)) {
-                if (medical.getWeb() != null) {
-                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
-                } else
-                    medical.setWeb(clusterNonDehypenizedContent);
             }
         }
-        return medical;
+        return leftNoteItem;
     }
 
     /**
@@ -868,27 +777,15 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             boolean output;
 
-            output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
+            output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<orgName type=\"institution\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<orgName type=\"department\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<phone>", "<phone>", addSpace);
@@ -897,7 +794,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<fax>", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
@@ -918,28 +821,24 @@ public class LeftNoteMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<docnum>")) {
-                buffer.append("</idno>\n");
-            } else if (lastTag0.equals("<affiliation>")) {
+            if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</affiliation>\n\t</byline>\n");
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<department>")) {
+                buffer.append("</orgName>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");
-            } else if (lastTag0.equals("<location>")) {
-                buffer.append("</address>\n");
-            } else if (lastTag0.equals("<medic>")) {
-                buffer.append("</medic>\n\t</person>\n");
-            } else if (lastTag0.equals("<org>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<email>")) {
-                buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {
                 buffer.append("</phone>\n");
             } else if (lastTag0.equals("<fax>")) {
                 buffer.append("</fax>\n");
+            } else if (lastTag0.equals("<email>")) {
+                buffer.append("</email>\n");
             } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ptr>\n");
+            } else if (lastTag0.equals("<medic>")) {
+                buffer.append("</medic>\n\t</person>\n");
             }
         }
     }

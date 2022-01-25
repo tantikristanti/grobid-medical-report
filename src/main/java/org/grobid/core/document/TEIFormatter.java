@@ -6,7 +6,6 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Text;
-import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.Date;
 import org.grobid.core.data.*;
@@ -220,7 +219,7 @@ public class TEIFormatter {
                 }
 
                 // document date
-                if (headerItem.getDocumentDate() != null && headerItem.getDocumentDate().length() >0) {
+                if (headerItem.getDocumentDate() != null && headerItem.getDocumentDate().length() > 0) {
                     tei.append("\t\t\t\t<date type=\"issued\" when=\"");
                     tei.append(headerItem.getDocumentDate()).append("\">");
                     tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate()));
@@ -282,7 +281,7 @@ public class TEIFormatter {
                 tei.append(headerItem.toTEIPatientBlock(4, config));
             }
 
-            // information from the left-note part of the medical reports if they exist
+            // information concerning organization from the left-note part of the medical reports if they exist
             if (leftNoteMedicalItem != null) {
                 tei.append(leftNoteMedicalItem.toTEILeftNoteBlock(4, config));
             }
@@ -326,150 +325,6 @@ public class TEIFormatter {
         }
 
         // opening for the body part
-        if (doc.getLanguage() != null) {
-            tei.append("\t<text xml:lang=\"").append(doc.getLanguage()).append("\">\n");
-        } else {
-            tei.append("\t<text>\n");
-        }
-
-        return tei;
-    }
-
-    public StringBuilder toTEILeftNote(LeftNoteMedicalItem biblio,
-                                       String defaultPublicationStatement,
-                                       List<BibDataSet> bds,
-                                       GrobidAnalysisConfig config) {
-        return toTEILeftNote(biblio, SchemaDeclaration.XSD, defaultPublicationStatement, bds, config);
-    }
-
-    public StringBuilder toTEILeftNote(LeftNoteMedicalItem leftNoteMedicalItem,
-                                       SchemaDeclaration schemaDeclaration,
-                                       String defaultPublicationStatement,
-                                       List<BibDataSet> bds,
-                                       GrobidAnalysisConfig config) {
-        StringBuilder tei = new StringBuilder();
-        tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        if (config.isWithXslStylesheet()) {
-            tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
-        }
-        if (schemaDeclaration == SchemaDeclaration.DTD) {
-            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
-        } else if (schemaDeclaration == SchemaDeclaration.XSD) {
-            // XML schema
-            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \nt" +
-                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n\t" +
-                "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
-                SCHEMA_XSD_LOCATION + "\n\t" +
-                "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
-//				"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
-        } else if (schemaDeclaration == SchemaDeclaration.RNG) {
-            // standard RelaxNG
-            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
-                "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
-        }
-
-        // by default there is no schema association
-        if (schemaDeclaration != SchemaDeclaration.XSD) {
-            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
-        }
-
-        if (doc.getLanguage() != null) {
-            tei.append("\t<teiLeftNote xml:lang=\"" + doc.getLanguage() + "\">");
-        } else {
-            tei.append("\t<teiLeftNote>");
-        }
-
-        tei.append("\n\t\t<fileDesc>\n\t\t\t<titleStmt>\n\t\t\t\t<title level=\"a\" type=\"main\"");
-        if (config.isGenerateTeiIds()) {
-            String divID = KeyGen.getKey().substring(0, 7);
-            tei.append(" xml:id=\"_" + divID + "\"");
-        }
-        tei.append(">");
-
-        if (leftNoteMedicalItem == null) {
-            // if the biblio object is null, we simply create an empty one
-            leftNoteMedicalItem = new LeftNoteMedicalItem();
-        }
-
-        if ((leftNoteMedicalItem.getInstitution() != null)) {
-            tei.append("\t\t\t<publicationStmt>\n");
-            if (leftNoteMedicalItem.getInstitution() != null) {
-                tei.append("\t\t\t\t<institution>" + TextUtilities.HTMLEncode(leftNoteMedicalItem.getInstitution()) +
-                    "</institution>\n");
-
-                tei.append("\t\t\t\t<availability status=\"unknown\">");
-                tei.append("<p>Copyright ");
-                //if (biblio.getPublicationDate() != null)
-                tei.append(TextUtilities.HTMLEncode(leftNoteMedicalItem.getInstitution()) + "</p>\n");
-                tei.append("\t\t\t\t</availability>\n");
-            } else {
-                // a dummy publicationStmt is still necessary according to TEI
-                tei.append("\t\t\t\t<publisher/>\n");
-                if (defaultPublicationStatement == null) {
-                    tei.append("\t\t\t\t<availability status=\"unknown\"><licence/></availability>");
-                } else {
-                    tei.append("\t\t\t\t<availability status=\"unknown\"><p>" +
-                        defaultPublicationStatement + "</p></availability>");
-                }
-                tei.append("\n");
-            }
-
-            tei.append("\t\t\t</publicationStmt>\n");
-        } else {
-            tei.append("\t\t\t<publicationStmt>\n");
-            tei.append("\t\t\t\t<publisher/>\n");
-            tei.append("\t\t\t\t<availability status=\"unknown\"><licence/></availability>\n");
-            tei.append("\t\t\t</publicationStmt>\n");
-        }
-        tei.append("\t\t\t<sourceDesc>\n\t\t\t\t<biblStruct>\n\t\t\t\t\t<analytic>\n");
-
-        tei.append(leftNoteMedicalItem.toTEIMedicBlock(6, config));
-
-        tei.append("\t\t\t\t\t</analytic>\n");
-        tei.append("\t\t\t\t\t<monogr>\n");
-        tei.append("\t\t\t\t\t\t<imprint>\n");
-        tei.append("\t\t\t\t\t\t\t<date/>\n");
-        tei.append("\t\t\t\t\t\t</imprint>\n");
-        tei.append("\t\t\t\t\t</monogr>\n");
-        tei.append("\t\t\t\t</biblStruct>\n");
-        tei.append("\t\t\t</sourceDesc>\n");
-        tei.append("\t\t</fileDesc>\n");
-
-        // encodingDesc gives info about the producer of the file
-        tei.append("\t\t<encodingDesc>\n");
-        tei.append("\t\t\t<appInfo>\n");
-
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        df.setTimeZone(tz);
-        String dateISOString = df.format(new java.util.Date());
-
-        tei.append("\t\t\t\t<application version=\"" + GrobidProperties.getVersion() +
-            "\" ident=\"GROBID\" when=\"" + dateISOString + "\">\n");
-        tei.append("\t\t\t\t\t<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>\n");
-        tei.append("\t\t\t\t\t<ref target=\"https://github.com/kermitt2/grobid\"/>\n");
-        tei.append("\t\t\t\t</application>\n");
-        tei.append("\t\t\t</appInfo>\n");
-        tei.append("\t\t</encodingDesc>\n");
-
-        boolean textClassWritten = false;
-
-        tei.append("\t\t<profileDesc>\n");
-
-        if (textClassWritten)
-            tei.append("\t\t\t</textClass>\n");
-
-        tei.append("\t\t</profileDesc>\n");
-
-        tei.append("\t</teiLeftNote>\n");
-
-        // output pages dimensions in the case coordinates will also be provided for some structures
-        try {
-            tei = toTEIPages(tei, doc, config);
-        } catch (Exception e) {
-            LOGGER.warn("Problem when serializing page size", e);
-        }
-
         if (doc.getLanguage() != null) {
             tei.append("\t<text xml:lang=\"").append(doc.getLanguage()).append("\">\n");
         } else {
