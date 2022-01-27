@@ -1678,7 +1678,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 5a. PERSON NAME MODEL (from medics)
                     // path for person name model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic.name.tei.xml"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic.name.blank.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medic.name"));
 
                     if (input != null && input.trim().length() > 0) {
@@ -1686,28 +1686,23 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         // if the model doesn't exist, just write the text to file
                         if (listMedics != null && listMedics.size() > 0) {
-                            // write the labeled data
-                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                            writer.write("<tei xml:space=\"preserve\">\n");
-                            writer.write("\t<teiHeader>\n");
-                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
-                            writer.write("\t\t\t<medics>\n");
-                            writer.write("\t\t\t\t<name>\n");
                             for (Medic medic : listMedics) {
-                                if (medic.getPersName() != null) {
+                                if (medic.getPersName() != null) { // take only the names
+                                    // write the labeled data
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<name>\n");
                                     writer.write(medic.getPersName() + "\n"); // unlabelled data
-                                }
-                            }
-                            writer.write("\t\t\t\t</name>\n");
-                            writer.write("\t\t\t</medics>\n");
-                            writer.write("\t\t</fileDesc>\n");
-                            writer.write("\t</teiHeader>\n");
-                            writer.write("</tei>");
-                            writer.close();
-
-                            for (Medic medic : listMedics) {
-                                if (medic.getPersName() != null) {
+                                    writer.write("\t\t\t\t</name>\n");
+                                    writer.write("\t\t\t</medics>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
                                     List<LayoutToken> nameTokenizations = analyzer.tokenizeWithLayoutToken(medic.getPersName());
 
                                     List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
@@ -1806,7 +1801,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 5b. PERSON NAME MODEL (from patients)
                     // path for person name model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.name.tei.xml"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.name.blank.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.name"));
 
                     if (input != null && input.trim().length() > 0) {
@@ -1854,6 +1849,10 @@ public class FullMedicalTextParser extends AbstractParser {
             } // end of the header processing
 
             // 7. LEFT NOTE MEDICAL REPORT MODEL with ORGANIZATION MODEL
+            /// path for person name model
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization.blank.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization"));
+
             // we take the left-note part only
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
 
