@@ -162,7 +162,7 @@ Addresses are labeled with their own tag `<address>`.
 ### Organization
 
 All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable organizational structure.
-The information contained therein will be extracted further by the [organization-medical-report](organization-medical-report.md) model.
+The information contained therein will be extracted further by the [organization-medical-report](organization.md) model.
 
 ```xml
     <org>

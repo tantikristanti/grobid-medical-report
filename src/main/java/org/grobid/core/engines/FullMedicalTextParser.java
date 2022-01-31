@@ -1318,11 +1318,12 @@ public class FullMedicalTextParser extends AbstractParser {
 
             // 7. LEFT NOTE MEDICAL REPORT MODEL with ORGANIZATION MODEL
             // path for person name model
-            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization.tei.xml"));
-            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization"));
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
 
             // we take the left-note part only
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+            tokenizations = doc.getTokenizations(); // tokens of segmentation data
 
             if (documentLeftNoteParts != null) {
                 Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
@@ -1337,7 +1338,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.close();
 
                         // =============== if the model exists ===============
-                        // featured and labeled (tagged) data
+                        // we tag with the left-note model
                         /*String rese = parsers.getLeftNoteMedicalParser().label(leftNote);
 
                         // buffer for the header block, take only the data with the label
@@ -1351,10 +1352,10 @@ public class FullMedicalTextParser extends AbstractParser {
                             + "\"/>\n\t</teiHeader>\n\t<text");
 
                         writer.write(" xml:lang=\"fr\"");
-                        writer.write(">\n\t\t<org>\n");
+                        writer.write(">\n\t\t<listOrg>\n");
 
                         writer.write(bufferLeftNote.toString());
-                        writer.write("\n\t\t</org>\n\t</text>\n</tei>\n");
+                        writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
                         writer.close();*/
 
                         // ==============================
@@ -1366,7 +1367,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             + "\"/>\n\t</teiHeader>\n\t<text");
 
                         writer.write(" xml:lang=\"fr\"");
-                        writer.write(">\n\t\t<org>\n");
+                        writer.write(">\n\t\t<listOrg>\n");
 
                         StringBuilder bufferLeftNote = new StringBuilder();
                         for (LayoutToken token : leftNoteTokenizations) {
@@ -1374,7 +1375,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         writer.write(bufferLeftNote.toString());
-                        writer.write("\n\t\t</org>\n\t</text>\n</tei>\n");
+                        writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
                         writer.close();
                         // ==============================
                     }
@@ -1849,9 +1850,9 @@ public class FullMedicalTextParser extends AbstractParser {
             } // end of the header processing
 
             // 7. LEFT NOTE MEDICAL REPORT MODEL with ORGANIZATION MODEL
-            /// path for person name model
-            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization.blank.tei.xml"));
-            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.organization"));
+            // path for organization model
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.blank.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
 
             // we take the left-note part only
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
@@ -1868,22 +1869,23 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.write(leftNote + "\n");
                         writer.close();
 
-                        // we write the unlabeled data
+                        // write the training TEI file for left-note which reflects the extract layout of the text as
+                        // extracted from the pdf
                         writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                             + pdfFileName.replace(".pdf", "")
                             + "\"/>\n\t</teiHeader>\n\t<text");
 
                         writer.write(" xml:lang=\"fr\"");
-                        writer.write(">\n\t\t<org>\n");
+                        writer.write(">\n\t\t<listOrg>\n");
 
                         StringBuilder bufferLeftNote = new StringBuilder();
                         for (LayoutToken token : leftNoteTokenizations) {
                             bufferLeftNote.append(token.getText());
                         }
 
-                        writer.write(bufferLeftNote.toString()); // unlabeled data
-                        writer.write("\n\t\t</org>\n\t</text>\n</tei>\n");
+                        writer.write(bufferLeftNote.toString());
+                        writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
                         writer.close();
                     }
                 }

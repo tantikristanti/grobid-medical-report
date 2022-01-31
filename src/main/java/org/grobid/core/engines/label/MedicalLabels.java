@@ -39,7 +39,6 @@ public class MedicalLabels extends TaggingLabels {
     public final static String PATIENT_LABEL = "<patient>";
     public final static String AFFILIATION_LABEL = "<affiliation>";
     public final static String ADDRESS_LABEL = "<address>";
-    public static final String INSTITUTION_LABEL = "<institution>";
     public final static String ORG_LABEL = "<org>";
     public static final String ORG_NAME_LABEL = "<orgname>";
     public final static String EMAIL_LABEL = "<email>";
@@ -50,6 +49,10 @@ public class MedicalLabels extends TaggingLabels {
     public static final String SETTLEMENT_LABEL = "<settlement>"; // the name of a settlement such as a city, town, or village
     public static final String COUNTRY_LABEL = "<country>";
     public static final String REGION_LABEL = "<region>"; // the name of an administrative unit such as a state, province, or county, larger than a settlement, but smaller than a country
+    public static final String CENTER_LABEL = "<center>";
+    public static final String SERVICE_LABEL = "<service>";
+    public static final String DEPARTMENT_LABEL = "<department>";
+    public static final String ADMINISTRATION_LABEL = "<administration>";
 
     // full medical text
     public static final String PARAGRAPH_LABEL = "<paragraph>";
@@ -118,8 +121,12 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER_NOTE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, NOTE_LABEL);
 
     // Left-Note Medical Report Model
+    public static final TaggingLabel LEFT_NOTE_IDNO= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ID_NUMBER_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
-    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_LABEL);
+    public static final TaggingLabel LEFT_NOTE_CENTER = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CENTER_LABEL);
+    public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
+    public static final TaggingLabel LEFT_NOTE_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
+    public static final TaggingLabel LEFT_NOTE_ADMINISTRATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADMINISTRATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
     public static final TaggingLabel LEFT_NOTE_COUNTRY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, COUNTRY_LABEL);
     public static final TaggingLabel LEFT_NOTE_TOWN = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SETTLEMENT_LABEL);
@@ -128,6 +135,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel LEFT_NOTE_WEB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, WEB_LABEL);
     public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
+    public static final TaggingLabel LEFT_NOTE_NOTE= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, NOTE_LABEL);
 
     // Full medical model
     public static final TaggingLabel TABLE_MARKER = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_MARKER_LABEL);
@@ -147,9 +155,14 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel DATELINE_NOTE = new TaggingLabelImpl(GrobidModels.DATELINE, NOTE_LABEL);
 
     // Medics
+    public static final TaggingLabel MEDIC_ID = new TaggingLabelImpl(GrobidModels.MEDIC, ID_NUMBER_LABEL);
     public static final TaggingLabel MEDIC_ROLE = new TaggingLabelImpl(GrobidModels.MEDIC, ROLE_LABEL);
     public static final TaggingLabel MEDIC_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, PERSON_NAME_LABEL);
     public static final TaggingLabel MEDIC_AFFILIATION = new TaggingLabelImpl(GrobidModels.MEDIC, AFFILIATION_LABEL);
+    public static final TaggingLabel MEDIC_CENTER = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CENTER_LABEL);
+    public static final TaggingLabel MEDIC_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
+    public static final TaggingLabel MEDIC_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
+    public static final TaggingLabel MEDIC_ADMINISTRATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADMINISTRATION_LABEL);
     public static final TaggingLabel MEDIC_ORGANISATION = new TaggingLabelImpl(GrobidModels.MEDIC, ORG_NAME_LABEL);
     public static final TaggingLabel MEDIC_INSTITUTION = new TaggingLabelImpl(GrobidModels.MEDIC, INSTITUTION_LABEL);
     public static final TaggingLabel MEDIC_ADDRESS = new TaggingLabelImpl(GrobidModels.MEDIC, ADDRESS_LABEL);
@@ -212,8 +225,12 @@ public class MedicalLabels extends TaggingLabels {
         register(HEADER_DOCTYPE);
 
         // left-note
+        register(LEFT_NOTE_IDNO);
         register(LEFT_NOTE_AFFILIATION);
-        register(LEFT_NOTE_ORG);
+        register(LEFT_NOTE_CENTER);
+        register(LEFT_NOTE_SERVICE);
+        register(LEFT_NOTE_DEPARTMENT);
+        register(LEFT_NOTE_ADMINISTRATION);
         register(LEFT_NOTE_ADDRESS);
         register(LEFT_NOTE_COUNTRY);
         register(LEFT_NOTE_TOWN);
@@ -222,6 +239,7 @@ public class MedicalLabels extends TaggingLabels {
         register(LEFT_NOTE_EMAIL);
         register(LEFT_NOTE_WEB);
         register(LEFT_NOTE_MEDIC);
+        register(LEFT_NOTE_NOTE);
 
         // full-medical-report
         register(TABLE_MARKER);
@@ -241,9 +259,14 @@ public class MedicalLabels extends TaggingLabels {
         register(DATELINE_NOTE);
 
         // medic
+        register(MEDIC_ID);
         register(MEDIC_ROLE);
         register(MEDIC_NAME);
         register(MEDIC_AFFILIATION);
+        register(MEDIC_CENTER);
+        register(MEDIC_SERVICE);
+        register(MEDIC_DEPARTMENT);
+        register(MEDIC_ADMINISTRATION);
         register(MEDIC_ORGANISATION);
         register(MEDIC_INSTITUTION);
         register(MEDIC_ADDRESS);

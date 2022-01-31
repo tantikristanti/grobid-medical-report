@@ -569,17 +569,41 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
+            if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_IDNO)) {
+                if (leftNoteItem.getIdno() != null) {
+                    leftNoteItem.setIdno(leftNoteItem.getIdno() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setIdno(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
                 if (leftNoteItem.getAffiliation() != null) {
                     leftNoteItem.setAffiliation(leftNoteItem.getAffiliation() + "\n" + clusterNonDehypenizedContent);
                 } else {
                     leftNoteItem.setAffiliation(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
-                if (leftNoteItem.getOrganization() != null) {
-                    leftNoteItem.setOrganization(leftNoteItem.getOrganization() + "\n" + clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_CENTER)) {
+                if (leftNoteItem.getCenter() != null) {
+                    leftNoteItem.setCenter(leftNoteItem.getCenter() + "\n" + clusterNonDehypenizedContent);
                 } else {
-                    leftNoteItem.setOrganization(clusterNonDehypenizedContent);
+                    leftNoteItem.setCenter(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SERVICE)) {
+                if (leftNoteItem.getService() != null) {
+                    leftNoteItem.setService(leftNoteItem.getService() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setService(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DEPARTMENT)) {
+                if (leftNoteItem.getDepartment() != null) {
+                    leftNoteItem.setDepartment(leftNoteItem.getDepartment() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setDepartment(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADMINISTRATION)) {
+                if (leftNoteItem.getAdministration() != null) {
+                    leftNoteItem.setAdministration(leftNoteItem.getAdministration() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setAdministration(clusterNonDehypenizedContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
                 if (leftNoteItem.getAddress() != null) {
@@ -628,6 +652,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     leftNoteItem.setMedics(leftNoteItem.getMedics() + "\n" + clusterNonDehypenizedContent);
                 } else {
                     leftNoteItem.setMedics(clusterNonDehypenizedContent);
+                }
+            }else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_NOTE)) {
+                if (leftNoteItem.getNote() != null) {
+                    leftNoteItem.setNote(leftNoteItem.getNote() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setNote(clusterNonDehypenizedContent);
                 }
             }
         }
@@ -777,12 +807,21 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             boolean output;
 
-            output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
+            output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<idno>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<orgName type=\"institution\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<orgName type=\"department\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org type=\"center\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org type=\"service\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org type=\"department\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<administration>", "<org type=\"administration\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
@@ -803,6 +842,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<note>", "\"<note type=\\\"short\\\">\"", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
             }
 
@@ -821,12 +863,18 @@ public class LeftNoteMedicalParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<affiliation>")) {
+            if (lastTag0.equals("<idno>")) {
+                buffer.append("</idno>\n");
+            } if (lastTag0.equals("<affiliation>")) {
                 buffer.append("</affiliation>\n\t</byline>\n");
-            } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<center>")) {
+                buffer.append("</org>\n");
+            } else if (lastTag0.equals("<service>")) {
+                buffer.append("</org>\n");
             } else if (lastTag0.equals("<department>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</org>\n");
+            } else if (lastTag0.equals("<administration>")) {
+                buffer.append("</org>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<phone>")) {
@@ -839,6 +887,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 buffer.append("</ptr>\n");
             } else if (lastTag0.equals("<medic>")) {
                 buffer.append("</medic>\n\t</person>\n");
+            } else if (lastTag0.equals("<note>")) {
+                buffer.append("</note>\n");
             }
         }
     }
@@ -980,7 +1030,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
             Language lang = new Language("fr");
 
             if (documentLeftNoteParts != null) {
-                List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
+                // these commands are be replace by `List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();`
+                /*List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
 
                 for (DocumentPiece docPiece : documentLeftNoteParts) {
                     DocumentPointer dp1 = docPiece.getLeft();
@@ -991,45 +1042,44 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     for (int i = tokens; i < tokene; i++) {
                         tokenizationsLeftNote.add(tokenizations.get(i));
                     }
-                }
+                }*/
 
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
                 String leftNote = featuredLeftNote.getLeft();
                 List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
                 String rese = null;
                 if ((leftNote != null) && (leftNote.trim().length() > 0)) {
-                    // we write the left-note untagged (but featurized)
+                    // we write left-note data with features
                     Writer writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(leftNote + "\n");
                     writer.close();
 
+                    // we tag with the left-note model
                     rese = label(leftNote);
 
                     // buffer for the left-note block
-                    StringBuilder bufferLeftNote = trainingExtraction(rese, tokenizationsLeftNote);
+                    StringBuilder bufferLeftNote = trainingExtraction(rese, leftNoteTokenization);
                     lang = LanguageUtilities.getInstance().runLanguageId(bufferLeftNote.toString());
                     if (lang != null) {
                         doc.setLanguage(lang.getLang());
+                        //writer.write(" xml:lang=\"" + lang.getLang() + "\"");
                     }
 
                     // write the training TEI file for left-note which reflects the extract layout of the text as
                     // extracted from the pdf
                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiLeftNote>\n\t\t<fileDesc xml:id=\""
+                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                         + pdfFileName.replace(".pdf", "")
-                        + "\"/>\n\t</teiLeftNote>\n\t<text");
+                        + "\"/>\n\t</teiHeader>\n\t<text");
 
-                    if (lang != null) {
-                        writer.write(" xml:lang=\"" + lang.getLang() + "\"");
-                    }
-                    writer.write(">\n\t\t<note place=\"left\">\n");
+                    writer.write(" xml:lang=\"fr\"");
+                    writer.write(">\n\t\t<listOrg>\n");
+
                     writer.write(bufferLeftNote.toString());
-                    writer.write("\n\t\t</note>\n\t</text>\n</tei>\n");
+                    writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
                     writer.close();
                 }
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new GrobidException("An exception occured while running Grobid training" +
@@ -1070,7 +1120,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.tei.xml"));
+            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.blank.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1079,13 +1129,14 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             // retreive only the left-note part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
-            List<LayoutToken> tokenizations = doc.getTokenizations();
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokens of the segmentation  data
 
             // TBD: language identifier here on content text sample
             Language lang = new Language("fr");
 
             if (documentLeftNoteParts != null) {
-                List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
+                // these commands are be replace by `List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();`
+                /*List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
 
                 for (DocumentPiece docPiece : documentLeftNoteParts) {
                     DocumentPointer dp1 = docPiece.getLeft();
@@ -1096,13 +1147,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     for (int i = tokens; i < tokene; i++) {
                         tokenizationsLeftNote.add(tokenizations.get(i));
                     }
-                }
+                }*/
 
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
-                String leftNote = featuredLeftNote.getLeft();
-                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
+                String leftNote = featuredLeftNote.getLeft(); // left note data with features
+                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight(); // tokens of the left note data
                 if ((leftNote != null) && (leftNote.trim().length() > 0)) {
-                    // we write the left-note untagged (but featurized)
+                    // we write left-note data with features
                     Writer writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(leftNote + "\n");
                     writer.close();
@@ -1110,24 +1161,20 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     // write the training TEI file for left-note which reflects the extract layout of the text as
                     // extracted from the pdf
                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiLeftNote>\n\t\t<fileDesc xml:id=\""
+                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                         + pdfFileName.replace(".pdf", "")
-                        + "\"/>\n\t</teiLeftNote>\n\t<text");
+                        + "\"/>\n\t</teiHeader>\n\t<text");
 
-                    if (lang != null) {
-                        // by default, it's French language since the medical reports are in French
-                        writer.write(" xml:lang=\"" + lang.getLang() + "\"");
-                    }
-                    writer.write(">\n\t\t<note place=\"left\">\n");
+                    writer.write(" xml:lang=\"fr\"");
+                    writer.write(">\n\t\t<listOrg>\n");
+
                     StringBuilder bufferLeftNote = new StringBuilder();
-
-                    // just write the text without any label
-                    for(LayoutToken token : tokenizationsLeftNote) {
+                    for (LayoutToken token : leftNoteTokenization) {
                         bufferLeftNote.append(token.getText());
                     }
 
                     writer.write(bufferLeftNote.toString());
-                    writer.write("\n\t\t</note>\n\t</text>\n</tei>\n");
+                    writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
                     writer.close();
                 }
             }
@@ -1228,7 +1275,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".left.note.high.level.tei.xml"));
+            File outputTEIFile = new File(outputFile + File.separator + pdfFileName.replace(".pdf", ".left.note.medical.tei.xml"));
             Writer writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1307,8 +1354,5 @@ public class LeftNoteMedicalParser extends AbstractParser {
         } finally {
             DocumentSource.close(documentSource, true, true, true);
         }
-
     }
-
-
 }

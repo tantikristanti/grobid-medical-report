@@ -31,8 +31,12 @@ public class LeftNoteMedicalItem {
 
     // information regarding the document
     private String language = null;
+    private String idno = null;
     private String affiliation = null;
-    private String organization = null;
+    private String center = null;
+    private String service = null;
+    private String department = null;
+    private String administration = null;
     private String address = null;
     private String country = null;
     private String settlement = null;
@@ -56,15 +60,20 @@ public class LeftNoteMedicalItem {
     public String toString() {
         return "LeftNoteItem{" +
             " language='" + language + '\'' +
+            ", idno='" + idno + '\'' +
             ", affiliation='" + affiliation + '\'' +
+            ", center='" + center + '\'' +
+            ", service='" + service + '\'' +
+            ", department='" + department + '\'' +
+            ", administration='" + administration + '\'' +
             ", address='" + address + '\'' +
             ", country='" + country + '\'' +
             ", town='" + settlement + '\'' +
             ", phone='" + phone + '\'' +
             ", fax='" + fax + '\'' +
             ", web='" + web + '\'' +
-            ", organization='" + organization + '\'' +
             ", medics='" + medics + '\'' +
+            ", note='" + note + '\'' +
             '}';
     }
 
@@ -113,8 +122,12 @@ public class LeftNoteMedicalItem {
         coordinates = null;
         labeledTokens = null;
         language = null;
+        idno = null;
         affiliation = null;
-        organization = null;
+        center = null;
+        service = null;
+        department = null;
+        administration = null;
         address = null;
         country = null;
         settlement = null;
@@ -138,30 +151,26 @@ public class LeftNoteMedicalItem {
     public String toTEILeftNoteBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
         TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("<org>\n");
+        tei.append("<listOrg>\n");
         if (affiliation != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            toTEIAffiliationBlock(nbTag, config);
+            tei.append("<affiliation>").append(TextUtilities.HTMLEncode(affiliation)).append("</affiliation>\n");
         }
-        if (listMedics != null && listMedics.size() > 0) {
+        if (center != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            toTEIMedicBlock(nbTag, config);
+            tei.append("<org type=\"center\">").append(TextUtilities.HTMLEncode(center)).append("</org>\n");
         }
-        TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("</org>\n");
-        return tei.toString();
-    }
-
-    /**
-     * Create the TEI encoding for the medics for the current header object.
-     */
-    public String toTEIAffiliationBlock(int nbTag, GrobidAnalysisConfig config) {
-        StringBuffer tei = new StringBuffer();
-        TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("<affiliation>\n");
-        if (affiliation != null) {
+        if (service != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append(TextUtilities.HTMLEncode(affiliation)).append("\n");
+            tei.append("<org type=\"service\">").append(TextUtilities.HTMLEncode(service)).append("</org>\n");
+        }
+        if (department != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org type=\"department\">").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
+        }
+        if (administration != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org type=\"administration\">").append(TextUtilities.HTMLEncode(administration)).append("</org>\n");
         }
         if (address != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -191,8 +200,105 @@ public class LeftNoteMedicalItem {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<ptr type=\"web\">").append(TextUtilities.HTMLEncode(web)).append("</ptr>\n");
         }
+        if (note != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<note type=\"short\">").append(TextUtilities.HTMLEncode(web)).append("</note>\n");
+        }
         TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("</affiliation>\n");
+        tei.append("</listOrg>\n");
+        return tei.toString();
+    }
+
+    /**
+     * Create the TEI encoding for the medics for the current header object.
+     */
+    public String toTEIAffiliationBlock(int nbTag, GrobidAnalysisConfig config) {
+        StringBuffer tei = new StringBuffer();
+        for(Affiliation aff : listAffiliations) {
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("<affiliation>\n");
+            if (aff.getAffiliationString() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append(TextUtilities.HTMLEncode(affiliation)).append("\n");
+            }
+            if (address != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<address>").append(TextUtilities.HTMLEncode(address)).append("</address>\n");
+            }
+            if (country != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<country>").append(TextUtilities.HTMLEncode(country)).append("</country>\n");
+            }
+            if (settlement != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<settlement>").append(TextUtilities.HTMLEncode(settlement)).append("</settlement>\n");
+            }
+            if (phone != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<phone>").append(TextUtilities.HTMLEncode(phone)).append("</phone>\n");
+            }
+            if (fax != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<fax>").append(TextUtilities.HTMLEncode(fax)).append("</fax>\n");
+            }
+            if (email != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<email>").append(TextUtilities.HTMLEncode(email)).append("</email>\n");
+            }
+            if (web != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("<ptr type=\"web\">").append(TextUtilities.HTMLEncode(web)).append("</ptr>\n");
+            }
+            TextUtilities.appendN(tei, '\t', nbTag);
+            tei.append("</affiliation>\n");
+        }
+        return tei.toString();
+    }
+
+    /**
+     * Create the TEI encoding for the medics for the current header object.
+     */
+    public String toTEIOrganizationBlock(int nbTag, GrobidAnalysisConfig config) {
+        StringBuffer tei = new StringBuffer();
+        TextUtilities.appendN(tei, '\t', nbTag);
+        if (center != null) {
+            tei.append("<org type=\"center\">").append(TextUtilities.HTMLEncode(center)).append("</org>\n");
+        }
+        if (service != null) {
+            tei.append("<org type=\"service\">").append(TextUtilities.HTMLEncode(service)).append("</org>\n");
+        }
+        if (department != null) {
+            tei.append("<org type=\"department\">").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
+        }
+        if (administration != null) {
+            tei.append("<org type=\"administration\">").append(TextUtilities.HTMLEncode(administration)).append("</org>\n");
+        }
+        if (address != null) {
+            tei.append("<address>").append(TextUtilities.HTMLEncode(address)).append("</address>\n");
+        }
+        if (country != null) {
+            tei.append("<country>").append(TextUtilities.HTMLEncode(country)).append("</country>\n");
+        }
+        if (settlement != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<settlement>").append(TextUtilities.HTMLEncode(settlement)).append("</settlement>\n");
+        }
+        if (phone != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<phone>").append(TextUtilities.HTMLEncode(phone)).append("</phone>\n");
+        }
+        if (fax != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<fax>").append(TextUtilities.HTMLEncode(fax)).append("</fax>\n");
+        }
+        if (email != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<email>").append(TextUtilities.HTMLEncode(email)).append("</email>\n");
+        }
+        if (web != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<ptr type=\"web\">").append(TextUtilities.HTMLEncode(web)).append("</ptr>\n");
+        }
         return tei.toString();
     }
 
@@ -315,10 +421,6 @@ public class LeftNoteMedicalItem {
         return affiliation;
     }
 
-    public String getOrganization() {
-        return organization;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -355,6 +457,14 @@ public class LeftNoteMedicalItem {
         return note;
     }
 
+    public String getIdno() {return idno;}
+
+    public void setIdno(String idno) {this.idno = idno;}
+
+    public String getAdministration() {return administration;}
+
+    public void setAdministration(String administration) {this.administration = administration;}
+
     public List<Affiliation> getListAffiliations() {
         return listAffiliations;
     }
@@ -379,6 +489,22 @@ public class LeftNoteMedicalItem {
         return medicsLayoutTokens;
     }
 
+    public String getCenter() {return center;}
+
+    public void setCenter(String center) {this.center = center;}
+
+    public String getService() {return service; }
+
+    public void setService(String service) {this.service = service;}
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
     public void setLabeledTokens(List<LayoutToken> tokens, TaggingLabel label) {
         if (labeledTokens == null)
             labeledTokens = new TreeMap<>();
@@ -401,9 +527,6 @@ public class LeftNoteMedicalItem {
         this.affiliation = affiliation;
     }
 
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
 
     public void setAddress(String address) {
         this.address = address;

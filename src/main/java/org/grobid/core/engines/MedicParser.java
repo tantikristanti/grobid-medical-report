@@ -114,6 +114,14 @@ public class MedicParser extends AbstractParser {
                 if (clusterContent.trim().length() == 0)
                     continue;
 
+                if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
+                    if (medic.getIdno() != null) {
+                        medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+                    } else {
+                        medic.setIdno(clusterContent);
+                    }
+                    medic.addLayoutTokens(cluster.concatTokens());
+                }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
                     if (medic.getRole() != null) {
                         medic.setRole(medic.getRole() + "\t" + clusterContent);
@@ -138,7 +146,8 @@ public class MedicParser extends AbstractParser {
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
+                if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
+                    (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
                     if (medic.getOrganisation() != null) {
                         medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
                     } else {
@@ -252,6 +261,14 @@ public class MedicParser extends AbstractParser {
             Engine.getCntManager().i(clusterLabel);
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
+            if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
+                if (medic.getIdno() != null) {
+                    medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+                } else {
+                    medic.setIdno(clusterContent);
+                }
+                medic.addLayoutTokens(cluster.concatTokens());
+            }
             if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
                 if (medic.getRole() != null) {
                     medic.setRole(medic.getRole() + "\t" + clusterContent);
@@ -276,7 +293,8 @@ public class MedicParser extends AbstractParser {
                 }
                 medic.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION)) {
+            if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
+                (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
                 if (medic.getOrganisation() != null) {
                     medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
                 } else {
@@ -475,9 +493,12 @@ public class MedicParser extends AbstractParser {
                         testClosingTag(buffer, currentTag0, lastTag0);
 
 
-                    String output = writeField(s1, lastTag0, s2, "<roleName>", "<roleName>", addSpace, 0);
+                    String output = writeField(s1, lastTag0, s2, "<idno>", "<idno>", addSpace, 0);
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<roleName>", "<roleName>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
@@ -571,6 +592,8 @@ public class MedicParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
+            } else if (lastTag0.equals("<idno>")) {
+                buffer.append("</idno>");
             } else if (lastTag0.equals("<rolename>")) {
                 buffer.append("</roleName>");
             } else if (lastTag0.equals("<persname>")) {

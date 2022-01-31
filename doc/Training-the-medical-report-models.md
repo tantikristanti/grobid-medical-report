@@ -20,7 +20,7 @@ The models prepared are:
 
 - [x] dateline
 
-- [ ] organization-medical-report
+- [x] organization-medical-report
 
 - [x] medic
 

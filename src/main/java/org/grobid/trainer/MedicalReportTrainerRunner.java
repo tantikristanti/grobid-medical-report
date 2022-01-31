@@ -125,7 +125,7 @@ public class MedicalReportTrainerRunner {
         } else if (model.equals("header-medical-report")) {
             trainer = new HeaderMedicalReportTrainer();
         } else if (model.equals("organization")) {
-            trainer = new OrganizationTrainer();
+            trainer = new LeftNoteTrainer();
         } else if (model.equals("fr-medical-ner")) {
             trainer = new FrenchMedicalNERTrainer();
         } else if (model.equals("dateline")) {

@@ -10,15 +10,19 @@ For identifying the exact pieces of information to be part of the `left-note-med
 
 For the left-note-medical-report model, we use the following TEI elements:
 
-* `<idno>` for the strong identifiers of the document 
+* `<idno>` for the strong identifiers of the document (ex. no. FINESS)
 * `<affiliation>` for the affiliation information
+* `<org>` for the information regarding identifiable organization
+    * `<org type="center">` for the name of the institution
+    * `<org type="service">` for the name of the institution
+    * `<org type="department">` for the name of the department
+    * `<org type="administration">` for the name of the administration
 * `<address>` for the address elements of affiliations
-* `<medic>` for the list of medics  
-* `<org>` for the information regarding identifiable organization  
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL 
+* `<medic>` for the list of medics
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
@@ -80,7 +84,7 @@ As illustrated above, titles and roles (e.g. Ph.D., MD, Dr., MCU-PH, PH, Chef de
 ### Organization
 
 All the mentions of organizations are labeled under <org>. [Organization](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-org.html) provides information about an identifiable organizational structure.
-The information contained therein will be extracted further by the [organization-medical-report](organization-medical-report.md) model.
+The information contained therein will be extracted further by the [organization-medical-report](organization.md) model.
 
 ```xml
     <org>

@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * <p>
  * Tanti, 2020
  */
-public class TEIOrganizationSaxParser extends DefaultHandler {
+public class TEILeftNoteSaxParser extends DefaultHandler {
 
     private StringBuffer accumulator = new StringBuffer(); // Accumulate parsed text
 
@@ -32,15 +32,15 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("affiliation", "address", "orgName", "institution", "department",
-        "email", "phone", "fax", "ptr", "medic");
+    private List<String> endTags = Arrays.asList("idno", "affiliation", "address", "org", "center",
+        "service", "department", "administration", "email", "phone", "fax", "ptr", "medic", "note");
 
     private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "org",
         "fileDesc", "text", "person", "p");
 
     private List<String> ignoredTags = Arrays.asList("page", "location");
 
-    public TEIOrganizationSaxParser() {
+    public TEILeftNoteSaxParser() {
         labeled = new ArrayList<String>();
     }
 
@@ -109,7 +109,9 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
         if (qName.equals("affiliation")) {
             currentTag = "<affiliation>";
             accumulator.setLength(0);
-        } else if (qName.equals("orgName")) {
+        } else if (qName.equals("idno")) {
+            currentTag = "<idno>";
+        } else if (qName.equals("org")) {
             int length = atts.getLength();
 
             // Process each attribute
@@ -120,8 +122,14 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
 
                 if (name != null) {
                     if (name.equals("type")) {
-                        if (value.equals("institution")) {
-                            currentTag = "<institution>";
+                        if (value.equals("center")) {
+                            currentTag = "<center>";
+                        }
+                    }
+                } else if (name != null) {
+                    if (name.equals("type")) {
+                        if (value.equals("service")) {
+                            currentTag = "<service>";
                         }
                     }
                 } else if (name != null) {
@@ -130,13 +138,23 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
                             currentTag = "<department>";
                         }
                     }
+                } else if (name != null) {
+                    if (name.equals("type")) {
+                        if (value.equals("administration")) {
+                            currentTag = "<administration>";
+                        }
+                    }
                 } else
                     currentTag = "<other>";
             }
-        } else if (qName.equals("institution")) {
-            currentTag = "<institution>";
+        } else if (qName.equals("center")) {
+            currentTag = "<center>";
+        } else if (qName.equals("service")) {
+            currentTag = "<service>";
         } else if (qName.equals("department")) {
             currentTag = "<department>";
+        } else if (qName.equals("administration")) {
+            currentTag = "<administration>";
         } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
@@ -166,6 +184,27 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
             }
         } else if (qName.equals("medic")) {
             currentTag = "<medic>";
+        } else if (qName.equals("note")) {
+            int length = atts.getLength();
+
+            if (length == 0) {
+                currentTag = "<note>";
+            } else {
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
+
+                    if ((name != null) && (value != null)) {
+                        if (name.equals("type")) {
+                            if (value.equals("short")) {
+                                currentTag = "<note>";
+                            }
+                        }
+                    }
+                }
+            }
         } else if (qName.equals("fileDesc")) {
             int length = atts.getLength();
 

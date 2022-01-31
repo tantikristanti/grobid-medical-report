@@ -179,12 +179,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                                 if (toLowerCaseName.endsWith(".jpg")) {
                                     outputFilePath = assetFile.getPath() + File.separator +
                                         toLowerCaseName.replace(".jpg", ".png");
-                                }
-                                /*else if (currFile.getName().toLowerCase().endsWith(".pbm")) {
-                                    outputFilePath = assetFile.getPath() + File.separator +
-                                         currFile.getName().toLowerCase().replace(".pbm",".png");
-                                }*/
-                                else {
+                                } else {
                                     outputFilePath = assetFile.getPath() + File.separator +
                                         toLowerCaseName.replace(".ppm", ".png");
                                 }

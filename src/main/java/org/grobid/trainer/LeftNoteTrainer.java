@@ -8,7 +8,7 @@ import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
-import org.grobid.trainer.sax.TEIOrganizationSaxParser;
+import org.grobid.trainer.sax.TEILeftNoteSaxParser;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -25,21 +25,21 @@ import java.util.StringTokenizer;
  *
  * @ Tanti, 2020
  */
-public class OrganizationTrainer extends AbstractTrainer{
+public class LeftNoteTrainer extends AbstractTrainer{
 
-    public OrganizationTrainer() {
-        super(GrobidModels.ORGANIZATION);
+    public LeftNoteTrainer() {
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
     }
 
     @Override
     public int createCRFPPData(File corpusPath, File trainingOutputPath) {
-        return addFeaturesOrganization(corpusPath.getAbsolutePath() + "/tei",
+        return addFeaturesLeftNote(corpusPath.getAbsolutePath() + "/tei",
             corpusPath.getAbsolutePath() + "/raw",
             trainingOutputPath, null, 1.0);
     }
 
     /**
-     * Add the selected features to a organization example set
+     * Add the selected features to left-note example set
      *
      * @param corpusDir
      *            a path where corpus files are located
@@ -56,7 +56,7 @@ public class OrganizationTrainer extends AbstractTrainer{
                                final File trainingOutputPath,
                                final File evalOutputPath,
                                double splitRatio) {
-        return addFeaturesOrganization(corpusDir.getAbsolutePath() + "/tei",
+        return addFeaturesLeftNote(corpusDir.getAbsolutePath() + "/tei",
             corpusDir.getAbsolutePath() + "/raw",
             trainingOutputPath,
             evalOutputPath,
@@ -66,22 +66,22 @@ public class OrganizationTrainer extends AbstractTrainer{
     /**
      * Add the selected features to the organization model training
      * @param sourceFile source path
-     * @param organizationPath organization path
+     * @param leftNotePath organization path
      * @param trainingOutputPath output training file
      * @return number of corpus files
      */
-    public int addFeaturesOrganization(String sourceFile,
-                                  String organizationPath,
+    public int addFeaturesLeftNote(String sourceFile,
+                                  String leftNotePath,
                                   final File trainingOutputPath,
                                   final File evalOutputPath,
                                   double splitRatio) {
         System.out.println(sourceFile);
-        System.out.println(organizationPath);
+        System.out.println(leftNotePath);
         System.out.println(trainingOutputPath);
         System.out.println(evalOutputPath);
 
         System.out.println("TEI files: " + sourceFile);
-        System.out.println("Organization info files: " + organizationPath);
+        System.out.println("Left-note info files: " + leftNotePath);
         if (trainingOutputPath != null)
             System.out.println("outputPath for training data: " + trainingOutputPath);
         if (evalOutputPath != null)
@@ -123,7 +123,7 @@ public class OrganizationTrainer extends AbstractTrainer{
                 String name = teifile.getName();
                 //System.out.println(name);
 
-                TEIOrganizationSaxParser parser2 = new TEIOrganizationSaxParser();
+                TEILeftNoteSaxParser parser2 = new TEILeftNoteSaxParser();
                 parser2.setFileName(name);
 
                 // get a factory
@@ -137,36 +137,36 @@ public class OrganizationTrainer extends AbstractTrainer{
                 //System.out.println(labeled);
                 //System.out.println(parser2.getPDFName()+"._");
 
-                File refDir2 = new File(organizationPath);
-                String organizationFile = null;
+                File refDir2 = new File(leftNotePath);
+                String leftNoteFile = null;
                 File[] refFiles2 = refDir2.listFiles();
                 for (File aRefFiles2 : refFiles2) {
                     String localFileName = aRefFiles2.getName();
-                    if (localFileName.equals(parser2.getPDFName() + ".organization.medical") ||
-                        localFileName.equals(parser2.getPDFName() + ".training.organization.medical")) {
-                        organizationFile = localFileName;
+                    if (localFileName.equals(parser2.getPDFName() + ".left.note.medical") ||
+                        localFileName.equals(parser2.getPDFName() + ".training.left.note.medical")) {
+                        leftNoteFile = localFileName;
                         break;
                     }
                     if ((localFileName.startsWith(parser2.getPDFName() + "._")) &&
-                        (localFileName.endsWith(".organization.medical") || localFileName.endsWith(".training.organization.medical"))) {
-                        organizationFile = localFileName;
+                        (localFileName.endsWith(".left.note.medical") || localFileName.endsWith(".training.left.note.medical"))) {
+                        leftNoteFile = localFileName;
                         break;
                     }
                 }
 
-                if (organizationFile == null)
+                if (leftNoteFile == null)
                     continue;
 
-                String pathOrganization = organizationPath + File.separator + organizationFile;
+                String pathLeftNote = leftNotePath + File.separator + leftNoteFile;
                 int p = 0;
                 BufferedReader bis = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(pathOrganization), "UTF8"));
+                    new InputStreamReader(new FileInputStream(pathLeftNote), "UTF8"));
 
-                StringBuilder organization = new StringBuilder();
+                StringBuilder leftNote = new StringBuilder();
 
                 String line;
                 while ((line = bis.readLine()) != null) {
-                    organization.append(line);
+                    leftNote.append(line);
                     int ii = line.indexOf(' ');
                     String token = null;
                     if (ii != -1) {
@@ -201,7 +201,7 @@ public class OrganizationTrainer extends AbstractTrainer{
                                 organization.append(line);*/
 
                                 String tag = st.nextToken();
-                                organization.append(" ").append(tag);
+                                leftNote.append(" ").append(tag);
                                 p = pp + 1;
                                 pp = p + 10;
                             } /*else {
@@ -212,14 +212,14 @@ public class OrganizationTrainer extends AbstractTrainer{
                             break;
                         }
                     }
-                    organization.append("\n");
+                    leftNote.append("\n");
                 }
                 bis.close();
 
                 // post process for ensuring continous labelling
-                StringBuilder organization2 = new StringBuilder();
-                String organizationStr = organization.toString();
-                StringTokenizer sto = new StringTokenizer(organizationStr, "\n");
+                StringBuilder leftNote2 = new StringBuilder();
+                String leftNoteStr = leftNote.toString();
+                StringTokenizer sto = new StringTokenizer(leftNoteStr, "\n");
                 String lastLabel = null;
                 String lastLastLabel = null;
                 String previousLine = null;
@@ -244,22 +244,22 @@ public class OrganizationTrainer extends AbstractTrainer{
                             if (label.equals(lastLastLabel)) {
                                 lastLabel = label;
                                 previousLine += " " + label;
-                                organization2.append(previousLine);
-                                organization2.append("\n");
+                                leftNote2.append(previousLine);
+                                leftNote2.append("\n");
                             } else {
                                 //if (lastLabel == null)
                                 //	previousLine += " <note>";
                                 if (lastLabel != null) {
-                                    organization2.append(previousLine);
-                                    organization2.append("\n");
+                                    leftNote2.append(previousLine);
+                                    leftNote2.append("\n");
                                 }
                             }
                         } else {
                             //if (lastLabel == null)
                             //	previousLine += " <note>";
                             if (lastLabel != null) {
-                                organization2.append(previousLine);
-                                organization2.append("\n");
+                                leftNote2.append(previousLine);
+                                leftNote2.append("\n");
                             }
                         }
                     }
@@ -272,19 +272,19 @@ public class OrganizationTrainer extends AbstractTrainer{
                 }
 
                 if (lastLabel != null) {
-                    organization2.append(previousLine);
-                    organization2.append("\n");
+                    leftNote2.append(previousLine);
+                    leftNote2.append("\n");
                 }
 
                 if ( (writer2 == null) && (writer3 != null) )
-                    writer3.write(organization2.toString() + "\n");
+                    writer3.write(leftNote2.toString() + "\n");
                 if ( (writer2 != null) && (writer3 == null) )
-                    writer2.write(organization2.toString() + "\n");
+                    writer2.write(leftNote2.toString() + "\n");
                 else {
                     if (Math.random() <= splitRatio)
-                        writer2.write(organization2.toString() + "\n");
+                        writer2.write(leftNote2.toString() + "\n");
                     else
-                        writer3.write(organization2.toString() + "\n");
+                        writer3.write(leftNote2.toString() + "\n");
                 }
             }
 
@@ -330,7 +330,7 @@ public class OrganizationTrainer extends AbstractTrainer{
             exp.printStackTrace();
         }
 
-        OrganizationTrainer trainer = new OrganizationTrainer();
+        LeftNoteTrainer trainer = new LeftNoteTrainer();
 
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));

@@ -11,6 +11,7 @@ import java.util.List;
  */
 
 public class Medic {
+    private String idno = null;
     private String roleName = null;
     private String persName = null;
     private String affiliation = null;
@@ -117,6 +118,30 @@ public class Medic {
 
     public String getNote() {
         return note;
+    }
+
+    public String getIdno() {
+        return idno;
+    }
+
+    public void setIdno(String idno) {
+        this.idno = idno;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
     }
 
     public void setNote(String note) {
