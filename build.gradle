@@ -145,7 +145,7 @@ def trainerTasks = [
     //Training models
     "train_medical_report_segmenter"        : "org.grobid.trainer.MedicalReportSegmenterTrainer",
     "train_header_medical_report"           : "org.grobid.trainer.HeaderMedicalReportTrainer",
-    "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteMedicalReportTrainer",
+    "train_left_note_medical_report"        : "org.grobid.trainer.LeftNoteTrainer",
     "train_full_medical_text"               : "org.grobid.trainer.FullMedicalTextTrainer",
     "train_french_medical_ner"              : "org.grobid.trainer.FrenchMedicalNERTrainer",
     "train_dateline"                        : "org.grobid.trainer.DatelineTrainer",
