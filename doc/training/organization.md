@@ -11,16 +11,12 @@ For identifying the exact pieces of information to be part of the `organization-
 For the organization-medical-report model, we use the following TEI elements:
 
 * `<affiliation>` for the affiliation information
-* `<org>` for the organization name
-  * `<org type="institution">` for the name of the institution
-  * `<org type="department">` for the name of the department
-  * `<org type="administration">` for the name of the administration
+* `<orgName>` for the organization name
 * `<address>` for the address elements of affiliations
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL
-* `<medic>` for the list of medics
 * `<note type="short">` for the any short notes in the header part
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 

@@ -10,6 +10,7 @@ For identifying the exact pieces of information to be part of the `header-medica
 
 For the medic model, we use the following TEI elements:
 
+* `<idno>` for the ID of medics (ex., N° RPPS)
 * `<roleName>` for the role of medics
 * `<persName>` for the name of medics 
 * `<affiliation>` for the affiliation attached directly to medics
