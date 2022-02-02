@@ -18,9 +18,11 @@ To be able to use this tool, the installation of Grobid is a must. In addition, 
     MEDICAL_REPORT_SEGMENTER("medical-report-segmenter"),
     HEADER_MEDICAL_REPORT("header-medical-report"),
     LEFT_NOTE_MEDICAL_REPORT("left-note-medical-report"),
-    NAME_MEDIC("name/medic"),
-    NAME_PATIENT("name/patient"),
+    MEDIC("medic"),
+    PATIENT("patient"),
+    NAMES_PERSON_MEDICAL("name/person-medical"),
     DATELINE("dateline"),
+    ORGANIZATION("organization"),
     FULL_MEDICAL_TEXT("full-medical-text"),
     FR_MEDICAL_NER("fr-medical-ner"),
     FR_MEDICAL_NER_QUAERO("fr-medical-ner-quaero");
@@ -30,7 +32,7 @@ To be able to use this tool, the installation of Grobid is a must. In addition, 
    - Engine (machine learning with [Wapiti](https://wapiti.limsi.fr/) or deep learning with [Delft](https://github.com/kermitt2/delft/))
    - Training parameters
     
-    For examples:
+    For examples (cam be copied from `resources/config/grobid-medical-report.yaml`):
      ```
      - name: "medical-report-segmenter"
        engine: "wapiti"
