@@ -113,40 +113,30 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
             currentTag = "<idno>";
         } else if (qName.equals("org")) {
             int length = atts.getLength();
+            if (length > 0) {
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
 
-            // Process each attribute
-            for (int i = 0; i < length; i++) {
-                // Get names and values for each attribute
-                String name = atts.getQName(i);
-                String value = atts.getValue(i);
-
-                if (name != null) {
-                    if (name.equals("type")) {
-                        if (value.equals("center")) {
-                            currentTag = "<center>";
+                    if (name != null) {
+                        if (name.equals("type")) {
+                            if (value.equals("center")) {
+                                currentTag = "<center>";
+                            } else if (value.equals("service")) {
+                                currentTag = "<service>";
+                            } else if (value.equals("department")) {
+                                currentTag = "<department>";
+                            } else if (value.equals("administration")) {
+                                currentTag = "<administration>";
+                            } else
+                                currentTag = "<org>"; // we take org with the type other than center, service, department or administration as <org>
                         }
                     }
-                } else if (name != null) {
-                    if (name.equals("type")) {
-                        if (value.equals("service")) {
-                            currentTag = "<service>";
-                        }
-                    }
-                } else if (name != null) {
-                    if (name.equals("type")) {
-                        if (value.equals("department")) {
-                            currentTag = "<department>";
-                        }
-                    }
-                } else if (name != null) {
-                    if (name.equals("type")) {
-                        if (value.equals("administration")) {
-                            currentTag = "<administration>";
-                        }
-                    }
-                } else
-                    currentTag = "<other>";
-            }
+                }
+            } else
+                currentTag = "<org>"; // we take org without any attribute as in the header model
         } else if (qName.equals("center")) {
             currentTag = "<center>";
         } else if (qName.equals("service")) {

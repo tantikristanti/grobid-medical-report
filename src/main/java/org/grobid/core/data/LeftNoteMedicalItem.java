@@ -37,6 +37,7 @@ public class LeftNoteMedicalItem {
     private String service = null;
     private String department = null;
     private String administration = null;
+    private String org = null;
     private String address = null;
     private String country = null;
     private String settlement = null;
@@ -66,6 +67,7 @@ public class LeftNoteMedicalItem {
             ", service='" + service + '\'' +
             ", department='" + department + '\'' +
             ", administration='" + administration + '\'' +
+            ", organization='" + org + '\'' +
             ", address='" + address + '\'' +
             ", country='" + country + '\'' +
             ", town='" + settlement + '\'' +
@@ -128,6 +130,7 @@ public class LeftNoteMedicalItem {
         service = null;
         department = null;
         administration = null;
+        org = null;
         address = null;
         country = null;
         settlement = null;
@@ -171,6 +174,10 @@ public class LeftNoteMedicalItem {
         if (administration != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org type=\"administration\">").append(TextUtilities.HTMLEncode(administration)).append("</org>\n");
+        }
+        if (org != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>").append(TextUtilities.HTMLEncode(org)).append("</org>\n");
         }
         if (address != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -499,6 +506,14 @@ public class LeftNoteMedicalItem {
 
     public String getDepartment() {
         return department;
+    }
+
+    public String getOrg() {
+        return org;
+    }
+
+    public void setOrg(String org) {
+        this.org = org;
     }
 
     public void setDepartment(String department) {

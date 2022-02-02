@@ -605,6 +605,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setAdministration(clusterNonDehypenizedContent);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
+                if (leftNoteItem.getOrg() != null) {
+                    leftNoteItem.setOrg(leftNoteItem.getOrg() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setOrg(clusterNonDehypenizedContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADDRESS)) {
                 if (leftNoteItem.getAddress() != null) {
                     leftNoteItem.setAddress(leftNoteItem.getAddress() + "\n" + clusterNonDehypenizedContent);
@@ -824,6 +830,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<administration>", "<org type=\"administration\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
             }
             if (!output) {
@@ -874,6 +883,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
             } else if (lastTag0.equals("<department>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<administration>")) {
+                buffer.append("</org>\n");
+            } else if (lastTag0.equals("<org>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");

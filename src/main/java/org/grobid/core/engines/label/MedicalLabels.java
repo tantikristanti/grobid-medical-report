@@ -127,6 +127,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
     public static final TaggingLabel LEFT_NOTE_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADMINISTRATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADMINISTRATION_LABEL);
+    public static final TaggingLabel LEFT_NOTE_ORG = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORG_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
     public static final TaggingLabel LEFT_NOTE_COUNTRY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, COUNTRY_LABEL);
     public static final TaggingLabel LEFT_NOTE_TOWN = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SETTLEMENT_LABEL);
@@ -231,6 +232,7 @@ public class MedicalLabels extends TaggingLabels {
         register(LEFT_NOTE_SERVICE);
         register(LEFT_NOTE_DEPARTMENT);
         register(LEFT_NOTE_ADMINISTRATION);
+        register(LEFT_NOTE_ORG);
         register(LEFT_NOTE_ADDRESS);
         register(LEFT_NOTE_COUNTRY);
         register(LEFT_NOTE_TOWN);
