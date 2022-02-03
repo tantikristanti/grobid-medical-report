@@ -111,7 +111,32 @@ public class TEIDatelineSaxParser extends DefaultHandler {
         } else if (qName.equals("time")) {
             currentTag = "<time>";
         } else if (qName.equals("note")) {
-            currentTag = "<note>";
+            int length = atts.getLength();
+
+            if (length == 0) {
+                currentTag = "<note>";
+            } else {
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
+
+                    if ((name != null) && (value != null)) {
+                        if (name.equals("type")) {
+                            if (name.equals("type")) {
+                                if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
+                                    value.equals("documentType") || value.equals("articleType")) {
+                                    currentTag = "<doctype>";
+                                } else if (value.equals("date")) {
+                                    currentTag = "<note>";
+                                } else
+                                    currentTag = "<other>";
+                            }
+                        }
+                    }
+                }
+            }
         } else if (qName.equals("dateline")) {
             accumulator = new StringBuffer();
             allContent = new StringBuffer();

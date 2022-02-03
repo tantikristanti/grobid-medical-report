@@ -105,7 +105,14 @@ public class DatelineParser extends AbstractParser {
                     continue;
 
 
-                if (clusterLabel.equals(MedicalLabels.DATELINE_PLACE_NAME)) {
+                if (clusterLabel.equals(MedicalLabels.DATELINE_DOCTYPE)) {
+                    if (dateline.getDoctype() != null) {
+                        dateline.setDoctype(dateline.getDoctype() + "\t" + clusterContent);
+                    } else {
+                        dateline.setDoctype(clusterContent);
+                    }
+                    dateline.addLayoutTokens(cluster.concatTokens());
+                } else if (clusterLabel.equals(MedicalLabels.DATELINE_PLACE_NAME)) {
                     if (dateline.getPlaceName() != null) {
                         dateline.setPlaceName(dateline.getPlaceName() + "\t" + clusterContent);
                     } else {
@@ -254,8 +261,12 @@ public class DatelineParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<time>", "<time>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<doctype>", "<note type=\"doctype\">", addSpace, 0);
                     }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"date\">", addSpace, 0);
+                    }
+
                     if (output != null) {
                         buffer.append(output);
                         lastTag = s1;
@@ -322,6 +333,8 @@ public class DatelineParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
+            } else if (lastTag0.equals("<doctype>")) {
+                buffer.append("<note type=\"doctype\">");
             } else if (lastTag0.equals("<place>")) {
                 buffer.append("</placeName>");
             } else if (lastTag0.equals("<date>")) {
@@ -329,7 +342,7 @@ public class DatelineParser extends AbstractParser {
             } else if (lastTag0.equals("<time>")) {
                 buffer.append("</time>");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("</note>");
+                buffer.append("<note type=\"date\">");
             } else {
                 res = false;
             }

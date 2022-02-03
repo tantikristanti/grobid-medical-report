@@ -166,7 +166,7 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
                 String name = atts.getQName(i);
                 String value = atts.getValue(i);
 
-                if (name != null) {
+                if ((name != null) && (value != null)) {
                     if (name.equals("type")) {
                         if (value.equals("document_type") || value.equals("doctype") || value.equals("docType") ||
                             value.equals("documentType") || value.equals("articleType")) {

@@ -150,6 +150,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
 
     // Dateline
+    public static final TaggingLabel DATELINE_DOCTYPE = new TaggingLabelImpl(GrobidModels.DATELINE, DOCTYPE_LABEL);
     public static final TaggingLabel DATELINE_PLACE_NAME = new TaggingLabelImpl(GrobidModels.DATELINE, PLACE_NAME_LABEL);
     public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
     public static final TaggingLabel DATELINE_TIME = new TaggingLabelImpl(GrobidModels.DATELINE, TIME_LABEL);
@@ -255,6 +256,7 @@ public class MedicalLabels extends TaggingLabels {
         register(TABLE);
 
         // dateline
+        register(DATELINE_DOCTYPE);
         register(DATELINE_PLACE_NAME);
         register(DATELINE_DATE);
         register(DATELINE_TIME);

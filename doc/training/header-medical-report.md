@@ -11,7 +11,7 @@ For identifying the exact pieces of information to be part of the `header-medica
 For the header-medical-report model, we use the following TEI elements:
 
 * `<idno>` for the strong identifiers of the document 
-* `<note type="doctype">` for indication on the document type
+* `<note type="doctype">` for the document type
 * `<titlePart>` for the document title
 * `<date>` for the date
 * `<time>` for the time information

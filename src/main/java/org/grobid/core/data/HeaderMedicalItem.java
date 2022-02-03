@@ -514,10 +514,23 @@ public class HeaderMedicalItem {
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("<datelines>\n");
         for (Dateline dateline : listDatelines) {
-            if (dateline.getPlaceName() != null || dateline.getNote() != null) {
+            if (dateline.getDoctype() != null || dateline.getPlaceName() != null || dateline.getNote() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 1);
                 tei.append("<dateline>").append("\n");
-                if (dateline.getPlaceName() != null) {
+                if (dateline.getDoctype() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<note type=\"doctype\">").append(TextUtilities.HTMLEncode(dateline.getDoctype())).append("</note>");
+
+                    if (dateline.getDate() != null) {
+                        // the date has been in the ISO format using the Date model and parser
+                        tei.append(" <date type=\"issued\" when=\"" + dateline.getDate() + "\">" +
+                            TextUtilities.HTMLEncode(dateline.getDate()));
+                        tei.append("</date>");
+                    }
+                    if (dateline.getTimeString() != null) {
+                        tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
+                    }
+                } else if (dateline.getPlaceName() != null) {
                     TextUtilities.appendN(tei, '\t', nbTag + 2);
                     tei.append("<placeName>").append(TextUtilities.HTMLEncode(dateline.getPlaceName())).append("</placeName>");
 
@@ -542,24 +555,24 @@ public class HeaderMedicalItem {
                     if (dateline.getTimeString() != null) {
                         tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
                     }
-                } else if (dateline.getDate() != null && dateline.getTimeString() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    // the date has been in the ISO format using the Date model and parser
-                    tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
-                        TextUtilities.HTMLEncode(dateline.getDate()));
-                    tei.append("</date>");
-                    tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
-                } else if (dateline.getDate() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    // the date has been in the ISO format using the Date model and parser
-                    tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
-                        TextUtilities.HTMLEncode(dateline.getDate()));
-                    tei.append("</date>");
                 }
-                tei.append("\n");
-                TextUtilities.appendN(tei, '\t', nbTag +1);
-                tei.append("</dateline>").append("\n");
+            } else if (dateline.getDate() != null && dateline.getTimeString() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                // the date has been in the ISO format using the Date model and parser
+                tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
+                    TextUtilities.HTMLEncode(dateline.getDate()));
+                tei.append("</date>");
+                tei.append(" <time>").append(TextUtilities.HTMLEncode(dateline.getTimeString())).append("</time>\n");
+            } else if (dateline.getDate() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                // the date has been in the ISO format using the Date model and parser
+                tei.append(" <date type=\"issued\" when=\"").append(dateline.getDate() + "\">" +
+                    TextUtilities.HTMLEncode(dateline.getDate()));
+                tei.append("</date>");
             }
+            tei.append("\n");
+            TextUtilities.appendN(tei, '\t', nbTag +1);
+            tei.append("</dateline>").append("\n");
         }
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("</datelines>\n");

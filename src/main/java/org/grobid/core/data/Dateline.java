@@ -13,6 +13,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
  * For comparing dates by strict time flow, please use java.util.Date + java.util.Calendar (see the Grobid documentation concerning Date)
  */
 public class Dateline  {
+    private String doctype = null;
     private String placeName = null;
     private String date = null;
     private int time = -1;
@@ -24,11 +25,20 @@ public class Dateline  {
     }
 
     public Dateline(Dateline fromDateline) {
+        this.doctype = fromDateline.doctype;
         this.placeName = fromDateline.placeName;
         this.date = fromDateline.date;
         this.time = fromDateline.time;
         this.timeString = fromDateline.timeString;
         this.note = fromDateline.note;
+    }
+
+    public String getDoctype() {
+        return doctype;
+    }
+
+    public void setDoctype(String doctype) {
+        this.doctype = doctype;
     }
 
     public String getPlaceName() {

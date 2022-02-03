@@ -179,10 +179,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         }
                         // to ISO standard
                         resHeader.setDocumentDate(toISOString(resHeader.getNormalizedDocumentDate()));
-                    }
-
-                    // if the date doesn't exist, we use the information from the dateline
-                    if (resHeader.getDateline() != null) {
+                    }  else if (resHeader.getDateline() != null) { // if the date doesn't exist, we use the information from the dateline
                         List<LayoutToken> datelineLayoutTokens = resHeader.getDatelinesTokens();
                         List<List<LayoutToken>> datelineSegments = new ArrayList<>();
                         if (isNotEmpty(datelineLayoutTokens)) {
@@ -208,18 +205,32 @@ public class HeaderMedicalParser extends AbstractParser {
                                 List<Dateline> localDatelines = parsers.getDatelineParser()
                                     .processingWithLayoutTokens(datelineSegments.get(k));
                                 for (Dateline dateline : localDatelines) {
-                                    // normalization of all dates in the dateline
-                                    if (dateline.getDate() != null) {
+                                    // fill the header items
+                                    if (dateline.getDoctype() != null) {
+                                        resHeader.setDocumentType(dateline.getDoctype());
+                                        // normalization of the date
+                                        if (dateline.getDate() != null) {
+                                            Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
+                                            if (normalisedDate.isPresent()) {
+                                                dateline.setDate(toISOString(normalisedDate.get()));
+                                            }
+                                        }
+                                    } else if (dateline.getPlaceName() != null) {
+                                        if (resHeader.getLocation() == null) {
+                                            resHeader.setLocation(dateline.getPlaceName());
+                                            // normalization of the date
+                                            if (dateline.getDate() != null) {
+                                                Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
+                                                if (normalisedDate.isPresent()) {
+                                                    dateline.setDate(toISOString(normalisedDate.get()));
+                                                }
+                                            }
+                                        }
+                                    } else if (dateline.getDate() != null) {
+                                        // normalization of the date
                                         Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
                                         if (normalisedDate.isPresent()) {
                                             dateline.setDate(toISOString(normalisedDate.get()));
-                                        }
-                                    }
-
-                                    // fill the header items
-                                    if (dateline.getPlaceName() != null) {
-                                        if (resHeader.getLocation() == null) {
-                                            resHeader.setLocation(dateline.getPlaceName());
                                         }
                                     }
 
