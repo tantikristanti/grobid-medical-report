@@ -35,10 +35,10 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
     private List<String> endTags = Arrays.asList("idno", "affiliation", "address", "org", "center",
         "service", "department", "administration", "email", "phone", "fax", "ptr", "medic", "note");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "note", "lb", "tei", "listOrg",
+    private List<String> intermediaryTags = Arrays.asList("byline", "lb", "tei", "teiHeader","listOrg",
         "fileDesc", "text", "person", "p");
 
-    private List<String> ignoredTags = Arrays.asList("page", "location");
+    private List<String> ignoredTags = Arrays.asList("page", "location", "web");
 
     public TEILeftNoteSaxParser() {
         labeled = new ArrayList<String>();
