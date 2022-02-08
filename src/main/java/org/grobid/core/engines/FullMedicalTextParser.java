@@ -1339,10 +1339,10 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         // =============== if the model exists ===============
                         // we tag with the left-note model
-                        /*String rese = parsers.getLeftNoteMedicalParser().label(leftNote);
+                        String rese = parsers.getLeftNoteMedicalParser().label(leftNote);
 
                         // buffer for the header block, take only the data with the label
-                        StringBuilder bufferLeftNote = parsers.getHeaderMedicalParser().trainingExtraction(rese, headerTokenizations);
+                        StringBuilder bufferLeftNote = parsers.getHeaderMedicalParser().trainingExtraction(rese, leftNoteTokenizations);
 
                         // write the training TEI file for header which reflects the extract layout of the text as
                         // extracted from the pdf
@@ -1356,12 +1356,12 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         writer.write(bufferLeftNote.toString());
                         writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
-                        writer.close();*/
+                        writer.close();
 
                         // ==============================
 
                         // =============== if the model doesn't exist yet ===============
-                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                       /* writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                         writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
                             + pdfFileName.replace(".pdf", "")
                             + "\"/>\n\t</teiHeader>\n\t<text");
@@ -1376,7 +1376,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         writer.write(bufferLeftNote.toString());
                         writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
-                        writer.close();
+                        writer.close();*/
                         // ==============================
                     }
                 }

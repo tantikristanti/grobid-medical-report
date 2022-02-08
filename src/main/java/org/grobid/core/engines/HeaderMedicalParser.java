@@ -329,7 +329,6 @@ public class HeaderMedicalParser extends AbstractParser {
                 }
 
                 // the left-note information part of medical reports if they exist
-                // retreive only the header (front) part
                 SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
                 Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
                 String leftNote = featuredLeftNote.getLeft();
