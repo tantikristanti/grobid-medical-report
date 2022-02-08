@@ -1342,7 +1342,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         String rese = parsers.getLeftNoteMedicalParser().label(leftNote);
 
                         // buffer for the header block, take only the data with the label
-                        StringBuilder bufferLeftNote = parsers.getHeaderMedicalParser().trainingExtraction(rese, leftNoteTokenizations);
+                        StringBuilder bufferLeftNote = parsers.getLeftNoteMedicalParser().trainingExtraction(rese, leftNoteTokenizations);
 
                         // write the training TEI file for header which reflects the extract layout of the text as
                         // extracted from the pdf
