@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 /**
- * A class contains features for medics parsing.
+ * A class contains features for organization parsing.
  *
  */
-public class FeaturesVectorMedic {
+public class FeaturesVectorOrganization {
     // default bins for relative position, set experimentally
     static private int nbBins = 12;
 
@@ -158,9 +158,9 @@ public class FeaturesVectorMedic {
     }
 
     /**
-     * Add feature for medic parsing.
+     * Add feature for organization parsing.
      */
-    static public String addFeaturesMedic(List<LayoutToken> tokens,
+    static public String addFeaturesOrganization(List<LayoutToken> tokens,
                                           List<String> labels,
                                           List<OffsetPosition> locationPositions,
                                           List<OffsetPosition> titlePositions,
@@ -177,7 +177,7 @@ public class FeaturesVectorMedic {
 
         FeatureFactory featureFactory = FeatureFactory.getInstance();
 
-        StringBuilder medic = new StringBuilder();
+        StringBuilder organization = new StringBuilder();
 
         int currentLocationPositions = 0;
         int currentTitlePositions = 0;
@@ -194,7 +194,7 @@ public class FeaturesVectorMedic {
 
         String previousTag = null;
         String previousText = null;
-        FeaturesVectorMedic features = null;
+        FeaturesVectorOrganization features = null;
         int sentenceLenth = tokens.size(); // length of the current sentence
         for (int n=0; n < tokens.size(); n++) {
             LayoutToken token = tokens.get(n);
@@ -217,7 +217,7 @@ public class FeaturesVectorMedic {
             }
 
             if (text.equals("\n")) {
-                // should not be the case for the medic model
+                // should not be the case for the organization model
                 continue;
             }
 
@@ -347,7 +347,7 @@ public class FeaturesVectorMedic {
                 continue;
             }
 
-            features = new FeaturesVectorMedic();
+            features = new FeaturesVectorOrganization();
             features.string = text;
             features.relativePosition = featureFactory.linearScaling(n, sentenceLenth, nbBins);
 
@@ -468,12 +468,12 @@ public class FeaturesVectorMedic {
 
             features.label = tag;
 
-            medic.append(features.printVector());
+            organization.append(features.printVector());
 
             previousTag = tag;
             previousText = text;
         }
 
-        return medic.toString();
+        return organization.toString();
     }
 }

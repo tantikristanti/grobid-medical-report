@@ -33,6 +33,11 @@ public class LeftNoteMedicalItem {
     private String language = null;
     private String idno = null;
     private String affiliation = null;
+    private String ghu = null;
+    private String chu = null;
+    private String dmu = null;
+    private String pole = null;
+    private String hospital = null;
     private String center = null;
     private String service = null;
     private String department = null;
@@ -63,6 +68,11 @@ public class LeftNoteMedicalItem {
             " language='" + language + '\'' +
             ", idno='" + idno + '\'' +
             ", affiliation='" + affiliation + '\'' +
+            ", ghu='" + ghu + '\'' +
+            ", chu='" + chu + '\'' +
+            ", dmu='" + dmu + '\'' +
+            ", pole='" + pole + '\'' +
+            ", hospital='" + hospital + '\'' +
             ", center='" + center + '\'' +
             ", service='" + service + '\'' +
             ", department='" + department + '\'' +
@@ -126,6 +136,11 @@ public class LeftNoteMedicalItem {
         language = null;
         idno = null;
         affiliation = null;
+        ghu = null;
+        chu = null;
+        dmu = null;
+        pole = null;
+        hospital = null;
         center = null;
         service = null;
         department = null;
@@ -159,21 +174,25 @@ public class LeftNoteMedicalItem {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<affiliation>").append(TextUtilities.HTMLEncode(affiliation)).append("</affiliation>\n");
         }
-        if (center != null) {
+        if (ghu != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org type=\"center\">").append(TextUtilities.HTMLEncode(center)).append("</org>\n");
+            tei.append("<org type=\"ghu\">").append(TextUtilities.HTMLEncode(ghu)).append("</org>\n");
         }
-        if (service != null) {
+        if (chu != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org type=\"service\">").append(TextUtilities.HTMLEncode(service)).append("</org>\n");
+            tei.append("<org type=\"chu\">").append(TextUtilities.HTMLEncode(chu)).append("</org>\n");
         }
-        if (department != null) {
+        if (dmu != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org type=\"department\">").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
+            tei.append("<org type=\"dmu\">").append(TextUtilities.HTMLEncode(dmu)).append("</org>\n");
         }
-        if (administration != null) {
+        if (pole != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org type=\"administration\">").append(TextUtilities.HTMLEncode(administration)).append("</org>\n");
+            tei.append("<org type=\"pole\">").append(TextUtilities.HTMLEncode(pole)).append("</org>\n");
+        }
+        if (hospital != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org type=\"hospital\">").append(TextUtilities.HTMLEncode(hospital)).append("</org>\n");
         }
         if (org != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -510,6 +529,47 @@ public class LeftNoteMedicalItem {
 
     public String getOrg() {
         return org;
+    }
+
+
+    public String getGhu() {
+        return ghu;
+    }
+
+    public void setGhu(String ghu) {
+        this.ghu = ghu;
+    }
+
+    public String getChu() {
+        return chu;
+    }
+
+    public void setChu(String chu) {
+        this.chu = chu;
+    }
+
+    public String getDmu() {
+        return dmu;
+    }
+
+    public void setDmu(String dmu) {
+        this.dmu = dmu;
+    }
+
+    public String getPole() {
+        return pole;
+    }
+
+    public void setPole(String pole) {
+        this.pole = pole;
+    }
+
+    public String getHospital() {
+        return hospital;
+    }
+
+    public void setHospital(String hospital) {
+        this.hospital = hospital;
     }
 
     public void setOrg(String org) {

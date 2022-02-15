@@ -13,10 +13,15 @@ For the left-note-medical-report model, we use the following TEI elements:
 * `<idno>` for the strong identifiers of the document (ex. no. FINESS)
 * `<affiliation>` for the affiliation information
 * `<org>` for the information regarding identifiable organization
-    * `<org type="center">` for the name of the institution
-    * `<org type="service">` for the name of the institution
-    * `<org type="department">` for the name of the department
-    * `<org type="administration">` for the name of the administration
+    * `<org type="ghu">` for the university hospital group (GHU, Groupement hospitalier universitaire)
+    * `<org type="chu">` for the university hospital center (CHU, Centre hospitalier universitaire)
+    * `<org type="dmu">` for the medical university departments  (DMU, Départements Médico-Universitaires)
+    * `<org type="pole">` for the pole type
+    * `<org type="hospital">` for the hospital type
+    * `<org type="center">` for the center type
+    * `<org type="service">` for the service type
+    * `<org type="department">` for the department type
+    * `<org type="administration">` for the administration type
 * `<address>` for the address elements of affiliations
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations

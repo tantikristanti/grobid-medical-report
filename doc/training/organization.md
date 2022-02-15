@@ -10,9 +10,10 @@ For identifying the exact pieces of information to be part of the `organization-
 
 For the organization-medical-report model, we use the following TEI elements:
 
-* `<affiliation>` for the affiliation information
 * `<orgName>` for the organization name
 * `<address>` for the address elements of affiliations
+* `<country>` for the country
+* `<settlement>` for the city
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations

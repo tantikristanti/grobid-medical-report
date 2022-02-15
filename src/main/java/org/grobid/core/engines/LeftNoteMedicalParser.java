@@ -581,6 +581,36 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setAffiliation(clusterNonDehypenizedContent);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_GHU)) {
+                if (leftNoteItem.getGhu() != null) {
+                    leftNoteItem.setGhu(leftNoteItem.getGhu() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setGhu(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_CHU)) {
+                if (leftNoteItem.getChu() != null) {
+                    leftNoteItem.setChu(leftNoteItem.getChu() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setChu(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DMU)) {
+                if (leftNoteItem.getDmu() != null) {
+                    leftNoteItem.setDmu(leftNoteItem.getDmu() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setDmu(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_POLE)) {
+                if (leftNoteItem.getPole() != null) {
+                    leftNoteItem.setPole(leftNoteItem.getPole() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setPole(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_HOSPITAL)) {
+                if (leftNoteItem.getHospital() != null) {
+                    leftNoteItem.setHospital(leftNoteItem.getHospital() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setHospital(clusterNonDehypenizedContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_CENTER)) {
                 if (leftNoteItem.getCenter() != null) {
                     leftNoteItem.setCenter(leftNoteItem.getCenter() + "\n" + clusterNonDehypenizedContent);
@@ -818,16 +848,31 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org type=\"center\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<ghu>", "<org type=\"ghu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org type=\"service\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<chu>", "<org type=\"chu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org type=\"department\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<dmu>", "<org type=\"dmu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<administration>", "<org type=\"administration\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<pole>", "<org type=\"pole\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<hospital>", "<org type=\"hospital\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<administration>", "<org>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);

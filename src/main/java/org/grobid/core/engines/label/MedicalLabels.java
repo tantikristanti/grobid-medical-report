@@ -49,6 +49,11 @@ public class MedicalLabels extends TaggingLabels {
     public static final String SETTLEMENT_LABEL = "<settlement>"; // the name of a settlement such as a city, town, or village
     public static final String COUNTRY_LABEL = "<country>";
     public static final String REGION_LABEL = "<region>"; // the name of an administrative unit such as a state, province, or county, larger than a settlement, but smaller than a country
+    public static final String GHU_LABEL = "<ghu>";
+    public static final String CHU_LABEL = "<chu>";
+    public static final String DMU_LABEL = "<dmu>";
+    public static final String POLE_LABEL = "<pole>";
+    public static final String HOSPITAL_LABEL = "<hospital>";
     public static final String CENTER_LABEL = "<center>";
     public static final String SERVICE_LABEL = "<service>";
     public static final String DEPARTMENT_LABEL = "<department>";
@@ -123,6 +128,11 @@ public class MedicalLabels extends TaggingLabels {
     // Left-Note Medical Report Model
     public static final TaggingLabel LEFT_NOTE_IDNO= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ID_NUMBER_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
+    public static final TaggingLabel LEFT_NOTE_GHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, GHU_LABEL);
+    public static final TaggingLabel LEFT_NOTE_CHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CHU_LABEL);
+    public static final TaggingLabel LEFT_NOTE_DMU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DMU_LABEL);
+    public static final TaggingLabel LEFT_NOTE_POLE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, POLE_LABEL);
+    public static final TaggingLabel LEFT_NOTE_HOSPITAL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, HOSPITAL_LABEL);
     public static final TaggingLabel LEFT_NOTE_CENTER = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CENTER_LABEL);
     public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
     public static final TaggingLabel LEFT_NOTE_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
@@ -155,6 +165,18 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel DATELINE_DATE = new TaggingLabelImpl(GrobidModels.DATELINE, DATE_LABEL);
     public static final TaggingLabel DATELINE_TIME = new TaggingLabelImpl(GrobidModels.DATELINE, TIME_LABEL);
     public static final TaggingLabel DATELINE_NOTE = new TaggingLabelImpl(GrobidModels.DATELINE, NOTE_LABEL);
+
+    // Organization
+    public static final TaggingLabel ORGANIZATION_NAME = new TaggingLabelImpl(GrobidModels.ORGANIZATION, ORG_NAME_LABEL);
+    public static final TaggingLabel ORGANIZATION_ADDRESS  = new TaggingLabelImpl(GrobidModels.ORGANIZATION, ADDRESS_LABEL);
+    public static final TaggingLabel ORGANIZATION_COUNTRY = new TaggingLabelImpl(GrobidModels.ORGANIZATION, COUNTRY_LABEL);
+    public static final TaggingLabel ORGANIZATION_TOWN = new TaggingLabelImpl(GrobidModels.ORGANIZATION, SETTLEMENT_LABEL);
+    public static final TaggingLabel ORGANIZATION_EMAIL = new TaggingLabelImpl(GrobidModels.ORGANIZATION, EMAIL_LABEL);
+    public static final TaggingLabel ORGANIZATION_PHONE = new TaggingLabelImpl(GrobidModels.ORGANIZATION, PHONE_LABEL);
+    public static final TaggingLabel ORGANIZATION_FAX = new TaggingLabelImpl(GrobidModels.ORGANIZATION, FAX_LABEL);
+    public static final TaggingLabel ORGANIZATION_WEB = new TaggingLabelImpl(GrobidModels.ORGANIZATION, WEB_LABEL);
+    public static final TaggingLabel ORGANIZATION_NOTE = new TaggingLabelImpl(GrobidModels.ORGANIZATION, NOTE_LABEL);
+    public static final TaggingLabel ORGANIZATION_MEDIC = new TaggingLabelImpl(GrobidModels.ORGANIZATION, MEDIC_LABEL);
 
     // Medics
     public static final TaggingLabel MEDIC_ID = new TaggingLabelImpl(GrobidModels.MEDIC, ID_NUMBER_LABEL);
@@ -229,6 +251,11 @@ public class MedicalLabels extends TaggingLabels {
         // left-note
         register(LEFT_NOTE_IDNO);
         register(LEFT_NOTE_AFFILIATION);
+        register(LEFT_NOTE_GHU);
+        register(LEFT_NOTE_CHU);
+        register(LEFT_NOTE_DMU);
+        register(LEFT_NOTE_POLE);
+        register(LEFT_NOTE_HOSPITAL);
         register(LEFT_NOTE_CENTER);
         register(LEFT_NOTE_SERVICE);
         register(LEFT_NOTE_DEPARTMENT);
