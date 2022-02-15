@@ -194,6 +194,22 @@ public class LeftNoteMedicalItem {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org type=\"hospital\">").append(TextUtilities.HTMLEncode(hospital)).append("</org>\n");
         }
+        if (center != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>").append(TextUtilities.HTMLEncode(center)).append("</org>\n");
+        }
+        if (service != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>").append(TextUtilities.HTMLEncode(service)).append("</org>\n");
+        }
+        if (department != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
+        }
+        if (administration != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>").append(TextUtilities.HTMLEncode(administration)).append("</org>\n");
+        }
         if (org != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org>").append(TextUtilities.HTMLEncode(org)).append("</org>\n");
