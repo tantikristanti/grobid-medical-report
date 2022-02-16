@@ -30,8 +30,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 
-/** A class to extract the left-note part of medical reports.
- *
+/**
+ * A class to extract the left-note part of medical reports.
+ * <p>
  * Tanti, 2020
  */
 public class LeftNoteMedicalParser extends AbstractParser {
@@ -151,7 +152,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * Return the left-note section with features to be processed by the sequence labelling model
      */
     public Pair<String, List<LayoutToken>> getSectionLeftNoteFeatured(Document doc,
-                                                                    SortedSet<DocumentPiece> documentLeftNoteParts) {
+                                                                      SortedSet<DocumentPiece> documentLeftNoteParts) {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
         StringBuilder leftNote = new StringBuilder();
         String currentFont = null;
@@ -193,7 +194,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     continue;
                 }
 
-                for(LayoutToken token : tokens) {
+                for (LayoutToken token : tokens) {
                     if (token.getFontSize() > largestFontSize) {
                         largestFontSize = token.getFontSize();
                     }
@@ -241,15 +242,15 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
                 // character density of the block
                 double density = 0.0;
-                if ( (block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
+                if ((block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
                     (block.getText() != null) && (!block.getText().contains("@PAGE")) &&
-                    (!block.getText().contains("@IMAGE")) )
-                    density = (double)block.getText().length() / (block.getHeight() * block.getWidth());
+                    (!block.getText().contains("@IMAGE")))
+                    density = (double) block.getText().length() / (block.getHeight() * block.getWidth());
 
                 String[] lines = localText.split("[\\n\\r]");
                 // set the max length of the lines in the block, in number of characters
                 int maxLineLength = 0;
-                for(int p=0; p<lines.length; p++) {
+                for (int p = 0; p < lines.length; p++) {
                     if (lines[p].length() > maxLineLength)
                         maxLineLength = lines[p].length();
                 }
@@ -304,7 +305,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                                 // Otherwise indentation is unchanged
                             }
                         }
-                    } else{
+                    } else {
                         newline = false;
                     }
                     // centered ?
@@ -350,7 +351,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         // beginning of block
                         features.lineStatus = "LINESTART";
                         features.blockStatus = "BLOCKSTART";
-                    } else if ((n == tokens.size() - 1) || (n+1 > dp2.getTokenDocPos() - block.getStartToken())) {
+                    } else if ((n == tokens.size() - 1) || (n + 1 > dp2.getTokenDocPos() - block.getStartToken())) {
                         // end of block
                         features.lineStatus = "LINEEND";
                         previousNewline = true;
@@ -409,8 +410,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
                     if (indented) {
                         features.alignmentStatus = "LINEINDENT";
-                    }
-                    else {
+                    } else {
                         features.alignmentStatus = "ALIGNEDLEFT";
                     }
 
@@ -454,7 +454,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
                     // check token offsets for email and http address, or known location
                     if (locationPositions != null) {
-                        for(OffsetPosition thePosition : locationPositions) {
+                        for (OffsetPosition thePosition : locationPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.locationName = true;
                                 break;
@@ -462,7 +462,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         }
                     }
                     if (emailPositions != null) {
-                        for(OffsetPosition thePosition : emailPositions) {
+                        for (OffsetPosition thePosition : emailPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.email = true;
                                 break;
@@ -470,7 +470,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         }
                     }
                     if (urlPositions != null) {
-                        for(OffsetPosition thePosition : urlPositions) {
+                        for (OffsetPosition thePosition : urlPositions) {
                             if (n >= thePosition.start && n <= thePosition.end) {
                                 features.http = true;
                                 break;
@@ -525,7 +525,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
                     if (density != -1.0) {
                         features.characterDensity = featureFactory
-                            .linearScaling(density-doc.getMinCharacterDensity(), doc.getMaxCharacterDensity()-doc.getMinCharacterDensity(), NBBINS_DENSITY);
+                            .linearScaling(density - doc.getMinCharacterDensity(), doc.getMaxCharacterDensity() - doc.getMinCharacterDensity(), NBBINS_DENSITY);
 //System.out.println((density-doc.getMinCharacterDensity()) + " " + (doc.getMaxCharacterDensity()-doc.getMinCharacterDensity()) + " " + NBBINS_DENSITY + " " + features.characterDensity);
                     }
 
@@ -554,7 +554,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * @param result        result
      * @param tokenizations list of tokens
      * @param leftNoteItem  left-note item
-     * @return              left-note item
+     * @return left-note item
      */
     public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem leftNoteItem, Document doc) {
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
@@ -689,7 +689,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setMedics(clusterNonDehypenizedContent);
                 }
-            }else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_NOTE)) {
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_NOTE)) {
                 if (leftNoteItem.getNote() != null) {
                     leftNoteItem.setNote(leftNoteItem.getNote() + "\n" + clusterNonDehypenizedContent);
                 } else {
@@ -845,37 +845,34 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<idno>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<ghu>", "<org>\n\t<orgName type=\"ghu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<ghu>", "<org type=\"ghu\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<chu>", "<org>\n\t<orgName type=\"chu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<chu>", "<org type=\"chu\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<dmu>", "<org>\n\t<orgName type=\"dmu\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<dmu>", "<org type=\"dmu\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<pole>", "<org>\n\t<orgName type=\"pole\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<pole>", "<org type=\"pole\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<hospital>", "<org>\n\t<orgName type=\"hospital\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<hospital>", "<org type=\"hospital\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org>\n\t<orgName type=\"center\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org type=\"center\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org>\n\t<orgName type=\"service\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org type=\"service\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org>\n\t<orgName type=\"department\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org type=\"sub\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<sub>", "<org>\n\t<orgName type=\"sub\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<administration>", "<org type=\"sub\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<organization>", "<org>\n\t<orgName type=\"other\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
@@ -919,28 +916,26 @@ public class LeftNoteMedicalParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<idno>")) {
                 buffer.append("</idno>\n");
-            } if (lastTag0.equals("<affiliation>")) {
-                buffer.append("</affiliation>\n\t</byline>\n");
             } else if (lastTag0.equals("<ghu>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<chu>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<dmu>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<pole>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<hospital>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<center>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<service>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<department>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<administration>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<org>")) {
-                buffer.append("</org>\n");
+                buffer.append("</orgName>\n\t</org>\n");
+            } else if (lastTag0.equals("<sub>")) {
+                buffer.append("</orgName>\n\t</org>\n");
+            } else if (lastTag0.equals("<organization>")) {
+                buffer.append("</orgName>\n\t</org>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");
             } else if (lastTag0.equals("<phone>")) {
@@ -985,19 +980,19 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * correction. The goal of this method is to help to produce additional
      * traning data based on an existing model.
      *
-     * @param inputDirectory - the path to the directory containing PDF to be processed.
-     * @param outputDirectory    - the path to the directory where the results as XML files
+     * @param inputDirectory  - the path to the directory containing PDF to be processed.
+     * @param outputDirectory - the path to the directory where the results as XML files
      *                        and CRF feature files shall be written.
-     * @param ind           - identifier integer to be included in the resulting files to
+     * @param ind             - identifier integer to be included in the resulting files to
      *                        identify the training case. This is optional: no identifier
      *                        will be included if ind = -1
      * @return the number of processed files.
      */
 
     public int createTrainingMedicalLeftNoteBatch(String inputDirectory,
-                                                String outputDirectory,
-                                                boolean blank,
-                                                int ind) throws IOException {
+                                                  String outputDirectory,
+                                                  boolean blank,
+                                                  int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
             if (!path.exists()) {
@@ -1053,10 +1048,10 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Process the specified pdf and format the result as training data for the left-note model.
      *
-     * @param inputFile input PDF file
+     * @param inputFile  input PDF file
      * @param pathOutput path to raw monograph featured sequence
      * @param pathOutput path to TEI
-     * @param id id
+     * @param id         id
      */
     public Document createTrainingFromPDF(File inputFile,
                                           String pathOutput,
@@ -1081,7 +1076,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.tei.xml"));
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1160,15 +1155,15 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Process the specified pdf and format the result as blank training data for the left-note model.
      *
-     * @param inputFile input PDF file
+     * @param inputFile  input PDF file
      * @param pathOutput path to raw monograph featured sequence
      * @param pathOutput path to TEI
-     * @param id id
+     * @param id         id
      */
 
     public Document createBlankTrainingFromPDF(File inputFile,
-                                          String pathOutput,
-                                          int id) {
+                                               String pathOutput,
+                                               int id) {
         if (tmpPath == null)
             throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
         if (!tmpPath.exists()) {
@@ -1186,7 +1181,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             String pdfFileName = inputFile.getName();
 
-            File outputTEIFile = new File( pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.blank.tei.xml"));
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.blank.tei.xml"));
             File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -1261,8 +1256,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
      */
 
     public int processLeftNoteDirectory(String inputDirectory,
-                                     String outputDirectory,
-                                     int ind) throws IOException {
+                                        String outputDirectory,
+                                        int ind) throws IOException {
         try {
             File path = new File(inputDirectory);
             if (!path.exists()) {

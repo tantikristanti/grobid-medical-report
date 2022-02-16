@@ -32,10 +32,9 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "affiliation", "address", "org", "center",
-        "service", "department", "administration", "email", "phone", "fax", "ptr", "medic", "note");
+    private List<String> endTags = Arrays.asList("idno", "address", "orgName", "email", "phone", "fax", "ptr", "medic", "note");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "lb", "tei", "teiHeader","listOrg",
+    private List<String> intermediaryTags = Arrays.asList("byline", "org", "lb", "tei", "teiHeader","listOrg",
         "fileDesc", "text", "person", "p");
 
     private List<String> ignoredTags = Arrays.asList("page", "location", "web");
@@ -111,7 +110,7 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         } else if (qName.equals("idno")) {
             currentTag = "<idno>";
-        } else if (qName.equals("org")) {
+        } else if (qName.equals("orgName")) {
             int length = atts.getLength();
             if (length > 0) {
                 // Process each attribute
@@ -138,24 +137,17 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
                                 currentTag = "<service>";
                             } else if (value.equals("department")) {
                                 currentTag = "<department>";
-                            } else if (value.equals("administration")) {
-                                currentTag = "<administration>";
+                            } else if (value.equals("sub")) {
+                                currentTag = "<sub>";
                             } else
-                                currentTag = "<org>"; // we take org with the type other than center, service, department or administration as <org>
+                                currentTag = "<organization>"; // we take org with the type other than center, service, department or administration as <org>
                         }
                     }
                 }
             } else
-                currentTag = "<org>"; // we take org without any attribute as in the header model
-        } else if (qName.equals("center")) {
-            currentTag = "<center>";
-        } else if (qName.equals("service")) {
-            currentTag = "<service>";
-        } else if (qName.equals("department")) {
-            currentTag = "<department>";
-        } else if (qName.equals("administration")) {
-            currentTag = "<administration>";
-        } else if (qName.equals("address")) {
+                currentTag = "<organization>"; // we take org without any attribute as in the header model
+            accumulator.setLength(0);
+        }  else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
         } else if (qName.equals("phone")) {

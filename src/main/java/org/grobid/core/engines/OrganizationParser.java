@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
  * Tanti, 2020
  */
 public class OrganizationParser extends AbstractParser {
-    private static Logger LOGGER = LoggerFactory.getLogger(MedicParser.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(OrganizationParser.class);
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
@@ -254,7 +254,7 @@ public class OrganizationParser extends AbstractParser {
                     String tok = st.nextToken().trim();
 
                     if (tok.length() == 0) {
-                        // new medic
+                        // new organization
                         start = true;
                         continue;
                     }
@@ -373,7 +373,7 @@ public class OrganizationParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    buffer.append("</medic>\n");
+                    buffer.append("</org>\n");
                 }
             }
 
