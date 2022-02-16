@@ -575,12 +575,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setIdno(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_AFFILIATION)) {
-                if (leftNoteItem.getAffiliation() != null) {
-                    leftNoteItem.setAffiliation(leftNoteItem.getAffiliation() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setAffiliation(clusterNonDehypenizedContent);
-                }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_GHU)) {
                 if (leftNoteItem.getGhu() != null) {
                     leftNoteItem.setGhu(leftNoteItem.getGhu() + "\n" + clusterNonDehypenizedContent);
@@ -629,13 +623,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setDepartment(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ADMINISTRATION)) {
-                if (leftNoteItem.getAdministration() != null) {
-                    leftNoteItem.setAdministration(leftNoteItem.getAdministration() + "\n" + clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SUB)) {
+                if (leftNoteItem.getSub() != null) {
+                    leftNoteItem.setSub(leftNoteItem.getSub() + "\n" + clusterNonDehypenizedContent);
                 } else {
-                    leftNoteItem.setAdministration(clusterNonDehypenizedContent);
+                    leftNoteItem.setSub(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORG)) {
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORGANIZATION)) {
                 if (leftNoteItem.getOrg() != null) {
                     leftNoteItem.setOrg(leftNoteItem.getOrg() + "\n" + clusterNonDehypenizedContent);
                 } else {
