@@ -21,7 +21,8 @@ For the left-note-medical-report model, we use the following TEI elements:
     * `<org type="center">` for the center type
     * `<org type="service">` for the service type
     * `<org type="department">` for the department type
-    * `<org type="administration">` for the administration type
+    * `<org type="sub">` for the suborganization type
+    * `<org type="other">` for the other organization type
 * `<address>` for the address elements of affiliations
 * `<email>` for the email information of affiliations
 * `<phone>` for the phone number of affiliations
