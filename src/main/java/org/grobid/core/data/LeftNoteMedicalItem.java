@@ -40,6 +40,7 @@ public class LeftNoteMedicalItem {
     private String center = null;
     private String service = null;
     private String department = null;
+   private String unit = null;
     private String sub = null;
     private String org = null;
     private String address = null;
@@ -431,6 +432,14 @@ public class LeftNoteMedicalItem {
 
     public String getOrg() {
         return org;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public String getGhu() {

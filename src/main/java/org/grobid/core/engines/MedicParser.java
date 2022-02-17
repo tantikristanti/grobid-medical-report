@@ -469,7 +469,7 @@ public class MedicParser extends AbstractParser {
                     }
 
                     if (start && (s1 != null)) {
-                        buffer.append("\t<medic>");
+                        //buffer.append("\t<medic>");
                         start = false;
                     }
 
@@ -552,7 +552,7 @@ public class MedicParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    buffer.append("</medic>\n");
+                    //buffer.append("</medic>\n");
                 }
             }
             

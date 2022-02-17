@@ -287,7 +287,7 @@ public class OrganizationParser extends AbstractParser {
                     }
 
                     if (start && (s1 != null)) {
-                        buffer.append("\t<org>");
+                        //buffer.append("\t<org>");
                         start = false;
                     }
 
@@ -314,21 +314,6 @@ public class OrganizationParser extends AbstractParser {
                     String output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<organization>", "<org>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<center>", "<org type=\"center\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<service>", "<org type=\"service\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<department>", "<org type=\"department\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<administration>", "<org type=\"administration\">", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
@@ -373,7 +358,7 @@ public class OrganizationParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    buffer.append("</org>\n");
+                    //buffer.append("</org>\n");
                 }
             }
 
@@ -413,9 +398,6 @@ public class OrganizationParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
-            } else if (lastTag0.equals("<organization>") || lastTag0.equals("<center>") ||
-                lastTag0.equals("<service>") || lastTag0.equals("<department>") || lastTag0.equals("<administration>")) {
-                buffer.append("</org>");
             } else if (lastTag0.equals("<orgname>")) {
                 buffer.append("</orgName>");
             } else if (lastTag0.equals("<address>")) {

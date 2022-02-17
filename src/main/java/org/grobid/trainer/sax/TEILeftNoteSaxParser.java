@@ -32,9 +32,9 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
-    private List<String> endTags = Arrays.asList("idno", "address", "orgName", "email", "phone", "fax", "ptr", "medic", "note");
+    private List<String> endTags = Arrays.asList("idno", "address", "org", "email", "phone", "fax", "ptr", "medic", "note");
 
-    private List<String> intermediaryTags = Arrays.asList("byline", "org", "lb", "tei", "teiHeader","listOrg",
+    private List<String> intermediaryTags = Arrays.asList("byline", "lb", "tei", "teiHeader","listOrg",
         "fileDesc", "text", "person", "p");
 
     private List<String> ignoredTags = Arrays.asList("page", "location", "web");
@@ -105,12 +105,9 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
             accumulator.setLength(0);
         }
 
-        if (qName.equals("affiliation")) {
-            currentTag = "<affiliation>";
-            accumulator.setLength(0);
-        } else if (qName.equals("idno")) {
+        if (qName.equals("idno")) {
             currentTag = "<idno>";
-        } else if (qName.equals("orgName")) {
+        } else if (qName.equals("org")) {
             int length = atts.getLength();
             if (length > 0) {
                 // Process each attribute
@@ -137,6 +134,8 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
                                 currentTag = "<service>";
                             } else if (value.equals("department")) {
                                 currentTag = "<department>";
+                            } else if (value.equals("unit")) {
+                                currentTag = "<unit>";
                             } else if (value.equals("sub")) {
                                 currentTag = "<sub>";
                             } else
