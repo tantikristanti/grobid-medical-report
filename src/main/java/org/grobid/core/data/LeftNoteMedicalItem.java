@@ -37,6 +37,7 @@ public class LeftNoteMedicalItem {
     private String dmu = null;
     private String pole = null;
     private String site = null;
+    private String institution = null;
     private String hospital = null;
     private String center = null;
     private String service = null;
@@ -178,6 +179,10 @@ public class LeftNoteMedicalItem {
         if (site != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org>\n\t<orgName type=\"site\">").append(TextUtilities.HTMLEncode(site)).append("</org>\n");
+        }
+        if (site != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>\n\t<orgName type=\"institution\">").append(TextUtilities.HTMLEncode(institution)).append("</org>\n");
         }
         if (hospital != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -492,6 +497,13 @@ public class LeftNoteMedicalItem {
         this.site = site;
     }
 
+    public String getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(String institution) {
+        this.institution = institution;
+    }
 
     public String getHospital() {
         return hospital;

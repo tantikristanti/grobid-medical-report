@@ -17,10 +17,13 @@ For the left-note-medical-report model, we use the following TEI elements:
     * `<org type="chu">` for the university hospital center (CHU, Centre hospitalier universitaire)
     * `<org type="dmu">` for the medical university departments  (DMU, Départements Médico-Universitaires)
     * `<org type="pole">` for the pole type
+    * `<org type="institution">` for the institution type
+    * `<org type="site">` for the site type
     * `<org type="hospital">` for the hospital type
     * `<org type="center">` for the center type
     * `<org type="service">` for the service type
     * `<org type="department">` for the department type
+    * `<org type="unit">` for the unit type
     * `<org type="sub">` for the suborganization type
     * `<org type="other">` for the other organization type
 * `<address>` for the address elements of affiliations

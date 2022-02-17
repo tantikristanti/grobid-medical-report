@@ -128,6 +128,8 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
                                 currentTag = "<pole>";
                             } else if (value.equals("site")) {
                                 currentTag = "<site>";
+                            } else if (value.equals("institution")) {
+                                currentTag = "<institution>";
                             } else if (value.equals("hospital")) {
                                 currentTag = "<hospital>";
                             } else if (value.equals("center")) {
