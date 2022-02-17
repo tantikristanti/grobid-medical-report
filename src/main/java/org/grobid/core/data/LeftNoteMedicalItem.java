@@ -36,11 +36,12 @@ public class LeftNoteMedicalItem {
     private String chu = null;
     private String dmu = null;
     private String pole = null;
+    private String site = null;
     private String hospital = null;
     private String center = null;
     private String service = null;
     private String department = null;
-   private String unit = null;
+    private String unit = null;
     private String sub = null;
     private String org = null;
     private String address = null;
@@ -174,6 +175,10 @@ public class LeftNoteMedicalItem {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org>\n\t<orgName type=\"pole\">").append(TextUtilities.HTMLEncode(pole)).append("</org>\n");
         }
+        if (site != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>\n\t<orgName type=\"site\">").append(TextUtilities.HTMLEncode(site)).append("</org>\n");
+        }
         if (hospital != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org>\n\t<orgName type=\"hospital\">").append(TextUtilities.HTMLEncode(hospital)).append("</org>\n");
@@ -189,6 +194,10 @@ public class LeftNoteMedicalItem {
         if (department != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<org>\n\t<orgName type=\"department\">").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
+        }
+        if (unit != null) {
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
+            tei.append("<org>\n\t<orgName type=\"unit\">").append(TextUtilities.HTMLEncode(unit)).append("</org>\n");
         }
         if (sub != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -473,6 +482,16 @@ public class LeftNoteMedicalItem {
     public void setPole(String pole) {
         this.pole = pole;
     }
+
+
+    public String getSite() {
+        return site;
+    }
+
+    public void setSite(String site) {
+        this.site = site;
+    }
+
 
     public String getHospital() {
         return hospital;

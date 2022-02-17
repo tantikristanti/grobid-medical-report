@@ -599,6 +599,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setPole(clusterNonDehypenizedContent);
                 }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SITE)) {
+                if (leftNoteItem.getSite() != null) {
+                    leftNoteItem.setSite(leftNoteItem.getSite() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setSite(clusterNonDehypenizedContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_HOSPITAL)) {
                 if (leftNoteItem.getHospital() != null) {
                     leftNoteItem.setHospital(leftNoteItem.getHospital() + "\n" + clusterNonDehypenizedContent);
@@ -623,11 +629,11 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setDepartment(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DEPARTMENT)) {
-                if (leftNoteItem.getDepartment() != null) {
-                    leftNoteItem.setDepartment(leftNoteItem.getDepartment() + "\n" + clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_UNIT)) {
+                if (leftNoteItem.getUnit() != null) {
+                    leftNoteItem.setUnit(leftNoteItem.getUnit() + "\n" + clusterNonDehypenizedContent);
                 } else {
-                    leftNoteItem.setDepartment(clusterNonDehypenizedContent);
+                    leftNoteItem.setUnit(clusterNonDehypenizedContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SUB)) {
                 if (leftNoteItem.getSub() != null) {
@@ -857,6 +863,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<pole>", "<org type=\"pole\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<site>", "<org type=\"site\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<hospital>", "<org type=\"hospital\">", addSpace);
             }
             if (!output) {
@@ -926,6 +935,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
             } else if (lastTag0.equals("<dmu>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<pole>")) {
+                buffer.append("</org>\n");
+            } else if (lastTag0.equals("<site>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<hospital>")) {
                 buffer.append("</org>\n");

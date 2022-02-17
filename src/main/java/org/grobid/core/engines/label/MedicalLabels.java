@@ -54,6 +54,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final String CHU_LABEL = "<chu>";
     public static final String DMU_LABEL = "<dmu>";
     public static final String POLE_LABEL = "<pole>";
+    public static final String SITE_LABEL = "<site>";
     public static final String HOSPITAL_LABEL = "<hospital>";
     public static final String CENTER_LABEL = "<center>";
     public static final String SERVICE_LABEL = "<service>";
@@ -135,6 +136,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_CHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CHU_LABEL);
     public static final TaggingLabel LEFT_NOTE_DMU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DMU_LABEL);
     public static final TaggingLabel LEFT_NOTE_POLE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, POLE_LABEL);
+    public static final TaggingLabel LEFT_NOTE_SITE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SITE_LABEL);
     public static final TaggingLabel LEFT_NOTE_HOSPITAL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, HOSPITAL_LABEL);
     public static final TaggingLabel LEFT_NOTE_CENTER = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CENTER_LABEL);
     public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
@@ -259,6 +261,7 @@ public class MedicalLabels extends TaggingLabels {
         register(LEFT_NOTE_CHU);
         register(LEFT_NOTE_DMU);
         register(LEFT_NOTE_POLE);
+        register(LEFT_NOTE_SITE);
         register(LEFT_NOTE_HOSPITAL);
         register(LEFT_NOTE_CENTER);
         register(LEFT_NOTE_SERVICE);
