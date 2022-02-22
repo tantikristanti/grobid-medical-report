@@ -148,7 +148,7 @@ public class EngineMedical extends Engine {
             }
             for (final File pdfFile : refFiles) {
                 try {
-                    createTraining(pdfFile, resultPath, resultPath, ind + n);
+                    createTraining(pdfFile, resultPath, ind + n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + pdfFile.getPath(), exp);
@@ -199,7 +199,7 @@ public class EngineMedical extends Engine {
             }
             for (final File pdfFile : refFiles) {
                 try {
-                    createTrainingBlank(pdfFile, resultPath, resultPath, ind + n);
+                    createTrainingBlank(pdfFile, resultPath, ind + n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occured while processing the following pdf: "
                         + pdfFile.getPath(), exp);
