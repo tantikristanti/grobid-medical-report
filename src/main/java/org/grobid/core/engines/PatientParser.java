@@ -451,7 +451,7 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"patient\">", addSpace, 0);
                     }
                     if (output != null) {
                         buffer.append(output);

@@ -25,7 +25,7 @@ For the header-medical-report model, we use the following TEI elements:
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL 
-* `<note type="short">` for the any short notes in the header part
+* `<note type="short">` for short notes in the header part
 
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 

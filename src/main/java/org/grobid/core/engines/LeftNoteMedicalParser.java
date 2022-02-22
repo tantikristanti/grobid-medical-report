@@ -599,12 +599,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 } else {
                     leftNoteItem.setPole(clusterNonDehypenizedContent);
                 }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SITE)) {
-                if (leftNoteItem.getSite() != null) {
-                    leftNoteItem.setSite(leftNoteItem.getSite() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setSite(clusterNonDehypenizedContent);
-                }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_INSTITUTION)) {
                 if (leftNoteItem.getInstitution() != null) {
                     leftNoteItem.setInstitution(leftNoteItem.getInstitution() + "\n" + clusterNonDehypenizedContent);
@@ -616,6 +610,12 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     leftNoteItem.setUniversity(leftNoteItem.getUniversity() + "\n" + clusterNonDehypenizedContent);
                 } else {
                     leftNoteItem.setUniversity(clusterNonDehypenizedContent);
+                }
+            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SITE)) {
+                if (leftNoteItem.getSite() != null) {
+                    leftNoteItem.setSite(leftNoteItem.getSite() + "\n" + clusterNonDehypenizedContent);
+                } else {
+                    leftNoteItem.setSite(clusterNonDehypenizedContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_HOSPITAL)) {
                 if (leftNoteItem.getHospital() != null) {

@@ -11,7 +11,6 @@ For identifying the exact pieces of information to be part of the `left-note-med
 For the left-note-medical-report model, we use the following TEI elements:
 
 * `<idno>` for the strong identifiers of the document (ex. no. FINESS)
-* `<affiliation>` for the affiliation information
 * `<org>` for the information regarding identifiable organization
     * `<org type="ghu">` for the university hospital group (GHU, Groupement hospitalier universitaire)
     * `<org type="chu">` for the university hospital center (CHU, Centre hospitalier universitaire)
@@ -28,11 +27,14 @@ For the left-note-medical-report model, we use the following TEI elements:
     * `<org type="sub">` for the sub-organization type
     * `<org type="other">` for the other organization type
 * `<address>` for the address elements of affiliations
-* `<email>` for the email information of affiliations
-* `<phone>` for the phone number of affiliations
-* `<fax>` for the fax number of affiliations
+* `<country>` for the country name
+* `<settlement>` for the city name
+* `<phone>` for the phone number 
+* `<fax>` for the fax number 
+* `<email>` for the email 
 * `<ptr type="web">` for the web URL 
 * `<medic>` for the list of medics
+* `<note type="short">` for short notes in the left note part
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
 

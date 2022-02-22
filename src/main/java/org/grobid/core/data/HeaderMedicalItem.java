@@ -289,13 +289,6 @@ public class HeaderMedicalItem {
     public void reset() {
         language = null;
         nbPages = -1;
-        affiliation = null;
-        address = null;
-        email = null;
-        phone = null;
-        fax = null;
-        web = null;
-        org = null;
         document_number = null;
         document_type = null;
         title = null;
@@ -304,207 +297,17 @@ public class HeaderMedicalItem {
         time = null;
         dateline = null;
         location = null;
+        affiliation = null;
+        address = null;
+        email = null;
+        phone = null;
+        fax = null;
+        web = null;
+        org = null;
         medics = null;
         patients = null;
         note = null;
-
-        listMedics = null;
-        listPatients = null;
-        fullAffiliations = null;
-        listDatelines = null;
     }
-
-    /**
-     * Attach existing recognized emails to medics (default) or patients
-     *//*
-    public void attachEmails() {
-        attachEmails(fullMedics);
-    }
-
-    public void attachEmails(List<PersonMedical> folks) {
-        // do we have an email field recognized?
-        if (email == null)
-            return;
-        // we check if we have several emails in the field
-        email = email.trim();
-        email = email.replace(" and ", "\t");
-        ArrayList<String> emailles = new ArrayList<String>();
-        StringTokenizer st0 = new StringTokenizer(email, "\t");
-        while (st0.hasMoreTokens()) {
-            emailles.add(st0.nextToken().trim());
-        }
-
-        List<String> sanitizedEmails = emailSanitizer.splitAndClean(emailles);
-
-        if (sanitizedEmails != null) {
-            medicEmailAssigner.assign(folks, sanitizedEmails);
-        }
-    }
-
-    *//**
-     * Attach existing recognized emails to authors
-     *//*
-    public void attachMedicEmails() {
-        attachEmails(fullMedics);
-    }*/
-
-    /**
-     * Attach existing recognized affiliations to medics
-     */
-    /*public void attachAffiliations() {
-        if (fullAffiliations == null) {
-            return;
-        }
-
-        if (fullMedics == null) {
-            return;
-        }
-        int nbAffiliations = fullAffiliations.size();
-        int nbmedics = fullMedics.size();
-
-        boolean hasMarker = false;
-
-        // do we have markers in the affiliations?
-        for (Affiliation aff : fullAffiliations) {
-            if (aff.getMarker() != null) {
-                hasMarker = true;
-                break;
-            }
-        }
-
-        if (nbAffiliations == 1) {
-            // we distribute this affiliation to each medic
-            Affiliation aff = fullAffiliations.get(0);
-            for (PersonMedical pers : fullMedics) {
-                pers.addAffiliation(aff);
-            }
-            aff.setFailAffiliation(false);
-        } else if ((nbmedics == 1) && (nbAffiliations > 1)) {
-            // we put all the affiliations to the single medic
-            PersonMedical pers = fullMedics.get(0);
-            for (Affiliation aff : fullAffiliations) {
-                pers.addAffiliation(aff);
-                aff.setFailAffiliation(false);
-            }
-        } else if (hasMarker) {
-            // we get the marker for each affiliation and try to find the related medic in the
-            // original medic field
-            for (Affiliation aff : fullAffiliations) {
-                if (aff.getMarker() != null) {
-                    String marker = aff.getMarker();
-                    int from = 0;
-                    int ind = 0;
-                    ArrayList<Integer> winners = new ArrayList<Integer>();
-                    while (ind != -1) {
-                        ind = originalMedics.indexOf(marker, from);
-                        boolean bad = false;
-                        if (ind != -1) {
-                            // we check if we have a digit/letter (1) matching incorrectly
-                            //  a double digit/letter (11), or a special non-digit (*) matching incorrectly
-                            //  a double special non-digit (**)
-                            if (marker.length() == 1) {
-                                if (Character.isDigit(marker.charAt(0))) {
-                                    if (ind - 1 > 0) {
-                                        if (Character.isDigit(originalMedics.charAt(ind - 1))) {
-                                            bad = true;
-                                        }
-                                    }
-                                    if (ind + 1 < originalMedics.length()) {
-                                        if (Character.isDigit(originalMedics.charAt(ind + 1))) {
-                                            bad = true;
-                                        }
-                                    }
-                                } else if (Character.isLetter(marker.charAt(0))) {
-                                    if (ind - 1 > 0) {
-                                        if (Character.isLetter(originalMedics.charAt(ind - 1))) {
-                                            bad = true;
-                                        }
-                                    }
-                                    if (ind + 1 < originalMedics.length()) {
-                                        if (Character.isLetter(originalMedics.charAt(ind + 1))) {
-                                            bad = true;
-                                        }
-                                    }
-                                } else if (marker.charAt(0) == '*') {
-                                    if (ind - 1 > 0) {
-                                        if (originalMedics.charAt(ind - 1) == '*') {
-                                            bad = true;
-                                        }
-                                    }
-                                    if (ind + 1 < originalMedics.length()) {
-                                        if (originalMedics.charAt(ind + 1) == '*') {
-                                            bad = true;
-                                        }
-                                    }
-                                }
-                            }
-                            if (marker.length() == 2) {
-                                // case with ** as marker
-                                if ((marker.charAt(0) == '*') && (marker.charAt(1) == '*')) {
-                                    if (ind - 2 > 0) {
-                                        if ((originalMedics.charAt(ind - 1) == '*') &&
-                                            (originalMedics.charAt(ind - 2) == '*')) {
-                                            bad = true;
-                                        }
-                                    }
-                                    if (ind + 2 < originalMedics.length()) {
-                                        if ((originalMedics.charAt(ind + 1) == '*') &&
-                                            (originalMedics.charAt(ind + 2) == '*')) {
-                                            bad = true;
-                                        }
-                                    }
-                                    if ((ind - 1 > 0) && (ind + 1 < originalMedics.length())) {
-                                        if ((originalMedics.charAt(ind - 1) == '*') &&
-                                            (originalMedics.charAt(ind + 1) == '*')) {
-                                            bad = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if ((ind != -1) && !bad) {
-                            // we find the associated medic name
-                            String original = originalMedics.toLowerCase();
-                            int p = 0;
-                            int best = -1;
-                            int ind2 = -1;
-                            int bestDistance = 1000;
-                            for (PersonMedical pers : fullMedics) {
-                                if (!winners.contains(Integer.valueOf(p))) {
-                                    String lastname = pers.getLastName();
-
-                                    if (lastname != null) {
-                                        lastname = lastname.toLowerCase();
-                                        ind2 = original.indexOf(lastname, ind2 + 1);
-                                        int dist = Math.abs(ind - (ind2 + lastname.length()));
-                                        if (dist < bestDistance) {
-                                            best = p;
-                                            bestDistance = dist;
-                                        }
-                                    }
-                                }
-                                p++;
-                            }
-
-                            // and we associate this affiliation to this medic
-                            if (best != -1) {
-                                fullMedics.get(best).addAffiliation(aff);
-                                aff.setFailAffiliation(false);
-                                winners.add(Integer.valueOf(best));
-                            }
-
-                            from = ind + 1;
-                        }
-                        if (bad) {
-                            from = ind + 1;
-                            bad = false;
-                        }
-                    }
-                }
-            }
-        }
-    }*/
 
     /**
      * Create the TEI encoding for the dateline block for the current header object.
@@ -589,6 +392,10 @@ public class HeaderMedicalItem {
         for (Medic medic : listMedics) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("<medic>").append("\n");
+            if (medic.getIdno() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<idno>").append(TextUtilities.HTMLEncode(medic.getIdno())).append("</idno>\n");
+            }
             if (medic.getRole() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
                 tei.append("<roleName>").append(TextUtilities.HTMLEncode(medic.getRole())).append("</roleName>\n");
@@ -710,10 +517,6 @@ public class HeaderMedicalItem {
         return tei.toString();
     }
 
-    private static volatile String possiblePreFixPageNumber = "[A-Ze]?";
-    private static volatile String possiblePostFixPageNumber = "[A-Z]?";
-    private static volatile Pattern page = Pattern.compile("(" + possiblePreFixPageNumber + "\\d+" + possiblePostFixPageNumber + ")");
-    private static volatile Pattern pageDigits = Pattern.compile("\\d+");
 
     public void setCoordinates(List<BoundingBox> coordinates) {
         this.coordinates = coordinates;

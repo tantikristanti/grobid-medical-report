@@ -79,34 +79,19 @@ public class HeaderMedicalParser extends AbstractParser {
         GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
-    /**
-     * Processing with application of the medical-report segmentation model
-     */
-    public Pair<String, Document> processing(File input, HeaderMedicalItem resHeader, LeftNoteMedicalItem resLeftNote,
-                                             GrobidAnalysisConfig config) {
-        DocumentSource documentSource = null;
-        try {
-            documentSource = DocumentSource.fromPdf(input, -1, -1, true, true, true);
-            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
-            String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, true);
-            return new ImmutablePair<String, Document>(tei, doc);
-        } finally {
-            if (documentSource != null) {
-                documentSource.close(true, true, true);
-            }
-        }
-    }
-
-    public Pair<String, Document> processing(File input, String md5Str, HeaderMedicalItem resHeader,
+    public Pair<String, Document> processing(File input, String md5Str,
+                                             HeaderMedicalItem resHeader,
                                              LeftNoteMedicalItem resLeftNote,
                                              GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
             documentSource.setMD5(md5Str);
+            // first, parse the document with the segmentation model
             Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
+            // then take only the header and left note parts for further process with this method
             String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
@@ -126,7 +111,7 @@ public class HeaderMedicalParser extends AbstractParser {
         try {
             // retrieve only the header (front) part
             SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
-            List<LayoutToken> tokenizations = doc.getTokenizations();
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokenizations for the entire document
 
             if (documentHeaderParts != null) {
                 Pair<String, List<LayoutToken>> featuredHeader = getSectionHeaderFeatured(doc, documentHeaderParts);
@@ -165,7 +150,7 @@ public class HeaderMedicalParser extends AbstractParser {
                         doc.setLanguage(lang);
                         resHeader.setLanguage(lang);
                     } else {
-                        resHeader.setLanguage("fr"); // by default it's French as medical reports are in French
+                        resHeader.setLanguage("fr"); // by default, the language is French
                     }
 
                     // number of pages
@@ -327,32 +312,29 @@ public class HeaderMedicalParser extends AbstractParser {
                         }
                     }
                 }
-
-                // the left-note information part of medical reports if they exist
-                SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
-                Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
-                String leftNote = featuredLeftNote.getLeft();
-                List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
-                String resLeftLabeled = null;
-                if (StringUtils.isNotBlank(leftNote)) {
-                    resLeftLabeled = parsers.getLeftNoteMedicalParser().label(leftNote);
-                    resLeftNote = parsers.getLeftNoteMedicalParser().resultExtraction(resLeftLabeled, leftNoteTokenization, resLeftNote, doc);
-                }
-
-                // we don't need to serialize if we process the full text (it would be done 2 times)
-                if (serialize) {
-                    TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
-                    tei.append("\t</text>\n");
-                    tei.append("</TEI>\n");
-                    return tei.toString();
-                } else
-                    return null;
             }
+            // the left-note information part of medical reports if they exist
+            SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+            Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
+            String leftNote = featuredLeftNote.getLeft();
+            List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
+            String resLeftLabeled = null;
+            if (StringUtils.isNotBlank(leftNote)) {
+                resLeftLabeled = parsers.getLeftNoteMedicalParser().label(leftNote);
+                resLeftNote = parsers.getLeftNoteMedicalParser().resultExtraction(resLeftLabeled, leftNoteTokenization, resLeftNote, doc);
+            }
+
+            if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
+                TEIFormatter teiFormatter = new TEIFormatter(doc, null);
+                StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
+                tei.append("\t</text>\n");
+                tei.append("</TEI>\n");
+                return tei.toString();
+            } else
+                return null;
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
-        return null;
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.grobid.core.factory;
 
+import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.EngineMedical;
 
 /**
@@ -15,6 +16,7 @@ public class GrobidMedicalFactory extends GrobidFactory {
      * The instance of GrobidMedicalFactory.
      */
     private static GrobidMedicalFactory factory = null;
+
 
     /**
      * Constructor.

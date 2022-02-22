@@ -3,12 +3,11 @@ package org.grobid.core.main.batch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.engines.EngineMedicalParsers;
+import org.grobid.core.engines.ProcessEngine;
+import org.grobid.core.engines.ProcessEngineMedical;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
-import org.grobid.core.utilities.GrobidConfig;
-import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
-import org.grobid.core.utilities.MedicalReportProperties;
+import org.grobid.core.utilities.*;
 import org.grobid.core.utilities.GrobidConfig.ModelParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class GrobidMedicalReportMain {
     private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
     private static final String COMMAND_PROCESS_HEADER = "processHeaderUser";
     private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
-    private static final String COMMAND_PROCESS_FULL_TEXT = "processFullMedical";
+    private static final String COMMAND_PROCESS_FULL_TEXT = "processFullText";
     private static final String COMMAND_CREATE_MEDICAL_NER_TRAINING = "createMedicalNerTraining";
     private static final String COMMAND_EXTRACT_NER = "extractNER";
 
@@ -257,8 +256,22 @@ public class GrobidMedicalReportMain {
 
     public static void main(final String[] args) throws Exception {
         gbdArgs = new GrobidMedicalReportMainArgs();
+        availableCommands = ProcessEngineMedical.getUsableMethods();
 
-        if (processArgs(args) && (gbdArgs.getProcessMethodName() != null)) {
+        if (processArgs(args)) {
+            inferParamsNotSet();
+            if (isNotEmpty(gbdArgs.getPath2grobidHome())) {
+                initProcess(gbdArgs.getPath2grobidHome());
+            } else {
+                LOGGER.warn("Grobid home not provided, using default. ");
+                initProcess(null);
+            }
+            ProcessEngineMedical processEngine = new ProcessEngineMedical();
+            Utilities.launchMethod(processEngine, new Object[] { gbdArgs }, gbdArgs.getProcessMethodName());
+            processEngine.close();
+        }
+
+        /*if (processArgs(args) && (gbdArgs.getProcessMethodName() != null)) {
             inferParamsNotSet();
             if (isNotEmpty(gbdArgs.getPath2grobidHome())) {
                 initProcess(gbdArgs.getPath2grobidHome());
@@ -307,6 +320,6 @@ public class GrobidMedicalReportMain {
             }
             LOGGER.info(nb + " files processed in " + (System.currentTimeMillis() - time) + " milliseconds");
             parsers.close();
-        }
+        }*/
     }
 }
