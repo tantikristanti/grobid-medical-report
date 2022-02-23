@@ -680,7 +680,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     }
                     
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
+                    LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
                 }
                 if (ind != -1)
@@ -689,7 +689,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
         }
     }
 
@@ -757,7 +757,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running Grobid training" +
+            throw new GrobidException("An exception occurred while running Grobid training" +
                 " data generation for medical model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -820,7 +820,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running grobid-medical blank training" +
+            throw new GrobidException("An exception occurred while running grobid-medical blank training" +
                 " data generation for the medical-report-segmenter model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1011,7 +1011,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
             return buffer;
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running Grobid.", e);
         }
     }
 

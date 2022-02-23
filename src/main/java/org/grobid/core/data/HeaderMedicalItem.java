@@ -94,39 +94,64 @@ public class HeaderMedicalItem {
             '}';
     }
 
-    public HeaderMedicalItem() {}
+    public HeaderMedicalItem() {
+    }
 
     public String getLanguage() {
         return this.language;
     }
 
-    public int getNbPages() {return nbPages;}
+    public int getNbPages() {
+        return nbPages;
+    }
 
-    public String getDocNum() { return this.document_number; }
+    public String getDocNum() {
+        return this.document_number;
+    }
 
-    public String getDocumentType() { return this.document_type; }
+    public String getDocumentType() {
+        return this.document_type;
+    }
 
-    public String getTitle() { return this.title; }
+    public String getTitle() {
+        return this.title;
+    }
 
-    public String getDocumentDate() { return this.document_date; }
+    public String getDocumentDate() {
+        return this.document_date;
+    }
 
-    public Date getNormalizedDocumentDate() { return normalized_document_date; }
+    public Date getNormalizedDocumentDate() {
+        return normalized_document_date;
+    }
 
-    public String getDocumentTime() { return this.time; }
+    public String getDocumentTime() {
+        return this.time;
+    }
 
-    public String getDateline() {return this.dateline;}
+    public String getDateline() {
+        return this.dateline;
+    }
 
-    public String getMedics() {return medics;}
+    public String getMedics() {
+        return medics;
+    }
 
-    public String getPatients() { return patients; }
+    public String getPatients() {
+        return patients;
+    }
 
-    public String getAffiliation() { return affiliation; }
+    public String getAffiliation() {
+        return affiliation;
+    }
 
     public String getAddress() {
         return address;
     }
 
-    public String getOrg() { return org; }
+    public String getOrg() {
+        return org;
+    }
 
     public String getEmail() {
         return email;
@@ -148,21 +173,33 @@ public class HeaderMedicalItem {
         return this.location;
     }
 
-    public String getNote() {return this.note;}
+    public String getNote() {
+        return this.note;
+    }
 
-    public List<Medic> getListMedics() {return listMedics;}
+    public List<Medic> getListMedics() {
+        return listMedics;
+    }
 
-    public List<Patient> getListPatients() { return listPatients; }
+    public List<Patient> getListPatients() {
+        return listPatients;
+    }
 
-    public List<Dateline> getListDatelines() { return listDatelines; }
+    public List<Dateline> getListDatelines() {
+        return listDatelines;
+    }
 
     public List<Affiliation> getFullAffiliations() {
         return fullAffiliations;
     }
 
-    public List<LayoutToken> getMedicsTokens() {return medicsLayoutTokens;}
+    public List<LayoutToken> getMedicsTokens() {
+        return medicsLayoutTokens;
+    }
 
-    public List<LayoutToken> getDatelinesTokens() {return datelinesLayoutTokens;}
+    public List<LayoutToken> getDatelinesTokens() {
+        return datelinesLayoutTokens;
+    }
 
     public List<LayoutToken> getPatientsTokens() {
         return patientsLayoutTokens;
@@ -172,37 +209,61 @@ public class HeaderMedicalItem {
         this.language = StringUtils.normalizeSpace(theLanguage);
     }
 
-    public void setNbPages(int nb) { this.nbPages = nb;}
+    public void setNbPages(int nb) {
+        this.nbPages = nb;
+    }
 
-    public void setDocNum(String idno) { this.document_number = StringUtils.normalizeSpace(idno); }
+    public void setDocNum(String idno) {
+        this.document_number = StringUtils.normalizeSpace(idno);
+    }
 
-    public void setDocumentType(String theDocumentType) { this.document_type = StringUtils.normalizeSpace(theDocumentType); }
+    public void setDocumentType(String theDocumentType) {
+        this.document_type = StringUtils.normalizeSpace(theDocumentType);
+    }
 
     public void setTitle(String theTitle) {
         this.title = StringUtils.normalizeSpace(theTitle);
     }
 
-    public void setDocumentDate(String theDate) { this.document_date = StringUtils.normalizeSpace(theDate); }
+    public void setDocumentDate(String theDate) {
+        this.document_date = StringUtils.normalizeSpace(theDate);
+    }
 
-    public void setDateline(String dateline) {this.dateline = StringUtils.normalizeSpace(dateline);}
+    public void setDateline(String dateline) {
+        this.dateline = StringUtils.normalizeSpace(dateline);
+    }
 
-    public void setLocation(String location) {this.location = StringUtils.normalizeSpace(location); }
+    public void setLocation(String location) {
+        this.location = StringUtils.normalizeSpace(location);
+    }
 
-    public void setNote(String note) { this.note = StringUtils.normalizeSpace(note); }
+    public void setNote(String note) {
+        this.note = StringUtils.normalizeSpace(note);
+    }
 
-    public void setDocumentTime(String theTime) { this.time = StringUtils.normalizeSpace(theTime); }
+    public void setDocumentTime(String theTime) {
+        this.time = StringUtils.normalizeSpace(theTime);
+    }
 
     public void setNormalizedDocumentDate(Date theDate) {
         this.normalized_document_date = theDate;
     }
 
-    public void setPatients(String thepatients) { this.patients = StringUtils.normalizeSpace(thepatients); }
+    public void setPatients(String thepatients) {
+        this.patients = StringUtils.normalizeSpace(thepatients);
+    }
 
-    public void setMedics(String themedics) {this.medics = StringUtils.normalizeSpace(themedics);}
+    public void setMedics(String themedics) {
+        this.medics = StringUtils.normalizeSpace(themedics);
+    }
 
-    public void setListMedics(List<Medic> fMedics) { this.listMedics = fMedics; }
+    public void setListMedics(List<Medic> fMedics) {
+        this.listMedics = fMedics;
+    }
 
-    public void setListPatients(List<Patient> fPatients) { this.listPatients = fPatients; }
+    public void setListPatients(List<Patient> fPatients) {
+        this.listPatients = fPatients;
+    }
 
     public void setFullAffiliations(List<Affiliation> full) {
         fullAffiliations = full;
@@ -222,7 +283,6 @@ public class HeaderMedicalItem {
         datelinesLayoutTokens.add(lt);
         return this;
     }
-
 
     public HeaderMedicalItem addMedicsToken(LayoutToken lt) {
         medicsLayoutTokens.add(lt);
@@ -263,7 +323,9 @@ public class HeaderMedicalItem {
         address = a;
     }
 
-    public void setOrg(String or) { org = or; }
+    public void setOrg(String or) {
+        org = or;
+    }
 
     public void setEmail(String e) {
         email = e;
@@ -374,7 +436,7 @@ public class HeaderMedicalItem {
                 tei.append("</date>");
             }
             tei.append("\n");
-            TextUtilities.appendN(tei, '\t', nbTag +1);
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
             tei.append("</dateline>").append("\n");
         }
         TextUtilities.appendN(tei, '\t', nbTag);
@@ -462,55 +524,57 @@ public class HeaderMedicalItem {
     public String toTEIPatientBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
         TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("<listPerson type=\"patients\">\n");
+        tei.append("<listPerson type=\"patient\">\n");
         for (Patient patient : listPatients) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<patient>").append("\n");
-            if (patient.getID() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<idno>").append(TextUtilities.HTMLEncode(patient.getID())).append("</idno>\n");
-            }
-            if (patient.getPersName() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<persName>").append(TextUtilities.HTMLEncode(patient.getPersName())).append("</persName>\n");
-            }
-            if (patient.getSex() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<sex type=\"" + TextUtilities.HTMLEncode(patient.getSex()) + "\">").append(TextUtilities.HTMLEncode(patient.getSex()));
-                tei.append("</sex>\n");
-            }
-            if (patient.getDateBirth() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<birth when=\">" + TextUtilities.HTMLEncode(patient.getDateBirth()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateBirth()));
+            if (patient != null) {
+                tei.append("<patient>").append("\n");
+                if (patient.getID() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<idno>").append(TextUtilities.HTMLEncode(patient.getID())).append("</idno>\n");
+                }
+                if (patient.getPersName() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<persName>").append(TextUtilities.HTMLEncode(patient.getPersName())).append("</persName>\n");
+                }
+                if (patient.getSex() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<sex type=\"" + TextUtilities.HTMLEncode(patient.getSex()) + "\">").append(TextUtilities.HTMLEncode(patient.getSex()));
+                    tei.append("</sex>\n");
+                }
+                if (patient.getDateBirth() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<birth when=\">" + TextUtilities.HTMLEncode(patient.getDateBirth()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateBirth()));
                     tei.append("</birth>\n");
+                }
+                if (patient.getDateDeath() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<death when=\">" + TextUtilities.HTMLEncode(patient.getDateDeath()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateDeath()));
+                    tei.append("</death>\n");
+                }
+                if (patient.getAddress() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<address>").append(TextUtilities.HTMLEncode(patient.getAddress())).append("</address>\n");
+                }
+                if (patient.getCountry() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<country>").append(TextUtilities.HTMLEncode(patient.getCountry())).append("</country>\n");
+                }
+                if (patient.getTown() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<settlement>").append(TextUtilities.HTMLEncode(patient.getTown())).append("</settlement>\n");
+                }
+                if (patient.getPhone() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<phone>").append(TextUtilities.HTMLEncode(patient.getPhone())).append("</phone>\n");
+                }
+                if (patient.getNote() != null) {
+                    TextUtilities.appendN(tei, '\t', nbTag + 2);
+                    tei.append("<note type=\"patient\">").append(TextUtilities.HTMLEncode(patient.getNote())).append("</note>\n");
+                }
+                TextUtilities.appendN(tei, '\t', nbTag + 1);
+                tei.append("</patient>\n");
             }
-            if (patient.getDateDeath() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<death when=\">" + TextUtilities.HTMLEncode(patient.getDateDeath()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateDeath()));
-                tei.append("</death>\n");
-            }
-            if (patient.getAddress() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<address>").append(TextUtilities.HTMLEncode(patient.getAddress())).append("</address>\n");
-            }
-            if (patient.getCountry() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<country>").append(TextUtilities.HTMLEncode(patient.getCountry())).append("</country>\n");
-            }
-            if (patient.getTown() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<settlement>").append(TextUtilities.HTMLEncode(patient.getTown())).append("</settlement>\n");
-            }
-            if (patient.getPhone() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<phone>").append(TextUtilities.HTMLEncode(patient.getPhone())).append("</phone>\n");
-            }
-            if (patient.getNote() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<note type=\"patient\">").append(TextUtilities.HTMLEncode(patient.getNote())).append("</note>\n");
-            }
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("</patient>\n");
         }
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("</listPerson>\n");
@@ -577,12 +641,15 @@ public class HeaderMedicalItem {
         this.titleLayoutTokens.addAll(layoutTokens);
     }
 
-    public void addMedicsTokens(List<LayoutToken> layoutTokens) {this.medicsLayoutTokens.addAll(layoutTokens);}
+    public void addMedicsTokens(List<LayoutToken> layoutTokens) {
+        this.medicsLayoutTokens.addAll(layoutTokens);
+    }
 
     public void addPatientsTokens(List<LayoutToken> layoutTokens) {
         this.patientsLayoutTokens.addAll(layoutTokens);
     }
 
-    public void addDatelinesTokens(List<LayoutToken> layoutTokens) { this.datelinesLayoutTokens.addAll(layoutTokens);
+    public void addDatelinesTokens(List<LayoutToken> layoutTokens) {
+        this.datelinesLayoutTokens.addAll(layoutTokens);
     }
 }

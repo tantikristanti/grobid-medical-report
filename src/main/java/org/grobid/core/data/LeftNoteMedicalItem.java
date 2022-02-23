@@ -60,7 +60,6 @@ public class LeftNoteMedicalItem {
     // list of medics, patients, datelines, affiliations for further process with related models
     private List<Organization> listOrganizations = null;
     private List<Medic> listMedics = null;
-    private List<LayoutToken> affiliationLayoutTokens = new ArrayList<>();
     private List<LayoutToken> organizationLayoutTokens = new ArrayList<>();
     private List<LayoutToken> medicsLayoutTokens = new ArrayList<>();
 
@@ -91,11 +90,6 @@ public class LeftNoteMedicalItem {
     }
 
     public LeftNoteMedicalItem() {}
-
-    public LeftNoteMedicalItem addAffiliationToken(LayoutToken lt) {
-        affiliationLayoutTokens.add(lt);
-        return this;
-    }
 
     public void addOrganization(Organization org) {
         if (listOrganizations == null)
@@ -149,7 +143,6 @@ public class LeftNoteMedicalItem {
         note = null;
         listOrganizations = null;
         listMedics = null;
-        affiliationLayoutTokens = new ArrayList<>();
         organizationLayoutTokens = new ArrayList<>();
         medicsLayoutTokens = new ArrayList<>();
     }
@@ -425,10 +418,6 @@ public class LeftNoteMedicalItem {
         return listMedics;
     }
 
-    public List<LayoutToken> getAffiliationLayoutTokens() {
-        return affiliationLayoutTokens;
-    }
-
     public List<LayoutToken> getOrganizationLayoutTokens() {
         return organizationLayoutTokens;
     }
@@ -594,10 +583,6 @@ public class LeftNoteMedicalItem {
 
     public void setListMedics(List<Medic> listMedics) {
         this.listMedics = listMedics;
-    }
-
-    public void setAffiliationLayoutTokens(List<LayoutToken> affiliationLayoutTokens) {
-        this.affiliationLayoutTokens = affiliationLayoutTokens;
     }
 
     public void setOrganizationLayoutTokens(List<LayoutToken> organizationLayoutTokens) {

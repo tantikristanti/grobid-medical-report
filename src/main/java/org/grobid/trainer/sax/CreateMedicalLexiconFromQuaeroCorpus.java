@@ -54,7 +54,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
                 try {
                     createMedicalLexiconFromBioC(file, output);
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
+                    LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
                 }
             }
@@ -62,7 +62,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
                 writeToFile(output);
             }
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
         }
     }
 
@@ -94,7 +94,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occured while creating " +
+            throw new GrobidException("An exception occurred while creating " +
                 "medical lexicon from the Quaero French Medical Corpus.", e);
         }
     }
@@ -128,7 +128,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occured while running Grobid training" +
+            throw new GrobidException("An exception occurred while running Grobid training" +
                 " data generation for header medical report.", e);
         }
     }

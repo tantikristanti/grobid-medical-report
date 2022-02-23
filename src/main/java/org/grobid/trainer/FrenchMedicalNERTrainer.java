@@ -115,7 +115,7 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
                 os3.close();
             }
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running Grobid.", e);
         }
         return totalExamples;
     }
@@ -196,7 +196,7 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
         }
         catch (Exception ex) {
             throw new GrobidResourceException(
-                "An exception occured when accessing/reading the French corpus.", ex);
+                "An exception occurred when accessing/reading the French corpus.", ex);
 
         }finally {
         }

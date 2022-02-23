@@ -90,7 +90,7 @@ public class ProcessEngineMedical implements Closeable {
             for (final File currPdf : files) {
                 try {
                     if (currPdf.getName().toLowerCase().endsWith(".pdf")) {
-                        result = getEngine().processHeaderLeftNoteMedicalReport(currPdf.getAbsolutePath(), null, null);
+                        result = getEngine().processHeaderLeftNoteMedicalReport(currPdf.getAbsolutePath(), null, null, null);
                         File outputPathFile = new File(outputPath);
                         if (!outputPathFile.exists()) {
                             outputPathFile.mkdirs();
@@ -113,8 +113,70 @@ public class ProcessEngineMedical implements Closeable {
                         }
                     }
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the file " + currPdf.getAbsolutePath()
+                    LOGGER.error("An error occurred while processing the file " + currPdf.getAbsolutePath()
                             + ". Continuing the process for the other files", exp);
+                }
+            }
+        }
+    }
+
+    /**
+     * Process the headers using pGbdArgs parameters.
+     *
+     * @param pGbdArgs The parameters.
+     * @throws Exception
+     */
+    public void processLeftNote(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        final File pdfDirectory = new File(pGbdArgs.getPath2Input());
+        File[] files = pdfDirectory.listFiles();
+        if (files == null) {
+            LOGGER.warn("No files in directory: " + pdfDirectory);
+        } else {
+            processLeftNoteDirectory(files, pGbdArgs, pGbdArgs.getPath2Output());
+        }
+    }
+
+    /**
+     * Process the header recursively or not using pGbdArgs parameters.
+     *
+     * @param files    list of files to be processed
+     * @param pGbdArgs The parameters.
+     * @throws Exception
+     */
+    private void processLeftNoteDirectory(File[] files, final GrobidMedicalReportMainArgs pGbdArgs, String outputPath) {
+        if (files != null) {
+            boolean recurse = pGbdArgs.isRecursive();
+            String result;
+            for (final File currPdf : files) {
+                try {
+                    if (currPdf.getName().toLowerCase().endsWith(".pdf")) {
+                        result = getEngine().processHeaderLeftNoteMedicalReport(currPdf.getAbsolutePath(), null, null, null);
+                        File outputPathFile = new File(outputPath);
+                        if (!outputPathFile.exists()) {
+                            outputPathFile.mkdirs();
+                        }
+                        if (currPdf.getName().endsWith(".pdf")) {
+                            IOUtilities.writeInFile(outputPath + File.separator
+                                + new File(currPdf.getAbsolutePath())
+                                .getName().replace(".pdf", ".left.note.medical.tei.xml"), result.toString());
+                        } else if (currPdf.getName().endsWith(".PDF")) {
+                            IOUtilities.writeInFile(outputPath + File.separator
+                                + new File(currPdf.getAbsolutePath())
+                                .getName().replace(".PDF", ".left.note.medical.tei.xml"), result.toString());
+                        }
+                    } else if (recurse && currPdf.isDirectory()) {
+                        File[] newFiles = currPdf.listFiles();
+                        if (newFiles != null) {
+                            String newLevel = currPdf.getName();
+                            processLeftNoteDirectory(newFiles, pGbdArgs, outputPath +
+                                File.separator + newLevel);
+                        }
+                    }
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occurred while processing the file " + currPdf.getAbsolutePath()
+                        + ". Continuing the process for the other files", exp);
                 }
             }
         }
@@ -203,7 +265,7 @@ public class ProcessEngineMedical implements Closeable {
                         }
                     }
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the file " + currPdf.getAbsolutePath()
+                    LOGGER.error("An error occurred while processing the file " + currPdf.getAbsolutePath()
                         + ". Continuing the process for the other files", exp);
                 }
             }
@@ -221,7 +283,6 @@ public class ProcessEngineMedical implements Closeable {
         int result = getEngine().batchCreateTraining(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
         LOGGER.info(result + " files processed.");
     }
-
 
     /**
      * Generate blank training data from provided directory of PDF documents, i.e. where TEI files are text only
@@ -243,7 +304,7 @@ public class ProcessEngineMedical implements Closeable {
      * @return List<String> containing the list of the methods.
      */
     public final static List<String> getUsableMethods() {
-        final Class<?> pClass = new ProcessEngine().getClass();
+        final Class<?> pClass = new ProcessEngineMedical().getClass();
         final List<String> availableMethods = new ArrayList<String>();
         for (final Method method : pClass.getMethods()) {
             if (isUsableMethod(method.getName())) {

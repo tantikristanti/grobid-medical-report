@@ -114,13 +114,15 @@ public class TEIFormatter {
 
     public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
                                              LeftNoteMedicalItem leftNoteMedicalItem,
+                                             String strLeftNote,
                                              String defaultPublicationStatement,
                                              GrobidAnalysisConfig config) {
-        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, strLeftNote, SchemaDeclaration.XSD, defaultPublicationStatement, config);
     }
 
     public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
                                              LeftNoteMedicalItem leftNoteMedicalItem,
+                                             String strLeftNote,
                                              SchemaDeclaration schemaDeclaration,
                                              String defaultPublicationStatement,
                                              GrobidAnalysisConfig config) {
@@ -157,9 +159,15 @@ public class TEIFormatter {
             tei.append("\t<teiHeader>\n");
         }
 
-        if (headerItem == null) {
-            // if the headerItem object is null, we simply create an empty one
-            headerItem = new HeaderMedicalItem();
+        if (headerItem == null || leftNoteMedicalItem == null) {
+            if(headerItem == null) {
+                // if the headerItem object is null, we simply create an empty one
+                headerItem = new HeaderMedicalItem();
+            }
+            if (leftNoteMedicalItem == null) {
+                // if the leftNoteMedicalItem object is null, we simply create an empty one
+                leftNoteMedicalItem = new LeftNoteMedicalItem();
+            }
         } else {
             tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n\t\t\t\t<title type=\"main\"");
             if (config.isGenerateTeiIds()) {
@@ -248,7 +256,7 @@ public class TEIFormatter {
                 }
                 // fax if it exists
                 if (headerItem.getFax() != null) {
-                    tei.append("\t\t\t\t\t<fax>" + TextUtilities.HTMLEncode(headerItem.getFax().replaceAll("\t", "; ")));
+                    tei.append("\t\t\t\t\t<fax>" + TextUtilities.HTMLEncode(headerItem.getFax().replaceAll("\t", "; ").replaceAll("\n", "")));
                     tei.append("</fax>\n");
                 }
                 // email if it exists
@@ -283,7 +291,15 @@ public class TEIFormatter {
 
             // information concerning organization from the left-note part of the medical reports if they exist
             if (leftNoteMedicalItem != null) {
-                tei.append(leftNoteMedicalItem.toTEILeftNoteBlock(4, config));
+                //tei.append(leftNoteMedicalItem.toTEILeftNoteBlock(4, config));
+                tei.append("\t\t\t\t<listOrg>");
+                tei.append("\t\t\t\t").append(strLeftNote.replaceAll("<lb/>", "").
+                    replaceAll("<person>","<listPerson type=\"medics\">").
+                    replaceAll("<medic>","\t<medic>").
+                    replaceAll("</medic>","\t</medic>").
+                    replaceAll("</person>","</listPerson>").
+                    replaceAll("\n", "\n\t\t\t\t"));
+                tei.append("</listOrg>\n");
             }
 
             tei.append("\t\t\t</sourceDesc>\n");

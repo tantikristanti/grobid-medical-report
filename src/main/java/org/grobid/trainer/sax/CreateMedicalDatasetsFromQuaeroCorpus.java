@@ -63,12 +63,12 @@ public class CreateMedicalDatasetsFromQuaeroCorpus {
                 try {
                     createTrainingBioC_Xml(file, output, tokenizer);
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
+                    LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
                 }
             }
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
         }
     }
 
@@ -191,7 +191,7 @@ public class CreateMedicalDatasetsFromQuaeroCorpus {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occured while creating " +
+            throw new GrobidException("An exception occurred while creating " +
                 "medical NER training data from the Quaero French Medical Corpus.", e);
         }
     }

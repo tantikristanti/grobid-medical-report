@@ -234,7 +234,7 @@ FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toStrin
                 os3.close();
             }
         } catch (Exception e) {
-            LOGGER.error("An exception occured while running Grobid.", e);
+            LOGGER.error("An exception occurred while running Grobid.", e);
         }
         return totalExamples;
     }

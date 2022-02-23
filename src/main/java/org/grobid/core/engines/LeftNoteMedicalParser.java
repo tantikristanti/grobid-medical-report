@@ -1,9 +1,12 @@
 package org.grobid.core.engines;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
+import org.grobid.core.data.Medic;
+import org.grobid.core.data.Organization;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -29,6 +32,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * A class to extract the left-note part of medical reports.
@@ -75,13 +80,13 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Processing with application of the medical-report segmentation model
      */
-    public Pair<String, Document> processing(File input, LeftNoteMedicalItem resLeftNote, GrobidAnalysisConfig config) {
+    public Pair<String, Document> processing(File input, LeftNoteMedicalItem resLeftNote, String strLeftNote, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
             Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
-            String tei = processingLeftNoteSection(config, doc, resLeftNote, true);
+            String tei = processingLeftNoteSection(config, doc, resLeftNote, strLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -93,14 +98,16 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Processing with application of the segmentation model
      */
-    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, GrobidAnalysisConfig config) {
+    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, String strLeftNote, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
             documentSource.setMD5(md5Str);
+            // first, parse the document with the segmentation model
             Document doc = parsers.getSegmentationParser().processing(documentSource, config);
 
-            String tei = processingLeftNoteSection(config, doc, resLeftNote, true);
+            // then take only the header and left note parts for further process with this method
+            String tei = processingLeftNoteSection(config, doc, resLeftNote, strLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -112,10 +119,11 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Left-Note processing after application of the medical-report segmentation model
      */
-    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, boolean serialize) {
+    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, String strLeftNote, boolean serialize) {
         try {
+            // retrieve only the header (front) part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
-            List<LayoutToken> tokenizations = doc.getTokenizations();
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokenizations for the entire document
 
             if (documentLeftNoteParts != null) {
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
@@ -124,18 +132,84 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 String res = null;
                 if ((leftNote != null) && (leftNote.trim().length() > 0)) {
                     res = label(leftNote);
-                    resLeftNote = resultExtraction(res, leftNoteTokenization, resLeftNote, doc);
+                    resLeftNote = resultExtraction(res, leftNoteTokenization, resLeftNote);
+
+                        // if the Organization model exists
+                        /*if (resLeftNote.getGhu() != null || resLeftNote.getChu() != null || resLeftNote.getDmu() != null ||
+                            resLeftNote.getPole() != null || resLeftNote.getInstitution() != null || resLeftNote.getUniversity() != null ||
+                            resLeftNote.getSite()  != null || resLeftNote.getHospital() != null || resLeftNote.getCenter() != null ||
+                            resLeftNote.getService() != null || resLeftNote.getDepartment() != null|| resLeftNote.getUnit() != null ||
+                            resLeftNote.getSub() != null || resLeftNote.getOrg() != null
+                        ) {
+                        List<LayoutToken> organizationLayoutTokens = resLeftNote.getOrganizationLayoutTokens();
+                        List<List<LayoutToken>> organizationSegments = new ArrayList<>();
+                        if (isNotEmpty(organizationLayoutTokens)) {
+                            List<LayoutToken> currentSegment = new ArrayList<>();
+                            for (LayoutToken theToken : organizationLayoutTokens) {
+                                // split the list of layout tokens when token "\n" is met
+                                if (theToken.getText() != null && theToken.getText().equals("\n")) {
+                                    if (currentSegment.size() > 0)
+                                        organizationSegments.add(currentSegment);
+                                    currentSegment = new ArrayList<>();
+                                } else
+                                    currentSegment.add(theToken);
+                            }
+                            // last segment
+                            if (currentSegment.size() > 0)
+                                organizationSegments.add(currentSegment);
+
+                            for (int k = 0; k < organizationSegments.size(); k++) {
+                                if (organizationSegments.get(k).size() == 0)
+                                    continue;
+                                // further organization processing with the Organization model
+                                List<Organization> localOrganizations = parsers.getOrganizationParser()
+                                    .processingWithLayoutTokens(organizationSegments.get(k));
+
+                                for (Organization organization : localOrganizations) {
+                                    // add new organization
+                                    resLeftNote.addOrganization(organization);
+                                }
+                            }
+                        }
+                    }*/
+
+                    // medics processing
+                    if (resLeftNote.getMedics() != null) {
+                        List<LayoutToken> medicLayoutTokens = resLeftNote.getMedicsLayoutTokens();
+                        List<List<LayoutToken>> medicSegments = new ArrayList<>();
+                        if (isNotEmpty(medicLayoutTokens)) {
+                            List<LayoutToken> currentSegment = new ArrayList<>();
+                            for (LayoutToken theToken : medicLayoutTokens) {
+                                // split the list of layout tokens when token "\n" is met
+                                if (theToken.getText() != null && theToken.getText().equals("\n")) {
+                                    if (currentSegment.size() > 0)
+                                        medicSegments.add(currentSegment);
+                                    currentSegment = new ArrayList<>();
+                                } else
+                                    currentSegment.add(theToken);
+                            }
+                            // last segment
+                            if (currentSegment.size() > 0)
+                                medicSegments.add(currentSegment);
+
+                            for (int k = 0; k < medicSegments.size(); k++) {
+                                if (medicSegments.get(k).size() == 0)
+                                    continue;
+                                // further medics processing with the Medic model
+                                List<Medic> localMedics = parsers.getMedicParser()
+                                    .processingWithLayoutTokens(medicSegments.get(k));
+
+                                for (Medic medic : localMedics) {
+                                    // add new medic
+                                    resLeftNote.addMedic(medic);
+                                }
+                            }
+                        }
+                    }
                 }
-
-                // For the language, by default in French because there is not enough text to test to obtain the id language
-                resLeftNote.setLanguage("fr");
-
-                //  TBD : remove invalid medics (no last name, noise, etc.) with PersonName.sanityCheck
-
-                // we don't need to serialize if we process the full text (it would be done 2 times)
-                if (serialize) {
+                if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, null, null, config);
+                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, strLeftNote, null, config);
                     tei.append("\t</text>\n");
                     tei.append("</TEI>\n");
                     return tei.toString();
@@ -556,7 +630,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * @param leftNoteItem  left-note item
      * @return left-note item
      */
-    public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem leftNoteItem, Document doc) {
+    public LeftNoteMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, LeftNoteMedicalItem leftNoteItem) {
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, result, tokenizations);
         List<TaggingTokenCluster> clusters = clusteror.cluster();
         leftNoteItem.generalResultMapping(result, tokenizations);
@@ -958,7 +1032,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<institution>")) {
                 buffer.append("</org>\n");
-            }  else if (lastTag0.equals("<university>")) {
+            } else if (lastTag0.equals("<university>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<hospital>")) {
                 buffer.append("</org>\n");
@@ -1070,7 +1144,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                         createTrainingFromPDF(file, outputDirectory, n);
                     }
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
+                    LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
                 }
                 if (ind != -1)
@@ -1079,7 +1153,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
         }
     }
 
@@ -1181,7 +1255,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occured while running Grobid training" +
+            throw new GrobidException("An exception occurred while running Grobid training" +
                 " data generation for left-note medical report.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1280,7 +1354,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occured while running grobid-medical blank training" +
+            throw new GrobidException("An exception occurred while running grobid-medical blank training" +
                 " data generation for the left-note medical report.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1329,7 +1403,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 try {
                     processing(file, outputDirectory, n);
                 } catch (final Exception exp) {
-                    LOGGER.error("An error occured while processing the following pdf: "
+                    LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
                 }
                 if (ind != -1)
@@ -1338,7 +1412,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occured while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
         }
     }
 
@@ -1448,7 +1522,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             writer.close();
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occured while running Grobid training" +
+            throw new GrobidException("An exception occurred while running Grobid training" +
                 " data generation for medical model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
