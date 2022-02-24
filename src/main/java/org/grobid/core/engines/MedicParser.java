@@ -498,7 +498,7 @@ public class MedicParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<roleName>", "<roleName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<rolename>", "<roleName>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
