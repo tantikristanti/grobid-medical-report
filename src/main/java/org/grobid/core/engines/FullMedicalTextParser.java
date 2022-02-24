@@ -2038,9 +2038,6 @@ public class FullMedicalTextParser extends AbstractParser {
                         // we tag with the left-note model
                         String rese = parsers.getLeftNoteMedicalParser().label(leftNote);
 
-                        // if the left note model exists, we can take the buffer from the parser
-                        //bufferLeftNote = parsers.getLeftNoteMedicalParser().trainingExtraction(rese, leftNoteTokenizations);
-
                         // 4b. MEDIC MODEL (from left note information)
                         // path for the medic model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.blank.tei.xml"));
@@ -2050,14 +2047,14 @@ public class FullMedicalTextParser extends AbstractParser {
                         String input = "";
                         int q = 0;
                         StringTokenizer st = new StringTokenizer(rese, "\n");
-                        while (st.hasMoreTokens() && (q < headerTokenization.size())) {
+                        while (st.hasMoreTokens() && (q < leftNoteTokenizations.size())) {
                             String line = st.nextToken();
-                            String theTotalTok = headerTokenization.get(q).getText();
-                            String theTok = headerTokenization.get(q).getText();
+                            String theTotalTok = leftNoteTokenizations.get(q).getText();
+                            String theTok = leftNoteTokenizations.get(q).getText();
                             while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
                                 q++;
-                                if ((q > 0) && (q < headerTokenization.size())) {
-                                    theTok = headerTokenization.get(q).getText();
+                                if ((q > 0) && (q < leftNoteTokenizations.size())) {
+                                    theTok = leftNoteTokenizations.get(q).getText();
                                     theTotalTok += theTok;
                                 }
                             }

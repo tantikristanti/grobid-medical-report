@@ -55,6 +55,7 @@ Example:
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -r -exe processHeader 
 ```
 
+<!--
 #### 2. processLeftNote
 'processLeftNote' batch command will extract, structure and normalise the left note part of medical reports in TEI format. The output is a TEI file corresponding to the structured report left note.
 
@@ -62,8 +63,9 @@ Example:
 ```bash
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -r -exe processLeftNote 
 ```
+-->
 
-#### 3. processFullText
+#### 2. processFullText
 To get the results from the combination of all the prepared models, we can use this command:
 
 Example:

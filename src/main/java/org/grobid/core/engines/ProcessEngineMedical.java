@@ -123,7 +123,7 @@ public class ProcessEngineMedical implements Closeable {
      * @param pGbdArgs The parameters.
      * @throws Exception
      */
-    public void processLeftNote(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
+    /*public void processLeftNote(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
         inferPdfInputPath(pGbdArgs);
         inferOutputPath(pGbdArgs);
         final File pdfDirectory = new File(pGbdArgs.getPath2Input());
@@ -133,7 +133,7 @@ public class ProcessEngineMedical implements Closeable {
         } else {
             processLeftNoteDirectory(files, pGbdArgs, pGbdArgs.getPath2Output());
         }
-    }
+    }*/
 
     /**
      * Process the header recursively or not using pGbdArgs parameters.
@@ -142,7 +142,7 @@ public class ProcessEngineMedical implements Closeable {
      * @param pGbdArgs The parameters.
      * @throws Exception
      */
-    private void processLeftNoteDirectory(File[] files, final GrobidMedicalReportMainArgs pGbdArgs, String outputPath) {
+    /*private void processLeftNoteDirectory(File[] files, final GrobidMedicalReportMainArgs pGbdArgs, String outputPath) {
         if (files != null) {
             boolean recurse = pGbdArgs.isRecursive();
             String result;
@@ -177,7 +177,7 @@ public class ProcessEngineMedical implements Closeable {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Process the full text using pGbdArgs parameters.

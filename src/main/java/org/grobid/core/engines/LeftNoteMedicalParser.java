@@ -862,8 +862,8 @@ public class LeftNoteMedicalParser extends AbstractParser {
         StringBuilder buffer = new StringBuilder();
 
         StringTokenizer st = new StringTokenizer(result, "\n");
-        String s1 = null;
-        String s2 = null;
+        String s1 = null; // the label
+        String s2 = null; // the text
         String lastTag = null;
 
         int p = 0;
@@ -884,7 +884,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             while (stt.hasMoreTokens()) {
                 String s = stt.nextToken().trim();
                 if (i == 0) {
-                    s2 = TextUtilities.HTMLEncode(s);
+                    s2 = TextUtilities.HTMLEncode(s); // the text
                     //s2 = s;
 
                     boolean strop = false;
@@ -1067,16 +1067,35 @@ public class LeftNoteMedicalParser extends AbstractParser {
     }
 
     private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
+        // s1 :  the label, s2 : the text
+
+        /*// process the medics if the model has achieved the best result
+        List<String> inputs = new ArrayList<String>();
+
+        if (s1.contains("<medic>")) {
+            inputs.add(s2);
+            s2 = parsers.getMedicParser().trainingExtraction(inputs).toString();
+        }
+        // process the organization if the model has achieved the best result
+        if (s1.contains("<ghu>") || s1.contains("<chu>") || s1.contains("<dmu>") ||
+            s1.contains("<pole>") || s1.contains("<site>") || s1.contains("<institution>") ||
+            s1.contains("<university>") || s1.contains("<hospital>") || s1.contains("<center>") ||
+            s1.contains("<service>") || s1.contains("<department>") || s1.contains("<unit>") ||
+            s1.contains("<sub>") || s1.contains("<organization>") ) {
+            inputs.add(s2);
+            s2 = parsers.getOrganizationParser().trainingExtraction(inputs).toString();
+        }*/
+
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) {
+            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if the tag is the same as the last one, we continue to add the text
                 if (addSpace)
                     buffer.append(" ").append(s2);
                 else
                     buffer.append(s2);
             } else
-                buffer.append("\n\t").append(outField).append(s2);
+                buffer.append("\n\t").append(outField).append(s2); // otherwise, we first add a carriage return before adding the text
         }
         return result;
     }

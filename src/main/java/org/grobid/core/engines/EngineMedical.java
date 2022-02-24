@@ -71,7 +71,7 @@ public class EngineMedical extends Engine {
      * information
      */
     public String processHeaderLeftNoteMedicalReport(String inputFile, String md5Str, GrobidAnalysisConfig config,
-                                                     HeaderMedicalItem resultHeader , LeftNoteMedicalItem resultLeftNote,
+                                                     HeaderMedicalItem resultHeader, LeftNoteMedicalItem resultLeftNote,
                                                      String strLeftNote) {
         // normally the header or left note items must not be null, but if it is the case,
         // we still continue with a new instance, so that the resulting TEI string is still delivered
@@ -80,6 +80,9 @@ public class EngineMedical extends Engine {
         }
         if (resultLeftNote == null) {
             resultLeftNote = new LeftNoteMedicalItem();
+        }
+        if (strLeftNote == null) {
+            strLeftNote = "";
         }
         Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), md5Str, resultHeader, resultLeftNote,strLeftNote, config);
         return resultTEI.getLeft(); // the left result is the TEI results, while the right one is the Document object result
@@ -109,7 +112,6 @@ public class EngineMedical extends Engine {
      * @param id           : an optional ID to be used in the TEI file, -1 if not used
      */
     public void createTraining(File inputFile, String pathOutput,  int id) {
-        //System.out.println(inputFile.getPath());
         parsers.getFullMedicalTextParser().createTraining(inputFile, pathOutput, id);
     }
 
@@ -229,7 +231,7 @@ public class EngineMedical extends Engine {
      */
     public String fullTextToTEI(File inputFile,
                                 GrobidAnalysisConfig config) throws Exception {
-        return fullTextToTEIDoc(inputFile, null, config).getTei();
+        return fullTextToTEIDoc(inputFile, config).getTei();
     }
 
     /**
@@ -265,7 +267,7 @@ public class EngineMedical extends Engine {
 
     public Document fullTextToTEIDoc(File inputFile,
                                      GrobidAnalysisConfig config) throws Exception {
-        return fullTextToTEIDoc(inputFile, null, config);
+        return fullTextToTEIDoc(inputFile, config);
     }
 
     public Document fullTextToTEIDoc(DocumentSource documentSource,
