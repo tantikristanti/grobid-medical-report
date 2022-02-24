@@ -1466,7 +1466,11 @@ public class FullMedicalTextParser extends AbstractParser {
                                     theTotalTok += theTok;
                                 }
                             }
-                            if (line.endsWith("<org>")) {
+                            if (line.endsWith("<ghu>") || line.endsWith("<chu>") || line.endsWith("<dmu>") ||
+                                line.endsWith("<pole>") || line.endsWith("<institution>") || line.endsWith("<university>") ||
+                                line.endsWith("<site>") || line.endsWith("<hospital>") || line.endsWith("<center>") ||
+                                line.endsWith("<service>") || line.endsWith("<department>") || line.endsWith("<unit>") ||
+                                line.endsWith("<sub>") || line.endsWith("<organization>")) {
                                 input += theTotalTok;
                             }
                             q++;
@@ -1480,14 +1484,14 @@ public class FullMedicalTextParser extends AbstractParser {
                             // force analyser with English, to avoid bad surprise
                             List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
                             List<String> tokenizationOrg = analyzer.tokenize(input);
-                            List<String> medicBlocks = new ArrayList<String>();
+                            List<String> orgBlocks = new ArrayList<String>();
                             if (tokenizationOrg.size() == 0)
                                 return null;
                             for (String tok : tokenizationOrg) {
                                 if (tok.equals("\n")) {
-                                    medicBlocks.add("@newline");
+                                    orgBlocks.add("@newline");
                                 } else if (!tok.equals(" ")) {
-                                    medicBlocks.add(tok + " <org>");
+                                    orgBlocks.add(tok + " <org>");
                                 }
                             }
 
@@ -2133,7 +2137,11 @@ public class FullMedicalTextParser extends AbstractParser {
                                     theTotalTok += theTok;
                                 }
                             }
-                            if (line.endsWith("<org>")) {
+                            if (line.endsWith("<ghu>") || line.endsWith("<chu>") || line.endsWith("<dmu>") ||
+                                line.endsWith("<pole>") || line.endsWith("<institution>") || line.endsWith("<university>") ||
+                                line.endsWith("<site>") || line.endsWith("<hospital>") || line.endsWith("<center>") ||
+                                line.endsWith("<service>") || line.endsWith("<department>") || line.endsWith("<unit>") ||
+                                line.endsWith("<sub>") || line.endsWith("<organization>")) {
                                 input += theTotalTok;
                             }
                             q++;
