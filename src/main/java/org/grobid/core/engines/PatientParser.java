@@ -479,23 +479,29 @@ public class PatientParser extends AbstractParser {
         return buffer;
     }
 
-    private String writeField(String s1, String lastTag0, String s2,
-                              String field, String outField, boolean addSpace, int nbIndent) {
+    private String writeField(String s1,
+                              String lastTag0,
+                              String s2,
+                              String field,
+                              String outField,
+                              boolean addSpace,
+                              int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
+             if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
                 if (addSpace)
                     result = " " + s2;
                 else
                     result = s2;
             } else {
                 result = "";
-
-                if (addSpace) {
-                    result += " " + outField + s2;
-                } else {
-                    result += outField + s2;
+                for (int i = 0; i < nbIndent; i++) {
+                    result += "\t";
                 }
+                if (addSpace)
+                    result += " " + outField + s2;
+                else
+                    result += outField + s2;
             }
         }
         return result;

@@ -976,7 +976,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<sub>", "<org type=\"sub\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<organization>", "<org type=\"other\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<organization>", "<org>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
