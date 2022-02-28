@@ -1318,6 +1318,87 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
                         }
                     }
+
+                    // 5a. ORGANIZATION MODEL (from header information)
+                    // path for medic model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization"));
+
+                    // buffer for the medics block
+                    StringBuilder bufferOrg = null;
+                    // we need to rebuild the found string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(labeledHeader, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<org>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferOrg = parsers.getOrganizationParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                        List<String> tokenizationOrg = analyzer.tokenize(input);
+                        List<String> orgBlocks = new ArrayList<String>();
+                        if (tokenizationOrg.size() == 0)
+                            return null;
+                        for (String tok : tokenizationOrg) {
+                            if (tok.equals("\n")) {
+                                orgBlocks.add("@newline");
+                            } else if (!tok.equals(" ")) {
+                                orgBlocks.add(tok + " <org>");
+                            }
+                        }
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the medic data with features
+                        String featuredOrg = FeaturesVectorOrganization.addFeaturesOrganization(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredOrg != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredOrg + "\n");
+                            writer.close();
+                        }
+
+
+                        if ((bufferOrg != null) && (bufferOrg.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<listOrg>\n");
+                            writer.write("\t\t\t\t<org>\n");
+                            writer.write("\t\t\t\t\t" + bufferOrg.toString());
+                            writer.write("\t\t\t\t</org>\n");
+                            writer.write("\t\t\t</listOrg>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+                    }
                 }
             } // end of the header processing
 
@@ -1444,7 +1525,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
                         }
 
-                        // 5. ORGANIZATION MODEL (from left note information)
+                        // 5b. ORGANIZATION MODEL (from left note information)
                         // path for medic model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization"));
@@ -1931,7 +2012,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.close();
                         }
 
-                        // we write the patients data yet unlabeled
+                        // we write the patient data yet unlabeled
                         if (input.length() > 0) {
                             writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -1994,6 +2075,81 @@ public class FullMedicalTextParser extends AbstractParser {
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    // 5b. ORGANIZATION MODEL (from header information)
+                    // path for the organization model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization.blank.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization"));
+
+                    // we need to rebuild the found string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenization.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenization.get(q).getText();
+                        String theTok = headerTokenization.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenization.size())) {
+                                theTok = headerTokenization.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<org>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    if (input != null && input.trim().length() > 0) {
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                        List<String> tokenizationOrg = analyzer.tokenize(input);
+                        List<String> orgBlocks = new ArrayList<String>();
+                        if (tokenizationOrg.size() == 0)
+                            return null;
+                        for (String tok : tokenizationOrg) {
+                            if (tok.equals("\n")) {
+                                orgBlocks.add("@newline");
+                            } else if (!tok.equals(" ")) {
+                                orgBlocks.add(tok + " <org>");
+                            }
+                        }
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the medic data with features
+                        String featuredOrg = FeaturesVectorOrganization.addFeaturesOrganization(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredOrg != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredOrg + "\n");
+                            writer.close();
+                        }
+
+                        // we write the organization data yet unlabeled
+                        if (input.length() > 0) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<listOrg>\n");
+                            writer.write("\t\t\t\t<org>\n");
+                            writer.write(input);
+                            writer.write("\n\t\t\t\t</org>\n");
+                            writer.write("\t\t\t</listOrg>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
                         }
                     }
                 }
@@ -2117,7 +2273,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
                         }
 
-                        // 5. ORGANIZATION MODEL (from left note information)
+                        // 5b. ORGANIZATION MODEL (from left note information)
                         // path for the organization model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization.blank.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization"));
@@ -2168,12 +2324,12 @@ public class FullMedicalTextParser extends AbstractParser {
                             List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
                             List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
                             // we write the medic data with features
-                            String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
+                            String featuredOrg = FeaturesVectorOrganization.addFeaturesOrganization(tokens, null,
                                 locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
 
-                            if (featuredMedic != null) {
+                            if (featuredOrg != null) {
                                 writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
-                                writer.write(featuredMedic + "\n");
+                                writer.write(featuredOrg + "\n");
                                 writer.close();
                             }
 
