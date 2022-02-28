@@ -3,15 +3,15 @@ grobidHome: "../grobid-home/"
 # path relative to the corpus and template path
 dataPath: "resources/dataset/"
 
-server:
-  type: custom
-  applicationConnectors:
-    - type: http
-      port: 8090
-  adminConnectors:
-    - type: http
-      port: 8091
-  registerDefaultExceptionMappers: false
+#server:
+#  type: custom
+#  applicationConnectors:
+#    - type: http
+#      port: 8070
+#  adminConnectors:
+#    - type: http
+#      port: 8071
+#  registerDefaultExceptionMappers: false
 
 models:
   # we configure here how each sequence labeling model should be implemented
