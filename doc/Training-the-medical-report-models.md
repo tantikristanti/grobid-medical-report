@@ -60,7 +60,7 @@ To train and to generate a new model, under the project directory `grobid/grobid
 ```bash
 > ./gradlew <training-goal-name>
 ```
-Training goal names are: `train_medical_report_segmenter`, `train_header_medical_report`, `train_left_note_medical_report`, `train_full_medical_text`.
+Training goal names are: `train_medical_report_segmenter`, `train_header_medical_report`, `train_left_note_medical_report`, `train_full_medical_text`, `train_dateline`, `train_organization`, `train_medic`, `train_patient`.
 
 An example of a command for training the __medical-report-segmenter__ model:
 ```bash
@@ -87,10 +87,19 @@ An example of a command for training the __train_dateline__ model:
 > ./gradlew train_dateline
 ```
 
+An example of a command for training the __train_dateline__ model:
+```bash
+> ./gradlew train_organization
+```
+
 An example of a command for training the __french_medical_ner__ model:
 ```bash
 > ./gradlew train_french_medical_ner
 ```
+
+Notes of errors :
+- warning: missing tokens, cannot apply pattern
+  - Solution:  check if every line in a training data has the expected number of features (also compared to the CRFPP template)
 
 As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. Further, to increase the speed, we can also modify the stopping criteria. For more information, please refer [this comment](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).
 
