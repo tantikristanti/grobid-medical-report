@@ -937,46 +937,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<idno>", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<ghu>", "<org type=\"ghu\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<chu>", "<org type=\"chu\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<dmu>", "<org type=\"dmu\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<pole>", "<org type=\"pole\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<site>", "<org type=\"site\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<org type=\"institution\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<university>", "<org type=\"university\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<hospital>", "<org type=\"hospital\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<center>", "<org type=\"center\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<service>", "<org type=\"service\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<department>", "<org type=\"department\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<org type=\"unit\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<sub>", "<org type=\"sub\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<organization>", "<org>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
@@ -1020,33 +981,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<idno>")) {
                 buffer.append("</idno>\n");
-            } else if (lastTag0.equals("<ghu>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<chu>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<dmu>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<pole>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<site>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<university>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<hospital>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<center>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<service>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<department>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<unit>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<sub>")) {
-                buffer.append("</org>\n");
-            } else if (lastTag0.equals("<organization>")) {
+            } else if (lastTag0.equals("<org>")) {
                 buffer.append("</org>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>\n");

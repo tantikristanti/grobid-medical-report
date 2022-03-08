@@ -65,9 +65,7 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
                            String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("orgname")) || (qName.equals("org")) || (qName.equals("center")) ||
-            (qName.equals("service")) || (qName.equals("department")) || (qName.equals("administration")) ||
-            (qName.equals("address")) || (qName.equals("country")) || (qName.equals("settlement")) ||
+        if ((qName.equals("orgname")) || (qName.equals("address")) || (qName.equals("country")) || (qName.equals("settlement")) ||
             (qName.equals("email")) ||  (qName.equals("phone")) || (qName.equals("fax")) || (qName.equals("web")) ||
             (qName.equals("note")) || (qName.equals("ptr")) || (qName.equals("medic"))
         ) {
@@ -106,9 +104,51 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
         accumulator.setLength(0);
 
         qName = qName.toLowerCase();
-        if (qName.equals("orgname")) {
-            currentTag = "<orgname>";
-        } else if (qName.equals("address")) {
+        if (qName.equals("affiliation")) {
+
+        } else if (qName.equals("orgname")) {
+            int length = atts.getLength();
+            if (length > 0) {
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
+
+                    if (name != null) {
+                        if (name.equals("type")) {
+                            if (value.equals("ghu")) {
+                                currentTag = "<ghu>";
+                            } else if (value.equals("chu")) {
+                                currentTag = "<chu>";
+                            } else if (value.equals("dmu")) {
+                                currentTag = "<dmu>";
+                            } else if (value.equals("pole")) {
+                                currentTag = "<pole>";
+                            } else if (value.equals("site")) {
+                                currentTag = "<site>";
+                            } else if (value.equals("institution")) {
+                                currentTag = "<institution>";
+                            } else if (value.equals("university")) {
+                                currentTag = "<university>";
+                            } else if (value.equals("hospital")) {
+                                currentTag = "<hospital>";
+                            } else if (value.equals("center")) {
+                                currentTag = "<center>";
+                            } else if (value.equals("service")) {
+                                currentTag = "<service>";
+                            } else if (value.equals("department")) {
+                                currentTag = "<department>";
+                            } else if (value.equals("unit")) {
+                                currentTag = "<unit>";
+                            } else
+                                currentTag = "<organization>"; // we take org with the type other than center, service, department or administration as <org>
+                        }
+                    }
+                }
+            } else
+                currentTag = "<organization>"; // we take orgName without any attribute
+        }  else if (qName.equals("address")) {
             currentTag = "<address>";
         } else if (qName.equals("country")) {
             currentTag = "<country>";
@@ -151,37 +191,8 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
 
                     if ((name != null) && (value != null)) {
                         if (name.equals("type")) {
-                            if (value.equals("short")) {
+                            if (value.equals("organization")) {
                                 currentTag = "<note>";
-                            }
-                        }
-                    }
-                }
-            }
-        } else if (qName.equals("org")) {
-            int length = atts.getLength();
-
-            if (length == 0) {
-                currentTag = "<organization>";
-            } else {
-                // Process each attribute
-                for (int i = 0; i < length; i++) {
-                    // Get names and values for each attribute
-                    String name = atts.getQName(i);
-                    String value = atts.getValue(i);
-
-                    if ((name != null) && (value != null)) {
-                        if (name.equals("type")) {
-                            if (value.equals("center")) {
-                                currentTag = "<center>";
-                            } else if (value.equals("service")) {
-                                currentTag = "<service>";
-                            } else if (value.equals("department")) {
-                                currentTag = "<department>";
-                            } else if (value.equals("administration")) {
-                                currentTag = "<administration>";
-                            } else {
-                                currentTag = "<organization>";
                             }
                         }
                     }

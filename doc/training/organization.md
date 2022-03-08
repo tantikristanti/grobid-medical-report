@@ -10,7 +10,22 @@ For identifying the exact pieces of information to be part of the `organization-
 
 For the organization-medical-report model, we use the following TEI elements:
 
+* `<affiliation>` for the affiliation name (i.e., the hospital name)
 * `<orgName>` for the organization name
+  * `<orgName type="ghu">` for the university hospital group (GHU, Groupement hospitalier universitaire)
+  * `<orgName type="chu">` for the university hospital center (CHU, Centre hospitalier universitaire)
+  * `<orgName type="dmu">` for the medical university departments  (DMU, Départements Médico-Universitaires)
+  * `<orgName type="pole">` for the pole type
+  * `<orgName type="institution">` for the institution type
+  * `<orgName type="university">` for the university type
+  * `<orgName type="site">` for the site type
+  * `<orgName type="hospital">` for the hospital type
+  * `<orgName type="center">` for the center type
+  * `<orgName type="service">` for the service type
+  * `<orgName type="department">` for the department type
+  * `<orgName type="unit">` for the unit type
+  * `<orgName type="sub">` for the sub-organization type
+  * `<orgName type="other">` for the other organization type
 * `<address>` for the address elements of affiliations
 * `<country>` for the country
 * `<settlement>` for the city
@@ -18,7 +33,6 @@ For the organization-medical-report model, we use the following TEI elements:
 * `<phone>` for the phone number of affiliations
 * `<fax>` for the fax number of affiliations
 * `<ptr type="web">` for the web URL
-* `<medic>` for the list of medics
 * `<note type="short">` for the any short notes in the header part
 
 > Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 

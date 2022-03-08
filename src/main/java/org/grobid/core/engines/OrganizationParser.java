@@ -311,9 +311,45 @@ public class OrganizationParser extends AbstractParser {
                         testClosingTag(buffer, currentTag0, lastTag0);
 
 
-                    String output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
+                    String output = writeField(s1, lastTag0, s2, "<ghu>", "<orgName type=\"ghu\">", addSpace, 0);
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<chu>", "<orgName type=\"chu\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<dmu>", "<orgName type=\"dmu\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<pole>", "<orgName type=\"pole\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<site>", "<orgName type=\"site\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<institution>", "<orgName type=\"institution\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<university>", "<orgName type=\"university\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<hospital>", "<orgName type=\"hospital\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<center>", "<orgName type=\"center\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<service>", "<orgName type=\"service\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<department>", "<orgName type=\"department\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<unit>", "<orgName type=\"unit\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<organization>", "<orgName type=\"other\">", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
@@ -337,10 +373,7 @@ public class OrganizationParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"medic\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"organization\">", addSpace, 0);
                     }
                     if (output != null) {
                         buffer.append(output);
@@ -398,8 +431,32 @@ public class OrganizationParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
-            } else if (lastTag0.equals("<orgname>")) {
-                buffer.append("</orgName>");
+            } else if (lastTag0.equals("<ghu>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<chu>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<dmu>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<pole>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<site>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<institution>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<university>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<hospital>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<center>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<service>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<department>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<unit>")) {
+                buffer.append("</orgName>\n");
+            } else if (lastTag0.equals("<organization>")) {
+                buffer.append("</orgName>\n");
             } else if (lastTag0.equals("<address>")) {
                 buffer.append("</address>");
             } else if (lastTag0.equals("<country>")) {
@@ -416,8 +473,6 @@ public class OrganizationParser extends AbstractParser {
                 buffer.append("</ptr>");
             } else if (lastTag0.equals("<note>")) {
                 buffer.append("</note>");
-            } else if (lastTag0.equals("<medic>")) {
-                buffer.append("<person>\n\t<medic>");
             } else {
                 res = false;
             }

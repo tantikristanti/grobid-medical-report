@@ -1547,11 +1547,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     theTotalTok += theTok;
                                 }
                             }
-                            if (line.endsWith("<ghu>") || line.endsWith("<chu>") || line.endsWith("<dmu>") ||
-                                line.endsWith("<pole>") || line.endsWith("<institution>") || line.endsWith("<university>") ||
-                                line.endsWith("<site>") || line.endsWith("<hospital>") || line.endsWith("<center>") ||
-                                line.endsWith("<service>") || line.endsWith("<department>") || line.endsWith("<unit>") ||
-                                line.endsWith("<sub>") || line.endsWith("<organization>")) {
+                            if (line.endsWith("<org>")) {
                                 input += theTotalTok;
                             }
                             q++;
@@ -2293,11 +2289,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     theTotalTok += theTok;
                                 }
                             }
-                            if (line.endsWith("<ghu>") || line.endsWith("<chu>") || line.endsWith("<dmu>") ||
-                                line.endsWith("<pole>") || line.endsWith("<institution>") || line.endsWith("<university>") ||
-                                line.endsWith("<site>") || line.endsWith("<hospital>") || line.endsWith("<center>") ||
-                                line.endsWith("<service>") || line.endsWith("<department>") || line.endsWith("<unit>") ||
-                                line.endsWith("<sub>") || line.endsWith("<organization>")) {
+                            if (line.endsWith("<org>")) {
                                 input += theTotalTok;
                             }
                             q++;

@@ -108,51 +108,8 @@ public class TEILeftNoteSaxParser extends DefaultHandler {
         if (qName.equals("idno")) {
             currentTag = "<idno>";
         } else if (qName.equals("org")) {
-            int length = atts.getLength();
-            if (length > 0) {
-                // Process each attribute
-                for (int i = 0; i < length; i++) {
-                    // Get names and values for each attribute
-                    String name = atts.getQName(i);
-                    String value = atts.getValue(i);
-
-                    if (name != null) {
-                        if (name.equals("type")) {
-                            if (value.equals("ghu")) {
-                                currentTag = "<ghu>";
-                            } else if (value.equals("chu")) {
-                                currentTag = "<chu>";
-                            } else if (value.equals("dmu")) {
-                                currentTag = "<dmu>";
-                            } else if (value.equals("pole")) {
-                                currentTag = "<pole>";
-                            } else if (value.equals("site")) {
-                                currentTag = "<site>";
-                            } else if (value.equals("institution")) {
-                                currentTag = "<institution>";
-                            } else if (value.equals("university")) {
-                                currentTag = "<university>";
-                            } else if (value.equals("hospital")) {
-                                currentTag = "<hospital>";
-                            } else if (value.equals("center")) {
-                                currentTag = "<center>";
-                            } else if (value.equals("service")) {
-                                currentTag = "<service>";
-                            } else if (value.equals("department")) {
-                                currentTag = "<department>";
-                            } else if (value.equals("unit")) {
-                                currentTag = "<unit>";
-                            } else if (value.equals("sub")) {
-                                currentTag = "<sub>";
-                            } else
-                                currentTag = "<organization>"; // we take org with the type other than center, service, department or administration as <org>
-                        }
-                    }
-                }
-            } else
-                currentTag = "<organization>"; // we take org without any attribute as in the header model
-            accumulator.setLength(0);
-        }  else if (qName.equals("address")) {
+            currentTag = "<org>";
+        } else if (qName.equals("address")) {
             currentTag = "<address>";
             accumulator.setLength(0);
         } else if (qName.equals("phone")) {
