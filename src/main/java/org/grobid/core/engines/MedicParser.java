@@ -53,7 +53,7 @@ public class MedicParser extends AbstractParser {
     }
 
     /**
-     * Processing of medics in the header part
+     * Processing of medics
      */
     public List<Medic> processing(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {

@@ -1391,7 +1391,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t\t\t<listOrg>\n");
                             writer.write("\t\t\t\t<org>\n");
                             writer.write("\t\t\t\t\t" + bufferOrg.toString());
-                            writer.write("\t\t\t\t</org>\n");
+                            writer.write("\n\t\t\t\t</org>\n");
                             writer.write("\t\t\t</listOrg>\n");
                             writer.write("\t\t</fileDesc>\n");
                             writer.write("\t</teiHeader>\n");
@@ -1597,7 +1597,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t\t<listOrg>\n");
                                 writer.write("\t\t\t\t<org>\n");
                                 writer.write("\t\t\t\t\t" + bufferOrg.toString());
-                                writer.write("\t\t\t\t</org>\n");
+                                writer.write("\n\t\t\t\t</org>\n");
                                 writer.write("\t\t\t</listOrg>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");

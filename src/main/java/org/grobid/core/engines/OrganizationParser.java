@@ -52,8 +52,6 @@ public class OrganizationParser extends AbstractParser {
         this.parsers = parsers;
     }
 
-    private File tmpPath = null;
-
     /**
      * Organization processing
      */
@@ -171,11 +169,11 @@ public class OrganizationParser extends AbstractParser {
                     }
                     organization.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.ORGANIZATION_MEDIC)) {
-                    if (organization.getMedic() != null) {
-                        organization.setMedic(organization.getMedic() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ORGANIZATION_WEB)) {
+                    if (organization.getWeb() != null) {
+                        organization.setWeb(organization.getWeb() + "\t" + clusterContent);
                     } else {
-                        organization.setMedic(clusterContent);
+                        organization.setWeb(clusterContent);
                     }
                     organization.addLayoutTokens(cluster.concatTokens());
                 }
@@ -405,14 +403,17 @@ public class OrganizationParser extends AbstractParser {
                               String field, String outField, boolean addSpace, int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
+            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) { // if the current tag is the same as the previous tag
                 if (addSpace)
                     result = " " + s2;
                 else
                     result = s2;
             } else {
                 result = "";
-
+                for (int i = 0; i < nbIndent; i++) {
+                    result += "\t";
+                }
+                // if the current tag is different from the previous tag, we add a carriage return
                 if (addSpace) {
                     result += " " + outField + s2;
                 } else {

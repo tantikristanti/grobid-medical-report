@@ -186,7 +186,6 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel ORGANIZATION_FAX = new TaggingLabelImpl(GrobidModels.ORGANIZATION, FAX_LABEL);
     public static final TaggingLabel ORGANIZATION_WEB = new TaggingLabelImpl(GrobidModels.ORGANIZATION, WEB_LABEL);
     public static final TaggingLabel ORGANIZATION_NOTE = new TaggingLabelImpl(GrobidModels.ORGANIZATION, NOTE_LABEL);
-    public static final TaggingLabel ORGANIZATION_MEDIC = new TaggingLabelImpl(GrobidModels.ORGANIZATION, MEDIC_LABEL);
 
     // Medics
     public static final TaggingLabel MEDIC_ID = new TaggingLabelImpl(GrobidModels.MEDIC, ID_NUMBER_LABEL);
