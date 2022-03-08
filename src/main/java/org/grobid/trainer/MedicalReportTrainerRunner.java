@@ -24,7 +24,7 @@ public class MedicalReportTrainerRunner {
     private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportTrainerRunner.class);
 
     private static final List<String> models = Arrays.asList("medical-report-segmenter", "full-medical-text", "header-medical-report",
-        "organization", "dateline", "fr-medical-ner", "medic", "patient", "person-name-medical");
+        "left-note-medical-report", "dateline", "fr-medical-ner", "medic", "patient", "organization", "person-name-medical");
     private static final List<String> options = Arrays.asList("0 - train", "1 - evaluate", "2 - split, train and evaluate", "3 - n-fold evaluation");
 
     private enum RunType {
@@ -124,8 +124,10 @@ public class MedicalReportTrainerRunner {
             trainer = new FullMedicalTextTrainer();
         } else if (model.equals("header-medical-report")) {
             trainer = new HeaderMedicalReportTrainer();
-        } else if (model.equals("organization")) {
+        } else if (model.equals("left-note-medical-report")) {
             trainer = new LeftNoteTrainer();
+        } else if (model.equals("organization")) {
+            trainer = new OrganizationTrainer();
         } else if (model.equals("fr-medical-ner")) {
             trainer = new FrenchMedicalNERTrainer();
         } else if (model.equals("dateline")) {
