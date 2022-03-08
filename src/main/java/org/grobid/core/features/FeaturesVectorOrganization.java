@@ -131,12 +131,12 @@ public class FeaturesVectorOrganization {
             res.append(" 1");
         else
             res.append(" 0");
-        
+
         if (email)
             res.append(" 1");
         else
             res.append(" 0");
-        
+
         if (http)
             res.append(" 1");
         else
@@ -238,7 +238,7 @@ public class FeaturesVectorOrganization {
                 if (!skipTest) {
                     for (int i = currentLocationPositions; i < locationPositions.size(); i++) {
                         if ((locationPositions.get(i).start <= n) &&
-                                (locationPositions.get(i).end >= n)) {
+                            (locationPositions.get(i).end >= n)) {
                             isLocationToken = true;
                             currentLocationPositions = i;
                             break;
@@ -261,7 +261,7 @@ public class FeaturesVectorOrganization {
                 if (!skipTest) {
                     for (int i = currentTitlePositions; i < titlePositions.size(); i++) {
                         if ((titlePositions.get(i).start <= n) &&
-                                (titlePositions.get(i).end >= n)) {
+                            (titlePositions.get(i).end >= n)) {
                             isTitleToken = true;
                             currentTitlePositions = i;
                             break;
@@ -284,7 +284,7 @@ public class FeaturesVectorOrganization {
                 if (!skipTest) {
                     for (int i = currentSuffixPositions; i < suffixPositions.size(); i++) {
                         if ((suffixPositions.get(i).start <= n) &&
-                                (suffixPositions.get(i).end >= n)) {
+                            (suffixPositions.get(i).end >= n)) {
                             isSuffixToken = true;
                             currentSuffixPositions = i;
                             break;
@@ -330,7 +330,7 @@ public class FeaturesVectorOrganization {
                 if (!skipTest) {
                     for (int i = currentUrlPositions; i < urlPositions.size(); i++) {
                         if ((urlPositions.get(i).start <= n) &&
-                                (urlPositions.get(i).end >= n)) {
+                            (urlPositions.get(i).end >= n)) {
                             isUrlToken = true;
                             currentUrlPositions = i;
                             break;
@@ -384,7 +384,7 @@ public class FeaturesVectorOrganization {
                     features.lineStatus = "LINEEND";
                     outputLineStatus = true;
                 }
-            } 
+            }
 
             if (!outputLineStatus) {
                 features.lineStatus = "LINEIN";

@@ -67,7 +67,7 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
 
         if ((qName.equals("orgname")) || (qName.equals("address")) || (qName.equals("country")) || (qName.equals("settlement")) ||
             (qName.equals("email")) ||  (qName.equals("phone")) || (qName.equals("fax")) || (qName.equals("web")) ||
-            (qName.equals("note")) || (qName.equals("ptr")) || (qName.equals("medic"))
+            (qName.equals("note")) || (qName.equals("ptr"))
         ) {
             String text = getText();
             writeField(text);
@@ -76,7 +76,7 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
             accumulator.append(" +L+ ");
         } else if (qName.equals("pb")) {
             accumulator.append(" +PAGE+ ");
-        } else if (qName.equals("listorg")) {
+        } else if (qName.equals("org")) {
             String text = getText();
             currentTag = "<other>";
             if (text.length() > 0) {
@@ -104,9 +104,7 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
         accumulator.setLength(0);
 
         qName = qName.toLowerCase();
-        if (qName.equals("affiliation")) {
-
-        } else if (qName.equals("orgname")) {
+        if (qName.equals("orgname")) {
             int length = atts.getLength();
             if (length > 0) {
                 // Process each attribute
@@ -198,7 +196,7 @@ public class TEIOrganizationSaxParser extends DefaultHandler {
                     }
                 }
             }
-        } else if (qName.equals("listorg")) {
+        } else if (qName.equals("org")) {
             accumulator = new StringBuffer();
             allContent = new StringBuffer();
             labeled = new ArrayList<String>();

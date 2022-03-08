@@ -109,7 +109,7 @@ public class OrganizationTrainer extends AbstractTrainer {
             for (; n < refFiles.length; n++) {
                 final File teifile = refFiles[n];
                 String name = teifile.getName();
-                System.out.println(name);
+                //System.out.println(name);
 
                 final TEIOrganizationSaxParser parser2 = new TEIOrganizationSaxParser();
 
