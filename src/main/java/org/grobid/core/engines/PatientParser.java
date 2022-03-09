@@ -516,25 +516,25 @@ public class PatientParser extends AbstractParser {
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
             } else if (lastTag0.equals("<idno>")) {
-                buffer.append("</idno>");
+                buffer.append("</idno>\n");
             } else if (lastTag0.equals("<persname>")) {
-                buffer.append("</persName>");
+                buffer.append("</persName>\n");
             } else if (lastTag0.equals("<sex>")) {
-                buffer.append("</sex>");
+                buffer.append("</sex>\n");
             } else if (lastTag0.equals("<birth>")) {
-                buffer.append("</birth>");
+                buffer.append("</birth>\n");
             } else if (lastTag0.equals("<death>")) {
-                buffer.append("</death>");
+                buffer.append("</death>\n");
             } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>");
+                buffer.append("</address>\n");
             } else if (lastTag0.equals("<country>")) {
-                buffer.append("</country>");
+                buffer.append("</country>\n");
             } else if (lastTag0.equals("<settlement>")) {
-                buffer.append("</settlement>");
+                buffer.append("</settlement>\n");
             } else if (lastTag0.equals("<phone>")) {
-                buffer.append("</phone>");
+                buffer.append("</phone>\n");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("</note>");
+                buffer.append("</note>\n");
             } else {
                 res = false;
             }

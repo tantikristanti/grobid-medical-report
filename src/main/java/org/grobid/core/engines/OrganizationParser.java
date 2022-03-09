@@ -459,21 +459,21 @@ public class OrganizationParser extends AbstractParser {
             } else if (lastTag0.equals("<organization>")) {
                 buffer.append("</orgName>\n");
             } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>");
+                buffer.append("</address>\n");
             } else if (lastTag0.equals("<country>")) {
-                buffer.append("</country>");
+                buffer.append("</country>\n");
             } else if (lastTag0.equals("<settlement>")) {
-                buffer.append("</settlement>");
+                buffer.append("</settlement>\n");
             } else if (lastTag0.equals("<email>")) {
-                buffer.append("</email>");
+                buffer.append("</email>\n");
             } else if (lastTag0.equals("<phone>")) {
-                buffer.append("</phone>");
+                buffer.append("</phone>\n");
             } else if (lastTag0.equals("<fax>")) {
-                buffer.append("</fax>");
+                buffer.append("</fax>\n");
             } else if (lastTag0.equals("<web>")) {
-                buffer.append("</ptr>");
+                buffer.append("</ptr>\n");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("</note>");
+                buffer.append("</note>\n");
             } else {
                 res = false;
             }
