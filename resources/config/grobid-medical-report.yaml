@@ -50,6 +50,9 @@ models:
       epsilon: 0.000001
       window: 30
       nbMaxIterations: 1500
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "fr-medical-ner"
     engine: "wapiti"
@@ -58,7 +61,9 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
-
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
   - name: "fr-medical-ner-quaero"
     engine: "wapiti"
     wapiti:
@@ -66,6 +71,9 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "ner"
     # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
@@ -75,6 +83,9 @@ models:
       epsilon: 0.000001
       window: 50
       nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "nerfr"
     # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
@@ -84,7 +95,9 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
-
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "dateline"
     # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
@@ -95,7 +108,9 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
-
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "medic"
     # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
@@ -106,7 +121,9 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
-
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "patient"
     # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
@@ -117,4 +134,19 @@ models:
       epsilon: 0.000001
       window: 20
       nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
 
+  - name: "name-person-medical"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    #engine: "delft"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"

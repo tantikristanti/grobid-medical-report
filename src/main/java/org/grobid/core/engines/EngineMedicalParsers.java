@@ -23,6 +23,7 @@ public class EngineMedicalParsers extends EngineParsers {
     private OrganizationParser organizationParser = null;
     private MedicParser medicParser = null;
     private PatientParser patientParser = null;
+    private PersonNameParser namePersonParser = null;
     private NEREnParser nerParser = null;
     private NERFrParser nerFrParser = null;
 
@@ -180,6 +181,17 @@ public class EngineMedicalParsers extends EngineParsers {
         return patientParser;
     }
 
+    public PersonNameParser getPersonNameParser() {
+        if (namePersonParser == null) {
+            synchronized (this) {
+                if (namePersonParser == null) {
+                    namePersonParser = new PersonNameParser();
+                }
+            }
+        }
+        return namePersonParser;
+    }
+
     /**
      * Init all model, this will also load the model into memory
      */
@@ -194,6 +206,7 @@ public class EngineMedicalParsers extends EngineParsers {
         dateParser = getDateParser();
         medicParser = getMedicParser();
         patientParser = getPatientParser();
+        namePersonParser = getPersonNameParser();
         nerParser = getNerParser();
         nerFrParser = getNerFrParser();
     }
