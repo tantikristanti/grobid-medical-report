@@ -151,7 +151,8 @@ def trainerTasks = [
     "train_dateline"                        : "org.grobid.trainer.DatelineTrainer",
     "train_patient"                         : "org.grobid.trainer.PatientTrainer",
     "train_medic"                           : "org.grobid.trainer.MedicTrainer",
-    "train_organization"                    : "org.grobid.trainer.OrganizationTrainer"
+    "train_organization"                    : "org.grobid.trainer.OrganizationTrainer",
+    "train_name_person_medical"             : "org.grobid.trainer.PersonNameMedicalTrainer"
 ]
 
 trainerTasks.each { taskName, mainClassName ->
