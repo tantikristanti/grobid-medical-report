@@ -1156,9 +1156,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         writer.write("\t<teiHeader>\n");
                                         writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                         writer.write("\t\t\t<medics>\n");
-                                        writer.write("\t\t\t\t<name>\n");
                                         writer.write("\t\t\t\t" + bufferName);
-                                        writer.write("\t\t\t\t</name>\n");
                                         writer.write("\t\t\t</medics>\n");
                                         writer.write("\t\t</fileDesc>\n");
                                         writer.write("\t</teiHeader>\n");
@@ -1275,9 +1273,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         writer.write("\t<teiHeader>\n");
                                         writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                         writer.write("\t\t\t<patients>\n");
-                                        writer.write("\t\t\t\t<name>\n");
                                         writer.write("\t\t\t\t" + bufferName);
-                                        writer.write("\t\t\t\t</name>\n");
                                         writer.write("\t\t\t</patients>\n");
                                         writer.write("\t\t</fileDesc>\n");
                                         writer.write("\t</teiHeader>\n");
@@ -1512,9 +1508,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         writer.write("\t<teiHeader>\n");
                                         writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                         writer.write("\t\t\t<medics>\n");
-                                        writer.write("\t\t\t\t<name>\n");
                                         writer.write("\t\t\t\t" + bufferName);
-                                        writer.write("\t\t\t\t</name>\n");
                                         writer.write("\t\t\t</medics>\n");
                                         writer.write("\t\t</fileDesc>\n");
                                         writer.write("\t</teiHeader>\n");
