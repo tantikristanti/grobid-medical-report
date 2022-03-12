@@ -433,47 +433,47 @@ public class OrganizationParser extends AbstractParser {
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
             } else if (lastTag0.equals("<ghu>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<chu>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<dmu>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<pole>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<site>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<university>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<hospital>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<center>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<service>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<department>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<unit>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<organization>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>\n");
+                buffer.append("</address>");
             } else if (lastTag0.equals("<country>")) {
-                buffer.append("</country>\n");
+                buffer.append("</country>");
             } else if (lastTag0.equals("<settlement>")) {
-                buffer.append("</settlement>\n");
+                buffer.append("</settlement>");
             } else if (lastTag0.equals("<email>")) {
-                buffer.append("</email>\n");
+                buffer.append("</email>");
             } else if (lastTag0.equals("<phone>")) {
-                buffer.append("</phone>\n");
+                buffer.append("</phone>");
             } else if (lastTag0.equals("<fax>")) {
-                buffer.append("</fax>\n");
+                buffer.append("</fax>");
             } else if (lastTag0.equals("<web>")) {
-                buffer.append("</ptr>\n");
+                buffer.append("</ptr>");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("</note>\n");
+                buffer.append("</note>");
             } else {
                 res = false;
             }

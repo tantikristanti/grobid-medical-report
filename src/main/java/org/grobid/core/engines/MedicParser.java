@@ -596,33 +596,33 @@ public class MedicParser extends AbstractParser {
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
             } else if (lastTag0.equals("<idno>")) {
-                buffer.append("</idno>\n");
+                buffer.append("</idno>");
             } else if (lastTag0.equals("<rolename>")) {
-                buffer.append("</roleName>\n");
+                buffer.append("</roleName>");
             } else if (lastTag0.equals("<persname>")) {
-                buffer.append("</persName>\n");
+                buffer.append("</persName>");
             } else if (lastTag0.equals("<affiliation>")) {
-                buffer.append("</affiliation>\n");
+                buffer.append("</affiliation>");
             } else if (lastTag0.equals("<orgname>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</orgName>\n");
+                buffer.append("</orgName>");
             } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>\n");
+                buffer.append("</address>");
             } else if (lastTag0.equals("<country>")) {
-                buffer.append("</country>\n");
+                buffer.append("</country>");
             } else if (lastTag0.equals("<settlement>")) {
-                buffer.append("</settlement>\n");
+                buffer.append("</settlement>");
             } else if (lastTag0.equals("<email>")) {
-                buffer.append("</email>\n");
+                buffer.append("</email>");
             } else if (lastTag0.equals("<phone>")) {
-                buffer.append("</phone>\n");
+                buffer.append("</phone>");
             } else if (lastTag0.equals("<fax>")) {
-                buffer.append("</fax>\n");
+                buffer.append("</fax>");
             } else if (lastTag0.equals("<web>")) {
-                buffer.append("</ptr>\n");
+                buffer.append("</ptr>");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("</note>\n");
+                buffer.append("</note>");
             } else {
                 res = false;
             }

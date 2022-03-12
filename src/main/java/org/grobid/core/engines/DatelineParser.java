@@ -342,7 +342,7 @@ public class DatelineParser extends AbstractParser {
             } else if (lastTag0.equals("<time>")) {
                 buffer.append("</time>");
             } else if (lastTag0.equals("<note>")) {
-                buffer.append("<note type=\"date\">");
+                buffer.append("</note>");
             } else {
                 res = false;
             }

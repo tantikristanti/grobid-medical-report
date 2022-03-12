@@ -860,6 +860,7 @@ public class FullMedicalTextParser extends AbstractParser {
         }
     }
 
+
     /**
      * Process the specified pdf and format the result as training data for all the models.
      *
@@ -870,6 +871,781 @@ public class FullMedicalTextParser extends AbstractParser {
     public Document createTraining(File inputFile,
                                    String pathOutput,
                                    int id) {
+        if (tmpPath == null)
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+        DocumentSource documentSource = null;
+        try {
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot train for full-medical-text, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+            Writer writer = null;
+
+            // path for medical report segmenter model
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical.tei.xml"));
+            File outputTextFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical.rawtxt"));
+            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.medical"));
+
+            // 1. MEDICAL REPORT SEGMENTER MODEL
+            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, false, true, true);
+            Document doc = new Document(documentSource);
+            doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
+
+            if (doc.getBlocks() == null) {
+                throw new Exception("PDF parsing resulted in empty content");
+            }
+            doc.produceStatistics();
+
+            // 1. SEGMENTATION MODEL
+            String featuredData = parsers.getMedicalReportSegmenterParser().getAllLinesFeatured(doc);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            // we write first the full text untagged (but featurized with segmentation features)
+            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+            writer.write(featuredData + "\n");
+            writer.close();
+
+            // also write the raw text as seen before segmentation
+            StringBuffer rawtxt = new StringBuffer();
+            for (LayoutToken txtline : tokenizations) {
+                rawtxt.append(txtline.getText());
+            }
+            //write the text to the file
+            FileUtils.writeStringToFile(outputTextFile, rawtxt.toString(), StandardCharsets.UTF_8);
+
+            // lastly, write the featurized and tagged data
+            if (isNotBlank(featuredData)) {
+                String rese = parsers.getMedicalReportSegmenterParser().label(featuredData);
+                StringBuffer bufferFulltext = parsers.getMedicalReportSegmenterParser().trainingExtraction(rese, tokenizations, doc);
+
+                // write the TEI file to reflect the extact layout of the text as extracted from the pdf
+                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") +
+                    "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
+
+                writer.write(bufferFulltext.toString());
+                writer.write("\n\t</text>\n</tei>\n");
+                writer.close();
+            }
+
+            // Now we process and create training data for other models ...
+
+            // But first, call the medical-report-segmenter model to have high level segmentation
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource,
+                GrobidAnalysisConfig.defaultInstance());
+            List<LayoutToken> tokenizationsFull = doc.getTokenizations();
+
+            // 2. HEADER MEDICAL REPORT  MODEL
+
+            // path for header medical report model
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medical"));
+
+            SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
+            if (documentHeaderParts != null) {
+                Pair<String, List<LayoutToken>> featuredHeader = parsers.getHeaderMedicalParser().getSectionHeaderFeatured(doc, documentHeaderParts);
+                String header = featuredHeader.getLeft();
+                List<LayoutToken> headerTokenizations = featuredHeader.getRight();
+                if ((header != null) && (header.trim().length() > 0)) {
+                    // we write the header data with features
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(header + "\n");
+                    writer.close();
+
+                    // featured and labeled (tagged) data
+                    String labeledHeader = parsers.getHeaderMedicalParser().label(header);
+
+                    // buffer for the header block
+                    StringBuilder bufferHeader = parsers.getHeaderMedicalParser().trainingExtraction(labeledHeader, headerTokenizations);
+
+                    // write the training TEI file for header which reflects the extract layout of the text as
+                    // extracted from the pdf
+                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
+                        + pdfFileName.replace(".pdf", "")
+                        + "\"/>\n\t</teiHeader>\n\t<text");
+
+                    writer.write(" xml:lang=\"fr\"");
+                    writer.write(">\n\t\t<front>\n");
+
+                    writer.write(bufferHeader.toString());
+                    writer.write("\n\t\t</front>\n\t</text>\n</tei>\n");
+                    writer.close();
+
+                    // buffer for the affiliation+address block
+                    /*StringBuilder bufferAffiliation =
+                        parsers.getAffiliationAddressParser().trainingExtraction(rese, headerTokenizations);*/
+
+                    // 3. DATELINE MODEL
+                    // path for dateline  model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.dateline.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.dateline"));
+
+                    // buffer for the dateline block
+                    StringBuilder bufferDateline = null;
+                    // we need to rebuild the found date string as it appears
+                    String input = "";
+                    int q = 0;
+                    // get the results of the header model and collect only those that are labeled as "<dateline>"
+                    StringTokenizer st = new StringTokenizer(labeledHeader, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<dateline>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+                    List<String> inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs); //if the models exists already
+                        tokenizations = analyzer.tokenizeWithLayoutToken(input);
+                        if (tokenizations.size() == 0)
+                            return null;
+                        List<OffsetPosition> placeNamePositions = lexicon.tokenPositionsLocationNames(tokenizations);
+                        // the dateline with features
+                        String featuredDateline = FeaturesVectorDateline.addFeaturesDateline(tokenizations,
+                            null, placeNamePositions);
+
+                        // we write the dateline with features
+                        if (featuredDateline != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredDateline + "\n");
+                            writer.close();
+                        }
+
+                        // dateline with label
+                        if ((bufferDateline != null) && (bufferDateline.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<datelines>\n");
+                            writer.write("\t\t\t" + bufferDateline.toString());
+                            writer.write("\t\t\t</datelines>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+                    }
+
+                    // 4a. MEDIC MODEL (from header information)
+                    // path for medic  model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic"));
+
+                    // buffer for the medics block
+                    StringBuilder bufferMedic = null;
+                    // we need to rebuild the found date string as it appears
+                    input = "";
+                    q = 0;
+                    // get the results of the header model and collect only those that are labeled as "<medic>"
+                    st = new StringTokenizer(labeledHeader, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<medic>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> medicTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(medicTokenizations);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(medicTokenizations);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(medicTokenizations);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(medicTokenizations);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(medicTokenizations);
+                        // we write the medic data with features
+                        String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(medicTokenizations, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredMedic != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredMedic + "\n");
+                            writer.close();
+                        }
+
+                        if ((bufferMedic != null) && (bufferMedic.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<medics>\n");
+                            writer.write("\t\t\t\t<medic>\n");
+                            writer.write("\t\t\t\t\t" + bufferMedic.toString());
+                            writer.write("\n\t\t\t\t</medic>\n");
+                            writer.write("\t\t\t</medics>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+
+                        // 5a. PERSON NAME MODEL (from medics in the header part)
+                        // path for person name model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name"));
+
+                        List<Medic> listMedics = parsers.getMedicParser().processing(input); //if the medic model exists already
+
+                        // if the model doesn't exist, just write the text to file
+                        if (listMedics != null && listMedics.size() > 0) {
+
+                            for (Medic medic : listMedics) {
+                                inputs = new ArrayList<String>();
+                                // buffer for the name block
+                                if (medic.getPersName() != null) {
+                                    String name = medic.getPersName();
+
+                                    // force analyser with English, to avoid bad surprise
+                                    List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
+                                    titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
+                                    suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
+
+                                    // we write the name data with features
+                                    String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
+
+                                    if (featuredName != null) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                        writer.write(featuredName + "\n");
+                                        writer.close();
+                                    }
+
+                                    inputs.add(name.trim());
+
+                                    // buffer for the header block, take only the data with the label
+                                    StringBuilder bufferName = parsers.getPersonNameParser().trainingExtraction(inputs);
+
+                                    if (bufferName != null && bufferName.length() > 0) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                        writer.write("<tei xml:space=\"preserve\">\n");
+                                        writer.write("\t<teiHeader>\n");
+                                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                        writer.write("\t\t\t<medics>\n");
+                                        writer.write("\t\t\t\t<name>\n");
+                                        writer.write("\t\t\t\t" + bufferName);
+                                        writer.write("\t\t\t\t</name>\n");
+                                        writer.write("\t\t\t</medics>\n");
+                                        writer.write("\t\t</fileDesc>\n");
+                                        writer.write("\t</teiHeader>\n");
+                                        writer.write("</tei>");
+                                        writer.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 6. PATIENT MODEL
+                    // path for patient model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient"));
+
+                    // buffer for the patients block
+                    StringBuilder bufferPatient = null;
+                    // we need to rebuild the found string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(labeledHeader, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<patient>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferPatient = parsers.getPatientParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> patientTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(patientTokenizations);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(patientTokenizations);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(patientTokenizations);
+                        // we write the patient data with features
+                        String featuredPatient = FeaturesVectorPatient.addFeaturesPatient(patientTokenizations, null,
+                            locationPositions, titlePositions, suffixPositions);
+
+                        if (featuredPatient != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredPatient + "\n");
+                            writer.close();
+                        }
+
+                        if ((bufferPatient != null) && (bufferPatient.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<patients>\n");
+                            writer.write("\t\t\t" + bufferPatient.toString());
+                            writer.write("\t\t\t</patients>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+
+                        // 5b. PERSON NAME MODEL (from patients in the header part)
+                        // path for person name model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name"));
+
+                        List<Patient> listPatients = parsers.getPatientParser().processing(input); //if the medic model exists already
+
+                        // if the model doesn't exist, just write the text to file
+                        if (listPatients != null && listPatients.size() > 0) {
+
+                            for (Patient patient : listPatients) {
+                                List<String> inputNames = new ArrayList<String>();
+                                // buffer for the name block
+                                if (patient.getPersName() != null) {
+                                    String name = patient.getPersName();
+
+                                    // force analyser with English, to avoid bad surprise
+                                    List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
+                                    titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
+                                    suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
+
+                                    // we write the name data with features
+                                    String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
+
+                                    if (featuredName != null) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                        writer.write(featuredName + "\n");
+                                        writer.close();
+                                    }
+
+                                    inputNames.add(name.trim());
+
+                                    // buffer for the header block, take only the data with the label
+                                    StringBuilder bufferName = parsers.getPersonNameParser().trainingExtraction(inputNames);
+
+                                    if (bufferName != null && bufferName.length() > 0) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                        writer.write("<tei xml:space=\"preserve\">\n");
+                                        writer.write("\t<teiHeader>\n");
+                                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                        writer.write("\t\t\t<patients>\n");
+                                        writer.write("\t\t\t\t<name>\n");
+                                        writer.write("\t\t\t\t" + bufferName);
+                                        writer.write("\t\t\t\t</name>\n");
+                                        writer.write("\t\t\t</patients>\n");
+                                        writer.write("\t\t</fileDesc>\n");
+                                        writer.write("\t</teiHeader>\n");
+                                        writer.write("</tei>");
+                                        writer.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 5a. ORGANIZATION MODEL (from header information)
+                    // path for medic model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization"));
+
+                    // buffer for the medics block
+                    StringBuilder bufferOrg = null;
+                    // we need to rebuild the found string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(labeledHeader, "\n");
+                    while (st.hasMoreTokens() && (q < headerTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = headerTokenizations.get(q).getText();
+                        String theTok = headerTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < headerTokenizations.size())) {
+                                theTok = headerTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<org>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferOrg = parsers.getOrganizationParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the medic data with features
+                        String featuredOrg = FeaturesVectorOrganization.addFeaturesOrganization(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredOrg != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredOrg + "\n");
+                            writer.close();
+                        }
+
+                        if ((bufferOrg != null) && (bufferOrg.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<listOrg>\n");
+                            writer.write("\t\t\t\t<org>\n");
+                            writer.write("\t\t\t\t\t" + bufferOrg.toString());
+                            writer.write("\n\t\t\t\t</org>\n");
+                            writer.write("\t\t\t</listOrg>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+                    }
+                }
+            } // end of the header processing
+
+            // 7. LEFT NOTE MEDICAL REPORT MODEL
+            // path for left note model
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medical"));
+
+            // we take the left-note part only
+            SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+
+            if (documentLeftNoteParts != null) {
+                Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
+                String leftNote = featuredLeftNote.getLeft(); // data with features
+                List<LayoutToken> leftNoteTokenizations = featuredLeftNote.getRight(); // tokens information
+                if ((leftNote != null) && (leftNote.trim().length() > 0)) {
+                    // we write left-note data with features
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(leftNote + "\n");
+                    writer.close();
+
+                    // =============== if the model exists ===============
+                    // we tag with the left-note model
+                    String labeledLeftNote = parsers.getLeftNoteMedicalParser().label(leftNote);
+
+                    // buffer for the header block, take only the data with the label
+                    StringBuilder bufferLeftNote = parsers.getLeftNoteMedicalParser().trainingExtraction(labeledLeftNote, leftNoteTokenizations);
+
+                    if (bufferLeftNote != null && (bufferLeftNote.length() > 0)) {
+                        // write the training TEI file for header which reflects the extract layout of the text as
+                        // extracted from the pdf
+                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\""
+                            + pdfFileName.replace(".pdf", "")
+                            + "\"/>\n\t</teiHeader>\n\t<text");
+
+                        writer.write(" xml:lang=\"fr\"");
+                        writer.write(">\n\t\t<listOrg>\n");
+
+                        writer.write(bufferLeftNote.toString());
+                        writer.write("\n\t\t</listOrg>\n\t</text>\n</tei>\n");
+                        writer.close();
+                    }
+
+                    // 4b. MEDIC MODEL (from left note information)
+                    // path for medic model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic"));
+
+                    // buffer for the medics block
+                    StringBuilder bufferMedic = null;
+                    // we need to rebuild the found string as it appears
+                    String input = "";
+                    int q = 0;
+                    StringTokenizer st = new StringTokenizer(labeledLeftNote, "\n");
+                    while (st.hasMoreTokens() && (q < leftNoteTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = leftNoteTokenizations.get(q).getText();
+                        String theTok = leftNoteTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < leftNoteTokenizations.size())) {
+                                theTok = leftNoteTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<medic>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    List<String> inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the medic data with features
+                        String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredMedic != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredMedic + "\n");
+                            writer.close();
+                        }
+
+                        if ((bufferMedic != null) && (bufferMedic.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<medics>\n");
+                            writer.write("\t\t\t\t<medic>\n");
+                            writer.write("\t\t\t\t\t" + bufferMedic.toString());
+                            writer.write("\n\t\t\t\t</medic>\n");
+                            writer.write("\t\t\t</medics>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+
+                        }
+
+                        // 5c. PERSON NAME MODEL (from medics in the header part)
+                        // path for person name model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name"));
+
+                        List<Medic> listMedics = parsers.getMedicParser().processing(input); //if the medic model exists already
+
+                        // if the model doesn't exist, just write the text to file
+                        if (listMedics != null && listMedics.size() > 0) {
+
+                            for (Medic medic : listMedics) {
+                                List<String> inputNames = new ArrayList<String>();
+                                // buffer for the name block
+                                if (medic.getPersName() != null) {
+                                    String name = medic.getPersName();
+
+                                    // force analyser with English, to avoid bad surprise
+                                    List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
+                                    titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
+                                    suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
+
+                                    // we write the name data with features
+                                    String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
+
+                                    if (featuredName != null) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                        writer.write(featuredName + "\n");
+                                        writer.close();
+                                    }
+
+                                    inputNames.add(name.trim());
+
+                                    // buffer for the header block, take only the data with the label
+                                    StringBuilder bufferName = parsers.getPersonNameParser().trainingExtraction(inputNames);
+
+                                    if (bufferName != null && bufferName.length() > 0) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                        writer.write("<tei xml:space=\"preserve\">\n");
+                                        writer.write("\t<teiHeader>\n");
+                                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                        writer.write("\t\t\t<medics>\n");
+                                        writer.write("\t\t\t\t<name>\n");
+                                        writer.write("\t\t\t\t" + bufferName);
+                                        writer.write("\t\t\t\t</name>\n");
+                                        writer.write("\t\t\t</medics>\n");
+                                        writer.write("\t\t</fileDesc>\n");
+                                        writer.write("\t</teiHeader>\n");
+                                        writer.write("</tei>");
+                                        writer.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 5b. ORGANIZATION MODEL (from left note information)
+                    // path for medic model
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization"));
+
+                    // buffer for the medics block
+                    StringBuilder bufferOrg = null;
+                    // we need to rebuild the found string as it appears
+                    input = "";
+                    q = 0;
+                    st = new StringTokenizer(labeledLeftNote, "\n");
+                    while (st.hasMoreTokens() && (q < leftNoteTokenizations.size())) {
+                        String line = st.nextToken();
+                        String theTotalTok = leftNoteTokenizations.get(q).getText();
+                        String theTok = leftNoteTokenizations.get(q).getText();
+                        while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
+                            q++;
+                            if ((q > 0) && (q < leftNoteTokenizations.size())) {
+                                theTok = leftNoteTokenizations.get(q).getText();
+                                theTotalTok += theTok;
+                            }
+                        }
+                        if (line.endsWith("<org>")) {
+                            input += theTotalTok;
+                        }
+                        q++;
+                    }
+
+                    inputs = new ArrayList<String>();
+                    if (input != null && input.trim().length() > 0) {
+                        inputs.add(input.trim());
+                        bufferOrg = parsers.getOrganizationParser().trainingExtraction(inputs); //if the models exists already
+
+                        // force analyser with English, to avoid bad surprise
+                        List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
+
+                        List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                        List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+                        List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+                        // we write the medic data with features
+                        String featuredOrg = FeaturesVectorOrganization.addFeaturesOrganization(tokens, null,
+                            locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+
+                        if (featuredOrg != null) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                            writer.write(featuredOrg + "\n");
+                            writer.close();
+                        }
+
+                        if ((bufferOrg != null) && (bufferOrg.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<listOrg>\n");
+                            writer.write("\t\t\t\t<org>\n");
+                            writer.write("\t\t\t\t\t" + bufferOrg.toString());
+                            writer.write("\n\t\t\t\t</org>\n");
+                            writer.write("\t\t\t</listOrg>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
+                        }
+                    }
+                }
+            } // end of the left note processing
+
+            // 8. FULL MEDICAL TEXT MODEL
+            // we take the body part only
+            SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+            if (documentBodyParts != null) {
+                Pair<String, LayoutTokenization> featSeg = getBodyTextFeatured(doc, documentBodyParts);
+                if (featSeg != null) {
+                    // if no textual body part found, nothing to generate
+                    String bodytext = featSeg.getLeft();
+                    List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization();
+
+                    // we write the full text untagged
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text"));
+                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                    writer.write(bodytext + "\n");
+                    writer.close();
+
+                    String rese = label(bodytext);
+                    StringBuilder bufferFulltext = trainingExtraction(rese, tokenizationsBody);
+
+                    // write the TEI file to reflect the extract layout of the text as extracted from the pdf
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.tei.xml"));
+                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                    if (id == -1) {
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader/>\n\t<text xml:lang=\"fr\">\n");
+                    } else {
+                        writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader>\n\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") +
+                            "\"/>\n\t</teiHeader>\n\t<text xml:lang=\"fr\">\n");
+                    }
+                    writer.write(bufferFulltext.toString());
+                    writer.write("\n\t</text>\n</tei>\n");
+                    writer.close();
+                }
+            }
+
+            return doc;
+
+        } catch (
+            Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid training" +
+                " data generation for full text.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+
+    }
+
+    public Document createTraining1(File inputFile,
+                                    String pathOutput,
+                                    int id) {
         if (tmpPath == null)
             throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
         if (!tmpPath.exists()) {
@@ -1024,18 +1800,6 @@ public class FullMedicalTextParser extends AbstractParser {
                         inputs.add(input.trim());
                         bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs); //if the models exists already
 
-                        List<String> tokenizationDateline = analyzer.tokenize(input);
-                        List<String> datelineBlocks = new ArrayList<String>();
-                        if (tokenizationDateline.size() == 0)
-                            return null;
-                        for (String tok : tokenizationDateline) {
-                            if (tok.equals("\n")) {
-                                datelineBlocks.add("@newline");
-                            } else if (!tok.equals(" ")) {
-                                datelineBlocks.add(tok + " <dateline>");
-                            }
-                        }
-
                         // we write the featured dateline, but first, take the tokens from the dateline part
                         tokenizations = analyzer.tokenizeWithLayoutToken(input);
                         if (tokenizations.size() == 0)
@@ -1051,21 +1815,19 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.close();
                         }
 
-                        if (bufferDateline != null) {
-                            if (bufferDateline.length() > 0) {
-                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                                writer.write("<tei xml:space=\"preserve\">\n");
-                                writer.write("\t<teiHeader>\n");
-                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
-                                writer.write("\t\t\t<datelines>\n");
-                                writer.write("\t\t\t" + bufferDateline.toString());
-                                writer.write("\t\t\t</datelines>\n");
-                                writer.write("\t\t</fileDesc>\n");
-                                writer.write("\t</teiHeader>\n");
-                                writer.write("</tei>");
-                                writer.close();
-                            }
+                        if ((bufferDateline != null) && (bufferDateline.length() > 0)) {
+                            writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                            writer.write("<tei xml:space=\"preserve\">\n");
+                            writer.write("\t<teiHeader>\n");
+                            writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                            writer.write("\t\t\t<datelines>\n");
+                            writer.write("\t\t\t" + bufferDateline.toString());
+                            writer.write("\t\t\t</datelines>\n");
+                            writer.write("\t\t</fileDesc>\n");
+                            writer.write("\t</teiHeader>\n");
+                            writer.write("</tei>");
+                            writer.close();
                         }
                     }
 
@@ -1208,7 +1970,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         // 5a. PERSON NAME MODEL (from medics in the header part)
                         // path for person name model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name.tei.xml"));
+                        /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name"));
 
                         List<Medic> listMedics = parsers.getMedicParser().processing(input); //if the medic model exists already
@@ -1259,7 +2021,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
-                        }
+                        }*/
                     }
 
                     // 6. PATIENT MODEL
@@ -1392,62 +2154,61 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }*/
+                        }
+                        // 5b. PERSON NAME MODEL (from patients in the header part)
+                        // path for person name model
+                        /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name"));
 
-                            // 5b. PERSON NAME MODEL (from patients in the header part)
-                            // path for person name model
-                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name.tei.xml"));
-                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name"));
+                        List<Patient> listPatients = parsers.getPatientParser().processing(input); //if the medic model exists already
 
-                            List<Patient> listPatients = parsers.getPatientParser().processing(input); //if the medic model exists already
+                        // if the model doesn't exist, just write the text to file
+                        if (listPatients != null && listPatients.size() > 0) {
+                            for (Patient patient : listPatients) {
+                                // buffer for the name block
+                                StringBuilder bufferName = null;
+                                if (patient.getPersName() != null) { // take only the names
+                                    // write the labeled data
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<patients>\n");
+                                    writer.write("\t\t\t\t<name>\n");
+                                    String names[] = patient.getPersName().split("\t");
+                                    inputs = new ArrayList<String>();
+                                    for (String name :  names) {
+                                        // force analyser with English, to avoid bad surprise
+                                        List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
+                                        titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
+                                        suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
 
-                            // if the model doesn't exist, just write the text to file
-                            if (listPatients != null && listPatients.size() > 0) {
-                                for (Patient patient : listPatients) {
-                                    // buffer for the name block
-                                    StringBuilder bufferName = null;
-                                    if (patient.getPersName() != null) { // take only the names
-                                        // write the labeled data
-                                        writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
-                                        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                                        writer.write("<tei xml:space=\"preserve\">\n");
-                                        writer.write("\t<teiHeader>\n");
-                                        writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
-                                        writer.write("\t\t\t<patients>\n");
-                                        writer.write("\t\t\t\t<name>\n");
-                                        String names[] = patient.getPersName().split("\t");
-                                        inputs = new ArrayList<String>();
-                                        for (String name :  names) {
-                                            // force analyser with English, to avoid bad surprise
-                                            List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
-                                            titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
-                                            suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
+                                        // we write the name data with features
+                                        String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
 
-                                            // we write the name data with features
-                                            String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
-
-                                            if (featuredName != null) {
-                                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
-                                                writer.write(featuredName + "\n");
-                                                writer.close();
-                                            }
-
-                                            // call the person name parser
-                                            inputs.add(input.trim());
-                                            bufferName = parsers.getPersonNameParser().trainingExtraction(inputs); //if the person name model exists already
-
-                                            writer.write("\t\t\t\t\t" + bufferName.toString());
-
+                                        if (featuredName != null) {
+                                            writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                            writer.write(featuredName + "\n");
+                                            writer.close();
                                         }
-                                        writer.write("\t\t\t\t</name>\n");
-                                        writer.write("\t\t\t</patients>\n");
-                                        writer.write("\t\t</fileDesc>\n");
-                                        writer.write("\t</teiHeader>\n");
-                                        writer.write("</tei>");
-                                        writer.close();
+
+                                        // call the person name parser
+                                        inputs.add(input.trim());
+                                        bufferName = parsers.getPersonNameParser().trainingExtraction(inputs); //if the person name model exists already
+
+                                        writer.write("\t\t\t\t\t" + bufferName.toString());
+
                                     }
+                                    writer.write("\t\t\t\t</name>\n");
+                                    writer.write("\t\t\t</patients>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
                                 }
                             }
-                        }
+                        }*/
                     }
 
                     // 5a. ORGANIZATION MODEL (from header information)
@@ -1642,11 +2403,12 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t</teiHeader>\n");
                                 writer.write("</tei>");
                                 writer.close();
+
                             }
 
                             // 5c. PERSON NAME MODEL (from medics in the left note part)
                             // path for person name model
-                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name.tei.xml"));
+                            /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name.tei.xml"));
                             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name"));
 
                             List<Medic> listMedics = parsers.getMedicParser().processing(input); //if the medic model exists already
@@ -1667,7 +2429,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         writer.write("\t\t\t\t<name>\n");
                                         String names[] = medic.getPersName().split("\t");
                                         inputs = new ArrayList<String>();
-                                        for (String name :  names) {
+                                        for (String name : names) {
                                             // force analyser with English, to avoid bad surprise
                                             List<LayoutToken> nameTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(name, new Language("en", 1.0));
                                             titlePositions = lexicon.tokenPositionsPersonTitle(nameTokenizations);
@@ -1697,7 +2459,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         writer.close();
                                     }
                                 }
-                            }
+                            }*/
                         }
 
                         // 5b. ORGANIZATION MODEL (from left note information)
@@ -1761,7 +2523,6 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write(featuredOrg + "\n");
                                 writer.close();
                             }
-
 
                             if ((bufferOrg != null) && (bufferOrg.length() > 0)) {
                                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
