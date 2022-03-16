@@ -69,7 +69,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
 			}
         }
 
-        if (qName.equals("figure")) {
+        if (qName.equals("figure") || qName.equals("table")) {
             figureBlock = false;
 			tableBlock = false;
         }
@@ -258,8 +258,10 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
             else if (qName.equals("other")) {
                 currentTags.push("<other>");
                 currentTag = "<other>";
-            }
-            else {
+            } else if (qName.equals("text")) {
+                currentTags.push("<other>");
+                currentTag = "<other>";
+            } else {
                 if (!qName.equals("tei") && !qName.equals("teiHeader") && !qName.equals("fileDesc") && !qName.equals("list")) {
                     logger.error("Invalid element name: " + qName + " - it will be mapped to the label <other>");
                     currentTags.push("<other>");
