@@ -16,7 +16,6 @@ public class EngineMedicalParsers extends EngineParsers {
     private LeftNoteMedicalParser leftNoteMedicalParser = null;
     private FullMedicalTextParser fullTextParser = null;
     private FrenchMedicalNERParser frenchMedicalNERParser = null;
-    private FrMedicalNERParser frMedicalNERParser = null;
     private AffiliationAddressParser affiliationAddressParser = null;
     private DatelineParser datelineParser = null;
     private DateParser dateParser = null;
@@ -80,17 +79,6 @@ public class EngineMedicalParsers extends EngineParsers {
             }
         }
         return frenchMedicalNERParser;
-    }
-
-    public FrMedicalNERParser getFrMedicalNERParser() {
-        if (frMedicalNERParser == null) {
-            synchronized (this) {
-                if (frMedicalNERParser == null) {
-                    frMedicalNERParser = new FrMedicalNERParser(this);
-                }
-            }
-        }
-        return frMedicalNERParser;
     }
 
     public NEREnParser getNerParser() {

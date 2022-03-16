@@ -24,8 +24,7 @@ To be able to use this tool, the installation of Grobid is a must. In addition, 
     DATELINE("dateline"),
     ORGANIZATION("organization"),
     FULL_MEDICAL_TEXT("full-medical-text"),
-    FR_MEDICAL_NER("fr-medical-ner"),
-    FR_MEDICAL_NER_QUAERO("fr-medical-ner-quaero");
+    FR_MEDICAL_NER("fr-medical-ner");
    ```
 2. Configuration of new models in grobid.yaml (grobid-home/config/grobid.yaml) by specifying:
    - Model names
@@ -155,4 +154,4 @@ We need to define the path to the input and output directories.
 
 ## Training Data and Models Copyright
 
-This module is dedicated specifically to projects related to [APHP](https://www.aphp.fr/) where training data and models are not to be shared publicly. Only the codes can be accessed. 
+This is a collaboration project between [INRIA](https://www.inria.fr/) and  [APHP](https://www.aphp.fr/). Thus, data and models are not possible to share publicly. 

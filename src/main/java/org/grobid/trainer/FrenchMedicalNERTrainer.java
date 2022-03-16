@@ -43,7 +43,10 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
     private File tmpPath = null;
 
     public FrenchMedicalNERTrainer() {
-        super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        // if we train the French Quaero Corpus
+        //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+
+        super(GrobidModels.FR_MEDICAL_NER);
     }
 
 

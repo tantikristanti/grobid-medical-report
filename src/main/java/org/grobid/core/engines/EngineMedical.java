@@ -103,6 +103,57 @@ public class EngineMedical extends Engine {
     }
 
     /**
+     * Process all the PDF in a given directory with a pdf extraction and
+     * produce blank training data, i.e. TEI files with text only
+     * without tags. This can be used to start from scratch any new model.
+     *
+     * @param directoryPath - the path to the directory containing PDF to be processed.
+     * @param resultPath    - the path to the directory where the results as XML files
+     *                        and default CRF feature files shall be written.
+     * @param ind           - identifier integer to be included in the resulting files to
+     *                        identify the training case. This is optional: no identifier
+     *                        will be included if ind = -1
+     * @return the number of processed files.
+     */
+    public int batchCreateTrainingBlank(String directoryPath, String resultPath, int ind) {
+        try {
+            File path = new File(directoryPath);
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+            for (final File pdfFile : refFiles) {
+                try {
+                    createTrainingBlank(pdfFile, resultPath, ind + n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occurred while processing the following pdf: "
+                        + pdfFile.getPath(), exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+        }
+    }
+
+    /**
      * Create training data for all models based on the application of
      * the current full text model on a new PDF
      *
@@ -168,6 +219,20 @@ public class EngineMedical extends Engine {
     }
 
     /**
+     * Generate blank training data for the French Medical NER model from provided directory of PDF documents, i.e. where TEI files are text only
+     * without tags. This can be used to start from scratch any new model.
+     *
+     * @param inputFile    : the path of the PDF file to be processed
+     * @param pathOutput      : the path where to put the CRF feature file and  the path where to put the annotated TEI representation (the
+     *                     file to be annotated for "from scratch" training data)
+     * @param id           : an optional ID to be used in the TEI file and the full text
+     *                     file, -1 if not used
+     */
+    public void createTrainingBlankFrenchMedicalNER(File inputFile, String pathOutput, int id) {
+        parsers.getFrenchMedicalNERParser().createBlankTrainingFromPDF(inputFile, pathOutput, id);
+    }
+
+    /**
      * Process all the PDF in a given directory with a pdf extraction and
      * produce blank training data, i.e. TEI files with text only
      * without tags. This can be used to start from scratch any new model.
@@ -180,7 +245,7 @@ public class EngineMedical extends Engine {
      *                        will be included if ind = -1
      * @return the number of processed files.
      */
-    public int batchCreateTrainingBlank(String directoryPath, String resultPath, int ind) {
+    public int batchCreateTrainingBlankFrenchMedicalNER(String directoryPath, String resultPath, int ind) {
         try {
             File path = new File(directoryPath);
             // we process all pdf files in the directory
@@ -203,7 +268,72 @@ public class EngineMedical extends Engine {
             }
             for (final File pdfFile : refFiles) {
                 try {
-                    createTrainingBlank(pdfFile, resultPath, ind + n);
+                    createTrainingBlankFrenchMedicalNER(pdfFile, resultPath, ind + n);
+                } catch (final Exception exp) {
+                    LOGGER.error("An error occurred while processing the following pdf: "
+                        + pdfFile.getPath(), exp);
+                }
+                if (ind != -1)
+                    n++;
+            }
+
+            return refFiles.length;
+        } catch (final Exception exp) {
+            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+        }
+    }
+
+    /**
+     * Create training data for all models based on the application of
+     * the current full text model on a new PDF
+     *
+     * @param inputFile    : the path of the PDF file to be processed
+     * @param pathOutput   : the path where to put the CRF feature file and  the annotated TEI representation (the
+     *                      file to be corrected for gold-level training data)
+     * @param id           : an optional ID to be used in the TEI file, -1 if not used
+     */
+    public void createTrainingFrenchMedicalNER(File inputFile, String pathOutput,  int id) {
+        parsers.getFrenchMedicalNERParser().createTraining(inputFile, pathOutput, id);
+    }
+
+    /**
+     * Process all the PDF in a given directory with a segmentation process and
+     * produce the corresponding training data format files for manual
+     * correction. The goal of this method is to help to produce additional
+     * traning data based on an existing model.
+     *
+     * @param directoryPath - the path to the directory containing PDF to be processed.
+     * @param resultPath    - the path to the directory where the results as XML files
+     *                      shall be written.
+     * @param ind           - identifier integer to be included in the resulting files to
+     *                      identify the training case. This is optional: no identifier
+     *                      will be included if ind = -1
+     * @return the number of processed files.
+     */
+    public int batchCreateTrainingFrenchMedicalNER(String directoryPath, String resultPath, int ind) {
+        try {
+            File path = new File(directoryPath);
+            // we process all pdf files in the directory
+            File[] refFiles = path.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    System.out.println(name);
+                    return name.endsWith(".pdf") || name.endsWith(".PDF");
+                }
+            });
+
+            if (refFiles == null)
+                return 0;
+
+            System.out.println(refFiles.length + " files to be processed.");
+
+            int n = 0;
+            if (ind == -1) {
+                // for undefined identifier (value at -1), we initialize it to 0
+                n = 1;
+            }
+            for (final File pdfFile : refFiles) {
+                try {
+                    createTrainingFrenchMedicalNER(pdfFile, resultPath, ind + n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occurred while processing the following pdf: "
                         + pdfFile.getPath(), exp);

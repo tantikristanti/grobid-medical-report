@@ -270,6 +270,20 @@ public class ProcessEngineMedical implements Closeable {
     }
 
     /**
+     * Generate blank training data from provided directory of PDF documents, i.e. where TEI files are text only
+     * without tags. This can be used to start from scratch any new model.
+     *
+     * @param pGbdArgs The parameters.
+     * @throws Exception
+     */
+    public void createTrainingBlank(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchCreateTrainingBlank(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
+    /**
      * Generate training data for all models
      *
      * @param pGbdArgs The parameters.
@@ -288,12 +302,25 @@ public class ProcessEngineMedical implements Closeable {
      * @param pGbdArgs The parameters.
      * @throws Exception
      */
-    public void createTrainingBlank(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
+    public void createTrainingBlankFrenchMedicalNER(final GrobidMedicalReportMainArgs pGbdArgs) throws Exception {
         inferPdfInputPath(pGbdArgs);
         inferOutputPath(pGbdArgs);
-        int result = getEngine().batchCreateTrainingBlank(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        int result = getEngine().batchCreateTrainingBlankFrenchMedicalNER(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
         LOGGER.info(result + " files processed.");
     }
+
+    /**
+     * Generate training data for all models
+     *
+     * @param pGbdArgs The parameters.
+     */
+    public void createTrainingFrenchMedicalNER(final GrobidMedicalReportMainArgs pGbdArgs) {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchCreateTrainingFrenchMedicalNER(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
 
     /**
      * List the engine methods that can be called.

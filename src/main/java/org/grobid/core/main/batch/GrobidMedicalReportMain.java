@@ -309,7 +309,7 @@ public class GrobidMedicalReportMain {
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
                 nb = parsers.getLeftNoteMedicalParser().processLeftNoteDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
-                // create training data using French Medical NER model (built with the Corpus QUAERO)
+                // create training data using French Medical NER model (built on the Corpus QUAERO)
                 nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
 
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_EXTRACT_NER)) {

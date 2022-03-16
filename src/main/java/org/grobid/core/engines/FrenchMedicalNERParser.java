@@ -44,7 +44,7 @@ import java.util.SortedSet;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * NER for French medical reports
+ * A parser for recognizing French medical terminologies
  * <p>
  * Tanti, 2021
  */
@@ -58,8 +58,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
     protected EngineMedicalParsers parsers;
 
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
-        //by default, we use CRF models
-        super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+        //by default, we use CRF models (e.g., with the model built on the training data of the French Quaero Corpus)
+        //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
+
+        //by default, we use CRF models (e.g., with the model built on the training data of the APHP Corpus)
+        super(GrobidModels.FR_MEDICAL_NER);
+
         // if we want to use DeLFT models
         //super(GrobidModels.FR_MEDICAL_NER_QUAERO, CntManagerFactory.getNoOpCntManager(), GrobidCRFEngine.DELFT, "BidLSTM_CRF");
         this.parsers = parsers;
@@ -75,8 +79,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
         List<LayoutToken> tokens = null;
         try {
             // for the analyser is English to avoid any bad surprises
-            //tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.EN, 1.0));
-            tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.FR, 1.0));
+            tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.EN, 1.0));
+            //tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(text, new Language(Language.FR, 1.0));
         } catch (Exception e) {
             LOGGER.error("Tokenization failed", e);
         }
@@ -100,7 +104,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
         String res = toFeatureVectorLayout(tokens, positionsIndexes);
         String result = label(res);
-        List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER_QUAERO, result, tokens);
+        // if we use the model built on the French Quaero Corpus
+        //List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER_QUAERO, result, tokens);
+
+        // if we use the model built on the French APHP Corpus
+        List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER, result, tokens);
 
         return entities;
     }
@@ -171,7 +179,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
 
     // create training data for model-0 where the tagger comes from grobid-ner
-    public StringBuilder createTrainingFromTextGrobidNer(String text, StringBuilder sb, String lang) throws IOException {
+    public StringBuilder createTrainingUsingGrobidNer(String text, StringBuilder sb, String lang) throws IOException {
         if (isEmpty(text))
             return null;
 
@@ -257,8 +265,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
         return sb;
     }
 
-    // create training data using the model built from the Quaero Corpus
-    public StringBuilder createTrainingFromModelQuaero(String text, StringBuilder sb) throws IOException {
+    // create training data by calling the pre-trained model
+    public StringBuilder createBlankTraining(String text, StringBuilder sb) throws IOException {
         if (isEmpty(text))
             return null;
 
@@ -266,15 +274,35 @@ public class FrenchMedicalNERParser extends AbstractParser {
         String[] paragraphs = text.split("\n");
         for (int p = 0; p < paragraphs.length; p++) {
 
-            String theText = paragraphs[p];
+            String theText = TextUtilities.HTMLEncode(paragraphs[p]);
+            if (theText.trim().length() == 0)
+                continue;
+
+            sb.append("\t\t\t<p " + "xml:id=\"p" + p + "\">");
+            sb.append(theText);
+            sb.append("</p>\n");
+        }
+        return sb;
+    }
+
+    // create training data by calling the pre-trained model
+    public StringBuilder createTraining(String text, StringBuilder sb) throws IOException {
+        if (isEmpty(text))
+            return null;
+
+        // let's segment in paragraphs, assuming we have one per paragraph per line
+        String[] paragraphs = text.split("\n");
+        for (int p = 0; p < paragraphs.length; p++) {
+
+            String theText = TextUtilities.HTMLEncode(paragraphs[p]);
             if (theText.trim().length() == 0)
                 continue;
 
             sb.append("\t\t\t<p " + "xml:id=\"p" + p + "\">");
 
             // we process NER at paragraph level (as it is trained at this level and because
-            // inter sentence features/template are used by the CFR)
-            // calling the French Medical NER model (grobid-ner)
+            // inter sentence features/template are used by the CRF)
+            // calling the French Medical NER model
 
             List<MedicalEntity> medicalEntities = extractNE(theText.trim());
 
@@ -355,58 +383,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
         return results;
     }
 
-    public int createTrainingFrenchMedicalNerBatch(String inputDirectory,
-                                                   String outputDirectory,
-                                                   int ind) throws IOException {
-        try {
-            File path = new File(inputDirectory);
-            if (!path.exists()) {
-                throw new GrobidException("Cannot create training data because input directory can not be accessed: " + inputDirectory);
-            }
-
-            File pathOut = new File(outputDirectory);
-            if (!pathOut.exists()) {
-                throw new GrobidException("Cannot create training data because output directory can not be accessed: " + outputDirectory);
-            }
-
-            // we process all pdf files in the directory
-            File[] refFiles = path.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    System.out.println(name);
-                    return name.endsWith(".pdf") || name.endsWith(".PDF");
-                }
-            });
-
-            if (refFiles == null)
-                return 0;
-
-            System.out.println(refFiles.length + " files to be processed.");
-
-            int n = 0;
-            if (ind == -1) {
-                // for undefined identifier (value at -1), we initialize it to 0
-                n = 1;
-            }
-            for (final File file : refFiles) {
-                try {
-                    createTraining(file, outputDirectory, n);
-
-                    // uncomment this command to create files containing features and blank training without any label
-                    //createBlankTrainingFromPDF(file, outputDirectory, n);
-                } catch (final Exception exp) {
-                    LOGGER.error("An error occurred while processing the following pdf: "
-                        + file.getPath() + ": " + exp);
-                }
-                if (ind != -1)
-                    n++;
-            }
-
-            return refFiles.length;
-        } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
-        }
-    }
-
     /**
      * Process the specified pdf and format the result as training data for all the models.
      *
@@ -435,7 +411,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             String pdfFileName = inputFile.getName();
             Writer writer = null;
 
-            // path for blank full-medical-text model
+            // path for the output
             File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner.tei.xml"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
@@ -452,7 +428,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
-            // take only the body part
+            // in this case, we only take the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
 
             if (documentBodyParts != null) {
@@ -483,11 +459,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
                 /*writer.write(bufferBody.toString() + "\n");*/
                 // create training data by calling the grobid-ner models
-                //createTrainingFromTextGrobidNer(bufferBody.toString(), result, lang);
+                //createTrainingUsingGrobidNer(bufferBody.toString(), result, lang);
 
-                // create training data by calling the French Quaero model
+                // create training data by calling the French NER medical model (either built on the French Quaero Corpus or on the APHP Corpus)
                 String theText = bufferBody.toString();
-                createTrainingFromModelQuaero(theText, result);
+
+                createTraining(theText, result);
                 writer.write(result + "\n");
                 writer.write("\n\t\t</document>\n");
                 writer.write("\t</subcorpus>\n</corpus>\n");
@@ -524,6 +501,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
         }
         DocumentSource documentSource = null;
         Document doc = null;
+        StringBuilder result = new StringBuilder();
         try {
             if (!inputFile.exists()) {
                 throw new GrobidResourceException("Cannot train for full-medical-text, because the file '" +
@@ -532,9 +510,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             String pdfFileName = inputFile.getName();
             Writer writer = null;
 
-            // path for blank full-medical-text model
-            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner.tei.xml"));
-            //File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.french.medical.ner"));
+            // path for the output
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.blank.french.medical.ner.tei.xml"));
 
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
             doc = new Document(documentSource);
@@ -545,13 +522,13 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            String fulltext = parsers.getMedicalReportSegmenterParser().getAllLinesFeatured(doc);
+            String featuredData = parsers.getMedicalReportSegmenterParser().getAllLinesFeatured(doc);
             List<LayoutToken> tokenizations = doc.getTokenizations();
 
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
-            // The BODY part after calling the segmentation model
+            // // in this case, we only take the body part
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             if (documentBodyParts != null) {
                 List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
@@ -583,7 +560,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
                     writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\">\n");
                 }
-                writer.write(bufferBody.toString());
+                String theText = bufferBody.toString();
+
+                createBlankTraining(theText, result);
+                writer.write(result + "\n");
+
                 writer.write("\n\t\t</document>\n");
                 writer.write("\t</subcorpus>\n</corpus>\n");
                 writer.close();

@@ -1,14 +1,24 @@
 # Annotation guidelines for the _french-medical-ner_ model
 
-Since for the French medical NER we use [The_QUAERO_French_Medical_Corpus](https://quaerofrenchmed.limsi.fr/) as our recources for building the model-0, it's obvious that we follow their annotation guidelines.
+We use the French medical NER we use [The_QUAERO_French_Medical_Corpus](https://quaerofrenchmed.limsi.fr/) as our annotation guidelines.
 
 ## Introduction
 
-For the following guidelines, we need to generate the training data first. 
+For the following guidelines, firstly we need to generate the training data.
 
-To generate the training data with the Quaero corpus as input and to conform to the Grobid format, we can use the CreateMedicalDatasetsFromQuaeroCorpus class. For our case which uses the largest entity mentions and does not handle nested entities, we adapt the generated datasets to conform to the Grobid format (in this case, corform to [grobid-ner](https://grobid-ner.readthedocs.io/en/latest/largest-entity-mention/)).
+1. Create blank training data from the body part
 
-However, to generate the training data using Model-0 (developed using the Quaero Copus) from any new corpus, we can see the explanation from [here](../Training-the-medical-report-models.md#generation-of-training-data).
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingBlankFrenchMedicalNER
+```
+
+2. Create the training data using the pre-trained model
+
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFrenchMedicalNER
+```
+
+For the annotation process, we use the largest entity mentions and does not handle nested entities which conform with [grobid-ner](https://grobid-ner.readthedocs.io/en/latest/largest-entity-mention/)).
 
 For the French medical NER model, we use the following TEI elements:
 
