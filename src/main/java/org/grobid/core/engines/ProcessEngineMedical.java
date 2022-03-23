@@ -321,7 +321,6 @@ public class ProcessEngineMedical implements Closeable {
         LOGGER.info(result + " files processed.");
     }
 
-
     /**
      * List the engine methods that can be called.
      *

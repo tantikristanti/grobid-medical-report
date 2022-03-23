@@ -1,47 +1,68 @@
 package org.grobid.core.data;
 
+import org.grobid.core.GrobidModels;
+import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.layout.BoundingBox;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.NERLexicon;
+import org.grobid.core.tokenization.TaggingTokenCluster;
+import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.OffsetPosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * Common representation of an unresolved entity mention for the NER components.
+ * Representation of entity mentions.
  *
- * @author Patrice Lopez
  */
 public class MedicalEntity implements Comparable<MedicalEntity> {
+    // map of labels (e.g. <drug> or <symptom>) to LayoutToken
+    private Map<String, List<LayoutToken>> labeledTokens;
+
+    private String anatomy = null;
+    private String date = null;
+    private String device = null;
+    private String dose = null;
+    private String drug = null;
+    private String examination = null;
+    private String living = null;
+    private String measure = null;
+    private String object = null;
+    private String pathology = null;
+    private String persname = null;
+    private String physiology = null;
+    private String substance = null;
+    private String symptom = null;
+    private String treatment = null;
+    private String value = null;
+    private String unit = null;
+
     /* Biomedical NER base types are adapted from
      - grobid-ner (https://grobid-ner.readthedocs.io/en/latest/class-and-senses/)
      - The Quaero Corpus (https://quaerofrenchmed.limsi.fr/)
     * */
     public enum Medical_NER_Type {
-        OTHER("OTHER"), // Entity not belonging to any classes
-        PERSON("PERSON"), // grobid-ner : first, middle, last names and aliases of people and fictional characters
-        LOCATION("LOCATION"), // grobid-ner : physical location, including planets and galaxies; The Quaero Corpus - GEOG : Geographic area
-        ORGANISATION("ORGANISATION"), // grobid-ner : organized group of people, with some sort of legal entity and concrete membership
-        ANIMAL("ANIMAL"), // grobid-ner : individual name of an animal
-        MEASURE("MEASURE"), // grobid-ner : numerical amount, including an optional unit of measure
-        LEGAL("LEGAL"), // grobid-ner : legal mentions such as article of law, convention, cases, treaty
-        IDENTIFIER("IDENTIFIER"), // grobid-ner : systematized identifier such as phone number, fax, email address
-        INSTALLATION("INSTALLATION"), // grobid-ner : structure built by humans
-        SUBSTANCE("SUBSTANCE"), // Substances other than chemical and drugs
-        PLANT("PLANT"), // grobid-ner : name of a plant
-        PERIOD("PERIOD"), // grobid-ner : date, historical era or other time period, time expressions
-        TITLE("TITLE"), // grobid-ner : personal or honorific title, for a person
-        WEBSITE("WEBSITE"), // grobid-ner : website URL or name
-        ANATOMY("ANATOMY"), // The Quaero Corpus - ANAT : Anatomical structure, body location or part, organ, body system
-        CHEMICAL("CHEMICAL"), // The Quaero Corpus - CHEM : Chemical and drugs
-        DEVICE("DEVICE"), // The Quaero Corpus - DEVI : Drug, medical, and research devices
-        DISORDER("DISORDER"), // The Quaero Corpus - DISO : Sign, symptom, diseases, syndrom, and abnormality
-        LIVING("LIVING"), // The Quaero Corpus - LIVB : Living beings other than human, animals, or plants (ex. Fungus, Bacterium, Virus)
-        OBJECT("OBJECT"), // The Quaero Corpus - OBJC : Manufactured, physical objects
-        PHENOMENA("PHENOMENA"), // The Quaero Corpus - PHEN : Laboratory or test results, human-caused phenomenon or process
-        PHYSIOLOGY("PHYSIOLOGY"), // The Quaero Corpus - PHYS : Organism function, attribute, clinical attribute
-        PROCEDURE("PROCEDURE"); // The Quaero Corpus - PROC : Diagnostic or laboratory procedures
+        OTHER("OTHER"),
+        ANATOMY("ANATOMY"),
+        DATE("DATE"),
+        DEVICE("DEVICE"),
+        DOSE("DOSE"),
+        DRUG("DRUG"),
+        EXAMINATION("EXAMINATION"),
+        LIVING("LEGAL"),
+        MEASURE("MEASURE"),
+        OBJECT("OBJECT"),
+        PATHOLOGY("PATHOLOGY"),
+        PERSNAME("PERSNAME"),
+        PHYSIOLOGY("PHYSIOLOGY"),
+        SUBSTANCE("SUBSTANCE"),
+        SYMPTOM("SYMPTOM"),
+        TREATMENT("TREATMENT"),
+        VALUE("VALUE"),
+        UNIT("UNIT");
 
         private String name;
 
@@ -179,52 +200,179 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     public void setStringType(String stringType) {
         if (stringType.toUpperCase().contains("OTHER")) {
             this.stringType = "OTHER";
-        } else if (stringType.toUpperCase().contains("PERSON")) {
-            this.stringType = "LIVB";
-        } else if (stringType.toUpperCase().contains("LOCATION")) {
-            this.stringType = "GEOG";
-        } else if (stringType.toUpperCase().contains("ORGANISATION")) {
-            this.stringType = "GEOG";
-        } else if (stringType.toUpperCase().contains("ANIMAL")) {
-            this.stringType = "LIVB";
+        } else if (stringType.toUpperCase().contains("ANATOMY")) {
+            this.stringType = "ANATOMY";
+        } else if (stringType.toUpperCase().contains("DATE")) {
+            this.stringType = "DATE";
+        } else if (stringType.toUpperCase().contains("DEVICE")) {
+            this.stringType = "DEVICE";
+        } else if (stringType.toUpperCase().contains("DOSE")) {
+            this.stringType = "DOSE";
+        } else if (stringType.toUpperCase().contains("DRUG")) {
+            this.stringType = "DRUG";
+        } else if (stringType.toUpperCase().contains("EXAMINATION")) {
+            this.stringType = "EXAMINATION";
+        } else if (stringType.toUpperCase().contains("LIVING")) {
+            this.stringType = "LIVING";
         } else if (stringType.toUpperCase().contains("MEASURE")) {
             this.stringType = "MEASURE";
-        } else if (stringType.toUpperCase().contains("LEGAL")) {
-            this.stringType = "LEGAL";
-        } else if (stringType.toUpperCase().contains("IDENTIFIER")) {
-            this.stringType = "IDENTIFIER";
-        } else if (stringType.toUpperCase().contains("INSTALLATION")) {
-            this.stringType = "GEOG";
-        } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
-            this.stringType = "CHEM";
-        } else if (stringType.toUpperCase().contains("DRUG")) {
-            this.stringType = "CHEM";
-        } else if (stringType.toUpperCase().contains("PLANT")) {
-            this.stringType = "LIVB";
-        } else if (stringType.toUpperCase().contains("PERIOD")) {
-            this.stringType = "PERIOD";
-        } else if (stringType.toUpperCase().contains("TITLE")) {
-            this.stringType = "TITLE";
-        } else if (stringType.toUpperCase().contains("WEBSITE")) {
-            this.stringType = "WEBSITE";
-        } else if (stringType.toUpperCase().contains("ANATOMY")) {
-            this.stringType = "ANAT";
-        } else if (stringType.toUpperCase().contains("DEVICE")) {
-            this.stringType = "DEVI";
-        } else if (stringType.toUpperCase().contains("DISORDER")) {
-            this.stringType = "DISO";
-        } else if (stringType.toUpperCase().contains("LIVING")) {
-            this.stringType = "LIVB";
         } else if (stringType.toUpperCase().contains("OBJECT")) {
-            this.stringType = "OBJC";
-        } else if (stringType.toUpperCase().contains("PHENOMENA")) {
-            this.stringType = "PHEN";
+            this.stringType = "OBJECT";
+        } else if (stringType.toUpperCase().contains("PATHOLOGY")) {
+            this.stringType = "PATHOLOGY";
+        } else if (stringType.toUpperCase().contains("PERSNAME")) {
+            this.stringType = "PERSNAME";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
-            this.stringType = "PHYS";
-        } else if (stringType.toUpperCase().contains("PROCEDURE")) {
-            this.stringType = "PROC";
+            this.stringType = "PHYSIOLOGY";
+        } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
+            this.stringType = "SUBSTANCE";
+        } else if (stringType.toUpperCase().contains("SYMPTOM")) {
+            this.stringType = "SYMPTOM";
+        } else if (stringType.toUpperCase().contains("TREATMENT")) {
+            this.stringType = "TREATMENT";
+        } else if (stringType.toUpperCase().contains("VALUE")) {
+            this.stringType = "VALUE";
+        } else if (stringType.toUpperCase().contains("UNIT")) {
+            this.stringType = "UNIT";
         }
     }
+
+    public String getAnatomy() {
+        return anatomy;
+    }
+
+    public void setAnatomy(String anatomy) {
+        this.anatomy = anatomy;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
+    }
+
+    public String getDose() {
+        return dose;
+    }
+
+    public void setDose(String dose) {
+        this.dose = dose;
+    }
+
+    public String getDrug() {
+        return drug;
+    }
+
+    public void setDrug(String drug) {
+        this.drug = drug;
+    }
+
+    public String getExamination() {
+        return examination;
+    }
+
+    public void setExamination(String examination) {
+        this.examination = examination;
+    }
+
+    public String getLiving() {
+        return living;
+    }
+
+    public void setLiving(String living) {
+        this.living = living;
+    }
+
+    public String getMeasure() {
+        return measure;
+    }
+
+    public void setMeasure(String measure) {
+        this.measure = measure;
+    }
+
+    public String getObject() {
+        return object;
+    }
+
+    public void setObject(String object) {
+        this.object = object;
+    }
+
+    public String getPathology() {
+        return pathology;
+    }
+
+    public void setPathology(String pathology) {
+        this.pathology = pathology;
+    }
+
+    public String getPersname() {
+        return persname;
+    }
+
+    public void setPersname(String persname) {
+        this.persname = persname;
+    }
+
+    public String getPhysiology() {
+        return physiology;
+    }
+
+    public void setPhysiology(String physiology) {
+        this.physiology = physiology;
+    }
+
+    public String getSubstance() {
+        return substance;
+    }
+
+    public void setSubstance(String substance) {
+        this.substance = substance;
+    }
+
+    public String getSymptom() {
+        return symptom;
+    }
+
+    public void setSymptom(String symptom) {
+        this.symptom = symptom;
+    }
+
+    public String getTreatment() {
+        return treatment;
+    }
+
+    public void setTreatment(String treatment) {
+        this.treatment = treatment;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
 
     public void setTypeFromString(String theType) {
         type = Medical_NER_Type.valueOf(theType);
@@ -478,4 +626,26 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         buffer.append("</stf>");
         return buffer.toString();
     }
+
+    public void generalResultMapping(String labeledResult, List<LayoutToken> tokenizations) {
+        if (labeledTokens == null)
+            labeledTokens = new TreeMap<>();
+
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FR_MEDICAL_NER, labeledResult, tokenizations);
+        List<TaggingTokenCluster> clusters = clusteror.cluster();
+        for (TaggingTokenCluster cluster : clusters) {
+            if (cluster == null) {
+                continue;
+            }
+
+            TaggingLabel clusterLabel = cluster.getTaggingLabel();
+            List<LayoutToken> clusterTokens = cluster.concatTokens();
+            List<LayoutToken> theList = labeledTokens.get(clusterLabel.getLabel());
+
+            theList = theList == null ? new ArrayList<>() : theList;
+            theList.addAll(clusterTokens);
+            labeledTokens.put(clusterLabel.getLabel(), theList);
+        }
+    }
+
 }

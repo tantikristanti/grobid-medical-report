@@ -198,7 +198,6 @@ public class TEIHeaderMedicalSaxParser extends DefaultHandler {
             // do nothing
         } else if (ignoredTags.contains(qName)) {
             // do nothing
-            currentTag = "<other>";
         } else {
             System.out.println("Warning: Unexpected starting tag " + qName);
             currentTag = "<other>";

@@ -130,7 +130,7 @@ public class FeaturesVectorDateline {
                                              List<String> labels,
                                              List<OffsetPosition> locationPositions) throws Exception {
         if (locationPositions == null) {
-            throw new GrobidException("At least one list of gazetter matches positions is null.");
+            throw new GrobidException("At least one list of gazetteer matches positions is null.");
         }
         FeatureFactory featureFactory = FeatureFactory.getInstance();
         StringBuilder dateline = new StringBuilder();

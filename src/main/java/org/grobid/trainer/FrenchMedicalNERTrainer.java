@@ -3,12 +3,15 @@ package org.grobid.trainer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
+import org.grobid.core.engines.FrenchMedicalNERParser;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
 import org.grobid.core.features.FeaturesVectorMedicalNER;
+import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.lexicon.MedicalNERLexicon;
+import org.grobid.core.lexicon.MedicalNERLexiconPositionsIndexes;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.*;
 import org.grobid.trainer.sax.FrenchCorpusSaxHandler;
@@ -26,10 +29,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 
 /**
- * Create the French NER tagging model
- * <p>
- * Taken and adapted from grobid-ner (@author Patrice Lopez)
- * <p>
+ * For training the French medical NER model
+ *
  * Tanti, 2021
  */
 public class FrenchMedicalNERTrainer extends AbstractTrainer {
@@ -38,39 +39,68 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
     protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
     protected Lexicon lexicon = Lexicon.getInstance();
 
-    private String quaeroCorpusPath = null;
-
-    private File tmpPath = null;
-
     public FrenchMedicalNERTrainer() {
-        // if we train the French Quaero Corpus
+        // if we train on the French Quaero Corpus
         //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
 
         super(GrobidModels.FR_MEDICAL_NER);
     }
 
-
-    @Override
     /**
-     * Add the selected features to the training data for the NER model
+     * Add the selected features to the medic model example set, default
+     *
+     * @param sourcePathLabel
+     *            a path where corpus files are located
+     *  @param outputPath
+     *            a path where result files are located
+     * @return the total number of used corpus items
      */
-    public int createCRFPPData(File sourcePathLabel,
-                               File outputPath) {
+    @Override
+    public int createCRFPPData(final File sourcePathLabel, final File outputPath) {
         return createCRFPPData(sourcePathLabel, outputPath, null, 1.0);
     }
 
+    /**
+     * Add the selected features to the medic model example set
+     *
+     * @param corpusDir
+     *            a path where corpus files are located
+     * @param trainingOutputPath
+     *            path where to store the temporary training data
+     * @param evalOutputPath
+     *            path where to store the temporary evaluation data
+     * @param splitRatio
+     *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @return the total number of used corpus items
+     */
     @Override
     public int createCRFPPData(final File corpusDir,
                                final File trainingOutputPath,
                                final File evalOutputPath,
                                double splitRatio) {
         int totalExamples = 0;
+        Lexicon lexicon = Lexicon.getInstance();
         try {
             System.out.println("sourcePathLabel: " + corpusDir);
             if (trainingOutputPath != null)
                 System.out.println("outputPath for training data: " + trainingOutputPath);
             if (evalOutputPath != null)
                 System.out.println("outputPath for evaluation data: " + evalOutputPath);
+
+            // we convert the tei files into the usual CRF label format
+            // we process all tei files in the output directory
+            final File[] refFiles = corpusDir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".xml");
+                }
+            });
+
+            if (refFiles == null) {
+                throw new IllegalStateException("Folder " + corpusDir.getAbsolutePath()
+                    + " does not seem to contain training data. Please check");
+            }
+
+            System.out.println(refFiles.length + " tei files");
 
             // the file for writing the training data
             OutputStream os2 = null;
@@ -88,122 +118,81 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
                 writer3 = new OutputStreamWriter(os3, "UTF8");
             }
 
-            File corpusTEI = new File(corpusDir.getAbsolutePath().toString() + "/tei");
-            if (!corpusTEI.exists()) {
-                LOGGER.warn("Directory does not exist: " + corpusTEI.getAbsolutePath());
-            }
-            File[] files = corpusTEI.listFiles();
-            if ((files == null) || (files.length == 0)) {
-                LOGGER.warn("No TEI files in directory: " + corpusTEI);
-            }
+            // get a factory for SAX parser
+            SAXParserFactory spf = SAXParserFactory.newInstance();
 
-            // process the core trainig set corresponding to LeMonde corpus first
-            for (int i = 0; i < files.length; i++) {
-                System.out.println(files[i].getName());
-                if (files[i].getName().indexOf(".xml") != -1)
-                    totalExamples += process(files[i], writer2, writer3, splitRatio);
+            // general lexicon taken from Grobid
+            List<OffsetPosition> locationsPositions;
+            List<OffsetPosition> titlesPositions;
+            List<OffsetPosition> suffixesPositions;
+            List<OffsetPosition> emailPositions;
+            List<OffsetPosition> urlPositions;
+
+            int n = 0;
+            for (; n < refFiles.length; n++) {
+                final File teifile = refFiles[n];
+                String name = teifile.getName();
+                System.out.println(name);
+
+                final FrenchCorpusSaxHandler parser2 = new FrenchCorpusSaxHandler();
+
+                // get a new instance of parser
+                final SAXParser p = spf.newSAXParser();
+                p.parse(teifile, parser2);
+
+                final List<List<String>> allLabeled = parser2.getLabeledResult();
+                final List<List<LayoutToken>> allTokens = parser2.getTokensResult();
+                totalExamples += parser2.nbEntities;
+
+                // we can now add the features
+               for(int i=0; i<allTokens.size(); i++) {
+                    // fix the offsets
+                    int pos = 0;
+                    for(LayoutToken token : allTokens.get(i)) {
+                        token.setOffset(pos);
+                        pos += token.getText().length();
+                    }
+
+                   locationsPositions = lexicon.tokenPositionsLocationNames(allTokens.get(i));
+                   titlesPositions = lexicon.tokenPositionsPersonTitle(allTokens.get(i));
+                   suffixesPositions = lexicon.tokenPositionsPersonSuffix(allTokens.get(i));
+                   emailPositions = lexicon.tokenPositionsEmailPattern(allTokens.get(i));
+                   urlPositions = lexicon.tokenPositionsUrlPattern(allTokens.get(i));
+
+                   String featuresNER = FeaturesVectorMedicalNER.addFeaturesNER(allTokens.get(i), allLabeled.get(i),
+                       locationsPositions, titlesPositions, suffixesPositions, emailPositions, urlPositions);
+
+                   /*MedicalNERLexiconPositionsIndexes positionsIndexes = new MedicalNERLexiconPositionsIndexes(medicalNERLexicon);
+                   positionsIndexes.computeIndexes(allTokens.get(i));*/
+
+
+                    if ( (writer2 == null) && (writer3 != null) )
+                        writer3.write(featuresNER + "\n \n"); // we write and add separators for each document
+                    if ( (writer2 != null) && (writer3 == null) )
+                        writer2.write(featuresNER + "\n \n");
+                    else {
+                        if (Math.random() <= splitRatio) // we randomize the data for training and evaluation
+                            writer2.write(featuresNER + "\n \n");
+                        else
+                            writer3.write(featuresNER + "\n \n");
+                    }
+                }
             }
 
             if (writer2 != null) {
                 writer2.close();
-            }
-            if (os2 != null) {
                 os2.close();
             }
 
             if (writer3 != null) {
                 writer3.close();
-            }
-            if (os3 != null) {
                 os3.close();
             }
+
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
         return totalExamples;
-    }
-
-    private int process(final File inputFile, Writer writerTraining, Writer writerEvaluation, double splitRatio) {
-        int res = 0;
-        try {
-            System.out.println("Path to French corpus training: " + inputFile.getPath());
-            if (!inputFile.exists()) {
-                throw new
-                    GrobidException("Cannot start training, because corpus resource file is not correctly set : "
-                    + inputFile.getPath());
-            }
-
-            String name = inputFile.getName();
-
-            FrenchCorpusSaxHandler parser2 = new FrenchCorpusSaxHandler();
-            parser2.setFileName(name);
-
-            // get a factory
-            SAXParserFactory spf = SAXParserFactory.newInstance();
-            //get a new instance of parser
-            SAXParser par = spf.newSAXParser();
-            par.parse(inputFile, parser2);
-
-            ArrayList<String> labeled = parser2.getLabeledResult();
-
-            for (int i = 0; i < labeled.size(); i++) {
-                String localLine = labeled.get(i);
-                StringTokenizer st = new StringTokenizer(localLine, " ");
-
-                // to store unit term positions
-                List<OffsetPosition> locationPositions = null;
-                List<OffsetPosition> personTitlePositions = null;
-                List<OffsetPosition> organisationPositions = null;
-                List<OffsetPosition> orgFormPositions = null;
-                
-                boolean isLocationToken = false;
-                boolean isPersonTitleToken = false;
-                boolean isOrganisationToken = false;
-                boolean isOrgFormToken = false;
-                if (st.hasMoreTokens()) {
-                    String localToken = st.nextToken();
-                    // unicode normalisation of the token - it should not be necessary if the training data
-                    // has been gnerated by a recent version of grobid
-                    localToken = UnicodeUtil.normaliseTextAndRemoveSpaces(localToken);
-                    String tag = st.nextToken();
-
-                    // add features for the token
-                    locationPositions = medicalNERLexicon.tokenPositionsGeographicNames(localToken);
-                    if(locationPositions != null && locationPositions.size() > 0){
-                        isLocationToken = true;
-                    }
-
-                    personTitlePositions = lexicon.tokenPositionsPersonTitle(localToken);
-                    if(personTitlePositions != null && personTitlePositions.size() > 0){
-                        isPersonTitleToken = true;
-                    }
-
-                    organisationPositions = lexicon.tokenPositionsOrganisationNames(localToken);
-                    if(organisationPositions != null && organisationPositions.size() > 0){
-                        isOrganisationToken = true;
-                    }
-
-                    orgFormPositions = lexicon.tokenPositionsOrgForm(localToken);
-                    if(orgFormPositions != null && orgFormPositions.size() > 0){
-                        isOrgFormToken = true;
-                    }
-
-                    // the "line" expected by the method FeaturesVectorNER.addFeaturesNER is the token
-                    // followed by the label, separated by a space, and nothing else
-                    FeaturesVectorMedicalNER featuresVector = FeaturesVectorMedicalNER.addFeaturesNER(localLine, isLocationToken, isPersonTitleToken, isOrganisationToken, isOrgFormToken);
-                    writerTraining.write(featuresVector.printVector() + "\n");
-
-                }
-            }
-            writerTraining.close();
-        }
-        catch (Exception ex) {
-            throw new GrobidResourceException(
-                "An exception occurred when accessing/reading the French corpus.", ex);
-
-        }finally {
-        }
-        return res;
     }
 
     /**
@@ -213,30 +202,10 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        MedicalReportConfiguration medicalReportConfiguration = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-        } catch (Exception e) {
-            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
-        }
-        try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
-
-            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
-            GrobidProperties.getInstance(grobidHomeFinder);
-
-            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
-        } catch (final Exception exp) {
-            System.err.println("grobid-medical-report initialisation failed: " + exp);
-            exp.printStackTrace();
-        }
-
-        FrenchMedicalNERTrainer trainer = new FrenchMedicalNERTrainer();
-
+        GrobidProperties.getInstance();
+        Trainer trainer = new FrenchMedicalNERTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));
-
         System.exit(0);
     }
 }

@@ -76,6 +76,7 @@ public class MedicalNERLexicon{
 
         initChemicalDrugs();
         addChemicalDrugs("resources/lexicon/CHEM.txt");
+        addChemicalDrugs("resources/lexicon/medications/ListMedicaments_BaseDonnesPublicGouvFr.txt");
 
         initDevices();
         addDevices("resources/lexicon/DEVI.txt");
@@ -103,11 +104,9 @@ public class MedicalNERLexicon{
     }
 
     public void initAnatomies() {
-        try {
-            anatomyPattern = new FastMatcher(new File("resources/lexicon/ANAT.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for anatomy names.", e);
-        }
+        LOGGER.info("Initiating anatomies");
+        anatomies = new HashSet<String>();
+        LOGGER.info("End of initialization of anatomy names");
     }
 
     public final void addAnatomies(String path) {
@@ -153,11 +152,9 @@ public class MedicalNERLexicon{
     }
 
     public void initChemicalDrugs() {
-        try {
-            chemicalDrugPattern = new FastMatcher(new File("resources/lexicon/CHEM.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for chemical and drug names.", e);
-        }
+        LOGGER.info("Initiating chemical and drug names");
+        chemicalDrugs = new HashSet<String>();
+        LOGGER.info("End of initialization of chemical and drug names");
     }
 
     public final void addChemicalDrugs(String path) {
@@ -203,11 +200,9 @@ public class MedicalNERLexicon{
     }
 
     public void initDevices() {
-        try {
-            devicePattern = new FastMatcher(new File("resources/lexicon/DEVI.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for device names.", e);
-        }
+        LOGGER.info("Initiating devices");
+        devices = new HashSet<String>();
+        LOGGER.info("End of initialization of device names");
     }
 
     public final void addDevices(String path) {
@@ -253,11 +248,9 @@ public class MedicalNERLexicon{
     }
 
     public void initDisorders() {
-        try {
-            disorderPattern = new FastMatcher(new File("resources/lexicon/DISO.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for disorder names.", e);
-        }
+        LOGGER.info("Initiating symptom and signs");
+        disorders = new HashSet<String>();
+        LOGGER.info("End of initialization of symptom and signs");
     }
 
     public final void addDisorders(String path) {
@@ -303,11 +296,9 @@ public class MedicalNERLexicon{
     }
 
     public void initGeographiAreas() {
-        try {
-            geographicAreaPattern = new FastMatcher(new File("resources/lexicon/GEOG.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for geograhic areas.", e);
-        }
+        LOGGER.info("Initiating geographical names");
+        geographicAreas = new HashSet<String>();
+        LOGGER.info("End of initialization of geographical and location names");
     }
 
     public final void addGeographiAreas(String path) {
@@ -353,11 +344,9 @@ public class MedicalNERLexicon{
     }
 
     public void initLivingBeings() {
-        try {
-            livingBeingPattern = new FastMatcher(new File("resources/lexicon/LIVB.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for living beings.", e);
-        }
+        LOGGER.info("Initiating living beings");
+        livingBeings = new HashSet<String>();
+        LOGGER.info("End of initialization of living beings");
     }
 
     public final void addLivingBeings(String path) {
@@ -403,11 +392,9 @@ public class MedicalNERLexicon{
     }
 
     public void initObjects() {
-        try {
-            objectPattern = new FastMatcher(new File("resources/lexicon/OBJC.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for object names.", e);
-        }
+        LOGGER.info("Initiating hospital objects");
+        objects = new HashSet<String>();
+        LOGGER.info("End of initialization of hospital objects");
     }
 
     public final void addObjects(String path) {
@@ -453,11 +440,9 @@ public class MedicalNERLexicon{
     }
 
     public void initPhenomena() {
-        try {
-            phenomenaPattern = new FastMatcher(new File("resources/lexicon/PHEN.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for phenomena.", e);
-        }
+        LOGGER.info("Initiating phenomena");
+        phenomena = new HashSet<String>();
+        LOGGER.info("End of initialization of phenomena");
     }
 
     public final void addPhenomena(String path) {
@@ -503,11 +488,9 @@ public class MedicalNERLexicon{
     }
 
     public void initPhysiology() {
-        try {
-            physiologyPattern = new FastMatcher(new File("resources/lexicon/PHYS.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for physiology names.", e);
-        }
+        LOGGER.info("Initiating physiology");
+        physiology = new HashSet<String>();
+        LOGGER.info("End of initialization of physiology");
     }
 
     public final void addPhysiology(String path) {
@@ -553,11 +536,9 @@ public class MedicalNERLexicon{
     }
 
     public void initProcedures() {
-        try {
-            procedurePattern = new FastMatcher(new File("resources/lexicon/PROC.txt"));
-        } catch (PatternSyntaxException e) {
-            throw new GrobidResourceException("Error when compiling lexicon matcher for procedures.", e);
-        }
+        LOGGER.info("Initiating procedures");
+        procedures = new HashSet<String>();
+        LOGGER.info("End of initialization of procedures");
     }
 
     public final void addProcedures(String path) {
@@ -773,7 +754,7 @@ public class MedicalNERLexicon{
     }
 
     /**
-     * Soft look-up in living beings gazetteer with token positions
+     * Soft look-up in living being gazetteer with token positions
      */
     public List<OffsetPosition> tokenPositionsLivingBeings(String s) {
         if (livingBeingPattern == null) {

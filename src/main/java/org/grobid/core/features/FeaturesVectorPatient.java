@@ -171,7 +171,7 @@ public class FeaturesVectorPatient {
         if ((locationPositions == null) ||
             (titlePositions == null) ||
             (suffixPositions == null)) {
-            throw new GrobidException("At least one list of gazetter matches positions is null.");
+            throw new GrobidException("At least one list of gazetteer matches positions is null.");
         }
 
         FeatureFactory featureFactory = FeatureFactory.getInstance();

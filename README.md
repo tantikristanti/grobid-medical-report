@@ -154,4 +154,4 @@ We need to define the path to the input and output directories.
 
 ## Training Data and Models Copyright
 
-This is a collaboration project between [INRIA](https://www.inria.fr/) and  [APHP](https://www.aphp.fr/). Thus, data and models are not possible to share publicly. 
+This is a collaborative project between [INRIA](https://www.inria.fr/) and  [APHP](https://www.aphp.fr/) where data and models are not possible to share publicly. 

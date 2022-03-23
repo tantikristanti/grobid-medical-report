@@ -293,7 +293,7 @@ public class EngineMedical extends Engine {
      * @param id           : an optional ID to be used in the TEI file, -1 if not used
      */
     public void createTrainingFrenchMedicalNER(File inputFile, String pathOutput,  int id) {
-        parsers.getFrenchMedicalNERParser().createTraining(inputFile, pathOutput, id);
+        parsers.getFrenchMedicalNERParser().createTrainingFromPDF(inputFile, pathOutput, id);
     }
 
     /**

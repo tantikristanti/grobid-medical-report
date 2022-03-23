@@ -941,7 +941,7 @@ public class HeaderMedicalParser extends AbstractParser {
                 else if (medical.getDocumentDate() == null)
                     medical.setDocumentDate(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.HEADER_TIME)) {
-                if (medical.getDocumentTime() != null && medical.getDocumentTime().length() < clusterNonDehypenizedContent.length())
+                if (medical.getDocumentTime() != null)
                     medical.setDocumentTime(clusterNonDehypenizedContent);
                 else if (medical.getDocumentDate() == null)
                     medical.setDocumentDate(clusterNonDehypenizedContent);
@@ -1046,32 +1046,6 @@ public class HeaderMedicalParser extends AbstractParser {
         String existinContentSimplified = existingContent.toLowerCase();
         existinContentSimplified = existinContentSimplified.replace(" ", "").trim();
         if (newContentSimplified.equals(existinContentSimplified))
-            return false;
-        else
-            return true;
-    }
-
-    /**
-     * In the context of field extraction, this variant of the previous method check if a newly
-     * extracted content is not redundant globally and as any substring combination with the already
-     * extracted content
-     */
-    private boolean isDifferentandNotIncludedContent(String existingContent, String newContent) {
-        if (existingContent == null) {
-            return true;
-        }
-        if (newContent == null) {
-            return false;
-        }
-        String newContentSimplified = newContent.toLowerCase();
-        newContentSimplified = newContentSimplified.replace(" ", "").trim();
-        newContentSimplified = newContentSimplified.replace("-", "").trim();
-        String existingContentSimplified = existingContent.toLowerCase();
-        existingContentSimplified = existingContentSimplified.replace(" ", "").trim();
-        existingContentSimplified = existingContentSimplified.replace("-", "").trim();
-        if (newContentSimplified.equals(existingContentSimplified) ||
-            existingContentSimplified.indexOf(newContentSimplified) != -1
-        )
             return false;
         else
             return true;

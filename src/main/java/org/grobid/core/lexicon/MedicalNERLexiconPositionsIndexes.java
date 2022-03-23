@@ -12,8 +12,11 @@ public class MedicalNERLexiconPositionsIndexes {
     private Lexicon lexicon;
     private MedicalNERLexicon medicalNERLexicon;
 
+    private List<OffsetPosition> anatomyPositions = new ArrayList<OffsetPosition>();
+
     private List<OffsetPosition> localLocationPositions = new ArrayList<OffsetPosition>();
     private List<OffsetPosition> localPersonTitlePositions = new ArrayList<OffsetPosition>();
+    private List<OffsetPosition> localPersonSuffixPositions = new ArrayList<OffsetPosition>();
     private List<OffsetPosition> localOrganisationPositions = new ArrayList<OffsetPosition>();
     private List<OffsetPosition> localOrgFormPositions = new ArrayList<OffsetPosition>();
 
@@ -23,8 +26,10 @@ public class MedicalNERLexiconPositionsIndexes {
     }
 
     public void computeIndexes(List<LayoutToken> tokens) {
+        anatomyPositions = medicalNERLexicon.tokenPositionsAnatomyNames(tokens);
         localLocationPositions = medicalNERLexicon.tokenPositionsGeographicNames(tokens);
         localPersonTitlePositions = lexicon.tokenPositionsPersonTitle(tokens);
+        localPersonSuffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
         localOrganisationPositions = lexicon.tokenPositionsOrganisationNames(tokens);
         localOrgFormPositions = lexicon.tokenPositionsOrgForm(tokens);
     }
@@ -64,6 +69,14 @@ public class MedicalNERLexiconPositionsIndexes {
 
     public void setLocalPersonTitlePositions(List<OffsetPosition> localPersonTitlePositions) {
         this.localPersonTitlePositions = localPersonTitlePositions;
+    }
+
+    public List<OffsetPosition> getLocalPersonSuffixPositions() {
+        return localPersonTitlePositions;
+    }
+
+    public void setLocalPersonSuffixPositions(List<OffsetPosition> localPersonSuffixPositions) {
+        this.localPersonSuffixPositions = localPersonSuffixPositions;
     }
 
     public List<OffsetPosition> getLocalOrganisationPositions() {

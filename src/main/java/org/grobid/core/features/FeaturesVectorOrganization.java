@@ -172,7 +172,7 @@ public class FeaturesVectorOrganization {
             (suffixPositions == null) ||
             (emailPositions == null) ||
             (urlPositions == null)) {
-            throw new GrobidException("At least one list of gazetter matches positions is null.");
+            throw new GrobidException("At least one list of gazetteer matches positions is null.");
         }
 
         FeatureFactory featureFactory = FeatureFactory.getInstance();

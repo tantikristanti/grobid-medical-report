@@ -23,14 +23,22 @@ For the annotation process, we use the largest entity mentions and does not hand
 For the French medical NER model, we use the following TEI elements:
 
 * `<anatomy>` for anatomy
-* `<device>` for devices
-* `<disorder>` for disorders
-* `<drug>` for chemical and drugs
+* `<date>` for dates
+* `<device>` for devices (e.g., hospital equipments and devices)
+* `<dose>` for doses
+* `<drug>` for drug names
+* `<examination>` for examination procedures
 * `<living>` for living beings
-* `<location>` for geographic areas
-* `<object>` for objects
-* `<phenomena>` for phenomena
+* `<measure>` for measure types or names
+* `<object>` for objects 
+* `<pathology>` for disease names
+* `<persName>` for person names
 * `<physiology>` for physiology
-* `<procedure>` for procedures
-* `<other>` for unknown (yet) part
+* `<substance>` for chemical substances
+* `<symptom>` for symptoms and signs
+* `<treatment>` for treatment procedures
+* `<value>` for values
+* `<unit>` for value units
+* `<other>` for unknown (yet) entities
+
 

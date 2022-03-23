@@ -16,7 +16,7 @@ The models prepared are:
 
 - [x] full-medical-text
 
-- [x] French medical NER 
+- [ ] French medical NER 
 
 - [x] dateline
 

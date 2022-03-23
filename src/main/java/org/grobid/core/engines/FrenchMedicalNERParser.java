@@ -4,6 +4,8 @@ import com.googlecode.clearnlp.engine.EngineGetter;
 import com.googlecode.clearnlp.segmentation.AbstractSegmenter;
 import com.googlecode.clearnlp.tokenization.AbstractTokenizer;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Entity;
@@ -16,22 +18,20 @@ import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
-import org.grobid.core.engines.tagging.*;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
+import org.grobid.core.features.FeatureFactory;
+import org.grobid.core.features.FeatureFactoryMedical;
 import org.grobid.core.features.FeaturesVectorMedicalNER;
-import org.grobid.core.features.FeaturesVectorNER;
 import org.grobid.core.lang.Language;
+import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.lexicon.LexiconPositionsIndexes;
 import org.grobid.core.lexicon.MedicalNERLexicon;
-import org.grobid.core.lexicon.MedicalNERLexiconPositionsIndexes;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
-import org.grobid.core.utilities.counters.impl.CntManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -50,12 +52,11 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 
 public class FrenchMedicalNERParser extends AbstractParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
-    private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-    protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
-    protected Lexicon lexicon = Lexicon.getInstance();
-    protected File tmpPath = null;
+    private static Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
     protected EngineMedicalParsers parsers;
+    public Lexicon lexicon = Lexicon.getInstance();
+    protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
+    protected File tmpPath = null;
 
     public FrenchMedicalNERParser(EngineMedicalParsers parsers) {
         //by default, we use CRF models (e.g., with the model built on the training data of the French Quaero Corpus)
@@ -67,6 +68,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
         // if we want to use DeLFT models
         //super(GrobidModels.FR_MEDICAL_NER_QUAERO, CntManagerFactory.getNoOpCntManager(), GrobidCRFEngine.DELFT, "BidLSTM_CRF");
         this.parsers = parsers;
+
         tmpPath = GrobidProperties.getTempPath();
     }
 
@@ -75,7 +77,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
      * The positions of the recognized entities are given as character offsets
      * (following Java specification of characters).
      */
-    public List<MedicalEntity> extractNE(String text) {
+    public List<MedicalEntity> extractNE(String text) throws Exception {
+        if (StringUtils.isEmpty(text)) {
+            return null;
+        }
+
         List<LayoutToken> tokens = null;
         try {
             // for the analyser is English to avoid any bad surprises
@@ -95,21 +101,456 @@ public class FrenchMedicalNERParser extends AbstractParser {
      * The positions of the recognized entities are given with coordinates in
      * the input document.
      */
-    public List<MedicalEntity> extractNE(List<LayoutToken> tokens) {
+    public List<MedicalEntity> extractNE(List<LayoutToken> tokens) throws Exception {
         if (tokens == null)
             return null;
 
-        MedicalNERLexiconPositionsIndexes positionsIndexes = new MedicalNERLexiconPositionsIndexes(medicalNERLexicon);
-        positionsIndexes.computeIndexes(tokens);
+        /*MedicalNERLexiconPositionsIndexes positionsIndexes = new MedicalNERLexiconPositionsIndexes(medicalNERLexicon);
+        positionsIndexes.computeIndexes(tokens);*/
 
-        String res = toFeatureVectorLayout(tokens, positionsIndexes);
-        String result = label(res);
+        List<OffsetPosition> locationsPositions = lexicon.tokenPositionsLocationNames(tokens);
+        List<OffsetPosition> titlesPositions = lexicon.tokenPositionsPersonTitle(tokens);
+        List<OffsetPosition> suffixesPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+        List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+        List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+
+        String featuresNERData = FeaturesVectorMedicalNER.addFeaturesNER(tokens, null, locationsPositions, titlesPositions, suffixesPositions,
+            emailPositions, urlPositions);
+        String result = label(featuresNERData);
         // if we use the model built on the French Quaero Corpus
         //List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER_QUAERO, result, tokens);
 
         // if we use the model built on the French APHP Corpus
-        List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER, result, tokens);
+        //List<MedicalEntity> entities = resultExtraction(GrobidModels.FR_MEDICAL_NER, result, tokens);
+        List<MedicalEntity> entities = resultExtraction(result, tokens);
 
+        return entities;
+    }
+
+    /**
+     * Return the header section with features to be processed by the sequence labelling model
+     */
+    public Pair<String, List<LayoutToken>> getNerFeatures(Document doc, SortedSet<DocumentPiece> documentBodyParts) {
+        FeatureFactory featureFactory = FeatureFactory.getInstance();
+        FeatureFactoryMedical featureFactoryMedical = FeatureFactoryMedical.getInstance();
+        StringBuilder nerFeatures = new StringBuilder();
+
+        // vector for features
+        FeaturesVectorMedicalNER features;
+        FeaturesVectorMedicalNER previousFeatures = null;
+
+        boolean endblock;
+        //for (Integer blocknum : blockDocumentHeaders) {
+        List<Block> blocks = doc.getBlocks();
+        if ((blocks == null) || blocks.size() == 0) {
+            return null;
+        }
+
+        List<LayoutToken> nerTokenizations = new ArrayList<LayoutToken>();
+
+        for (DocumentPiece docPiece : documentBodyParts) {
+            DocumentPointer dp1 = docPiece.getLeft();
+            DocumentPointer dp2 = docPiece.getRight();
+
+            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
+                Block block = blocks.get(blockIndex);
+
+                List<LayoutToken> tokens = block.getTokens();
+                if ((tokens == null) || (tokens.size() == 0)) {
+                    continue;
+                }
+            }
+        }
+
+        for (DocumentPiece docPiece : documentBodyParts) {
+            DocumentPointer dp1 = docPiece.getLeft();
+            DocumentPointer dp2 = docPiece.getRight();
+
+            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
+                Block block = blocks.get(blockIndex);
+
+                List<LayoutToken> tokens = block.getTokens();
+                if ((tokens == null) || (tokens.size() == 0)) {
+                    continue;
+                }
+
+                String localText = block.getText();
+                if (localText == null)
+                    continue;
+                int n = 0;
+                if (blockIndex == dp1.getBlockPtr()) {
+                    //n = block.getStartToken();
+                    n = dp1.getTokenDocPos() - block.getStartToken();
+                }
+
+                List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                List<OffsetPosition> titlesPositions = lexicon.tokenPositionsPersonTitle(tokens);
+                List<OffsetPosition> suffixesPositions = lexicon.tokenPositionsPersonSuffix(tokens);
+                List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+
+                while (n < tokens.size()) {
+                    if (blockIndex == dp2.getBlockPtr()) {
+                        if (n > dp2.getTokenDocPos() - block.getStartToken()) {
+                            break;
+                        }
+                    }
+
+                    LayoutToken token = tokens.get(n);
+                    nerTokenizations.add(token);
+
+                    String text = token.getText();
+                    if (text == null) {
+                        n++;
+                        continue;
+                    }
+
+                    text = text.replace(" ", "");
+                    if (text.length() == 0) {
+                        n++;
+                        continue;
+                    }
+
+                    if (text.equals("\n") || text.equals("\r")) {
+                        n++;
+                        continue;
+                    }
+
+                    // final sanitisation and filtering for the token
+                    text = text.replaceAll("[ \n]", "");
+                    if (TextUtilities.filterLine(text)) {
+                        n++;
+                        continue;
+                    }
+
+                    features = new FeaturesVectorMedicalNER();
+                    features.string = text;
+
+                    Matcher m0 = featureFactory.isPunct.matcher(text);
+                    if (m0.find()) {
+                        features.punctType = "PUNCT";
+                    }
+                    if (text.equals("(") || text.equals("[")) {
+                        features.punctType = "OPENBRACKET";
+
+                    } else if (text.equals(")") || text.equals("]")) {
+                        features.punctType = "ENDBRACKET";
+
+                    } else if (text.equals(".")) {
+                        features.punctType = "DOT";
+
+                    } else if (text.equals(",")) {
+                        features.punctType = "COMMA";
+
+                    } else if (text.equals("-")) {
+                        features.punctType = "HYPHEN";
+
+                    } else if (text.equals("\"") || text.equals("\'") || text.equals("`")) {
+                        features.punctType = "QUOTE";
+                    }
+
+                    if (text.length() == 1) {
+                        features.singleChar = true;
+                    }
+
+                    if (Character.isUpperCase(text.charAt(0))) {
+                        features.capitalisation = "INITCAP";
+                    }
+
+                    if (featureFactory.test_all_capital(text)) {
+                        features.capitalisation = "ALLCAP";
+                    }
+
+                    if (featureFactory.test_digit(text)) {
+                        features.digit = "CONTAINSDIGITS";
+                    }
+
+                    if (featureFactory.test_common(text)) {
+                        features.commonName = true;
+                    }
+
+                    if (featureFactory.test_names(text)) {
+                        features.properName = true;
+                    }
+
+                    if (featureFactory.test_first_names(text)) {
+                        features.firstName = true;
+                    }
+
+                    if (featureFactory.test_last_names(text)) {
+                        features.lastName = true;
+                    }
+
+                    Matcher m = featureFactory.isDigit.matcher(text);
+                    if (m.find()) {
+                        features.digit = "ALLDIGIT";
+                    }
+
+                    if (featureFactory.test_common(text)) {
+                        features.commonName = true;
+                    }
+
+                    if (featureFactory.test_names(text)) {
+                        features.properName = true;
+                    }
+
+                    if (featureFactory.test_month(text)) {
+                        features.month = true;
+                    }
+
+                    Matcher m2 = featureFactory.year.matcher(text);
+                    if (m2.find()) {
+                        features.year = true;
+                    }
+
+                    // check token offsets for title of person
+                    if (titlesPositions != null) {
+                        for (OffsetPosition thePosition : titlesPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.isPersonTitleToken = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // check token offsets for title of person
+                    if (suffixesPositions != null) {
+                        for (OffsetPosition thePosition : suffixesPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.isPersonSuffixToken = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // check token offsets for email and http address, or known location
+                    if (locationPositions != null) {
+                        for (OffsetPosition thePosition : locationPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.locationName = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        if (featureFactoryMedical.test_geography(text)) {
+                            features.locationName = true;
+                        }
+                    }
+                    if (emailPositions != null) {
+                        for (OffsetPosition thePosition : emailPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.email = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (urlPositions != null) {
+                        for (OffsetPosition thePosition : urlPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.http = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (features.capitalisation == null)
+                        features.capitalisation = "NOCAPS";
+
+                    if (features.digit == null)
+                        features.digit = "NODIGIT";
+
+                    if (features.punctType == null)
+                        features.punctType = "NOPUNCT";
+
+                    if (featureFactory.test_country(text)) {
+                        features.countryName = true;
+                    }
+
+                    if (featureFactory.test_city(text)) {
+                        features.cityName = true;
+                    }
+
+                    if (featureFactoryMedical.test_anatomies(text)) {
+                        features.anatomy = true;
+                    }
+
+                    if (featureFactoryMedical.test_drugs_chemicals(text)) {
+                        features.chemical = true;
+                    }
+
+                    if (featureFactoryMedical.test_devices(text) || featureFactoryMedical.test_objects(text)) {
+                        features.device = true;
+                    }
+
+                    if (featureFactoryMedical.test_disorders(text)) {
+                        features.disorder = true;
+                    }
+
+                    if (featureFactoryMedical.test_living_beings(text)) {
+                        features.livingBeing = true;
+                    }
+
+                    if (featureFactoryMedical.test_phenomena(text)) {
+                        features.phenomena = true;
+                    }
+
+                    if (featureFactoryMedical.test_physiology(text)) {
+                        features.physiology = true;
+                    }
+
+                    if (featureFactoryMedical.test_procedures(text)) {
+                        features.procedure = true;
+                    }
+
+                    features.wordShape = TextUtilities.wordShape(text);
+
+                    features.wordShapeTrimmed = TextUtilities.wordShapeTrimmed(text);
+
+
+                    if (previousFeatures != null)
+                        nerFeatures.append(previousFeatures.printVector());
+                    previousFeatures = features;
+
+                    n++;
+                }
+
+                if (previousFeatures != null) {
+                    nerFeatures.append(previousFeatures.printVector());
+                    previousFeatures = null;
+                }
+            }
+        }
+
+        return Pair.of(nerFeatures.toString(), nerTokenizations);
+    }
+
+    /**
+     * Extract results from a labelled NER data.
+     *
+     * @param result        result
+     * @param tokenizations list of tokens
+     * @return a medical item
+     */
+    public List<MedicalEntity> resultExtraction(String result, List<LayoutToken> tokenizations) {
+        List<MedicalEntity> entities = new ArrayList<>();
+        MedicalEntity entity = null;
+
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.FR_MEDICAL_NER, result, tokenizations);
+        List<TaggingTokenCluster> clusters = clusteror.cluster();
+
+        entity.generalResultMapping(result, tokenizations);
+        String label = null, previousLabel = null;
+        boolean begin = true;
+        for (TaggingTokenCluster cluster : clusters) {
+            if (cluster == null) {
+                continue;
+            }
+            TaggingLabel clusterLabel = cluster.getTaggingLabel();
+            Engine.getCntManager().i(clusterLabel);
+
+            String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
+            String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
+            entity.setRawName(clusterContent);
+            label = clusterLabel.getLabel();
+            if (begin && label != previousLabel) {
+                label = "I-" + label;
+                entity.setRawType(label);
+                begin = false;
+            }
+            previousLabel = clusterLabel.getLabel();
+            entity.setBoundingBoxes(BoundingBoxCalculator.calculate(cluster.concatTokens()));
+            entity.setOffsets(calculateOffsets(cluster));
+            entity.setLayoutTokens(cluster.concatTokens());
+
+
+            if (clusterLabel.equals(MedicalLabels.NER_ANATOMY)) {
+                if (entity.getAnatomy() != null) {
+                    entity.setAnatomy(entity.getAnatomy() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setAnatomy(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_DATE)) {
+                if (entity.getDate() != null) {
+                    entity.setDate(entity.getAnatomy() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setDate(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_DEVICE)) {
+                if (entity.getDevice() != null) {
+                    entity.setDevice(entity.getDevice() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setDevice(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_DOSE)) {
+                if (entity.getDose() != null) {
+                    entity.setDose(entity.getDose() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setDose(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_DRUG)) {
+                if (entity.getDrug() != null) {
+                    entity.setDrug(entity.getDrug() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setDrug(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_EXAMINATION)) {
+                if (entity.getExamination() != null) {
+                    entity.setExamination(entity.getExamination() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setExamination(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_LIVING)) {
+                if (entity.getLiving() != null) {
+                    entity.setLiving(entity.getLiving() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setLiving(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_MEASURE)) {
+                if (entity.getMeasure() != null) {
+                    entity.setMeasure(entity.getMeasure() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setMeasure(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_OBJECT)) {
+                if (entity.getObject() != null) {
+                    entity.setObject(entity.getObject() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setObject(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_PATHOLOGY)) {
+                if (entity.getPathology() != null) {
+                    entity.setPathology(entity.getPathology() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setPathology(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_PERSON_NAME)) {
+                if (entity.getPersname() != null) {
+                    entity.setPersname(entity.getPersname() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setPersname(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_PHYSIOLOGY)) {
+                if (entity.getPhysiology() != null) {
+                    entity.setPhysiology(entity.getPhysiology() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setPhysiology(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_SUBSTANCE)) {
+                if (entity.getSubstance() != null) {
+                    entity.setSubstance(entity.getSubstance() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setSubstance(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_SYMPTOM)) {
+                if (entity.getSymptom() != null) {
+                    entity.setSymptom(entity.getSymptom() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setSymptom(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_TREATMENT)) {
+                if (entity.getTreatment() != null) {
+                    entity.setTreatment(entity.getTreatment() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setTreatment(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_VALUE)) {
+                if (entity.getValue() != null) {
+                    entity.setValue(entity.getValue() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setValue(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_UNIT)) {
+                if (entity.getUnit() != null) {
+                    entity.setUnit(entity.getUnit() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setUnit(clusterNonDehypenizedContent);
+            }
+            entities.add(entity);
+        }
         return entities;
     }
 
@@ -286,7 +727,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
     }
 
     // create training data by calling the pre-trained model
-    public StringBuilder createTraining(String text, StringBuilder sb) throws IOException {
+    public StringBuilder createTraining(String text, StringBuilder sb) throws Exception {
         if (isEmpty(text))
             return null;
 
@@ -299,13 +740,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 continue;
 
             sb.append("\t\t\t<p " + "xml:id=\"p" + p + "\">");
-
             // we process NER at paragraph level (as it is trained at this level and because
             // inter sentence features/template are used by the CRF)
             // calling the French Medical NER model
 
             List<MedicalEntity> medicalEntities = extractNE(theText.trim());
-
             int nerTextLength = 0;
             String nerTextStart = "", nerText = "", nerTextEnd = "",
                 combinedText = "", prevText = "", nextText = "";
@@ -390,9 +829,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
      * @param pathOutput path for result
      * @param id         id
      */
-    public Document createTraining(File inputFile,
-                                   String pathOutput,
-                                   int id) {
+    public Document createTrainingFromPDF(File inputFile,
+                                          String pathOutput,
+                                          int id) {
         if (tmpPath == null)
             throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
         if (!tmpPath.exists()) {
@@ -423,13 +862,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
             doc.produceStatistics();
 
-            List<LayoutToken> tokenizations = doc.getTokenizations();
-
             // first, call the medical-report-segmenter model to have high level segmentation
             doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
 
-            // in this case, we only take the body part
+            // in this case, we only take the body part for further process with the French medical NER model
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
 
             if (documentBodyParts != null) {
                 List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
@@ -452,20 +890,48 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     bufferBody.append(token.getText());
                 }
 
+                String[] lines = bufferBody.toString().split("\n");
+                List nerResults = new ArrayList();
+                List<LayoutToken> tokensText = null;
+                int p = 1;
+
                 // write the TEI file to reflect the extract layout of the text as extracted from the pdf
                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                 writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
                 writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
-
                 /*writer.write(bufferBody.toString() + "\n");*/
+
                 // create training data by calling the grobid-ner models
                 //createTrainingUsingGrobidNer(bufferBody.toString(), result, lang);
 
-                // create training data by calling the French NER medical model (either built on the French Quaero Corpus or on the APHP Corpus)
-                String theText = bufferBody.toString();
+                List<OffsetPosition> locationsPositions = null;
+                List<OffsetPosition> titlesPositions = null;
+                List<OffsetPosition> suffixesPositions = null;
+                List<OffsetPosition> emailPositions = null;
+                List<OffsetPosition> urlPositions = null;
+                for (String line : lines) {
+                    if ((line != null) && (line.length() > 0)) {
+                        tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line, new Language(Language.EN, 1.0));
 
-                createTraining(theText, result);
-                writer.write(result + "\n");
+                        locationsPositions = lexicon.tokenPositionsLocationNames(tokensText);
+                        titlesPositions = lexicon.tokenPositionsPersonTitle(tokensText);
+                        suffixesPositions = lexicon.tokenPositionsPersonSuffix(tokensText);
+                        emailPositions = lexicon.tokenPositionsEmailPattern(tokensText);
+                        urlPositions = lexicon.tokenPositionsUrlPattern(tokensText);
+
+                        String featuresNERData = FeaturesVectorMedicalNER.addFeaturesNER(tokensText, null, locationsPositions, titlesPositions, suffixesPositions,
+                            emailPositions, urlPositions);
+                        String labeledNerData = label(featuresNERData);
+                        String bufferNer = trainingExtraction(labeledNerData, tokensText).toString();
+
+                        if ((bufferNer != null) && (bufferNer.length() > 0)) {
+                            writer.write("\t\t\t<p " + "xml:id=\"p" + p + "\">");
+                            writer.write(bufferNer);
+                            writer.write("</p>\n");
+                            p++;
+                        }
+                    }
+                }
                 writer.write("\n\t\t</document>\n");
                 writer.write("\t</subcorpus>\n</corpus>\n");
                 writer.close();
@@ -581,42 +1047,247 @@ public class FrenchMedicalNERParser extends AbstractParser {
     }
 
 
-    public static String toFeatureVectorLayout(List<LayoutToken> tokens, MedicalNERLexiconPositionsIndexes positionsIndexes) {
-        StringBuffer ress = new StringBuffer();
-        int posit = 0; // keep track of the position index in the list of positions
+    /**
+     * In the context of field extraction, check if a newly extracted content is not redundant
+     * with the already extracted content
+     */
+    private boolean isDifferentContent(String existingContent, String newContent) {
+        if (existingContent == null) {
+            return true;
+        }
+        if (newContent == null) {
+            return false;
+        }
+        String newContentSimplified = newContent.toLowerCase();
+        newContentSimplified = newContentSimplified.replace(" ", "").trim();
+        String existinContentSimplified = existingContent.toLowerCase();
+        existinContentSimplified = existinContentSimplified.replace(" ", "").trim();
+        if (newContentSimplified.equals(existinContentSimplified))
+            return false;
+        else
+            return true;
+    }
 
-        for (LayoutToken token : tokens) {
-            if ((token.getText() == null) ||
-                (token.getText().length() == 0) ||
-                token.getText().equals(" ") ||
-                token.getText().equals("\t") ||
-                token.getText().equals("\n") ||
-                token.getText().equals("\r") ||
-                token.getText().equals("\u00A0")) {
+    private List<LayoutToken> getLayoutTokens(TaggingTokenCluster cluster) {
+        List<LayoutToken> tokens = new ArrayList<>();
+
+        for (LabeledTokensContainer container : cluster.getLabeledTokensContainers()) {
+            tokens.addAll(container.getLayoutTokens());
+        }
+
+        return tokens;
+    }
+
+    /**
+     * Extract results from a labelled header in the training format without any
+     * string modification.
+     *
+     * @param result        result
+     * @param tokenizations list of tokens
+     * @return a result
+     */
+    public StringBuilder trainingExtraction(String result, List<LayoutToken> tokenizations) {
+        // this is the main buffer for the whole header
+        StringBuilder buffer = new StringBuilder();
+
+        StringTokenizer st = new StringTokenizer(result, "\n");
+        String s1 = null;
+        String s2 = null;
+        String lastTag = null;
+
+        int p = 0;
+
+        while (st.hasMoreTokens()) {
+            boolean addSpace = false;
+            String tok = st.nextToken().trim();
+
+            if (tok.length() == 0) {
                 continue;
             }
+            StringTokenizer stt = new StringTokenizer(tok, "\t");
+            // List<String> localFeatures = new ArrayList<String>();
+            int i = 0;
 
-            // check if the token is a known NE
-            // do we have a NE at position posit?
-            boolean isLocationToken = MedicalNERLexiconPositionsIndexes
-                .isTokenInLexicon(positionsIndexes.getLocalLocationPositions(), posit);
-            boolean isPersonTitleToken = MedicalNERLexiconPositionsIndexes
-                .isTokenInLexicon(positionsIndexes.getLocalPersonTitlePositions(), posit);
-            boolean isOrganisationToken = MedicalNERLexiconPositionsIndexes
-                .isTokenInLexicon(positionsIndexes.getLocalOrganisationPositions(), posit);
-            boolean isOrgFormToken = MedicalNERLexiconPositionsIndexes
-                .isTokenInLexicon(positionsIndexes.getLocalOrgFormPositions(), posit);
+            boolean newLine = false;
+            int ll = stt.countTokens();
+            while (stt.hasMoreTokens()) {
+                String s = stt.nextToken().trim();
+                if (i == 0) {
+                    s2 = TextUtilities.HTMLEncode(s);
+                    //s2 = s;
 
-            ress.append(FeaturesVectorMedicalNER
-                .addFeaturesNER(token.getText(),
-                    isLocationToken, isPersonTitleToken, isOrganisationToken, isOrgFormToken)
-                .printVector());
+                    boolean strop = false;
+                    while ((!strop) && (p < tokenizations.size())) {
+                        String tokOriginal = tokenizations.get(p).t();
+                        if (tokOriginal.equals(" ")
+                            || tokOriginal.equals("\u00A0")) {
+                            addSpace = true;
+                        } else if (tokOriginal.equals(s)) {
+                            strop = true;
+                        }
+                        p++;
+                    }
+                } else if (i == ll - 1) {
+                    s1 = s;
+                } else {
+                    if (s.equals("LINESTART"))
+                        newLine = true;
+                    // localFeatures.add(s);
+                }
+                i++;
+            }
 
-            ress.append("\n");
-            posit++;
+            if (newLine) {
+                buffer.append("<lb/>");
+            }
+
+            String lastTag0 = null;
+            if (lastTag != null) {
+                if (lastTag.startsWith("I-")) {
+                    lastTag0 = lastTag.substring(2, lastTag.length());
+                } else {
+                    lastTag0 = lastTag;
+                }
+            }
+            String currentTag0 = null;
+            if (s1 != null) {
+                if (s1.startsWith("I-")) {
+                    currentTag0 = s1.substring(2, s1.length());
+                } else {
+                    currentTag0 = s1;
+                }
+            }
+
+            if (lastTag != null) {
+                testClosingTag(buffer, currentTag0, lastTag0);
+            }
+
+            boolean output;
+
+            output = writeField(buffer, s1, lastTag0, s2, "<anatomy>", "<ENAMEX type=\"anatomy\">", addSpace);
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"anatomy\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<device>", "<ENAMEX type=\"device\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<dose>", "<ENAMEX type=\"dose\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<drug>", "<ENAMEX type=\"drug\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<examination>", "<ENAMEX type=\"examination\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<measure>", "<ENAMEX type=\"measure\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<object>", "<ENAMEX type=\"object\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<pathology>", "<ENAMEX type=\"pathology\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<persname>", "<ENAMEX type=\"persname\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<physiology>", "<ENAMEX type=\"physiology\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<substance>", "<ENAMEX type=\"substance\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<symptom>", "<ENAMEX type=\"symptom\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<treatment>", "<ENAMEX type=\"treatment\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<value>", "<ENAMEX type=\"value\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<ENAMEX type=\"unit\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
+            }
+
+            lastTag = s1;
+
+            if (!st.hasMoreTokens()) {
+                if (lastTag != null) {
+                    testClosingTag(buffer, "", currentTag0);
+                }
+            }
         }
-        ress.append("\n");
-        return ress.toString();
+
+        return buffer;
+    }
+
+    private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
+        if (!currentTag0.equals(lastTag0)) {
+            // we close the current tag
+            if (lastTag0.equals("<anatomy>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<date>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<device>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<dose>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<drug>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<examination>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<living>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<measure>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<object>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<pathology>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<persname>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<physiology>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<substance>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<symptom>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<treatment>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<value>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<unit>")) {
+                buffer.append("</ENAMEX>");
+            }
+        }
+    }
+
+    private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
+        boolean result = false;
+        if ((s1.equals(field)) || (s1.equals("I-" + field))) {
+            result = true;
+            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) {
+                if (addSpace)
+                    buffer.append(" ").append(s2);
+                else
+                    buffer.append(s2);
+            } else {
+                //buffer.append(" ").append(outField).append(s2);
+                if (addSpace)
+                    buffer.append(" ").append(outField).append(s2);
+                else
+                    buffer.append(outField).append(s2);
+            }
+        }
+        return result;
     }
 
     @Override
