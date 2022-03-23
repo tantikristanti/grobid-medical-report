@@ -16,7 +16,7 @@ The models prepared are:
 
 - [x] full-medical-text
 
-- [ ] French medical NER 
+- [x] French medical terminology recognition 
 
 - [x] dateline
 
@@ -26,9 +26,9 @@ The models prepared are:
 
 - [x] patient
 
-- [ ] name-medic
+- [x] name-medic
 
-- [ ] name-patient
+- [x] name-patient
 
 
 
