@@ -115,12 +115,12 @@ public class FullMedicalTextParser extends AbstractParser {
             // left-note processing
             LeftNoteMedicalItem resLeftNote = new LeftNoteMedicalItem();
 
-            String strLeftNote = null;
-
             Pair<String, LayoutTokenization> featSeg = null;
 
+            StringBuilder strLeftNote = new StringBuilder();;
+
             // using the segmentation model to identify the header and left-note zones
-            parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, strLeftNote, false);
+            parsers.getHeaderMedicalParser().processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,  false);
 
             // full text processing
             featSeg = getBodyTextFeatured(doc, documentBodyParts);
@@ -3182,7 +3182,7 @@ System.out.println("majorityEquationarkerType: " + majorityEquationarkerType);*/
                        List<LayoutToken> tokenizationsAnnex,
                        HeaderMedicalItem resHeader,
                        LeftNoteMedicalItem resLeftNote,
-                       String strLeftNote,
+                       StringBuilder strLeftNote,
                        List<Figure> figures,
                        List<Table> tables,
                        List<CalloutAnalyzer.MarkerType> markerTypes,
@@ -3194,7 +3194,7 @@ System.out.println("majorityEquationarkerType: " + majorityEquationarkerType);*/
         StringBuilder tei;
         try {
             // header and left-note
-            tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, strLeftNote, null, config);
+            tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
 
             // body
             tei = teiFormatter.toTEIBody(tei, reseBody, resHeader, layoutTokenization, figures, tables, markerTypes, doc, config);

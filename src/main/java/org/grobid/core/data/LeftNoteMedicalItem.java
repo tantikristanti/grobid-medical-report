@@ -32,19 +32,6 @@ public class LeftNoteMedicalItem {
     // information regarding the document
     private String language = null;
     private String idno = null;
-    private String ghu = null;
-    private String chu = null;
-    private String dmu = null;
-    private String pole = null;
-    private String site = null;
-    private String institution = null;
-    private String university = null;
-    private String hospital = null;
-    private String center = null;
-    private String service = null;
-    private String department = null;
-    private String unit = null;
-    private String sub = null;
     private String org = null;
     private String address = null;
     private String country = null;
@@ -56,6 +43,7 @@ public class LeftNoteMedicalItem {
     private String medics = null;
     // left-note short note
     private String note = null;
+    private String rawLeftNote = null;
 
     // list of medics, patients, datelines, affiliations for further process with related models
     private List<Organization> listOrganizations = null;
@@ -68,21 +56,13 @@ public class LeftNoteMedicalItem {
         return "LeftNoteItem{" +
             " language='" + language + '\'' +
             ", idno='" + idno + '\'' +
-            ", ghu='" + ghu + '\'' +
-            ", chu='" + chu + '\'' +
-            ", dmu='" + dmu + '\'' +
-            ", pole='" + pole + '\'' +
-            ", hospital='" + hospital + '\'' +
-            ", center='" + center + '\'' +
-            ", service='" + service + '\'' +
-            ", department='" + department + '\'' +
-            ", sub='" + sub + '\'' +
             ", organization='" + org + '\'' +
             ", address='" + address + '\'' +
             ", country='" + country + '\'' +
             ", town='" + settlement + '\'' +
             ", phone='" + phone + '\'' +
             ", fax='" + fax + '\'' +
+            ", email='" + email + '\'' +
             ", web='" + web + '\'' +
             ", medics='" + medics + '\'' +
             ", note='" + note + '\'' +
@@ -123,14 +103,6 @@ public class LeftNoteMedicalItem {
         labeledTokens = null;
         language = null;
         idno = null;
-        ghu = null;
-        chu = null;
-        dmu = null;
-        pole = null;
-        hospital = null;
-        center = null;
-        service = null;
-        department = null;;
         org = null;
         address = null;
         country = null;
@@ -154,57 +126,9 @@ public class LeftNoteMedicalItem {
         StringBuffer tei = new StringBuffer();
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("<listOrg>\n");
-        if (ghu != null) {
+        if (idno != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"ghu\">").append(TextUtilities.HTMLEncode(ghu)).append("</org>\n");
-        }
-        if (chu != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"chu\">").append(TextUtilities.HTMLEncode(chu)).append("</org>\n");
-        }
-        if (dmu != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"dmu\">").append(TextUtilities.HTMLEncode(dmu)).append("</org>\n");
-        }
-        if (pole != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"pole\">").append(TextUtilities.HTMLEncode(pole)).append("</org>\n");
-        }
-        if (site != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"site\">").append(TextUtilities.HTMLEncode(site)).append("</org>\n");
-        }
-        if (site != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"institution\">").append(TextUtilities.HTMLEncode(institution)).append("</org>\n");
-        }
-        if (university != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"university\">").append(TextUtilities.HTMLEncode(university)).append("</org>\n");
-        }
-        if (hospital != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"hospital\">").append(TextUtilities.HTMLEncode(hospital)).append("</org>\n");
-        }
-        if (center != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"center\">").append(TextUtilities.HTMLEncode(center)).append("</org>\n");
-        }
-        if (service != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"service\">").append(TextUtilities.HTMLEncode(service)).append("</org>\n");
-        }
-        if (department != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"department\">").append(TextUtilities.HTMLEncode(department)).append("</org>\n");
-        }
-        if (unit != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"unit\">").append(TextUtilities.HTMLEncode(unit)).append("</org>\n");
-        }
-        if (sub != null) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            tei.append("<org>\n\t<orgName type=\"sub\">").append(TextUtilities.HTMLEncode(sub)).append("</org>\n");
+            tei.append("<idno>").append(TextUtilities.HTMLEncode(idno)).append("</idno>\n");
         }
         if (org != null) {
             TextUtilities.appendN(tei, '\t', nbTag + 1);
@@ -400,14 +324,6 @@ public class LeftNoteMedicalItem {
 
     public String getIdno() {return idno;}
 
-    public String getSub() {
-        return sub;
-    }
-
-    public void setSub(String sub) {
-        this.sub = sub;
-    }
-
     public void setIdno(String idno) {this.idno = idno;}
 
     public List<Organization> getListOrganizations() {
@@ -426,101 +342,12 @@ public class LeftNoteMedicalItem {
         return medicsLayoutTokens;
     }
 
-    public String getCenter() {return center;}
-
-    public void setCenter(String center) {this.center = center;}
-
-    public String getService() {return service; }
-
-    public void setService(String service) {this.service = service;}
-
-    public String getDepartment() {
-        return department;
-    }
-
     public String getOrg() {
         return org;
     }
 
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public String getGhu() {
-        return ghu;
-    }
-
-    public void setGhu(String ghu) {
-        this.ghu = ghu;
-    }
-
-    public String getChu() {
-        return chu;
-    }
-
-    public void setChu(String chu) {
-        this.chu = chu;
-    }
-
-    public String getDmu() {
-        return dmu;
-    }
-
-    public void setDmu(String dmu) {
-        this.dmu = dmu;
-    }
-
-    public String getPole() {
-        return pole;
-    }
-
-    public void setPole(String pole) {
-        this.pole = pole;
-    }
-
-
-    public String getSite() {
-        return site;
-    }
-
-    public void setSite(String site) {
-        this.site = site;
-    }
-
-    public String getInstitution() {
-        return institution;
-    }
-
-    public void setInstitution(String institution) {
-        this.institution = institution;
-    }
-
-    public String getUniversity() {
-        return university;
-    }
-
-    public void setUniversity(String university) {
-        this.university = university;
-    }
-
-    public String getHospital() {
-        return hospital;
-    }
-
-    public void setHospital(String hospital) {
-        this.hospital = hospital;
-    }
-
     public void setOrg(String org) {
         this.org = org;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     public void setLabeledTokens(List<LayoutToken> tokens, TaggingLabel label) {
@@ -592,4 +419,13 @@ public class LeftNoteMedicalItem {
     public void setMedicsLayoutTokens(List<LayoutToken> medicsLayoutTokens) {
         this.medicsLayoutTokens = medicsLayoutTokens;
     }
+
+    public String getRawLeftNote() {
+        return rawLeftNote;
+    }
+
+    public void setRawLeftNote(String rawLeftNote) {
+        this.rawLeftNote = rawLeftNote;
+    }
+
 }

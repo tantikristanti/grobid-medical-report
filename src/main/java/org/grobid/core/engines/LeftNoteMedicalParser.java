@@ -80,7 +80,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Processing with application of the medical-report segmentation model
      */
-    public Pair<String, Document> processing(File input, LeftNoteMedicalItem resLeftNote, String strLeftNote, GrobidAnalysisConfig config) {
+    public Pair<String, Document> processing(File input, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
@@ -98,7 +98,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Processing with application of the segmentation model
      */
-    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, String strLeftNote, GrobidAnalysisConfig config) {
+    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
@@ -119,7 +119,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Left-Note processing after application of the medical-report segmentation model
      */
-    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, String strLeftNote, boolean serialize) {
+    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, boolean serialize) {
         try {
             // retrieve only the header (front) part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
@@ -209,7 +209,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 }
                 if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, strLeftNote, null, config);
+                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote,null, config);
                     tei.append("\t</text>\n");
                     tei.append("</TEI>\n");
                     return tei.toString();
@@ -648,84 +648,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     leftNoteItem.setIdno(leftNoteItem.getIdno() + "\n" + clusterNonDehypenizedContent);
                 } else {
                     leftNoteItem.setIdno(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_GHU)) {
-                if (leftNoteItem.getGhu() != null) {
-                    leftNoteItem.setGhu(leftNoteItem.getGhu() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setGhu(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_CHU)) {
-                if (leftNoteItem.getChu() != null) {
-                    leftNoteItem.setChu(leftNoteItem.getChu() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setChu(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DMU)) {
-                if (leftNoteItem.getDmu() != null) {
-                    leftNoteItem.setDmu(leftNoteItem.getDmu() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setDmu(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_POLE)) {
-                if (leftNoteItem.getPole() != null) {
-                    leftNoteItem.setPole(leftNoteItem.getPole() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setPole(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_INSTITUTION)) {
-                if (leftNoteItem.getInstitution() != null) {
-                    leftNoteItem.setInstitution(leftNoteItem.getInstitution() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setInstitution(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_UNIVERSITY)) {
-                if (leftNoteItem.getUniversity() != null) {
-                    leftNoteItem.setUniversity(leftNoteItem.getUniversity() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setUniversity(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SITE)) {
-                if (leftNoteItem.getSite() != null) {
-                    leftNoteItem.setSite(leftNoteItem.getSite() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setSite(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_HOSPITAL)) {
-                if (leftNoteItem.getHospital() != null) {
-                    leftNoteItem.setHospital(leftNoteItem.getHospital() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setHospital(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_CENTER)) {
-                if (leftNoteItem.getCenter() != null) {
-                    leftNoteItem.setCenter(leftNoteItem.getCenter() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setCenter(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SERVICE)) {
-                if (leftNoteItem.getService() != null) {
-                    leftNoteItem.setService(leftNoteItem.getService() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setService(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_DEPARTMENT)) {
-                if (leftNoteItem.getDepartment() != null) {
-                    leftNoteItem.setDepartment(leftNoteItem.getDepartment() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setDepartment(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_UNIT)) {
-                if (leftNoteItem.getUnit() != null) {
-                    leftNoteItem.setUnit(leftNoteItem.getUnit() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setUnit(clusterNonDehypenizedContent);
-                }
-            } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_SUB)) {
-                if (leftNoteItem.getSub() != null) {
-                    leftNoteItem.setSub(leftNoteItem.getSub() + "\n" + clusterNonDehypenizedContent);
-                } else {
-                    leftNoteItem.setSub(clusterNonDehypenizedContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.LEFT_NOTE_ORGANIZATION)) {
                 if (leftNoteItem.getOrg() != null) {

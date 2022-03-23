@@ -52,7 +52,7 @@ public class EngineMedical extends Engine {
         String inputFile,
         HeaderMedicalItem resultHeader,
         LeftNoteMedicalItem resultLeftNote,
-        String strLeftNote
+        StringBuilder strLeftNote
     ) {
         GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
             .startPage(0)
@@ -72,7 +72,7 @@ public class EngineMedical extends Engine {
      */
     public String processHeaderLeftNoteMedicalReport(String inputFile, String md5Str, GrobidAnalysisConfig config,
                                                      HeaderMedicalItem resultHeader, LeftNoteMedicalItem resultLeftNote,
-                                                     String strLeftNote) {
+                                                     StringBuilder strLeftNote) {
         // normally the header or left note items must not be null, but if it is the case,
         // we still continue with a new instance, so that the resulting TEI string is still delivered
         if (resultHeader == null) {
@@ -82,9 +82,9 @@ public class EngineMedical extends Engine {
             resultLeftNote = new LeftNoteMedicalItem();
         }
         if (strLeftNote == null) {
-            strLeftNote = "";
+            strLeftNote = new StringBuilder();
         }
-        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), md5Str, resultHeader, resultLeftNote,strLeftNote, config);
+        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), md5Str, resultHeader, resultLeftNote, config);
         return resultTEI.getLeft(); // the left result is the TEI results, while the right one is the Document object result
     }
 
@@ -361,7 +361,7 @@ public class EngineMedical extends Engine {
      */
     public String fullTextToTEI(File inputFile,
                                 GrobidAnalysisConfig config) throws Exception {
-        return fullTextToTEIDoc(inputFile, config).getTei();
+        return fullTextToTEIDoc(inputFile, null, config).getTei();
     }
 
     /**
@@ -397,12 +397,12 @@ public class EngineMedical extends Engine {
 
     public Document fullTextToTEIDoc(File inputFile,
                                      GrobidAnalysisConfig config) throws Exception {
-        return fullTextToTEIDoc(inputFile, config);
+        return fullTextToTEIDoc(inputFile, null, config);
     }
 
     public Document fullTextToTEIDoc(DocumentSource documentSource,
                                      GrobidAnalysisConfig config) throws Exception {
-        FullTextParser fullTextParser = parsers.getFullTextParser();
+        FullMedicalTextParser fullTextParser = parsers.getFullMedicalTextParser();
         Document resultDoc;
         LOGGER.debug("Starting processing fullTextToTEI on " + documentSource);
         long time = System.currentTimeMillis();

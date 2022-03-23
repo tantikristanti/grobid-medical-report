@@ -114,15 +114,13 @@ public class TEIFormatter {
 
     public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
                                              LeftNoteMedicalItem leftNoteMedicalItem,
-                                             String strLeftNote,
                                              String defaultPublicationStatement,
                                              GrobidAnalysisConfig config) {
-        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, strLeftNote, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
     }
 
     public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
                                              LeftNoteMedicalItem leftNoteMedicalItem,
-                                             String strLeftNote,
                                              SchemaDeclaration schemaDeclaration,
                                              String defaultPublicationStatement,
                                              GrobidAnalysisConfig config) {
@@ -159,34 +157,31 @@ public class TEIFormatter {
             tei.append("\t<teiHeader>\n");
         }
 
-        if (headerItem == null || leftNoteMedicalItem == null) {
-            if(headerItem == null) {
-                // if the headerItem object is null, we simply create an empty one
-                headerItem = new HeaderMedicalItem();
-            }
-            if (leftNoteMedicalItem == null) {
-                // if the leftNoteMedicalItem object is null, we simply create an empty one
-                leftNoteMedicalItem = new LeftNoteMedicalItem();
-            }
+        if (headerItem == null)  {
+            // if the headerItem object is null, we simply create an empty one
+            headerItem = new HeaderMedicalItem();
+        } else if (leftNoteMedicalItem == null) {
+            // if the leftNoteMedicalItem object is null, we simply create an empty one
+            leftNoteMedicalItem = new LeftNoteMedicalItem();
         } else {
-            tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n\t\t\t\t<title type=\"main\"");
-            if (config.isGenerateTeiIds()) {
-                String divID = KeyGen.getKey().substring(0, 7);
-                tei.append(" xml:id=\"_" + divID + "\"");
-            }
-            tei.append(">");
+            tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n");
 
-            // title
-            if (headerItem.getTitle() != null) {
-                tei.append(TextUtilities.HTMLEncode(headerItem.getTitle()));
-            } else {
-                tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentType()));
+            // document title or document type
+            if ((headerItem.getTitle() != null) || (headerItem.getDocumentType() != null)) {
+                tei.append("\t\t\t\t<title type=\"main\">");
+                if (headerItem.getTitle() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getTitle()));
+                }
+                else if (headerItem.getDocumentType() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentType()));
+                }
+                tei.append("</title>\n");
+            }else {
+                tei.append("\t\t\t\t<title xsi:nil=\"true\">\n");
             }
-
-            tei.append("</title>\n");
 
             // number of pages
-            if (headerItem.getNbPages() != -1) {
+            if (headerItem.getNbPages() > 0) {
                 tei.append("\t\t\t\t<extent>\n");
                 tei.append("\t\t\t\t\t<measure unit=\"pages\">" + headerItem.getNbPages() + "</measure>\n");
                 tei.append("\t\t\t\t</extent>\n");
@@ -290,10 +285,10 @@ public class TEIFormatter {
             }
 
             // information concerning organization from the left-note part of the medical reports if they exist
-            if (leftNoteMedicalItem != null) {
+            if (leftNoteMedicalItem.getRawLeftNote() != null && leftNoteMedicalItem.getRawLeftNote().length() > 0) {
                 //tei.append(leftNoteMedicalItem.toTEILeftNoteBlock(4, config));
                 tei.append("\t\t\t\t<listOrg>");
-                tei.append("\t\t\t\t").append(strLeftNote.replaceAll("<lb/>", "").
+                tei.append("\t\t\t\t").append(leftNoteMedicalItem.getRawLeftNote().replaceAll("<lb/>", "").
                     replaceAll("<person>","<listPerson type=\"medics\">").
                     replaceAll("<medic>","\t<medic>").
                     replaceAll("</medic>","\t</medic>").
