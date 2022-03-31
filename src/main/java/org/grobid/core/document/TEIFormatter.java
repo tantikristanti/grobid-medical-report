@@ -211,13 +211,13 @@ public class TEIFormatter {
 
                 // document number
                 if (headerItem.getDocNum() != null) {
-                    tei.append("\t\t\t\t<idno>" + TextUtilities.HTMLEncode(headerItem.getDocNum().replaceAll("\n", "")) +
+                    tei.append("\t\t\t\t<idno>" + TextUtilities.HTMLEncode(headerItem.getDocNum().replaceAll("\n", " ")) +
                         "</idno>\n");
                 }
 
                 // place name
                 if (headerItem.getLocation() != null) {
-                    tei.append("\t\t\t\t<pubPlace>" + TextUtilities.HTMLEncode(headerItem.getLocation().replaceAll("\n", "")) +
+                    tei.append("\t\t\t\t<pubPlace>" + TextUtilities.HTMLEncode(headerItem.getLocation().replaceAll("\n", "<lb/>")) +
                         "</pubPlace>\n");
                 }
 
@@ -246,22 +246,22 @@ public class TEIFormatter {
                 }
                 // phone if it exists
                 if (headerItem.getPhone() != null) {
-                    tei.append("\t\t\t\t\t<phone>" + TextUtilities.HTMLEncode(headerItem.getPhone().replaceAll("\t", "; ").replaceAll("\n", "")));
+                    tei.append("\t\t\t\t\t<phone>" + TextUtilities.HTMLEncode(headerItem.getPhone().replaceAll("\t", "; ").replaceAll("\n", " ")));
                     tei.append("</phone>\n");
                 }
                 // fax if it exists
                 if (headerItem.getFax() != null) {
-                    tei.append("\t\t\t\t\t<fax>" + TextUtilities.HTMLEncode(headerItem.getFax().replaceAll("\t", "; ").replaceAll("\n", "")));
+                    tei.append("\t\t\t\t\t<fax>" + TextUtilities.HTMLEncode(headerItem.getFax().replaceAll("\t", "; ").replaceAll("\n", " ")));
                     tei.append("</fax>\n");
                 }
                 // email if it exists
                 if (headerItem.getEmail() != null) {
-                    tei.append("\t\t\t\t\t<email>" + TextUtilities.HTMLEncode(headerItem.getEmail()));
+                    tei.append("\t\t\t\t\t<email>" + TextUtilities.HTMLEncode(headerItem.getEmail().replaceAll("\n", "")));
                     tei.append("</email>\n");
                 }
                 // web if it exists
                 if (headerItem.getWeb() != null) {
-                    tei.append("\t\t\t\t\t<ptr type=\"web\">" + TextUtilities.HTMLEncode(headerItem.getWeb()));
+                    tei.append("\t\t\t\t\t<ptr type=\"web\">" + TextUtilities.HTMLEncode(headerItem.getWeb().replaceAll("\n", "")));
                     tei.append("</ptr>\n");
                 }
                 tei.append("\t\t\t\t</publisher>\n");
@@ -291,7 +291,7 @@ public class TEIFormatter {
                 tei.append("\t\t\t\t").append(leftNoteMedicalItem.getRawLeftNote().replaceAll("<lb/>", "").
                     replaceAll("<person>","<listPerson type=\"medics\">").
                     replaceAll("<medic>","\t<medic>").
-                    replaceAll("</medic>","\t</medic>").
+                    replaceAll("</medic>","</medic>").
                     replaceAll("</person>","</listPerson>").
                     replaceAll("\n", "\n\t\t\t\t"));
                 tei.append("</listOrg>\n");

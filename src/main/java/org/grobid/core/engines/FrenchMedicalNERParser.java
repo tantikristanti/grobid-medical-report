@@ -1166,7 +1166,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<anatomy>", "<ENAMEX type=\"anatomy\">", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"anatomy\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"date\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<device>", "<ENAMEX type=\"device\">", addSpace);
