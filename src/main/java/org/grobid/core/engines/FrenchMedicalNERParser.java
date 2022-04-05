@@ -483,26 +483,26 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setDose(entity.getDose() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setDose(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.NER_DRUG)) {
-                if (entity.getDrug() != null) {
-                    entity.setDrug(entity.getDrug() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    entity.setDrug(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.NER_EXAMINATION)) {
-                if (entity.getExamination() != null) {
-                    entity.setExamination(entity.getExamination() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    entity.setExamination(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_LIVING)) {
                 if (entity.getLiving() != null) {
                     entity.setLiving(entity.getLiving() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setLiving(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_LOCATION)) {
+                if (entity.getLocation() != null) {
+                    entity.setLocation(entity.getLocation() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setLocation(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_MEASURE)) {
                 if (entity.getMeasure() != null) {
                     entity.setMeasure(entity.getMeasure() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setMeasure(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_MEDICAMENT)) {
+                if (entity.getMedicament() != null) {
+                    entity.setMedicament(entity.getMedicament() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setMedicament(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_OBJECT)) {
                 if (entity.getObject() != null) {
                     entity.setObject(entity.getObject() + "\t" + clusterNonDehypenizedContent);
@@ -523,6 +523,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setPhysiology(entity.getPhysiology() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setPhysiology(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_PROCEDURE)) {
+                if (entity.getProcedure() != null) {
+                    entity.setProcedure(entity.getProcedure() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setProcedure(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_SUBSTANCE)) {
                 if (entity.getSubstance() != null) {
                     entity.setSubstance(entity.getSubstance() + "\t" + clusterNonDehypenizedContent);
@@ -533,21 +538,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setSymptom(entity.getSymptom() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setSymptom(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.NER_TREATMENT)) {
-                if (entity.getTreatment() != null) {
-                    entity.setTreatment(entity.getTreatment() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    entity.setTreatment(clusterNonDehypenizedContent);
-            } else if (clusterLabel.equals(MedicalLabels.NER_VALUE)) {
-                if (entity.getValue() != null) {
-                    entity.setValue(entity.getValue() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    entity.setValue(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_UNIT)) {
                 if (entity.getUnit() != null) {
                     entity.setUnit(entity.getUnit() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setUnit(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_VALUE)) {
+                if (entity.getValue() != null) {
+                    entity.setValue(entity.getValue() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setValue(clusterNonDehypenizedContent);
             }
             entities.add(entity);
         }
@@ -1175,16 +1175,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<dose>", "<ENAMEX type=\"dose\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<drug>", "<ENAMEX type=\"drug\">", addSpace);
-            }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<examination>", "<ENAMEX type=\"examination\">", addSpace);
-            }
-            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<ENAMEX type=\"location\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<measure>", "<ENAMEX type=\"measure\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<medicament>", "<ENAMEX type=\"medicament\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<object>", "<ENAMEX type=\"object\">", addSpace);
@@ -1199,20 +1199,21 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<physiology>", "<ENAMEX type=\"physiology\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<procedure>", "<ENAMEX type=\"procedure\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<substance>", "<ENAMEX type=\"substance\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<symptom>", "<ENAMEX type=\"symptom\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<treatment>", "<ENAMEX type=\"treatment\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<ENAMEX type=\"unit\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<value>", "<ENAMEX type=\"value\">", addSpace);
             }
-            if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<ENAMEX type=\"unit\">", addSpace);
-            }
+
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
             }
@@ -1240,13 +1241,15 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<dose>")) {
                 buffer.append("</ENAMEX>");
-            } else if (lastTag0.equals("<drug>")) {
-                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<examination>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<living>")) {
                 buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<location>")) {
+                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<measure>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<medicament>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<object>")) {
                 buffer.append("</ENAMEX>");
@@ -1256,15 +1259,15 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<physiology>")) {
                 buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<procedure>")) {
+                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<substance>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<symptom>")) {
                 buffer.append("</ENAMEX>");
-            } else if (lastTag0.equals("<treatment>")) {
+            } else if (lastTag0.equals("<unit>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<value>")) {
-                buffer.append("</ENAMEX>");
-            } else if (lastTag0.equals("<unit>")) {
                 buffer.append("</ENAMEX>");
             }
         }

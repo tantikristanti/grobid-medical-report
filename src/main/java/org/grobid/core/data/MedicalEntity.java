@@ -19,26 +19,26 @@ import java.util.TreeMap;
  *
  */
 public class MedicalEntity implements Comparable<MedicalEntity> {
-    // map of labels (e.g. <drug> or <symptom>) to LayoutToken
+    // map of labels (e.g. <medicament> or <symptom>) to LayoutToken
     private Map<String, List<LayoutToken>> labeledTokens;
 
     private String anatomy = null;
     private String date = null;
     private String device = null;
     private String dose = null;
-    private String drug = null;
-    private String examination = null;
     private String living = null;
+    private String location = null;
     private String measure = null;
+    private String medicament = null;
     private String object = null;
     private String pathology = null;
     private String persname = null;
     private String physiology = null;
+    private String procedure = null;
     private String substance = null;
     private String symptom = null;
-    private String treatment = null;
-    private String value = null;
     private String unit = null;
+    private String value = null;
 
     /* Biomedical NER base types are adapted from
      - grobid-ner (https://grobid-ner.readthedocs.io/en/latest/class-and-senses/)
@@ -50,17 +50,17 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         DATE("DATE"),
         DEVICE("DEVICE"),
         DOSE("DOSE"),
-        DRUG("DRUG"),
-        EXAMINATION("EXAMINATION"),
-        LIVING("LEGAL"),
+        LIVING("LIVING"),
+        LOCATION("LOCATION"),
         MEASURE("MEASURE"),
+        MEDICAMENT("MEDICAMENT"),
         OBJECT("OBJECT"),
         PATHOLOGY("PATHOLOGY"),
         PERSNAME("PERSNAME"),
         PHYSIOLOGY("PHYSIOLOGY"),
+        PROCEDURE("PROCEDURE"),
         SUBSTANCE("SUBSTANCE"),
         SYMPTOM("SYMPTOM"),
-        TREATMENT("TREATMENT"),
         VALUE("VALUE"),
         UNIT("UNIT");
 
@@ -157,8 +157,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         origin = ent.origin;
         boundingBoxes = ent.boundingBoxes;
         isAcronym = ent.isAcronym;
-        //startTokenPos = ent.startTokenPos;
-        //endTokenPos = ent.startTokenPos;
     }
 
     public String getRawName() {
@@ -208,14 +206,12 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "DEVICE";
         } else if (stringType.toUpperCase().contains("DOSE")) {
             this.stringType = "DOSE";
-        } else if (stringType.toUpperCase().contains("DRUG")) {
-            this.stringType = "DRUG";
-        } else if (stringType.toUpperCase().contains("EXAMINATION")) {
-            this.stringType = "EXAMINATION";
         } else if (stringType.toUpperCase().contains("LIVING")) {
             this.stringType = "LIVING";
         } else if (stringType.toUpperCase().contains("MEASURE")) {
             this.stringType = "MEASURE";
+        } else if (stringType.toUpperCase().contains("MEDICAMENT")) {
+            this.stringType = "MEDICAMENT";
         } else if (stringType.toUpperCase().contains("OBJECT")) {
             this.stringType = "OBJECT";
         } else if (stringType.toUpperCase().contains("PATHOLOGY")) {
@@ -224,16 +220,16 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "PERSNAME";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
             this.stringType = "PHYSIOLOGY";
+        } else if (stringType.toUpperCase().contains("PROCEDURE")) {
+            this.stringType = "PROCEDURE";
         } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
             this.stringType = "SUBSTANCE";
         } else if (stringType.toUpperCase().contains("SYMPTOM")) {
             this.stringType = "SYMPTOM";
-        } else if (stringType.toUpperCase().contains("TREATMENT")) {
-            this.stringType = "TREATMENT";
-        } else if (stringType.toUpperCase().contains("VALUE")) {
-            this.stringType = "VALUE";
         } else if (stringType.toUpperCase().contains("UNIT")) {
             this.stringType = "UNIT";
+        } else if (stringType.toUpperCase().contains("VALUE")) {
+            this.stringType = "VALUE";
         }
     }
 
@@ -269,22 +265,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.dose = dose;
     }
 
-    public String getDrug() {
-        return drug;
-    }
-
-    public void setDrug(String drug) {
-        this.drug = drug;
-    }
-
-    public String getExamination() {
-        return examination;
-    }
-
-    public void setExamination(String examination) {
-        this.examination = examination;
-    }
-
     public String getLiving() {
         return living;
     }
@@ -293,12 +273,29 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.living = living;
     }
 
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
     public String getMeasure() {
         return measure;
     }
 
     public void setMeasure(String measure) {
         this.measure = measure;
+    }
+
+    public String getMedicament() {
+        return medicament;
+    }
+
+    public void setMedicament(String medicament) {
+        this.medicament = medicament;
     }
 
     public String getObject() {
@@ -349,14 +346,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.symptom = symptom;
     }
 
-    public String getTreatment() {
-        return treatment;
-    }
-
-    public void setTreatment(String treatment) {
-        this.treatment = treatment;
-    }
-
     public String getValue() {
         return value;
     }
@@ -371,6 +360,14 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public String getProcedure() {
+        return procedure;
+    }
+
+    public void setProcedure(String procedure) {
+        this.procedure = procedure;
     }
 
 

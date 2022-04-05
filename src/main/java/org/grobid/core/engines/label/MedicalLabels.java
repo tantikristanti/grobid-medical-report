@@ -69,13 +69,13 @@ public class MedicalLabels extends TaggingLabels {
     public static final String ANATOMY_LABEL = "<anatomy>";
     public static final String DEVICE_LABEL = "<device>";
     public static final String DOSE_LABEL = "<dose>";
-    public static final String DRUG_LABEL = "<drug>";
-    public static final String EXAMINATION_LABEL = "<examination>";
     public static final String LIVING_LABEL = "<living>";
     public static final String MEASURE_LABEL = "<measure>";
     public static final String OBJECT_LABEL = "<object>";
     public static final String PATHOLOGY_LABEL = "<pathology>";
     public static final String PHYSIOLOGY_LABEL = "<physiology>";
+    public static final String PROCEDURE_LABEL = "<procedure>";
+    public static final String MEDICAMENT_LABEL = "<medicament>";
     public static final String SUBSTANCE_LABEL = "<substance>";
     public static final String SYMPTOM_LABEL = "<symptom>";
     public static final String TREATMENT_LABEL = "<treatment>";
@@ -247,19 +247,20 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_DATE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DATE_LABEL);
     public static final TaggingLabel NER_DEVICE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DEVICE_LABEL);
     public static final TaggingLabel NER_DOSE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DOSE_LABEL);
-    public static final TaggingLabel NER_DRUG = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DRUG_LABEL);
-    public static final TaggingLabel NER_EXAMINATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, EXAMINATION_LABEL);
     public static final TaggingLabel NER_LIVING = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LIVING_LABEL);
+    public static final TaggingLabel NER_LOCATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LOCATION_LABEL);
     public static final TaggingLabel NER_MEASURE= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
     public static final TaggingLabel NER_OBJECT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, OBJECT_LABEL);
     public static final TaggingLabel NER_PATHOLOGY= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PATHOLOGY_LABEL);
     public static final TaggingLabel NER_PERSON_NAME= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_NAME_LABEL);
     public static final TaggingLabel NER_PHYSIOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHYSIOLOGY_LABEL);
+    public static final TaggingLabel NER_PROCEDURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PROCEDURE_LABEL);
+    public static final TaggingLabel NER_MEDICAMENT= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEDICAMENT_LABEL);
     public static final TaggingLabel NER_SUBSTANCE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SUBSTANCE_LABEL);
     public static final TaggingLabel NER_SYMPTOM = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SYMPTOM_LABEL);
-    public static final TaggingLabel NER_TREATMENT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, TREATMENT_LABEL);
-    public static final TaggingLabel NER_VALUE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, VALUE_LABEL);
     public static final TaggingLabel NER_UNIT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, UNIT_LABEL);
+    public static final TaggingLabel NER_VALUE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, VALUE_LABEL);
+
 
     static {
         // medical-report-segmenter

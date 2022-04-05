@@ -114,34 +114,34 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                     if (name.equals("type")) {
                         if (value.equals("anat") || value.equals("anatomy")) {
                             currentTag = "<anatomy>";
-                        } else if (value.equals("devi") || value.equals("device")) {
-                            currentTag = "<device>";
                         } else if (value.equals("date")) {
                             currentTag = "<date>";
+                        } else if (value.equals("devi") || value.equals("device")) {
+                            currentTag = "<device>";
                         } else if (value.equals("dose")) {
                             currentTag = "<dose>";
-                        } else if (value.equals("drug")) {
-                            currentTag = "<drug>";
-                        } else if (value.equals("examination")) {
-                            currentTag = "<examination>";
+                        }  else if (value.equals("livb") || value.equals("living")) {
+                            currentTag = "<living>";
+                        } else if (value.equals("city") || value.equals("country") || value.equals("address") || value.equals("location")) {
+                            currentTag = "<location>";
                         } else if (value.equals("measure")) {
                             currentTag = "<measure>";
+                        } else if (value.equals("drug") || value.equals("product") || value.equals("medicament")) {
+                            currentTag = "<medicament>";
                         } else if (value.equals("objc") || value.equals("object")) {
                             currentTag = "<object>";
-                        } else if (value.equals("livb") || value.equals("living")) {
-                            currentTag = "<living>";
-                        } else if (value.equals("diso") || value.equals("pathology")) {
+                        } else if (value.equals("disorder") || value.equals("pathology")) {
                             currentTag = "<pathology>";
-                        } else if (value.equals("persname")) {
+                        } else if (value.equals("persname") || value.equals("name")) {
                             currentTag = "<persname>";
                         } else if (value.equals("phys") || value.equals("physiology")) {
                             currentTag = "<physiology>";
-                        } else if (value.equals("chem") || value.equals("substance"))  {
+                        } else if (value.equals("procedure") ) {
+                            currentTag = "<procedure>";
+                        } else if (value.equals("chemical") || value.equals("substance"))  {
                             currentTag = "<substance>";
-                        } else if (value.equals("phen") || value.equals("symptom")) {
+                        } else if (value.equals("phenomena") || value.equals("symptom")) {
                             currentTag = "<symptom>";
-                        } else if (value.equals("treatment")) {
-                            currentTag = "<treatment>";
                         } else if (value.equals("unit")) {
                             currentTag = "<unit>";
                         } else if (value.equals("value")) {
