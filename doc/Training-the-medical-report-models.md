@@ -134,8 +134,10 @@ To generate a new training data, under the project directory `grobid/grobid-medi
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
 ```
 
-Generation of training data commands are: `createTrainingSegmentationBlank`, `createTrainingSegmentation`, `createTrainingFullBlank`, `createTrainingFull` .
+Generation of training data commands are: `createTrainingBlank`, `createTraining`, `createTrainingBlankFrenchMedicalNER`, `createTrainingFrenchMedicalNER` .
 
+Particularly for the `createTrainingBlank` and `createTrainingBlankFrenchMedicalNER`, these commands are used for generating datasets without labels. In general, they are used for building new models from scratch.
+.
 
 <!---
 An example of a command for generating a new training data for the __medical-report-segmenter__ model: 

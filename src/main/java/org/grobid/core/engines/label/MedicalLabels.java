@@ -97,7 +97,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final String PERSON_SEX_LABEL = "<sex>";
     public static final String PERSON_BIRTH_LABEL = "<birth>";
     public static final String PERSON_DEATH_LABEL = "<death>";
-    
+
     // names
     public final static String FORENAME_LABEL = "<forename>";
     public final static String MIDDLENAME_LABEL = "<middlename>";
@@ -148,7 +148,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel HEADER_NOTE = new TaggingLabelImpl(GrobidModels.HEADER_MEDICAL_REPORT, NOTE_LABEL);
 
     // Left-Note Medical Report Model
-    public static final TaggingLabel LEFT_NOTE_IDNO= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ID_NUMBER_LABEL);
+    public static final TaggingLabel LEFT_NOTE_IDNO = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ID_NUMBER_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_GHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, GHU_LABEL);
     public static final TaggingLabel LEFT_NOTE_CHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CHU_LABEL);
@@ -162,7 +162,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
     public static final TaggingLabel LEFT_NOTE_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
     public static final TaggingLabel LEFT_NOTE_UNIT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, UNIT_LABEL);
-    public static final TaggingLabel LEFT_NOTE_SUB= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SUB_LABEL);
+    public static final TaggingLabel LEFT_NOTE_SUB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SUB_LABEL);
     public static final TaggingLabel LEFT_NOTE_ORGANIZATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORGANIZATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
     public static final TaggingLabel LEFT_NOTE_COUNTRY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, COUNTRY_LABEL);
@@ -172,7 +172,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel LEFT_NOTE_EMAIL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, EMAIL_LABEL);
     public static final TaggingLabel LEFT_NOTE_WEB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, WEB_LABEL);
     public static final TaggingLabel LEFT_NOTE_MEDIC = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, MEDIC_LABEL);
-    public static final TaggingLabel LEFT_NOTE_NOTE= new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, NOTE_LABEL);
+    public static final TaggingLabel LEFT_NOTE_NOTE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, NOTE_LABEL);
 
     // Full medical model
     public static final TaggingLabel TABLE_MARKER = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_MARKER_LABEL);
@@ -194,7 +194,7 @@ public class MedicalLabels extends TaggingLabels {
 
     // Organization
     public static final TaggingLabel ORGANIZATION_NAME = new TaggingLabelImpl(GrobidModels.ORGANIZATION, ORG_NAME_LABEL);
-    public static final TaggingLabel ORGANIZATION_ADDRESS  = new TaggingLabelImpl(GrobidModels.ORGANIZATION, ADDRESS_LABEL);
+    public static final TaggingLabel ORGANIZATION_ADDRESS = new TaggingLabelImpl(GrobidModels.ORGANIZATION, ADDRESS_LABEL);
     public static final TaggingLabel ORGANIZATION_COUNTRY = new TaggingLabelImpl(GrobidModels.ORGANIZATION, COUNTRY_LABEL);
     public static final TaggingLabel ORGANIZATION_TOWN = new TaggingLabelImpl(GrobidModels.ORGANIZATION, SETTLEMENT_LABEL);
     public static final TaggingLabel ORGANIZATION_EMAIL = new TaggingLabelImpl(GrobidModels.ORGANIZATION, EMAIL_LABEL);
@@ -249,13 +249,14 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_DOSE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DOSE_LABEL);
     public static final TaggingLabel NER_LIVING = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LIVING_LABEL);
     public static final TaggingLabel NER_LOCATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LOCATION_LABEL);
-    public static final TaggingLabel NER_MEASURE= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
+    public static final TaggingLabel NER_MEASURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
     public static final TaggingLabel NER_OBJECT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, OBJECT_LABEL);
-    public static final TaggingLabel NER_PATHOLOGY= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PATHOLOGY_LABEL);
-    public static final TaggingLabel NER_PERSON_NAME= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_NAME_LABEL);
+    public static final TaggingLabel NER_PATHOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PATHOLOGY_LABEL);
+    public static final TaggingLabel NER_PERSON_NAME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_NAME_LABEL);
+    public static final TaggingLabel NER_PHONE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHONE_LABEL);
     public static final TaggingLabel NER_PHYSIOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHYSIOLOGY_LABEL);
     public static final TaggingLabel NER_PROCEDURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PROCEDURE_LABEL);
-    public static final TaggingLabel NER_MEDICAMENT= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEDICAMENT_LABEL);
+    public static final TaggingLabel NER_MEDICAMENT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEDICAMENT_LABEL);
     public static final TaggingLabel NER_SUBSTANCE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SUBSTANCE_LABEL);
     public static final TaggingLabel NER_SYMPTOM = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SYMPTOM_LABEL);
     public static final TaggingLabel NER_UNIT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, UNIT_LABEL);

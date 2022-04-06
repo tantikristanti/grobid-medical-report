@@ -134,6 +134,8 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<pathology>";
                         } else if (value.equals("persname") || value.equals("name")) {
                             currentTag = "<persname>";
+                        } else if (value.equals("phone")) {
+                            currentTag = "<phone>";
                         } else if (value.equals("phys") || value.equals("physiology")) {
                             currentTag = "<physiology>";
                         } else if (value.equals("procedure") ) {

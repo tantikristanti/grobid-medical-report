@@ -518,6 +518,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setPersname(entity.getPersname() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setPersname(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_PHONE)) {
+                if (entity.getPhone() != null) {
+                    entity.setPhone(entity.getPhone() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setPhone(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_PHYSIOLOGY)) {
                 if (entity.getPhysiology() != null) {
                     entity.setPhysiology(entity.getPhysiology() + "\t" + clusterNonDehypenizedContent);
@@ -1196,6 +1201,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<persname>", "<ENAMEX type=\"persname\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<phone>", "<ENAMEX type=\"phone\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<physiology>", "<ENAMEX type=\"physiology\">", addSpace);
             }
             if (!output) {
@@ -1256,6 +1264,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             } else if (lastTag0.equals("<pathology>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<persname>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<phone>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<physiology>")) {
                 buffer.append("</ENAMEX>");

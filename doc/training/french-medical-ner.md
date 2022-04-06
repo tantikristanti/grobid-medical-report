@@ -33,6 +33,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<object>` for objects 
 * `<pathology>` for disease names
 * `<persName>` for person names
+* `<phone>` for phone numbers
 * `<physiology>` for physiology
 * `<procedure>` for procedures
 * `<substance>` for chemical substances
