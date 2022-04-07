@@ -36,6 +36,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String phone = null;
     private String physiology = null;
     private String procedure = null;
+    private String rolename = null;
     private String substance = null;
     private String symptom = null;
     private String unit = null;
@@ -380,6 +381,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.procedure = procedure;
     }
 
+    public String getRolename() {
+        return rolename;
+    }
+
+    public void setRolename(String rolename) {
+        this.rolename = rolename;
+    }
 
     public void setTypeFromString(String theType) {
         type = Medical_NER_Type.valueOf(theType);

@@ -26,13 +26,14 @@ For the French medical NER model, we use the following TEI elements:
 * `<date>` for dates
 * `<device>` for devices (e.g., hospital equipments and devices)
 * `<dose>` for doses
-* `<living>` for living beings
+* `<living>` for living beings (e.g., bacteria, virus,  fungus)
 * `<location>` for locations, addresses, city and country names
 * `<measure>` for measure types or names
 * `<medicament>` for medicament
 * `<object>` for objects 
 * `<pathology>` for disease names
 * `<persName>` for person names
+* `<roleName>` for person role names
 * `<phone>` for phone numbers
 * `<physiology>` for physiology
 * `<procedure>` for procedures

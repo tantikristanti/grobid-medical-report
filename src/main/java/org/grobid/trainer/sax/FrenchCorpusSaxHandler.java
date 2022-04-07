@@ -140,6 +140,8 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<physiology>";
                         } else if (value.equals("procedure") ) {
                             currentTag = "<procedure>";
+                        } else if (value.equals("role") || value.equals("rolename")) {
+                            currentTag = "<rolename>";
                         } else if (value.equals("chemical") || value.equals("substance"))  {
                             currentTag = "<substance>";
                         } else if (value.equals("phenomena") || value.equals("symptom")) {

@@ -533,6 +533,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setProcedure(entity.getProcedure() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setProcedure(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_ROLE_NAME)) {
+                if (entity.getRolename() != null) {
+                    entity.setRolename(entity.getRolename() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setRolename(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_SUBSTANCE)) {
                 if (entity.getSubstance() != null) {
                     entity.setSubstance(entity.getSubstance() + "\t" + clusterNonDehypenizedContent);
@@ -1198,7 +1203,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<pathology>", "<ENAMEX type=\"pathology\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<persname>", "<ENAMEX type=\"persname\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<persname>", "<ENAMEX type=\"persName\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<phone>", "<ENAMEX type=\"phone\">", addSpace);
@@ -1208,6 +1213,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<procedure>", "<ENAMEX type=\"procedure\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<rolename>", "<ENAMEX type=\"roleName\">", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<substance>", "<ENAMEX type=\"substance\">", addSpace);
@@ -1272,6 +1280,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             } else if (lastTag0.equals("<procedure>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<substance>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<rolename>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<symptom>")) {
                 buffer.append("</ENAMEX>");
