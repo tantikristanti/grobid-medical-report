@@ -162,10 +162,6 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
                    String featuresNER = FeaturesVectorMedicalNER.addFeaturesNER(allTokens.get(i), allLabeled.get(i),
                        locationsPositions, titlesPositions, suffixesPositions, emailPositions, urlPositions);
 
-                   /*MedicalNERLexiconPositionsIndexes positionsIndexes = new MedicalNERLexiconPositionsIndexes(medicalNERLexicon);
-                   positionsIndexes.computeIndexes(allTokens.get(i));*/
-
-
                     if ( (writer2 == null) && (writer3 != null) )
                         writer3.write(featuresNER + "\n \n"); // we write and add separators for each document
                     if ( (writer2 != null) && (writer3 == null) )

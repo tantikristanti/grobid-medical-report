@@ -7,7 +7,6 @@ import org.grobid.core.utilities.TextUtilities;
 import org.grobid.core.utilities.UnicodeUtil;
 
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 
 /**
@@ -48,8 +47,6 @@ public class FeaturesVectorMedicalNER {
     public boolean phenomena = false;
     public boolean physiology = false;
     public boolean procedure = false;
-
-    public String shadowNumber = null; // Convert digits to “0”
 
     public String wordShape = null;
     // Convert upper-case letters to "X", lower- case letters to "x", digits to "d" and other to "c"
@@ -105,9 +102,6 @@ public class FeaturesVectorMedicalNER {
         else
             res.append(" 0");
 
-        // punctuation information (1)
-        //res.append(" " + punctType); // in case the token is a punctuation (NO otherwise)
-
         // lexical information (11)
         if (commonName)
             res.append(" 1");
@@ -139,17 +133,17 @@ public class FeaturesVectorMedicalNER {
         else
             res.append(" 0");
 
+        if (locationName)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
         if (year)
             res.append(" 1");
         else
             res.append(" 0");
 
         if (month)
-            res.append(" 1");
-        else
-            res.append(" 0");
-
-        if (locationName)
             res.append(" 1");
         else
             res.append(" 0");
@@ -235,12 +229,6 @@ public class FeaturesVectorMedicalNER {
         else
             res.append(" 0");
 
-        // token length (1)
-        //res.append(" " + string.length()); // /
-
-        // shadow number (1)
-        //res.append(" " + shadowNumber); // /
-
         // word shape (1)
         res.append(" " + wordShape);
 
@@ -265,7 +253,7 @@ public class FeaturesVectorMedicalNER {
                                           List<OffsetPosition> titlePositions,
                                           List<OffsetPosition> suffixPositions,
                                           List<OffsetPosition> emailPositions,
-                                          List<OffsetPosition> urlPositions) throws Exception {
+                                          List<OffsetPosition> urlPositions)  {
 
         if ((locationPositions == null) ||
             (titlePositions == null) ||
@@ -468,10 +456,8 @@ public class FeaturesVectorMedicalNER {
             } else if (text.equals("\"") | text.equals("\'") | text.equals("`")) {
                 features.punctType = "QUOTE";
             }
-
-            if (text.length() == 1) {
-                features.singleChar = true;
-            }
+            if (features.punctType == null)
+                features.punctType = "NOPUNCT";
 
             if (Character.isUpperCase(text.charAt(0))) {
                 features.capitalisation = "INITCAP";
@@ -481,9 +467,24 @@ public class FeaturesVectorMedicalNER {
                 features.capitalisation = "ALLCAP";
             }
 
+            if (features.capitalisation == null)
+                features.capitalisation = "NOCAPS";
+
+            if (text.length() == 1) {
+                features.singleChar = true;
+            }
+
             if (featureFactory.test_digit(text)) {
                 features.digit = "CONTAINSDIGITS";
             }
+
+            Matcher m = featureFactory.isDigit.matcher(text);
+            if (m.find()) {
+                features.digit = "ALLDIGIT";
+            }
+
+            if (features.digit == null)
+                features.digit = "NODIGIT";
 
             if (featureFactory.test_common(text)) {
                 features.commonName = true;
@@ -509,30 +510,25 @@ public class FeaturesVectorMedicalNER {
                 features.isPersonSuffixToken = true;
             }
 
-            Matcher m = featureFactory.isDigit.matcher(text);
-            if (m.find()) {
-                features.digit = "ALLDIGIT";
-            }
-
-            if (features.capitalisation == null)
-                features.capitalisation = "NOCAPS";
-
-            if (features.digit == null)
-                features.digit = "NODIGIT";
-
-            if (features.punctType == null)
-                features.punctType = "NOPUNCT";
-
-            if (isLocationToken || featureFactoryMedical.test_geography(text)) {
-                features.locationName = true;
+            if (featureFactory.test_city(text)) {
+                features.cityName = true;
             }
 
             if (featureFactory.test_country(text)) {
                 features.countryName = true;
             }
 
-            if (featureFactory.test_city(text)) {
-                features.cityName = true;
+            if (isLocationToken || featureFactoryMedical.test_geography(text)) {
+                features.locationName = true;
+            }
+
+            Matcher m2 = featureFactory.year.matcher(text);
+            if (m2.find()) {
+                features.year = true;
+            }
+
+            if (featureFactory.test_month(text)) {
+                features.month = true;
             }
 
             if (isEmailToken) {

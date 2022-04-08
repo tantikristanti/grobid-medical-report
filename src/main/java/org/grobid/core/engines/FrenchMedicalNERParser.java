@@ -5,6 +5,7 @@ import com.googlecode.clearnlp.segmentation.AbstractSegmenter;
 import com.googlecode.clearnlp.tokenization.AbstractTokenizer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
@@ -53,6 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FrenchMedicalNERParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERParser.class);
+    private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
     protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
@@ -68,8 +70,50 @@ public class FrenchMedicalNERParser extends AbstractParser {
         // if we want to use DeLFT models
         //super(GrobidModels.FR_MEDICAL_NER_QUAERO, CntManagerFactory.getNoOpCntManager(), GrobidCRFEngine.DELFT, "BidLSTM_CRF");
         this.parsers = parsers;
-
+        GrobidProperties.getInstance();
         tmpPath = GrobidProperties.getTempPath();
+    }
+
+    /**
+     * Processing with application of the French medical terminology model
+     */
+    public Pair<String, Document> processing(File input, List<MedicalEntity> entities, GrobidAnalysisConfig config) {
+        DocumentSource documentSource = null;
+        try {
+            documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
+            Document doc = parsers.getSegmentationParser().processing(documentSource, config);
+
+            String tei = processingNer(config, doc, entities);
+            return new ImmutablePair<>(tei, doc);
+        } finally {
+            if (documentSource != null) {
+                documentSource.close(true, true, true);
+            }
+        }
+    }
+
+    /**
+     * Medical terminology recognition after application of the segmentation model
+     */
+    public String processingNer(GrobidAnalysisConfig config, Document doc, List<MedicalEntity> entities) {
+        try {
+            SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            if (documentBodyParts != null) {
+                Pair<String, List<LayoutToken>> featuredHeader = getNerFeatures(doc, documentBodyParts);
+                String entityWithFeatures = featuredHeader.getLeft();
+                List<LayoutToken> nerTokenization = featuredHeader.getRight();
+                String nerLabeled = null;
+                if (StringUtils.isNotBlank(entityWithFeatures)) {
+                    nerLabeled = label(entityWithFeatures);
+                    entities = resultExtraction(nerLabeled, nerTokenization);
+                }
+            }
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid.", e);
+        }
+        return null;
     }
 
     /**
@@ -139,8 +183,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
         FeaturesVectorMedicalNER features;
         FeaturesVectorMedicalNER previousFeatures = null;
 
-        boolean endblock;
-        //for (Integer blocknum : blockDocumentHeaders) {
         List<Block> blocks = doc.getBlocks();
         if ((blocks == null) || blocks.size() == 0) {
             return null;
@@ -159,27 +201,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 if ((tokens == null) || (tokens.size() == 0)) {
                     continue;
                 }
-            }
-        }
-
-        for (DocumentPiece docPiece : documentBodyParts) {
-            DocumentPointer dp1 = docPiece.getLeft();
-            DocumentPointer dp2 = docPiece.getRight();
-
-            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
-                Block block = blocks.get(blockIndex);
-
-                List<LayoutToken> tokens = block.getTokens();
-                if ((tokens == null) || (tokens.size() == 0)) {
-                    continue;
-                }
 
                 String localText = block.getText();
                 if (localText == null)
                     continue;
                 int n = 0;
                 if (blockIndex == dp1.getBlockPtr()) {
-                    //n = block.getStartToken();
                     n = dp1.getTokenDocPos() - block.getStartToken();
                 }
 
@@ -1089,7 +1116,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
     }
 
     /**
-     * Extract results from a labelled header in the training format without any
+     * Extract results from a labelled medical terminology recognition in the training data format without any
      * string modification.
      *
      * @param result        result
@@ -1115,7 +1142,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 continue;
             }
             StringTokenizer stt = new StringTokenizer(tok, "\t");
-            // List<String> localFeatures = new ArrayList<String>();
             int i = 0;
 
             boolean newLine = false;
@@ -1123,8 +1149,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             while (stt.hasMoreTokens()) {
                 String s = stt.nextToken().trim();
                 if (i == 0) {
-                    s2 = TextUtilities.HTMLEncode(s);
-                    //s2 = s;
+                    s2 = TextUtilities.HTMLEncode(s); // the text
 
                     boolean strop = false;
                     while ((!strop) && (p < tokenizations.size())) {
@@ -1142,12 +1167,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 } else {
                     if (s.equals("LINESTART"))
                         newLine = true;
-                    // localFeatures.add(s);
                 }
                 i++;
             }
 
-            if (newLine) {
+            if (newLine) { // it's not the case for this model
                 buffer.append("<lb/>");
             }
 
@@ -1293,22 +1317,18 @@ public class FrenchMedicalNERParser extends AbstractParser {
         }
     }
 
+    // s1: the label; s2: the text
     private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) {
+            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same, just concatenate the string
                 if (addSpace)
                     buffer.append(" ").append(s2);
                 else
                     buffer.append(s2);
-            } else {
-                //buffer.append(" ").append(outField).append(s2);
-                if (addSpace)
-                    buffer.append(" ").append(outField).append(s2);
-                else
-                    buffer.append(outField).append(s2);
-            }
+            } else
+                buffer.append(outField).append(s2); // otherwise, add the current label with the concatenated string
         }
         return result;
     }
