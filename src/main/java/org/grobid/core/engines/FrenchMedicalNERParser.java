@@ -1322,7 +1322,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same, just concatenate the string
+            if ((s1.equals("<other>") || s1.equals("I-<other>"))) {
+                if (addSpace)
+                    buffer.append(" ").append(s2);
+                else
+                    buffer.append(s2);
+            } else if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same, just concatenate the string
                 if (addSpace)
                     buffer.append(" ").append(s2);
                 else
