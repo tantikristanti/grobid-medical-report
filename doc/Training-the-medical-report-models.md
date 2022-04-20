@@ -119,7 +119,7 @@ To split (e.g., training:evaluation = 80:20) automatically and randomly the data
 > ./gradlew <automatic-evaluation-goal-name>
 ```
 
-Automatic evaluation goal names are: `eval_medical_report_segmenter_split`, `eval_header_medical_report_split`, `eval_left_note_medical_report_split`, `eval_full_medical_text`.
+Automatic train goal names are: `train_medical_report_segmenter_split`, `train_header_medical_report_split`, `train_left_note_medical_report_split`, `train_full_medical_text`, `train_french_medical_ner_split`
 
 By default, the training and evaluation data partition is 80:20 (i.e., the datasets are under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus`). To change it, add the `-s` parameter or change the `-s` `build.gradle` to the desired proportion.
 
