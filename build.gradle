@@ -167,15 +167,6 @@ ext.getArg = { propName, defaultVal ->
     return project.hasProperty(propName) ? project.getProperty(propName) : defaultVal;
 }
 
-// Train and evaluation NER
-// run like: gradle trainEvalNer -gH /path/to/grobid-home
-task trainEvalNer(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
-    classpath = sourceSets.main.runtimeClasspath
-    args 2, 'ner', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
-    jvmArgs '-Xmx3072m'
-}
-
 // Evaluation
 // as running this command: $ ./gradlew eval_medical_report_segmenter -gH /path/to/grobid-home
 task eval_medical_report_segmenter(dependsOn: 'classes', type: JavaExec, group: 'training') {
@@ -185,8 +176,8 @@ task eval_medical_report_segmenter(dependsOn: 'classes', type: JavaExec, group: 
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_medical_report_segmenter_split -gH /path/to/grobid-home
-task eval_medical_report_segmenter_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_medical_report_segmenter_split -gH /path/to/grobid-home -s [training:test]
+task train_medical_report_segmenter_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'medical-report-segmenter', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
@@ -201,8 +192,8 @@ task eval_header_medical_report(dependsOn: 'classes', type: JavaExec, group: 'tr
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_header_medical_report_split -gH /path/to/grobid-home
-task eval_header_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_header_medical_report_split -gH /path/to/grobid-home -s [training:test]
+task train_header_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'header-medical-report', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
@@ -217,8 +208,8 @@ task eval_left_note_medical_report(dependsOn: 'classes', type: JavaExec, group: 
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_left_note_medical_report_split -gH /path/to/grobid-home
-task eval_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_left_note_medical_report_split -gH /path/to/grobid-home -s [training:test]
+task train_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'left-note-medical-report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
@@ -233,27 +224,11 @@ task eval_full_medical_text(dependsOn: 'classes', type: JavaExec, group: 'traini
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_full_medical_text_split -gH /path/to/grobid-home
-task eval_full_medical_text_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_full_medical_text_split -gH /path/to/grobid-home -s [training:test]
+task train_full_medical_text_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'full-medical-text', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
-    jvmArgs '-Xmx3072m'
-}
-
-// as running this command: $ ./gradlew eval_full_medical_text -gH /path/to/grobid-home
-task eval_fr_medical_ner(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
-    classpath = sourceSets.main.runtimeClasspath
-    args 1, 'fr-medical-ner', '-gH', getArg('gH', '../grobid-home')
-    jvmArgs '-Xmx3072m'
-}
-
-// as running this command: $ ./gradlew eval_full_medical_text_split -gH /path/to/grobid-home
-task eval_fr_medical_ner_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
-    mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
-    classpath = sourceSets.main.runtimeClasspath
-    args 2, 'fr-medical-ner', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
@@ -265,8 +240,8 @@ task eval_dateline(dependsOn: 'classes', type: JavaExec, group: 'training') {
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_dateline_split -gH /path/to/grobid-home
-task eval_dateline_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_dateline_split -gH /path/to/grobid-home -s [training:test]
+task train_dateline_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'dateline', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
@@ -281,8 +256,8 @@ task eval_medic(dependsOn: 'classes', type: JavaExec, group: 'training') {
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_medic_split -gH /path/to/grobid-home
-task eval_medic_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_medic_split -gH /path/to/grobid-home -s [training:test]
+task train_medic_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'medic', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
@@ -297,8 +272,8 @@ task eval_patient(dependsOn: 'classes', type: JavaExec, group: 'training') {
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_patient_split -gH /path/to/grobid-home
-task eval_patient_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_patient_split -gH /path/to/grobid-home -s [training:test]
+task train_patient_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'patient', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
@@ -313,15 +288,15 @@ task eval_organization(dependsOn: 'classes', type: JavaExec, group: 'training') 
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_organization_split -gH /path/to/grobid-home
-task eval_organization_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_organization_split -gH /path/to/grobid-home -s [training:test]
+task train_organization_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'organization', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_organization -gH /path/to/grobid-home
+// as running this command: $ ./gradlew eval_name_person_medical -gH /path/to/grobid-home
 task eval_name_person_medical(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
@@ -329,15 +304,15 @@ task eval_name_person_medical(dependsOn: 'classes', type: JavaExec, group: 'trai
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_organization_split -gH /path/to/grobid-home
-task eval_name_person_medical_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_name_person_medical_split -gH /path/to/grobid-home -s [training:test]
+task train_name_person_medical_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'name-person-medical', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_organization -gH /path/to/grobid-home
+// as running this command: $ ./gradlew eval_french_medical_ner -gH /path/to/grobid-home
 task eval_french_medical_ner(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
@@ -345,8 +320,9 @@ task eval_french_medical_ner(dependsOn: 'classes', type: JavaExec, group: 'train
     jvmArgs '-Xmx3072m'
 }
 
-// as running this command: $ ./gradlew eval_organization_split -gH /path/to/grobid-home
-task eval_french_medical_ner_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+// as running this command: $ ./gradlew train_french_medical_ner_split -gH /path/to/grobid-home -s [training:test]
+// $ ./gradlew train_french_medical_ner_split -gH ../grobid-home/ -s 0.9
+task train_french_medical_ner_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'fr-medical-ner', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')

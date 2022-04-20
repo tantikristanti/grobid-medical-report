@@ -27,7 +27,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<device>` for devices (e.g., hospital equipments and devices)
 * `<dose>` for doses
 * `<living>` for living beings (e.g., bacteria, virus,  fungus)
-* `<location>` for locations, addresses, city and country names
+* `<location>` for location, address, city and country names
 * `<measure>` for measure types or names
 * `<medicament>` for medicament
 * `<object>` for objects 
