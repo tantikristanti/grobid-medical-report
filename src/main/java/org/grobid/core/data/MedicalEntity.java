@@ -31,6 +31,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String measure = null;
     private String medicament = null;
     private String object = null;
+    private String orgname = null;
     private String pathology = null;
     private String persname = null;
     private String phone = null;
@@ -306,6 +307,14 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
 
     public void setObject(String object) {
         this.object = object;
+    }
+
+    public String getOrgname() {
+        return orgname;
+    }
+
+    public void setOrgname(String orgname) {
+        this.orgname = orgname;
     }
 
     public String getPathology() {

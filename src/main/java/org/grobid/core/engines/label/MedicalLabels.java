@@ -251,6 +251,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_LOCATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LOCATION_LABEL);
     public static final TaggingLabel NER_MEASURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
     public static final TaggingLabel NER_OBJECT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, OBJECT_LABEL);
+    public static final TaggingLabel NER_ORG_NAME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, ORG_NAME_LABEL);
     public static final TaggingLabel NER_PATHOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PATHOLOGY_LABEL);
     public static final TaggingLabel NER_PERSON_NAME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_NAME_LABEL);
     public static final TaggingLabel NER_PHONE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHONE_LABEL);

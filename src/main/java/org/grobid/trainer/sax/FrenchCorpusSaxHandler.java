@@ -130,6 +130,8 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<medicament>";
                         } else if (value.equals("objc") || value.equals("object")) {
                             currentTag = "<object>";
+                        } else if (value.equals("orgname")) {
+                            currentTag = "<orgname>";
                         } else if (value.equals("disorder") || value.equals("pathology")) {
                             currentTag = "<pathology>";
                         } else if (value.equals("persname") || value.equals("name")) {

@@ -31,6 +31,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<measure>` for measure types or names
 * `<medicament>` for medicament
 * `<object>` for objects 
+* `<orgName>` for organization names
 * `<pathology>` for disease names
 * `<persName>` for person names
 * `<roleName>` for person role names
@@ -38,7 +39,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<physiology>` for physiology
 * `<procedure>` for procedures
 * `<substance>` for chemical substances
-* `<symptom>` for symptoms and signs
+* `<symptom>` for observed symptoms and signs
 * `<unit>` for value units
 * `<value>` for values
 * `<other>` for unknown (yet) entities

@@ -535,6 +535,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setObject(entity.getObject() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setObject(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_ORG_NAME)) {
+                if (entity.getOrgname() != null) {
+                    entity.setOrgname(entity.getOrgname() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setOrgname(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_PATHOLOGY)) {
                 if (entity.getPathology() != null) {
                     entity.setPathology(entity.getPathology() + "\t" + clusterNonDehypenizedContent);
@@ -1224,6 +1229,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<object>", "<ENAMEX type=\"object\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<orgname>", "<ENAMEX type=\"orgName\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<pathology>", "<ENAMEX type=\"pathology\">", addSpace);
             }
             if (!output) {
@@ -1253,7 +1261,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<value>", "<ENAMEX type=\"value\">", addSpace);
             }
-
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
             }
@@ -1293,6 +1300,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<object>")) {
                 buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<orgname>")) {
+                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<pathology>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<persname>")) {
@@ -1322,15 +1331,15 @@ public class FrenchMedicalNERParser extends AbstractParser {
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same, just concatenate the string
+            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same the last one, just concatenate the string
                 if (addSpace)
                     buffer.append(" ").append(s2);
                 else
                     buffer.append(s2);
             } else {
-                if (addSpace)
+                /*if (addSpace)
                     buffer.append(" ").append(outField).append(s2);
-                else
+                else*/
                     buffer.append(outField).append(s2); // otherwise, add the current label with the concatenated string
             }
         }
