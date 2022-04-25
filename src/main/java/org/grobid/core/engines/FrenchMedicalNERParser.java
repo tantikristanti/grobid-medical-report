@@ -1337,9 +1337,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 else
                     buffer.append(s2);
             } else {
-                /*if (addSpace)
+                if (addSpace)
                     buffer.append(" ").append(outField).append(s2);
-                else*/
+                else
                     buffer.append(outField).append(s2); // otherwise, add the current label with the concatenated string
             }
         }
