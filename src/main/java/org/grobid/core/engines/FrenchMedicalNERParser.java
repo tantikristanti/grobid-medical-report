@@ -515,6 +515,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setEmail(entity.getEmail() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setEmail(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_FAX)) {
+                if (entity.getFax() != null) {
+                    entity.setFax(entity.getEmail() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setFax(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_LIVING)) {
                 if (entity.getLiving() != null) {
                     entity.setLiving(entity.getLiving() + "\t" + clusterNonDehypenizedContent);
@@ -1227,6 +1232,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<email>", "<ENAMEX type=\"email\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<ENAMEX type=\"fax\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
             }
             if (!output) {
@@ -1306,7 +1314,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<email>")) {
                 buffer.append("</ENAMEX>");
-            } else if (lastTag0.equals("<examination>")) {
+            } else if (lastTag0.equals("<fax>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<living>")) {
                 buffer.append("</ENAMEX>");
@@ -1330,9 +1338,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<procedure>")) {
                 buffer.append("</ENAMEX>");
-            } else if (lastTag0.equals("<substance>")) {
-                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<rolename>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<substance>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<symptom>")) {
                 buffer.append("</ENAMEX>");
