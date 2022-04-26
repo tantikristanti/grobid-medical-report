@@ -111,6 +111,7 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
 
                 if (name != null) {
                     name = name.toLowerCase();
+                    value = value.toLowerCase();
                     if (name.equals("type")) {
                         if (value.equals("anat") || value.equals("anatomy")) {
                             currentTag = "<anatomy>";
