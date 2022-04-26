@@ -26,6 +26,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String date = null;
     private String device = null;
     private String dose = null;
+    private String email = null;
     private String living = null;
     private String location = null;
     private String measure = null;
@@ -42,6 +43,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String symptom = null;
     private String unit = null;
     private String value = null;
+    private String web = null;
 
     /* Biomedical NER base types are adapted from
      - grobid-ner (https://grobid-ner.readthedocs.io/en/latest/class-and-senses/)
@@ -53,6 +55,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         DATE("DATE"),
         DEVICE("DEVICE"),
         DOSE("DOSE"),
+        EMAIL("EMAIL"),
         LIVING("LIVING"),
         LOCATION("LOCATION"),
         MEASURE("MEASURE"),
@@ -60,12 +63,15 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         OBJECT("OBJECT"),
         PATHOLOGY("PATHOLOGY"),
         PERSNAME("PERSNAME"),
+        ROLENAME("ROLENAME"),
+        PHONE("PHONE"),
         PHYSIOLOGY("PHYSIOLOGY"),
         PROCEDURE("PROCEDURE"),
         SUBSTANCE("SUBSTANCE"),
         SYMPTOM("SYMPTOM"),
+        UNIT("UNIT"),
         VALUE("VALUE"),
-        UNIT("UNIT");
+        WEB("WEB");
 
         private String name;
 
@@ -209,18 +215,28 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "DEVICE";
         } else if (stringType.toUpperCase().contains("DOSE")) {
             this.stringType = "DOSE";
+        } else if (stringType.toUpperCase().contains("EMAIL")) {
+            this.stringType = "EMAIL";
         } else if (stringType.toUpperCase().contains("LIVING")) {
             this.stringType = "LIVING";
+        } else if (stringType.toUpperCase().contains("LOCATION")) {
+            this.stringType = "LOCATION";
         } else if (stringType.toUpperCase().contains("MEASURE")) {
             this.stringType = "MEASURE";
         } else if (stringType.toUpperCase().contains("MEDICAMENT")) {
             this.stringType = "MEDICAMENT";
         } else if (stringType.toUpperCase().contains("OBJECT")) {
             this.stringType = "OBJECT";
+        } else if (stringType.toUpperCase().contains("ORGNAME")) {
+            this.stringType = "ORGNAME";
         } else if (stringType.toUpperCase().contains("PATHOLOGY")) {
             this.stringType = "PATHOLOGY";
         } else if (stringType.toUpperCase().contains("PERSNAME")) {
             this.stringType = "PERSNAME";
+        } else if (stringType.toUpperCase().contains("ROLENAME")) {
+            this.stringType = "ROLENAME";
+        } else if (stringType.toUpperCase().contains("PHONE")) {
+            this.stringType = "PHONE";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
             this.stringType = "PHYSIOLOGY";
         } else if (stringType.toUpperCase().contains("PROCEDURE")) {
@@ -233,6 +249,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "UNIT";
         } else if (stringType.toUpperCase().contains("VALUE")) {
             this.stringType = "VALUE";
+        } else if (stringType.toUpperCase().contains("WEB")) {
+            this.stringType = "WEB";
         }
     }
 
@@ -266,6 +284,15 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
 
     public void setDose(String dose) {
         this.dose = dose;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getLiving() {
@@ -366,6 +393,14 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.symptom = symptom;
     }
 
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     public String getValue() {
         return value;
     }
@@ -374,12 +409,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.value = value;
     }
 
-    public String getUnit() {
-        return unit;
+
+    public String getWeb() {
+        return web;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setWeb(String web) {
+        this.web = web;
     }
 
     public String getProcedure() {

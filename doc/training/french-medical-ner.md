@@ -26,6 +26,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<date>` for dates
 * `<device>` for devices (e.g., hospital equipments and devices)
 * `<dose>` for doses
+* `<email>` for emails
 * `<living>` for living beings (e.g., bacteria, virus,  fungus)
 * `<location>` for location, address, city and country names
 * `<measure>` for measure types or names
@@ -39,9 +40,10 @@ For the French medical NER model, we use the following TEI elements:
 * `<physiology>` for physiology
 * `<procedure>` for procedures
 * `<substance>` for chemical substances
-* `<symptom>` for observed symptoms and signs
+* `<symptom>` for observed symptoms and signs, phenomena
 * `<unit>` for value units
 * `<value>` for values
+* `<web>` for web sites
 * `<other>` for unknown (yet) entities
 
 

@@ -121,7 +121,9 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<device>";
                         } else if (value.equals("dose")) {
                             currentTag = "<dose>";
-                        }  else if (value.equals("livb") || value.equals("living")) {
+                        } else if (value.equals("email")) {
+                            currentTag = "<email>";
+                        } else if (value.equals("livb") || value.equals("living")) {
                             currentTag = "<living>";
                         } else if (value.equals("city") || value.equals("country") || value.equals("address") || value.equals("location")) {
                             currentTag = "<location>";
@@ -153,6 +155,8 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<unit>";
                         } else if (value.equals("value")) {
                             currentTag = "<value>";
+                        } else if (value.equals("web")) {
+                            currentTag = "<web>";
                         } else
                             currentTag = "<other>";
                     }

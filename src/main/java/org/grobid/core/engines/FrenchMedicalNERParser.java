@@ -510,6 +510,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setDose(entity.getDose() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setDose(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_EMAIL)) {
+                if (entity.getEmail() != null) {
+                    entity.setEmail(entity.getEmail() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setEmail(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_LIVING)) {
                 if (entity.getLiving() != null) {
                     entity.setLiving(entity.getLiving() + "\t" + clusterNonDehypenizedContent);
@@ -590,6 +595,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setValue(entity.getValue() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setValue(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_WEB)) {
+                if (entity.getWeb() != null) {
+                    entity.setWeb(entity.getWeb() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setWeb(clusterNonDehypenizedContent);
             }
             entities.add(entity);
         }
@@ -1214,6 +1224,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<dose>", "<ENAMEX type=\"dose\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<email>", "<ENAMEX type=\"email\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
             }
             if (!output) {
@@ -1262,6 +1275,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<value>", "<ENAMEX type=\"value\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ENAMEX type=\"web\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
             }
 
@@ -1287,6 +1303,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             } else if (lastTag0.equals("<device>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<dose>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<email>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<examination>")) {
                 buffer.append("</ENAMEX>");
@@ -1321,6 +1339,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             } else if (lastTag0.equals("<unit>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<value>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ENAMEX>");
             }
         }

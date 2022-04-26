@@ -247,6 +247,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_DATE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DATE_LABEL);
     public static final TaggingLabel NER_DEVICE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DEVICE_LABEL);
     public static final TaggingLabel NER_DOSE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DOSE_LABEL);
+    public static final TaggingLabel NER_EMAIL= new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, EMAIL_LABEL);
     public static final TaggingLabel NER_LIVING = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LIVING_LABEL);
     public static final TaggingLabel NER_LOCATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LOCATION_LABEL);
     public static final TaggingLabel NER_MEASURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
@@ -263,7 +264,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_SYMPTOM = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SYMPTOM_LABEL);
     public static final TaggingLabel NER_UNIT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, UNIT_LABEL);
     public static final TaggingLabel NER_VALUE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, VALUE_LABEL);
-
+    public static final TaggingLabel NER_WEB = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, WEB_LABEL);
 
     static {
         // medical-report-segmenter
