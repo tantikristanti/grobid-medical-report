@@ -28,7 +28,7 @@ For the French medical NER model, we use the following TEI elements:
 * `<dose>` for doses
 * `<email>` for emails
 * `<fax>` for fax numbers
-* `<living>` for living beings (e.g., bacteria, virus,  fungus)
+* `<living>` for living beings (e.g., animals, plants, bacteria, virus, fungus)
 * `<location>` for location, address, city and country names
 * `<measure>` for measure types or names
 * `<medicament>` for medicament

@@ -243,7 +243,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                         continue;
                     }
 
-                    // final sanitisation and filtering for the token
+                    // final sanitation and filtering for the token
                     text = text.replaceAll("[ \n]", "");
                     if (TextUtilities.filterLine(text)) {
                         n++;
@@ -942,14 +942,10 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
                 StringBuilder bufferBody = new StringBuilder();
 
-                // just write the text without any label
                 for (LayoutToken token : tokenizationsBody) {
                     bufferBody.append(token.getText());
                 }
-
-                String[] lines = bufferBody.toString().split("\n");
-                List nerResults = new ArrayList();
-                List<LayoutToken> tokensText = null;
+                String[] lines = bufferBody.toString().split("[\\n\\r]");
                 int p = 1;
 
                 // write the TEI file to reflect the extract layout of the text as extracted from the pdf
@@ -968,7 +964,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 List<OffsetPosition> urlPositions = null;
                 for (String line : lines) {
                     if ((line != null) && (line.length() > 0)) {
-                        tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line, new Language(Language.EN, 1.0));
+                        // we segment the text
+                        List<LayoutToken> tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line);
+
+                        if (tokensText == null) {
+                            tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line, new Language("en", 1.0)); // by default, we tokenize with English language
+                        }
 
                         locationsPositions = lexicon.tokenPositionsLocationNames(tokensText);
                         titlesPositions = lexicon.tokenPositionsPersonTitle(tokensText);
@@ -1183,7 +1184,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                         p++;
                     }
                 } else if (i == ll - 1) {
-                    s1 = s;
+                    s1 = s; // the label
                 } else {
                     if (s.equals("LINESTART"))
                         newLine = true;
@@ -1292,7 +1293,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             lastTag = s1;
 
             if (!st.hasMoreTokens()) {
-                if (lastTag != null) {
+                if (lastTag != null && lastTag.length() > 0) {
                     testClosingTag(buffer, "", currentTag0);
                 }
             }
@@ -1304,7 +1305,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
         if (!currentTag0.equals(lastTag0)) {
             // we close the current tag
-            if (lastTag0.equals("<anatomy>")) {
+            if (lastTag0.equals("<other>")) {
+                buffer.append("");
+            } else if (lastTag0.equals("<anatomy>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<date>")) {
                 buffer.append("</ENAMEX>");

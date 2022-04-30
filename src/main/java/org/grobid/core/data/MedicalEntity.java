@@ -63,12 +63,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         MEASURE("MEASURE"),
         MEDICAMENT("MEDICAMENT"),
         OBJECT("OBJECT"),
+        ORGNAME("ORGNAME"),
         PATHOLOGY("PATHOLOGY"),
         PERSNAME("PERSNAME"),
-        ROLENAME("ROLENAME"),
         PHONE("PHONE"),
         PHYSIOLOGY("PHYSIOLOGY"),
         PROCEDURE("PROCEDURE"),
+        ROLENAME("ROLENAME"),
         SUBSTANCE("SUBSTANCE"),
         SYMPTOM("SYMPTOM"),
         UNIT("UNIT"),
@@ -87,9 +88,9 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         }
     }
 
-    // Orign of the entity definition
+    // the origin of the entity definition
     public enum Origin {
-        GROBID("grobid"),
+        GROBID("grobid-medical-report"),
         USER("user");
 
         private String name;
@@ -237,14 +238,14 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "PATHOLOGY";
         } else if (stringType.toUpperCase().contains("PERSNAME")) {
             this.stringType = "PERSNAME";
-        } else if (stringType.toUpperCase().contains("ROLENAME")) {
-            this.stringType = "ROLENAME";
         } else if (stringType.toUpperCase().contains("PHONE")) {
             this.stringType = "PHONE";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
             this.stringType = "PHYSIOLOGY";
         } else if (stringType.toUpperCase().contains("PROCEDURE")) {
             this.stringType = "PROCEDURE";
+        } else if (stringType.toUpperCase().contains("ROLENAME")) {
+            this.stringType = "ROLENAME";
         } else if (stringType.toUpperCase().contains("SUBSTANCE")) {
             this.stringType = "SUBSTANCE";
         } else if (stringType.toUpperCase().contains("SYMPTOM")) {

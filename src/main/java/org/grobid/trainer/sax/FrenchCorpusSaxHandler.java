@@ -125,9 +125,9 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<email>";
                         } else if (value.equals("fax")) {
                             currentTag = "<fax>";
-                        } else if (value.equals("livb") || value.equals("living")) {
+                        } else if (value.equals("living")) {
                             currentTag = "<living>";
-                        } else if (value.equals("city") || value.equals("country") || value.equals("address") || value.equals("location")) {
+                        } else if (value.equals("city") || value.equals("country") || value.equals("address") || value.equals("location") || value.equals("geog")) {
                             currentTag = "<location>";
                         } else if (value.equals("measure")) {
                             currentTag = "<measure>";
@@ -145,11 +145,11 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<phone>";
                         } else if (value.equals("phys") || value.equals("physiology")) {
                             currentTag = "<physiology>";
-                        } else if (value.equals("procedure") ) {
+                        } else if (value.equals("procedure") || value.equals("proc")) {
                             currentTag = "<procedure>";
                         } else if (value.equals("role") || value.equals("rolename")) {
                             currentTag = "<rolename>";
-                        } else if (value.equals("chemical") || value.equals("substance"))  {
+                        } else if (value.equals("chemical") || value.equals("substance") || value.equals("chem"))  {
                             currentTag = "<substance>";
                         } else if (value.equals("phenomena") || value.equals("symptom")) {
                             currentTag = "<symptom>";
