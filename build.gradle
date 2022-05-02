@@ -62,11 +62,11 @@ dependencies {
 
 
     //GROBID (.m2/repository/org/grobid/)
-    implementation ('org.grobid:grobid-core:0.7.1-SNAPSHOT') {
+    implementation ('org.grobid:grobid-core:0.7.2-SNAPSHOT') {
         exclude(module: 'slf4j-jdk14')
     }
-    implementation ('org.grobid:grobid-trainer:0.7.1-SNAPSHOT')
-    implementation ('org.grobid:grobid-service:0.7.1-SNAPSHOT')
+    implementation ('org.grobid:grobid-trainer:0.7.2-SNAPSHOT')
+    implementation ('org.grobid:grobid-service:0.7.2-SNAPSHOT')
     implementation ('org.grobid:grobid-ner:0.7.0'){
         transitive = false
     }
