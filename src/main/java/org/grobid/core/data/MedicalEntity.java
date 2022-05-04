@@ -43,6 +43,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String substance = null;
     private String symptom = null;
     private String unit = null;
+   private String time = null;
     private String value = null;
     private String web = null;
 
@@ -414,6 +415,15 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.unit = unit;
     }
 
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public String getValue() {
         return value;
     }
@@ -421,7 +431,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     public void setValue(String value) {
         this.value = value;
     }
-
 
     public String getWeb() {
         return web;

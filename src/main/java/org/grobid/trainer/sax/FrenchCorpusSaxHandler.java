@@ -153,6 +153,8 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<substance>";
                         } else if (value.equals("phenomena") || value.equals("symptom")) {
                             currentTag = "<symptom>";
+                        } else if (value.equals("time")) {
+                            currentTag = "<time>";
                         } else if (value.equals("unit")) {
                             currentTag = "<unit>";
                         } else if (value.equals("value")) {

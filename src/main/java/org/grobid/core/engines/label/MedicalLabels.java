@@ -264,6 +264,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_SUBSTANCE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SUBSTANCE_LABEL);
     public static final TaggingLabel NER_SYMPTOM = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, SYMPTOM_LABEL);
     public static final TaggingLabel NER_UNIT = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, UNIT_LABEL);
+    public static final TaggingLabel NER_TIME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, TIME_LABEL);
     public static final TaggingLabel NER_VALUE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, VALUE_LABEL);
     public static final TaggingLabel NER_WEB = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, WEB_LABEL);
 

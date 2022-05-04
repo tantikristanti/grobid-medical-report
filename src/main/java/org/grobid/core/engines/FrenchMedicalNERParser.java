@@ -595,6 +595,11 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setUnit(entity.getUnit() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setUnit(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_TIME)) {
+                if (entity.getTime() != null) {
+                    entity.setTime(entity.getTime() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setTime(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_VALUE)) {
                 if (entity.getValue() != null) {
                     entity.setValue(entity.getValue() + "\t" + clusterNonDehypenizedContent);
@@ -1278,6 +1283,9 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<symptom>", "<ENAMEX type=\"symptom\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<time>", "<ENAMEX type=\"time\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<ENAMEX type=\"unit\">", addSpace);
             }
             if (!output) {
@@ -1346,6 +1354,8 @@ public class FrenchMedicalNERParser extends AbstractParser {
             } else if (lastTag0.equals("<substance>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<symptom>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<time>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<unit>")) {
                 buffer.append("</ENAMEX>");
