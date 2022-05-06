@@ -94,6 +94,7 @@ public class MedicalLabels extends TaggingLabels {
     // person (medics, patient)
     public static final String ROLE_LABEL = "<rolename>";
     public static final String PERSON_NAME_LABEL = "<persname>";
+    public static final String PERSON_TYPE_LABEL = "<perstype>";
     public static final String PERSON_SEX_LABEL = "<sex>";
     public static final String PERSON_BIRTH_LABEL = "<birth>";
     public static final String PERSON_DEATH_LABEL = "<death>";
@@ -256,6 +257,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_ORG_NAME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, ORG_NAME_LABEL);
     public static final TaggingLabel NER_PATHOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PATHOLOGY_LABEL);
     public static final TaggingLabel NER_PERSON_NAME = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_NAME_LABEL);
+    public static final TaggingLabel NER_PERSON_TYPE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PERSON_TYPE_LABEL);
     public static final TaggingLabel NER_PHONE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHONE_LABEL);
     public static final TaggingLabel NER_PHYSIOLOGY = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PHYSIOLOGY_LABEL);
     public static final TaggingLabel NER_PROCEDURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, PROCEDURE_LABEL);

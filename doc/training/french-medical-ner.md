@@ -36,15 +36,17 @@ For the French medical NER model, we use the following TEI elements:
 * `<orgName>` for organization names
 * `<pathology>` for disease names
 * `<persName>` for person names
+* `<persType>` for person types (e.g., Origine algérienne, italienne)
 * `<phone>` for phone numbers
 * `<physiology>` for physiology
 * `<procedure>` for procedures
 * `<roleName>` for person role names
 * `<substance>` for chemical substances
 * `<symptom>` for observed symptoms and signs, phenomena
+* `<time>` for time (e.g., 23h10, 10:00)
 * `<unit>` for value units
 * `<value>` for values
-* `<web>` for web sites
+* `<web>` for websites
 * `<other>` for unknown (yet) entities
 
 

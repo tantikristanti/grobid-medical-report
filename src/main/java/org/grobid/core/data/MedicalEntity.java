@@ -36,6 +36,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String orgname = null;
     private String pathology = null;
     private String persname = null;
+    private String perstype = null;
     private String phone = null;
     private String physiology = null;
     private String procedure = null;
@@ -67,12 +68,14 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         ORGNAME("ORGNAME"),
         PATHOLOGY("PATHOLOGY"),
         PERSNAME("PERSNAME"),
+        PERSTYPE("PERSTYPE"),
         PHONE("PHONE"),
         PHYSIOLOGY("PHYSIOLOGY"),
         PROCEDURE("PROCEDURE"),
         ROLENAME("ROLENAME"),
         SUBSTANCE("SUBSTANCE"),
         SYMPTOM("SYMPTOM"),
+        TIME("TIME"),
         UNIT("UNIT"),
         VALUE("VALUE"),
         WEB("WEB");
@@ -374,6 +377,13 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.persname = persname;
     }
 
+    public String getPerstype() {
+        return perstype;
+    }
+
+    public void setPerstype(String perstype) {
+        this.perstype = perstype;
+    }
 
     public String getPhone() {
         return phone;
