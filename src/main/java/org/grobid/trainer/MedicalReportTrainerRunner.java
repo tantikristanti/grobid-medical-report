@@ -1,8 +1,13 @@
 package org.grobid.trainer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.main.GrobidHomeFinder;
+import org.grobid.core.main.LibraryLoader;
+import org.grobid.core.utilities.GrobidConfig;
 import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +48,37 @@ public class MedicalReportTrainerRunner {
 
     protected static void initProcess(final String path2GbdHome, final String path2GbdProperties) {
         GrobidProperties.getInstance();
+    }
+
+    /**
+     * Init process with the provided grobid-home or  default value of the grobid home
+     *
+     * @param grobidHome
+     */
+    protected static void initProcess(String grobidHome) {
+        MedicalReportConfiguration medicalReportConfiguration = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+        } catch (Exception e) {
+            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
+        }
+        try {
+            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+
+            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
+            GrobidProperties.getInstance(grobidHomeFinder);
+
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
+
+            for (GrobidConfig.ModelParameters theModel : medicalReportConfiguration.getModels())
+                GrobidProperties.getInstance().addModel(theModel);
+
+            LibraryLoader.load();
+        } catch (final Exception exp) {
+            System.err.println("grobid-medical-report initialisation failed: " + exp);
+            exp.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {

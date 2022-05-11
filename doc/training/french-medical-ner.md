@@ -49,7 +49,6 @@ For the French medical NER model, we use the following TEI elements:
 * `<web>` for websites
 * `<other>` for unknown (yet) entities
 
-
 References for annotation guidelines:
 * https://www.academie-medecine.fr/le-dictionnaire/
 * https://www.cnrtl.fr 

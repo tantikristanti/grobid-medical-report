@@ -242,6 +242,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "PATHOLOGY";
         } else if (stringType.toUpperCase().contains("PERSNAME")) {
             this.stringType = "PERSNAME";
+        } else if (stringType.toUpperCase().contains("PERSTYPE")) {
+            this.stringType = "PERSTYPE";
         } else if (stringType.toUpperCase().contains("PHONE")) {
             this.stringType = "PHONE";
         } else if (stringType.toUpperCase().contains("PHYSIOLOGY")) {
@@ -254,6 +256,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "SUBSTANCE";
         } else if (stringType.toUpperCase().contains("SYMPTOM")) {
             this.stringType = "SYMPTOM";
+        } else if (stringType.toUpperCase().contains("TIME")) {
+            this.stringType = "TIME";
         } else if (stringType.toUpperCase().contains("UNIT")) {
             this.stringType = "UNIT";
         } else if (stringType.toUpperCase().contains("VALUE")) {
