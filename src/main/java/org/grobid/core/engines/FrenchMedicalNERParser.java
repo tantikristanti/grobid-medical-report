@@ -4,6 +4,7 @@ import com.googlecode.clearnlp.engine.EngineGetter;
 import com.googlecode.clearnlp.segmentation.AbstractSegmenter;
 import com.googlecode.clearnlp.tokenization.AbstractTokenizer;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -955,8 +956,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 for (LayoutToken token : tokenizationsBody) {
                     bufferBody.append(token.getText());
                 }
-                String[] lines = bufferBody.toString().split("[\\n\\r]");
-                int p = 1;
+
+                // also write the raw text (it's needed for further process, for example, with DeLFT)
+                StringBuffer rawtxt = new StringBuffer();
+                for (LayoutToken txtline : tokenizationsBody) {
+                    rawtxt.append(TextUtilities.HTMLEncode(txtline.getText()));
+                }
+                // path for the output
+                String outPathRawtext = pathOutput + File.separator +
+                    pdfFileName.replace(".pdf", ".training.french.medical.ner.rawtext.txt");
+                FileUtils.writeStringToFile(new File(outPathRawtext), rawtxt.toString(), "UTF-8");
 
                 // write the TEI file to reflect the extract layout of the text as extracted from the pdf
                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
@@ -972,6 +981,10 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 List<OffsetPosition> suffixesPositions = null;
                 List<OffsetPosition> emailPositions = null;
                 List<OffsetPosition> urlPositions = null;
+
+                // read the paragraph by lines
+                String[] lines = bufferBody.toString().split("[\\n\\r]");
+                int p = 1;
                 for (String line : lines) {
                     if ((line != null) && (line.length() > 0)) {
                         // we segment the text
@@ -1084,6 +1097,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 for (LayoutToken token : tokenizationsBody) {
                     bufferBody.append(token.getText());
                 }
+
+                // also write the raw text
+                StringBuffer rawtxt = new StringBuffer();
+                for (LayoutToken txtline : tokenizationsBody) {
+                    rawtxt.append(TextUtilities.HTMLEncode(txtline.getText()));
+                }
+                // path for the output
+                String outPathRawtext = pathOutput + File.separator +
+                    pdfFileName.replace(".pdf", ".training.french.medical.ner.rawtext.txt");
+                FileUtils.writeStringToFile(new File(outPathRawtext), rawtxt.toString(), "UTF-8");
 
                 // write the TEI file to reflect the extract layout of the text as extracted from the pdf
                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
