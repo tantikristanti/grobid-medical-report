@@ -217,7 +217,7 @@ task eval_left_note_medical_report(dependsOn: 'classes', type: JavaExec, group: 
 task train_left_note_medical_report_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 2, 'left-note-medical-report', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    args 2, 'left-note-medical-report', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
@@ -233,7 +233,7 @@ task eval_full_medical_text(dependsOn: 'classes', type: JavaExec, group: 'traini
 task train_full_medical_text_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
-    args 2, 'full-medical-text', '-gH', getArg('gH', '../../grobid-home'), '-s', getArg('s', '0.8')
+    args 2, 'full-medical-text', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
