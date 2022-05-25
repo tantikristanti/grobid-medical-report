@@ -6,7 +6,7 @@ For the following guidelines, we first need to generate the training data as exp
 
 In __grobid-medical-report__, __patient__ corresponds to the patient information. 
 
-For identifying the exact pieces of information to be part of the `header-medical-report`, see the [Annotation guidelines of the header-medical-report model](header-medical-report.md).
+For identifying the exact pieces of patient information to be part of the `header-medical-report`, see the [Annotation guidelines of the header-medical-report model](header-medical-report.md).
 
 For the patient model, we use the following TEI elements:
 

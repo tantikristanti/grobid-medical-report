@@ -6,7 +6,7 @@ For the following guidelines, we first need to generate the training data as exp
 
 In __grobid-medical-report__, the document __organization-medical-report__ corresponds to the information of organization structures. 
 
-For identifying the exact pieces of information to be part of the `organization-medical-report` segments, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
+For identifying the exact pieces of organization information to be part of the `header-medical-report` or `left-note-medical-report`, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
 
 For the organization-medical-report model, we use the following TEI elements:
 
