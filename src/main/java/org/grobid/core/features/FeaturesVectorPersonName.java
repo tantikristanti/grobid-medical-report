@@ -119,7 +119,7 @@ public class FeaturesVectorPersonName {
             List<OffsetPosition> titlePosition, List<OffsetPosition> suffixPosition) throws Exception {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
 
-        StringBuffer header = new StringBuffer();
+        StringBuffer name = new StringBuffer();
         boolean newline = true;
         String previousTag = null;
         String previousText = null;
@@ -330,13 +330,244 @@ public class FeaturesVectorPersonName {
 
             features.label = tag;
 
-            header.append(features.printVector());
+            name.append(features.printVector());
 
             previousTag = tag;
             previousText = text;
         }
 
-        return header.toString();
+        return name.toString();
+    }
+
+    /**
+     * Add features for name parsing.
+     */
+    static public String addFeaturesNameAnonym(List<LayoutToken> tokens, List<String> labels,
+                                         List<OffsetPosition> titlePosition, List<OffsetPosition> suffixPosition,
+                                         List<String> dataOriginal, List<String> dataAnonymized) throws Exception {
+        FeatureFactory featureFactory = FeatureFactory.getInstance();
+
+        StringBuffer name = new StringBuffer();
+        boolean newline = true;
+        String previousTag = null;
+        String previousText = null;
+        FeaturesVectorName features = null;
+        LayoutToken token = null;
+
+        int currentTitlePosition = 0;
+        int currentSuffixPosition = 0;
+
+        boolean isTitleToken;
+        boolean isSuffixToken;
+        boolean skipTest;
+
+        for(int n=0; n<tokens.size(); n++) {
+            boolean outputLineStatus = false;
+            isTitleToken = false;
+            isSuffixToken = false;
+            skipTest = false;
+
+            token = tokens.get(n);
+
+            String text = token.getText();
+            if (text.equals(" ")) {
+                continue;
+            }
+
+            newline = false;
+            if (text.equals("\n")) {
+                newline = true;
+                continue;
+            }
+
+            // remove spaces
+            for (int i=0; i<dataOriginal.size(); i++) {
+                text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+            }
+            text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
+            if (text.trim().length() == 0 ) {
+                continue;
+            }
+
+            // check the position of matched title
+            if ((titlePosition != null) && (titlePosition.size() > 0)) {
+                if (currentTitlePosition == titlePosition.size() - 1) {
+                    if (titlePosition.get(currentTitlePosition).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentTitlePosition; i < titlePosition.size(); i++) {
+                        if ((titlePosition.get(i).start <= n) &&
+                            (titlePosition.get(i).end >= n)) {
+                            isTitleToken = true;
+                            currentTitlePosition = i;
+                            break;
+                        } else if (titlePosition.get(i).start > n) {
+                            isTitleToken = false;
+                            currentTitlePosition = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matched suffix
+            skipTest = false;
+            if (suffixPosition != null) {
+                if (currentSuffixPosition == suffixPosition.size() - 1) {
+                    if (suffixPosition.get(currentSuffixPosition).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentSuffixPosition; i < suffixPosition.size(); i++) {
+                        if ((suffixPosition.get(i).start <= n) &&
+                            (suffixPosition.get(i).end >= n)) {
+                            isSuffixToken = true;
+                            currentSuffixPosition = i;
+                            break;
+                        } else if (suffixPosition.get(i).start > n) {
+                            isSuffixToken = false;
+                            currentSuffixPosition = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            String tag = null;
+            if (!CollectionUtils.isEmpty(labels) && (labels.size() > n)) {
+                tag = labels.get(n);
+            }
+
+            if (TextUtilities.filterLine(text)) {
+                continue;
+            }
+
+            features = new FeaturesVectorName();
+            features.string = text;
+
+            if (newline) {
+                features.lineStatus = "LINESTART";
+                outputLineStatus = true;
+            }
+
+            Matcher m0 = featureFactory.isPunct.matcher(text);
+            if (m0.find()) {
+                features.punctType = "PUNCT";
+            }
+
+            if ((text.equals("(")) | (text.equals("["))) {
+                features.punctType = "OPENBRACKET";
+            } else if ((text.equals(")")) | (text.equals("]"))) {
+                features.punctType = "ENDBRACKET";
+            } else if (text.equals(".")) {
+                features.punctType = "DOT";
+            } else if (text.equals(",")) {
+                features.punctType = "COMMA";
+            } else if (text.equals("-")) {
+                features.punctType = "HYPHEN";
+            } else if (text.equals("\"") | text.equals("\'") | text.equals("`")) {
+                features.punctType = "QUOTE";
+            }
+
+            if (n == 0) {
+                if (!outputLineStatus) {
+                    features.lineStatus = "LINESTART";
+                    outputLineStatus = true;
+                }
+            } else if (tokens.size() == n + 1) {
+                if (!outputLineStatus) {
+                    features.lineStatus = "LINEEND";
+                    outputLineStatus = true;
+                }
+            } else {
+                // look ahead...
+                boolean endline = false;
+                int i = 1;
+                boolean endloop = false;
+                while ((tokens.size() > n + i) & (!endloop)) {
+                    String newLine = tokens.get(n + i).getText();
+                    if (newLine != null) {
+                        if (newLine.equals("\n")) {
+                            endline = true;
+                            if (!outputLineStatus) {
+                                features.lineStatus = "LINEEND";
+                                outputLineStatus = true;
+                            }
+                            endloop = true;
+                        } else if (!newLine.equals(" ")) {
+                            endloop = true;
+                        }
+                    }
+                    i++;
+                }
+            }
+
+            if (!outputLineStatus) {
+                features.lineStatus = "LINEIN";
+                outputLineStatus = true;
+            }
+
+            if (text.length() == 1) {
+                features.singleChar = true;
+            }
+
+            if (Character.isUpperCase(text.charAt(0))) {
+                features.capitalisation = "INITCAP";
+            }
+
+            if (featureFactory.test_all_capital(text)) {
+                features.capitalisation = "ALLCAP";
+            }
+
+            if (features.capitalisation == null)
+                features.capitalisation = "NOCAPS";
+
+            if (featureFactory.test_digit(text)) {
+                features.digit = "CONTAINSDIGITS";
+            }
+
+            if (featureFactory.test_common(text)) {
+                features.commonName = true;
+            }
+
+            if (featureFactory.test_first_names(text)) {
+                features.firstName = true;
+            }
+
+            if (featureFactory.test_last_names(text)) {
+                features.lastName = true;
+            }
+
+            Matcher m = featureFactory.isDigit.matcher(text);
+            if (m.find()) {
+                features.digit = "ALLDIGIT";
+            }
+
+            if (features.digit == null)
+                features.digit = "NODIGIT";
+
+            if (features.punctType == null)
+                features.punctType = "NOPUNCT";
+
+            if (isTitleToken) {
+                features.isKnownTitle = true;
+            }
+
+            if (isSuffixToken) {
+                features.isKnownSuffix = true;
+            }
+
+            features.label = tag;
+
+            name.append(features.printVector());
+
+            previousTag = tag;
+            previousText = text;
+        }
+
+        return name.toString();
     }
 
 }

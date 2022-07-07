@@ -30,8 +30,6 @@ The models prepared are:
 
 - [x] name-patient
 
-
-
 Note:
 - [x] (A completed model)
 - [ ] (An uncompleted model - work in progress)
@@ -176,7 +174,7 @@ An example of a command for generating pre-annotated training data for all model
 > java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFull
 ```
 
-With this command, for each PDF file as input, for each model, two types of files will be generated. They are files containing features (extention without *.xml) and files containing pre-annotated data using existing trained models (e.g., medical-report-segmenter model, header-medical-report model). 
+With this command, for each PDF file as input, for each model, two types of files will be generated. They are files containing features (without *.xml extension) and files containing pre-annotated data using existing trained models (e.g., medical-report-segmenter model, header-medical-report model). 
 These files can then be corrected and be used for re-training new models. Only pre-annotated TEI files can be revised while the feature files cannot be corrected manually.
 
 Depending on what model we want to retrain, these files will then need to be placed under grobid-trainer directory (`grobid-trainer/resources/dataset/*MODEL*/`), especially under `grobid-trainer/resources/dataset/*MODEL*/corpus` for training data and under `grobid-trainer/resources/dataset/*MODEL*/evaluation` for evaluation data. The corrected TEI files need to be put under `grobid-trainer/resources/dataset/*MODEL*/corpus/tei` and the feature files under `grobid-trainer/resources/dataset/*MODEL*/corpus/raw`.
@@ -187,5 +185,42 @@ An example of a command for generating a new training data for the __fr-medical-
 ```
 
 ## Training guidelines
-
 Annotation guidelines for creating the training data corresponding to the different GROBID models are available from the [following page](training/General-principles.md).
+
+## Data Anonymization 
+With the awareness that we work with confidential data, we also provide facilities to anonymize sensitive data.
+There are two types of anonymized data:
+- data to conduct training and testing activities for all levels of the models;
+- final results for end-user
+
+The data that we anonymize includes the social security numbers, the names, the phone numbers, the address, and the dates of birth of patients, names of doctors and health practitioners, document numbers.
+
+### Data Anonymization for Training and Testing Datasets
+To anonymize the sensitive data in datasets and to assist annotators in referencing the anonymized data to the original data, two steps are required:
+1. Extracting reference data containing original data and anonymized data.
+
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory_containing_PDF/ -dOut  ~/path_to_output_directory_containing_result_TXT/ -exe createDataAnonymized
+```
+The input path is the path where PDF files containing the data to be extracted are saved. The output results are in TXT format. 
+The resulting file format is as follows:
+
+Element | Original data | Anonymized data
+------- |---------------| ---------------
+Security Social Number | 0123456789    | 5042697120
+Phone Number | 0760512430    | 0971642056
+Birth date | 2015-05-20    | 2022-02-17
+Firstname | Beau          | Belle  
+Lastname | GARCON        | FILLE
+
+2. Extracting dataset with anonymized data based on reference data.
+
+```bash
+> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory_containing_PDFs/ -dOut  ~/path_to_output_directory_containing_results/ -exe createTrainingAnonym
+```
+The input path is the path where PDF files containing the data to be extracted are saved.
+As training files used in Grobid family projects, for each PDF file as input and for each model, two types of files will be generated. 
+- files containing features (without *.xml extension) 
+- files containing pre-annotated data using existing trained models
+
+The difference with ordinary training data generation is that with this method, sensitive data are anonymized.

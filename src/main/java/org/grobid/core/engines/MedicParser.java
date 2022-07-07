@@ -562,6 +562,193 @@ public class MedicParser extends AbstractParser {
         return buffer;
     }
 
+    /**
+     * Extract results from a list of medics strings in the training format
+     * without any string modification.
+     *
+     * @param inputs list of input data
+     * @return result
+     */
+    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String> dataOriginal, List<String> dataAnonymized) {
+        StringBuilder buffer = new StringBuilder();
+        try {
+            if (inputs == null)
+                return null;
+
+            if (inputs.size() == 0)
+                return null;
+
+            List<OffsetPosition> locationsPositions = null;
+            List<OffsetPosition> titlePositions = null;
+            List<OffsetPosition> suffixPositions = null;
+            List<OffsetPosition> emailPositions = null;
+            List<OffsetPosition> urlPositions = null;
+
+            for (String input : inputs) {
+                if (input == null)
+                    continue;
+
+                List<LayoutToken> tokenizations = analyzer.tokenizeWithLayoutToken(input);
+                if (tokenizations.size() == 0)
+                    return null;
+
+                locationsPositions = lexicon.tokenPositionsLocationNames(tokenizations);
+                titlePositions = lexicon.tokenPositionsPersonTitle(tokenizations);
+                suffixPositions = lexicon.tokenPositionsPersonSuffix(tokenizations);
+                emailPositions = lexicon.tokenPositionsEmailPattern(tokenizations);
+                urlPositions = lexicon.tokenPositionsUrlPattern(tokenizations);
+
+                String ress = FeaturesVectorMedic.addFeaturesMedic(tokenizations, null,
+                    locationsPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                String res = label(ress);
+
+                String lastTag = null;
+                String lastTag0;
+                String currentTag0 = null;
+                boolean start = true;
+                String s1 = null; // the label
+                String s2 = null; // the token
+                int p = 0;
+
+                // extract results from the processed file
+                StringTokenizer st = new StringTokenizer(res, "\n");
+                while (st.hasMoreTokens()) {
+                    boolean addSpace = false;
+                    String tok = st.nextToken().trim();
+
+                    if (tok.length() == 0) {
+                        // new medic
+                        start = true;
+                        continue;
+                    }
+                    StringTokenizer stt = new StringTokenizer(tok, "\t");
+                    int i = 0;
+
+                    boolean newLine = false;
+                    int ll = stt.countTokens();
+                    while (stt.hasMoreTokens()) {
+                        String s = stt.nextToken().trim();
+                        if (i == 0) {
+                            for (int j=0; j<dataOriginal.size(); j++) {
+                                s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                            }
+                            s2 = TextUtilities.HTMLEncode(s);
+                            //s2 = s;
+
+                            boolean strop = false;
+                            while ((!strop) && (p < tokenizations.size())) {
+                                String tokOriginal = tokenizations.get(p).t();
+                                for (int j=0; j<dataOriginal.size(); j++) {
+                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                }
+                                if (tokOriginal.equals(" ")
+                                    || tokOriginal.equals("\u00A0")) {
+                                    addSpace = true;
+                                } else if (tokOriginal.equals(s)) {
+                                    strop = true;
+                                }
+                                p++;
+                            }
+                        } else if (i == ll - 1) {
+                            s1 = s;
+                        }
+                        i++;
+                    }
+
+                    if (start && (s1 != null)) {
+                        //buffer.append("\t<medic>");
+                        start = false;
+                    }
+
+                    lastTag0 = null;
+                    if (lastTag != null) {
+                        if (lastTag.startsWith("I-")) {
+                            lastTag0 = lastTag.substring(2, lastTag.length());
+                        } else {
+                            lastTag0 = lastTag;
+                        }
+                    }
+                    if (s1 != null) {
+                        if (s1.startsWith("I-")) {
+                            currentTag0 = s1.substring(2, s1.length());
+                        } else {
+                            currentTag0 = s1;
+                        }
+                    }
+
+                    if ((lastTag0 != null) && (currentTag0 != null))
+                        testClosingTag(buffer, currentTag0, lastTag0);
+
+
+                    String output = writeField(s1, lastTag0, s2, "<idno>", "<idno>", addSpace, 0);
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<rolename>", "<roleName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<affiliation>", "<affiliation>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<institution>", "<orgName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<settlement>", "<settlement>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<fax>", "<fax>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"medic\">", addSpace, 0);
+                    }
+                    if (output != null) {
+                        buffer.append(output);
+                        lastTag = s1;
+                        continue;
+                    }
+                    lastTag = s1;
+                }
+
+                if (lastTag != null) {
+                    if (lastTag.startsWith("I-")) {
+                        lastTag0 = lastTag.substring(2, lastTag.length());
+                    } else {
+                        lastTag0 = lastTag;
+                    }
+                    currentTag0 = "";
+                    testClosingTag(buffer, currentTag0, lastTag0);
+                    //buffer.append("</medic>\n");
+                }
+            }
+
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid.", e);
+        }
+        return buffer;
+    }
+
     private String writeField(String s1, String lastTag0, String s2,
                               String field, String outField, boolean addSpace, int nbIndent) {
         String result = null;

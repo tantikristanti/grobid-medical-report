@@ -53,7 +53,7 @@ public class PersonNameParser extends AbstractParser {
     /**
      * Processing of person's name
      */
-    public List<PersonName> process(String input) throws Exception {
+    public PersonName process(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -63,7 +63,7 @@ public class PersonNameParser extends AbstractParser {
         return processing(tokens);
     }
 
-    public List<PersonName> processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public PersonName processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
@@ -73,11 +73,10 @@ public class PersonNameParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified person name entities as POJO.
      */
-    public List<PersonName> processing(List<LayoutToken> tokens) {
+    public PersonName processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<PersonName> listNames = new ArrayList<>();
         PersonName name = null;
         try {
             List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
@@ -149,14 +148,11 @@ public class PersonNameParser extends AbstractParser {
                     }
                     name.addLayoutTokens(cluster.concatTokens());
                 }
-                if (name != null) {
-                    listNames.add(name);
-                }
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return listNames;
+        return name;
     }
 
     /**
@@ -290,6 +286,150 @@ public class PersonNameParser extends AbstractParser {
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
+                                if (tokOriginal.equals(" ")
+                                    || tokOriginal.equals("\u00A0")) {
+                                    addSpace = true;
+                                } else if (tokOriginal.equals(s)) {
+                                    strop = true;
+                                }
+                                p++;
+                            }
+                        } else if (i == ll - 1) {
+                            s1 = s; // the label
+                        }
+                        i++;
+                    }
+                    if (start && (s1 != null)) {
+                        buffer.append("\t<name>");
+                        start = false;
+                    }
+                    // lastTag, lastTag0 (without I-)
+                    if (lastTag != null) {
+                        if (lastTag.startsWith("I-")) {
+                            lastTag0 = lastTag.substring(2, lastTag.length());
+                        } else {
+                            lastTag0 = lastTag;
+                        }
+                    }
+                    // currentTag, currentTag (without I-)
+                    if (s1 != null) {
+                        if (s1.startsWith("I-")) {
+                            currentTag0 = s1.substring(2, s1.length());
+                        } else {
+                            currentTag0 = s1;
+                        }
+                    }
+                    // close tag
+                    if ((lastTag0 != null) && (currentTag0 != null))
+                        testClosingTag(buffer, currentTag0, lastTag0);
+
+                    String output = writeField(s1, lastTag0, s2, "<forename>", "<forename>", addSpace, 0);
+
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<middlename>", "<middlename>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<surname>", "<surname>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<title>", "<title>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<suffix>", "<suffix>", addSpace, 0);
+                    }
+                    if (output != null) {
+                        buffer.append(output);
+                        lastTag = s1;
+                        continue;
+                    }
+                    lastTag = s1;
+                }
+                if (lastTag != null) {
+                    if (lastTag.startsWith("I-")) {
+                        lastTag0 = lastTag.substring(2, lastTag.length());
+                    } else {
+                        lastTag0 = lastTag;
+                    }
+                    currentTag0 = "";
+                    testClosingTag(buffer, currentTag0, lastTag0);
+                    buffer.append("</name>\n");
+                }
+            }
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid.", e);
+        }
+        return buffer;
+    }
+
+    /**
+     * Extract results from a dateline string in the training format without any string modification.
+     */
+    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String>  dataOriginal, List<String> dataAnonymized) {
+        StringBuilder buffer = new StringBuilder();
+        try {
+            if (inputs == null)
+                return null;
+
+            if (inputs.size() == 0)
+                return null;
+
+            List<OffsetPosition> titlePositions = null;
+            List<OffsetPosition> suffixPositions = null;
+
+            for (String input : inputs) {
+                if (input == null)
+                    continue;
+                List<LayoutToken> tokenizations = analyzer.tokenizeWithLayoutToken(input);
+                if (tokenizations.size() == 0)
+                    return null;
+
+                titlePositions = lexicon.tokenPositionsPersonTitle(tokenizations);
+                suffixPositions = lexicon.tokenPositionsPersonSuffix(tokenizations);
+
+                String ress = FeaturesVectorPersonName.addFeaturesName(tokenizations,
+                    null, titlePositions, suffixPositions);
+                String res = label(ress);
+
+                String lastTag = null;
+                String lastTag0 = null;
+                String currentTag0 = null;
+                boolean start = true;
+                String s1 = null;
+                String s2 = null;
+                int p = 0;
+                boolean addSpace;
+                // extract results from the processed file
+                StringTokenizer st = new StringTokenizer(res, "\n");
+                while (st.hasMoreTokens()) {
+                    addSpace = false;
+                    String tok = st.nextToken().trim();
+                    if (tok.length() == 0) {
+                        // new dateline
+                        start = true;
+                        continue;
+                    }
+                    StringTokenizer stt = new StringTokenizer(tok, "\t");
+                    int i = 0;
+
+                    boolean newLine = false;
+                    int ll = stt.countTokens();
+                    while (stt.hasMoreTokens()) {
+                        String s = stt.nextToken().trim();
+                        if (i == 0) {
+                            for (int j=0; j<dataOriginal.size(); j++) {
+                                s = s.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                            }
+                            s2 = TextUtilities.HTMLEncode(s); // the token
+
+                            boolean strop = false;
+                            while ((!strop) && (p < tokenizations.size())) {
+                                String tokOriginal = tokenizations.get(p).t();
+                                for (int j=0; j<dataOriginal.size(); j++) {
+                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                }
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
                                     addSpace = true;

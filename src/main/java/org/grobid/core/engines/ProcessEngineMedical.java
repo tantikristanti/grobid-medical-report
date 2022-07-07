@@ -2,6 +2,7 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
+import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.factory.GrobidMedicalFactory;
 import org.grobid.core.main.batch.GrobidMainArgs;
 import org.grobid.core.main.batch.GrobidMedicalReportMainArgs;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -270,6 +272,18 @@ public class ProcessEngineMedical implements Closeable {
     }
 
     /**
+     * Generate raw texts from PDF files
+     *
+     * @param pGbdArgs The parameters.
+     */
+    public void generateText(final GrobidMedicalReportMainArgs pGbdArgs) {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchGenerateText(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
+    /**
      * Generate blank training data from provided directory of PDF documents, i.e. where TEI files are text only
      * without tags. This can be used to start from scratch any new model.
      *
@@ -292,6 +306,30 @@ public class ProcessEngineMedical implements Closeable {
         inferPdfInputPath(pGbdArgs);
         inferOutputPath(pGbdArgs);
         int result = getEngine().batchCreateTraining(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
+    /**
+     * Generate training data for all models
+     *
+     * @param pGbdArgs The parameters.
+     */
+    public void createTrainingAnonym(final GrobidMedicalReportMainArgs pGbdArgs) {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchCreateTrainingAnonym(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
+    /**
+     * Generate training data for all models and some data (document number, patient name and date of birth, doctor's name) will be anonymized
+     *
+     * @param pGbdArgs The parameters.
+     */
+    public void createDataAnonymized(final GrobidMedicalReportMainArgs pGbdArgs) {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchCreateDataAnonymized(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
         LOGGER.info(result + " files processed.");
     }
 

@@ -292,11 +292,14 @@ public class HeaderMedicalParser extends AbstractParser {
 
                                         for (Patient patient : localPatients) {
                                             // normalization of all birth and death dates of patients
+
                                             if (patient.getDateBirth() != null) {
+
                                                 Optional<Date> normalisedDate = getNormalizedDate(patient.getDateBirth());
                                                 if (normalisedDate.isPresent()) {
-                                                    patient.setDateBirth(toISOString(normalisedDate.get()));
+                                                    patient.setDateBirth(toISOString(normalisedDate.get())); // yyyy-mm-dd
                                                 }
+
                                             }
                                             if (patient.getDateDeath() != null) {
                                                 Optional<Date> normalisedDate = getNormalizedDate(patient.getDateDeath());
@@ -893,6 +896,417 @@ public class HeaderMedicalParser extends AbstractParser {
     }
 
     /**
+     * Return the header section with features to be processed by the sequence labelling model
+     */
+    public Pair<String, List<LayoutToken>> getSectionHeaderFeaturedAnonym(Document doc,
+                                                                    SortedSet<DocumentPiece> documentHeaderParts,
+                                                                          List<String> dataOriginal,
+                                                                          List<String> dataAnonymized) {
+        FeatureFactory featureFactory = FeatureFactory.getInstance();
+        StringBuilder header = new StringBuilder();
+        String currentFont = null;
+        int currentFontSize = -1;
+
+        // vector for features
+        FeaturesVectorHeaderMedical features;
+        FeaturesVectorHeaderMedical previousFeatures = null;
+
+        double lineStartX = Double.NaN;
+        boolean indented = false;
+        boolean centered = false;
+
+        boolean endblock;
+        //for (Integer blocknum : blockDocumentHeaders) {
+        List<Block> blocks = doc.getBlocks();
+        if ((blocks == null) || blocks.size() == 0) {
+            return null;
+        }
+
+        List<LayoutToken> headerTokenizations = new ArrayList<LayoutToken>();
+
+        // find the largest, smallest and average size font on the header section
+        // note: only  largest font size information is used currently
+        double largestFontSize = 0.0;
+        double smallestFontSize = 100000.0;
+        double averageFontSize;
+        double accumulatedFontSize = 0.0;
+        int nbTokens = 0;
+        for (DocumentPiece docPiece : documentHeaderParts) {
+            DocumentPointer dp1 = docPiece.getLeft();
+            DocumentPointer dp2 = docPiece.getRight();
+
+            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
+                Block block = blocks.get(blockIndex);
+
+                List<LayoutToken> tokens = block.getTokens();
+                if ((tokens == null) || (tokens.size() == 0)) {
+                    continue;
+                }
+
+                for (LayoutToken token : tokens) {
+                    if (token.getFontSize() > largestFontSize) {
+                        largestFontSize = token.getFontSize();
+                    }
+
+                    if (token.getFontSize() < smallestFontSize) {
+                        smallestFontSize = token.getFontSize();
+                    }
+
+                    accumulatedFontSize += token.getFontSize();
+                    nbTokens++;
+                }
+            }
+        }
+        averageFontSize = accumulatedFontSize / nbTokens;
+
+        for (DocumentPiece docPiece : documentHeaderParts) {
+            DocumentPointer dp1 = docPiece.getLeft();
+            DocumentPointer dp2 = docPiece.getRight();
+
+            for (int blockIndex = dp1.getBlockPtr(); blockIndex <= dp2.getBlockPtr(); blockIndex++) {
+                Block block = blocks.get(blockIndex);
+                boolean newline = false;
+                boolean previousNewline = true;
+                endblock = false;
+                double spacingPreviousBlock = 0.0; // discretized
+
+                if (previousFeatures != null)
+                    previousFeatures.blockStatus = "BLOCKEND";
+
+                List<LayoutToken> tokens = block.getTokens();
+                if ((tokens == null) || (tokens.size() == 0)) {
+                    continue;
+                }
+
+                String localText = block.getText();
+                if (localText == null)
+                    continue;
+                int startIndex = 0;
+                int n = 0;
+                if (blockIndex == dp1.getBlockPtr()) {
+                    //n = block.getStartToken();
+                    n = dp1.getTokenDocPos() - block.getStartToken();
+                    startIndex = dp1.getTokenDocPos() - block.getStartToken();
+                }
+
+                // character density of the block
+                double density = 0.0;
+                if ((block.getHeight() != 0.0) && (block.getWidth() != 0.0) &&
+                    (block.getText() != null) && (!block.getText().contains("@PAGE")) &&
+                    (!block.getText().contains("@IMAGE")))
+                    density = (double) block.getText().length() / (block.getHeight() * block.getWidth());
+
+                String[] lines = localText.split("[\\n\\r]");
+                // set the max length of the lines in the block, in number of characters
+                int maxLineLength = 0;
+                for (int p = 0; p < lines.length; p++) {
+                    if (lines[p].length() > maxLineLength)
+                        maxLineLength = lines[p].length();
+                }
+
+                List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
+                List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
+                List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
+
+                while (n < tokens.size()) {
+                    if (blockIndex == dp2.getBlockPtr()) {
+                        if (n > dp2.getTokenDocPos() - block.getStartToken()) {
+                            break;
+                        }
+                    }
+
+                    LayoutToken token = tokens.get(n);
+                    headerTokenizations.add(token);
+
+                    String text = token.getText();
+                    if (text == null) {
+                        n++;
+                        continue;
+                    }
+
+                    text = text.replace(" ", "");
+                    if (text.length() == 0) {
+                        n++;
+                        continue;
+                    }
+
+                    if (text.equals("\n") || text.equals("\r")) {
+                        previousNewline = true;
+                        newline = false;
+                        n++;
+                        continue;
+                    }
+
+                    if (previousNewline) {
+                        newline = true;
+                        previousNewline = false;
+                        if (previousFeatures != null) {
+                            double previousLineStartX = lineStartX;
+                            lineStartX = token.getX();
+                            double characterWidth = token.width / token.getText().length();
+                            if (!Double.isNaN(previousLineStartX)) {
+                                // Indentation if line start is > 1 character width to the right of previous line start
+                                if (lineStartX - previousLineStartX > characterWidth)
+                                    indented = true;
+                                    // Indentation ends if line start is > 1 character width to the left of previous line start
+                                else if (previousLineStartX - lineStartX > characterWidth)
+                                    indented = false;
+                                // Otherwise indentation is unchanged
+                            }
+                        }
+                    } else {
+                        newline = false;
+                    }
+                    // centered ?
+
+                    // final sanitisation and filtering for the token
+                    text = text.replaceAll("[ \n]", "");
+                    if (TextUtilities.filterLine(text)) {
+                        n++;
+                        continue;
+                    }
+
+                    features = new FeaturesVectorHeaderMedical();
+
+                    for (int i=0; i<dataOriginal.size(); i++) {
+                         text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                    }
+
+                    features.token = token;
+                    features.string = text;
+
+                    if (newline)
+                        features.lineStatus = "LINESTART";
+
+                    Matcher m0 = featureFactory.isPunct.matcher(text);
+                    if (m0.find()) {
+                        features.punctType = "PUNCT";
+                    }
+                    if (text.equals("(") || text.equals("[")) {
+                        features.punctType = "OPENBRACKET";
+
+                    } else if (text.equals(")") || text.equals("]")) {
+                        features.punctType = "ENDBRACKET";
+
+                    } else if (text.equals(".")) {
+                        features.punctType = "DOT";
+
+                    } else if (text.equals(",")) {
+                        features.punctType = "COMMA";
+
+                    } else if (text.equals("-")) {
+                        features.punctType = "HYPHEN";
+
+                    } else if (text.equals("\"") || text.equals("\'") || text.equals("`")) {
+                        features.punctType = "QUOTE";
+                    }
+
+                    if (n == startIndex) {
+                        // beginning of block
+                        features.lineStatus = "LINESTART";
+                        features.blockStatus = "BLOCKSTART";
+                    } else if ((n == tokens.size() - 1) || (n + 1 > dp2.getTokenDocPos() - block.getStartToken())) {
+                        // end of block
+                        features.lineStatus = "LINEEND";
+                        previousNewline = true;
+                        features.blockStatus = "BLOCKEND";
+                        endblock = true;
+                    } else {
+                        // look ahead to see if we are at the end of a line within the block
+                        boolean endline = false;
+
+                        int ii = 1;
+                        boolean endloop = false;
+                        while ((n + ii < tokens.size()) && (!endloop)) {
+                            LayoutToken tok = tokens.get(n + ii);
+                            if (tok != null) {
+                                String toto = tok.getText();
+                                if (toto != null) {
+                                    if (toto.equals("\n") || text.equals("\r")) {
+                                        endline = true;
+                                        endloop = true;
+                                    } else {
+                                        if ((toto.trim().length() != 0)
+                                            && (!text.equals("\u00A0"))
+                                            && (!(toto.contains("@IMAGE")))
+                                            && (!(toto.contains("@PAGE")))
+                                            && (!text.contains(".pbm"))
+                                            && (!text.contains(".ppm"))
+                                            && (!text.contains(".png"))
+                                            && (!text.contains(".svg"))
+                                            && (!text.contains(".jpg"))) {
+                                            endloop = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (n + ii == tokens.size() - 1) {
+                                endblock = true;
+                                endline = true;
+                            }
+
+                            ii++;
+                        }
+
+                        if ((!endline) && !(newline)) {
+                            features.lineStatus = "LINEIN";
+                        } else if (!newline) {
+                            features.lineStatus = "LINEEND";
+                            previousNewline = true;
+                        }
+
+                        if ((!endblock) && (features.blockStatus == null))
+                            features.blockStatus = "BLOCKIN";
+                        else if (features.blockStatus == null)
+                            features.blockStatus = "BLOCKEND";
+                    }
+
+                    if (indented) {
+                        features.alignmentStatus = "LINEINDENT";
+                    } else {
+                        features.alignmentStatus = "ALIGNEDLEFT";
+                    }
+
+                    if (text.length() == 1) {
+                        features.singleChar = true;
+                    }
+
+                    if (Character.isUpperCase(text.charAt(0))) {
+                        features.capitalisation = "INITCAP";
+                    }
+
+                    if (featureFactory.test_all_capital(text)) {
+                        features.capitalisation = "ALLCAP";
+                    }
+
+                    if (featureFactory.test_digit(text)) {
+                        features.digit = "CONTAINSDIGITS";
+                    }
+
+                    Matcher m = featureFactory.isDigit.matcher(text);
+                    if (m.find()) {
+                        features.digit = "ALLDIGIT";
+                    }
+
+                    if (featureFactory.test_common(text)) {
+                        features.commonName = true;
+                    }
+
+                    if (featureFactory.test_names(text)) {
+                        features.properName = true;
+                    }
+
+                    if (featureFactory.test_month(text)) {
+                        features.month = true;
+                    }
+
+                    Matcher m2 = featureFactory.year.matcher(text);
+                    if (m2.find()) {
+                        features.year = true;
+                    }
+
+                    // check token offsets for email and http address, or known location
+                    if (locationPositions != null) {
+                        for (OffsetPosition thePosition : locationPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.locationName = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (emailPositions != null) {
+                        for (OffsetPosition thePosition : emailPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.email = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (urlPositions != null) {
+                        for (OffsetPosition thePosition : urlPositions) {
+                            if (n >= thePosition.start && n <= thePosition.end) {
+                                features.http = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (currentFont == null) {
+                        currentFont = token.getFont();
+                        features.fontStatus = "NEWFONT";
+                    } else if (!currentFont.equals(token.getFont())) {
+                        currentFont = token.getFont();
+                        features.fontStatus = "NEWFONT";
+                    } else
+                        features.fontStatus = "SAMEFONT";
+
+                    int newFontSize = (int) token.getFontSize();
+                    if (currentFontSize == -1) {
+                        currentFontSize = newFontSize;
+                        features.fontSize = "HIGHERFONT";
+                    } else if (currentFontSize == newFontSize) {
+                        features.fontSize = "SAMEFONTSIZE";
+                    } else if (currentFontSize < newFontSize) {
+                        features.fontSize = "HIGHERFONT";
+                        currentFontSize = newFontSize;
+                    } else if (currentFontSize > newFontSize) {
+                        features.fontSize = "LOWERFONT";
+                        currentFontSize = newFontSize;
+                    }
+
+                    if (token.getFontSize() == largestFontSize)
+                        features.largestFont = true;
+                    if (token.getFontSize() == smallestFontSize)
+                        features.smallestFont = true;
+                    if (token.getFontSize() > averageFontSize)
+                        features.largerThanAverageFont = true;
+
+                    // not used
+                    /*if (token.isSuperscript())
+                        features.superscript = true;*/
+
+                    if (token.isBold())
+                        features.bold = true;
+
+                    if (token.isItalic())
+                        features.italic = true;
+
+                    if (features.capitalisation == null)
+                        features.capitalisation = "NOCAPS";
+
+                    if (features.digit == null)
+                        features.digit = "NODIGIT";
+
+                    if (features.punctType == null)
+                        features.punctType = "NOPUNCT";
+
+
+                    if (density != -1.0) {
+                        features.characterDensity = featureFactory
+                            .linearScaling(density - doc.getMinCharacterDensity(), doc.getMaxCharacterDensity() - doc.getMinCharacterDensity(), NBBINS_DENSITY);
+                    }
+
+                    if (previousFeatures != null)
+                        header.append(previousFeatures.printVector());
+                    previousFeatures = features;
+
+                    n++;
+                }
+
+                if (previousFeatures != null) {
+                    previousFeatures.blockStatus = "BLOCKEND";
+                    previousFeatures.lineStatus = "LINEEND";
+                    header.append(previousFeatures.printVector());
+                    previousFeatures = null;
+                }
+            }
+        }
+
+        return Pair.of(header.toString(), headerTokenizations);
+    }
+
+    /**
      * Extract results from a labelled header.
      *
      * @param result        result
@@ -1101,6 +1515,168 @@ public class HeaderMedicalParser extends AbstractParser {
                     boolean strop = false;
                     while ((!strop) && (p < tokenizations.size())) {
                         String tokOriginal = tokenizations.get(p).t();
+                        if (tokOriginal.equals(" ")
+                            || tokOriginal.equals("\u00A0")) {
+                            addSpace = true;
+                        } else if (tokOriginal.equals(s)) {
+                            strop = true;
+                        }
+                        p++;
+                    }
+                } else if (i == ll - 1) {
+                    s1 = s;
+                } else {
+                    if (s.equals("LINESTART"))
+                        newLine = true;
+                    // localFeatures.add(s);
+                }
+                i++;
+            }
+
+            if (newLine) {
+                buffer.append("<lb/>");
+            }
+
+            String lastTag0 = null;
+            if (lastTag != null) {
+                if (lastTag.startsWith("I-")) {
+                    lastTag0 = lastTag.substring(2, lastTag.length());
+                } else {
+                    lastTag0 = lastTag;
+                }
+            }
+            String currentTag0 = null;
+            if (s1 != null) {
+                if (s1.startsWith("I-")) {
+                    currentTag0 = s1.substring(2, s1.length());
+                } else {
+                    currentTag0 = s1;
+                }
+            }
+
+            if (lastTag != null) {
+                testClosingTag(buffer, currentTag0, lastTag0);
+            }
+
+            boolean output;
+
+            output = writeField(buffer, s1, lastTag0, s2, "<docnum>", "<idno>", addSpace);
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<doctype>", "<note type=\"doctype\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<title>", "<docTitle>\n\t<titlePart>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<date>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<time>", "<time>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<dateline>", "<dateline>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<person>\n\t<patient>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<affiliation>", "<byline>\n\t<affiliation>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<institution>", "<byline>\n\t<affiliation>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<address>", "<address>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<address>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<email>", "<email>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<phone>", "<phone>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<fax>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<org>", "<org>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<note>", "<note type=\"short\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
+            }
+
+            lastTag = s1;
+
+            if (!st.hasMoreTokens()) {
+                if (lastTag != null) {
+                    testClosingTag(buffer, "", currentTag0);
+                }
+            }
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Extract results from a labelled header in the training format without any
+     * string modification.
+     *
+     * @param result        result
+     * @param tokenizations list of tokens
+     * @return a result
+     */
+    public StringBuilder trainingExtractionAnonym(String result, List<LayoutToken> tokenizations,
+                                                  List<String> dataOriginal, List<String> dataAnonymized) {
+        // this is the main buffer for the whole header
+        StringBuilder buffer = new StringBuilder();
+
+        StringTokenizer st = new StringTokenizer(result, "\n");
+        String s1 = null; // the label
+        String s2 = null; // the token
+        String lastTag = null;
+
+        int p = 0;
+
+        while (st.hasMoreTokens()) {
+            boolean addSpace = false;
+            String tok = st.nextToken().trim();
+
+            if (tok.length() == 0) {
+                continue;
+            }
+            StringTokenizer stt = new StringTokenizer(tok, "\t");
+            // List<String> localFeatures = new ArrayList<String>();
+            int i = 0;
+
+            boolean newLine = false;
+            int ll = stt.countTokens();
+            while (stt.hasMoreTokens()) {
+                String s = stt.nextToken().trim();
+                if (i == 0) {
+                    for (int j=0; j<dataOriginal.size(); j++) {
+                        s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                    }
+                    s2 = TextUtilities.HTMLEncode(s);
+                    //s2 = s;
+
+                    boolean strop = false;
+                    while ((!strop) && (p < tokenizations.size())) {
+                        String tokOriginal = tokenizations.get(p).t();
+                        for (int j=0; j<dataOriginal.size(); j++) {
+                            tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                        }
+
                         if (tokOriginal.equals(" ")
                             || tokOriginal.equals("\u00A0")) {
                             addSpace = true;

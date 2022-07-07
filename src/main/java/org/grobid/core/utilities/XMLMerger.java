@@ -22,7 +22,7 @@ public class XMLMerger {
     private static final Logger logger = LoggerFactory.getLogger(FrenchCorpusSaxHandler.class);
 
     public static void main(String[] args) throws Exception {
-        String dirPath = "../grobid-trainer/resources/dataset/fr-medical-ner/corpus/";
+        String dirPath = "../grobid-trainer/resources/dataset/fr-medical-ner/corpus/forDelFT/";
         File path = new File(dirPath);
         // we process all pdf files in the directory
         File[] refFiles = path.listFiles(new FilenameFilter() {

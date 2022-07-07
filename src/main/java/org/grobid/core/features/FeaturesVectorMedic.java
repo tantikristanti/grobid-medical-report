@@ -476,4 +476,329 @@ public class FeaturesVectorMedic {
 
         return medic.toString();
     }
+
+    /**
+     * Add feature for medic parsing.
+     */
+    static public String addFeaturesMedicAnonym(List<LayoutToken> tokens,
+                                          List<String> labels,
+                                          List<OffsetPosition> locationPositions,
+                                          List<OffsetPosition> titlePositions,
+                                          List<OffsetPosition> suffixPositions,
+                                          List<OffsetPosition> emailPositions,
+                                          List<OffsetPosition> urlPositions,
+                                          List<String> dataOriginal,
+                                          List<String> dataAnonymized) throws Exception {
+        if ((locationPositions == null) ||
+            (titlePositions == null) ||
+            (suffixPositions == null) ||
+            (emailPositions == null) ||
+            (urlPositions == null)) {
+            throw new GrobidException("At least one list of gazetteer matches positions is null.");
+        }
+
+        FeatureFactory featureFactory = FeatureFactory.getInstance();
+
+        StringBuilder medic = new StringBuilder();
+
+        int currentLocationPositions = 0;
+        int currentTitlePositions = 0;
+        int currentSuffixPositions = 0;
+        int currentEmailPositions = 0;
+        int currentUrlPositions = 0;
+
+        boolean isLocationToken;
+        boolean isTitleToken;
+        boolean isSuffixToken;
+        boolean isEmailToken;
+        boolean isUrlToken;
+        boolean skipTest;
+
+        String previousTag = null;
+        String previousText = null;
+        FeaturesVectorMedic features = null;
+        int sentenceLenth = tokens.size(); // length of the current sentence
+        for (int n=0; n < tokens.size(); n++) {
+            LayoutToken token = tokens.get(n);
+            String tag = null;
+            if ( (labels != null) && (labels.size() > 0) && (n < labels.size()) )
+                tag = labels.get(n);
+
+            boolean outputLineStatus = false;
+
+            isLocationToken = false;
+            isTitleToken = false;
+            isSuffixToken = false;
+            isEmailToken = false;
+            isUrlToken = false;
+            skipTest = false;
+
+            String text = token.getText();
+            if (text.equals(" ")) {
+                continue;
+            }
+
+            if (text.equals("\n")) {
+                // should not be the case for the medic model
+                continue;
+            }
+
+            // remove blank spaces
+            for (int i=0; i<dataOriginal.size(); i++) {
+                text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+            }
+            text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
+            if (text.trim().length() == 0 ) {
+                continue;
+            }
+
+            // check the position of matched locations
+            skipTest = false;
+            if (locationPositions != null && (locationPositions.size() > 0)) {
+                if (currentLocationPositions == locationPositions.size() - 1) {
+                    if (locationPositions.get(currentLocationPositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentLocationPositions; i < locationPositions.size(); i++) {
+                        if ((locationPositions.get(i).start <= n) &&
+                            (locationPositions.get(i).end >= n)) {
+                            isLocationToken = true;
+                            currentLocationPositions = i;
+                            break;
+                        } else if (locationPositions.get(i).start > n) {
+                            isLocationToken = false;
+                            currentLocationPositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matched titles
+            skipTest = false;
+            if (titlePositions != null && (titlePositions.size() > 0)) {
+                if (currentTitlePositions == titlePositions.size() - 1) {
+                    if (titlePositions.get(currentTitlePositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentTitlePositions; i < titlePositions.size(); i++) {
+                        if ((titlePositions.get(i).start <= n) &&
+                            (titlePositions.get(i).end >= n)) {
+                            isTitleToken = true;
+                            currentTitlePositions = i;
+                            break;
+                        } else if (titlePositions.get(i).start > n) {
+                            isTitleToken = false;
+                            currentTitlePositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matched suffixes
+            skipTest = false;
+            if (suffixPositions != null && (suffixPositions.size() > 0)) {
+                if (currentSuffixPositions == suffixPositions.size() - 1) {
+                    if (suffixPositions.get(currentSuffixPositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentSuffixPositions; i < suffixPositions.size(); i++) {
+                        if ((suffixPositions.get(i).start <= n) &&
+                            (suffixPositions.get(i).end >= n)) {
+                            isSuffixToken = true;
+                            currentSuffixPositions = i;
+                            break;
+                        } else if (suffixPositions.get(i).start > n) {
+                            isSuffixToken = false;
+                            currentSuffixPositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matched email
+            skipTest = false;
+            if (emailPositions != null && (emailPositions.size() > 0)) {
+                if (currentEmailPositions == emailPositions.size() - 1) {
+                    if (emailPositions.get(currentEmailPositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentEmailPositions; i < emailPositions.size(); i++) {
+                        if ((emailPositions.get(i).start <= n) &&
+                            (emailPositions.get(i).end >= n)) {
+                            isEmailToken = true;
+                            currentEmailPositions = i;
+                            break;
+                        } else if (emailPositions.get(i).start > n) {
+                            isEmailToken = false;
+                            currentEmailPositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // check the position of matched url
+            skipTest = false;
+            if (urlPositions != null && (urlPositions.size() > 0)) {
+                if (currentUrlPositions == urlPositions.size() - 1) {
+                    if (urlPositions.get(currentUrlPositions).end < n) {
+                        skipTest = true;
+                    }
+                }
+                if (!skipTest) {
+                    for (int i = currentUrlPositions; i < urlPositions.size(); i++) {
+                        if ((urlPositions.get(i).start <= n) &&
+                            (urlPositions.get(i).end >= n)) {
+                            isUrlToken = true;
+                            currentUrlPositions = i;
+                            break;
+                        } else if (urlPositions.get(i).start > n) {
+                            isUrlToken = false;
+                            currentUrlPositions = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (TextUtilities.filterLine(text)) {
+                continue;
+            }
+
+            features = new FeaturesVectorMedic();
+            features.string = text;
+            features.relativePosition = featureFactory.linearScaling(n, sentenceLenth, nbBins);
+
+            if (n == 0) {
+                features.lineStatus = "LINESTART";
+                outputLineStatus = true;
+            }
+            Matcher m0 = featureFactory.isPunct.matcher(text);
+            if (m0.find()) {
+                features.punctType = "PUNCT";
+            }
+
+            if ((text.equals("(")) | (text.equals("["))) {
+                features.punctType = "OPENBRACKET";
+            } else if ((text.equals(")")) | (text.equals("]"))) {
+                features.punctType = "ENDBRACKET";
+            } else if (text.equals(".")) {
+                features.punctType = "DOT";
+            } else if (text.equals(",")) {
+                features.punctType = "COMMA";
+            } else if (text.equals("-")) {
+                features.punctType = "HYPHEN";
+            } else if (text.equals("\"") | text.equals("\'") | text.equals("`")) {
+                features.punctType = "QUOTE";
+            }
+
+            if (n == 0) {
+                if (!outputLineStatus) {
+                    features.lineStatus = "LINESTART";
+                    outputLineStatus = true;
+                }
+            } else if (tokens.size() == n+1) {
+                if (!outputLineStatus) {
+                    features.lineStatus = "LINEEND";
+                    outputLineStatus = true;
+                }
+            }
+
+            if (!outputLineStatus) {
+                features.lineStatus = "LINEIN";
+                outputLineStatus = true;
+            }
+
+            if (text.length() == 1) {
+                features.singleChar = true;
+            }
+
+            if (Character.isUpperCase(text.charAt(0))) {
+                features.capitalisation = "INITCAP";
+            }
+
+            if (featureFactory.test_all_capital(text)) {
+                features.capitalisation = "ALLCAP";
+            }
+
+            if (featureFactory.test_digit(text)) {
+                features.digit = "CONTAINSDIGITS";
+            }
+
+            if (isTitleToken) {
+                features.isKnownTitle = true;
+            }
+
+            if (isSuffixToken) {
+                features.isKnownSuffix = true;
+            }
+
+            if (featureFactory.test_common(text)) {
+                features.commonName = true;
+            }
+
+            if (featureFactory.test_names(text)) {
+                features.properName = true;
+            }
+
+            if (featureFactory.test_last_names(text)) {
+                features.lastName = true;
+            }
+
+            if (featureFactory.test_first_names(text)) {
+                features.firstName = true;
+            }
+
+            Matcher m = featureFactory.isDigit.matcher(text);
+            if (m.find()) {
+                features.digit = "ALLDIGIT";
+            }
+
+            if (features.capitalisation == null)
+                features.capitalisation = "NOCAPS";
+
+            if (features.digit == null)
+                features.digit = "NODIGIT";
+
+            if (features.punctType == null)
+                features.punctType = "NOPUNCT";
+
+
+            if (isLocationToken) {
+                features.isKnownLocation = true;
+            }
+
+            if (featureFactory.test_country(text)) {
+                features.isKnownCountry = true;
+            }
+
+            if (featureFactory.test_city(text)) {
+                features.isKnownCity = true;
+            }
+
+            if (isEmailToken) {
+                features.email = true;
+            }
+
+            if (isUrlToken) {
+                features.http = true;
+            }
+
+            features.label = tag;
+
+            medic.append(features.printVector());
+
+            previousTag = tag;
+            previousText = text;
+        }
+
+        return medic.toString();
+    }
 }

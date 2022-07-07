@@ -286,9 +286,11 @@ public class GrobidMedicalReportMain {
             EngineMedicalParsers parsers = new EngineMedicalParsers();
 
             if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),true, -1);
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "training", -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false,-1);
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "blank",-1);
+            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
+                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "anonym",-1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_BLANK)) {
                 nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true, -1);
             } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL)) {
