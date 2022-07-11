@@ -18,12 +18,16 @@ For the full-medical-text model, we use the following TEI elements:
 * `<item>` for list items inside lists
 * `<figure>` for figures
 * `<figure type="table">` for tables
+* `<medic>` for the list of medics still found in the body part
+* `<patient>` the list of patients still found in the body part
 * `<ref>` markers, for reference to other parts of the document
     * `<ref type="figure">` a pointer to a figure in the document
     * `<ref type="table">` a link to a table in the document
 * `<note>` for headnotes and footnotes that can appear in the body part
     * `<note place="headnote">` for the page header note
     * `<note place="footnote">` for the page footer note
+    * `<note type="licence">` for the licence and data access information 
+    * `<note type="note">` for other type of notes
 * `<other>` for unknown (yet) part
 
 > Note: It is recommended to study first the existing training documents for the __full-medical-text__ model (`grobid/grobid-trainer/resources/dataset/full-medical-text`) to see some examples of how these elements should be used.

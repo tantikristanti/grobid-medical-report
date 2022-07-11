@@ -2,13 +2,13 @@ package org.grobid.core.main.batch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.grobid.core.engines.EngineMedicalParsers;
-import org.grobid.core.engines.ProcessEngine;
 import org.grobid.core.engines.ProcessEngineMedical;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
-import org.grobid.core.utilities.*;
 import org.grobid.core.utilities.GrobidConfig.ModelParameters;
+import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.core.utilities.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -4,6 +4,8 @@ public class DataToBeAnonymized {
     // we keep the original information
     // the document number found in the header part
     private String idnoOriginal = null;
+    private String dateDocumentOriginal = null;
+
     // patient information
     private String securitySocialNumberOriginal = null;
     private String firstNamePatientOriginal = null;
@@ -13,15 +15,18 @@ public class DataToBeAnonymized {
     private String dateBirthPatientOriginal = null;
     private String addressPatientOriginal = null;
     private String emailPatientOriginal = null;
+
     // medic information
     private String firstNameMedicOriginal = null;
     private String middleNameMedicOriginal = null;
     private String lastNameMedicOriginal = null;
     private String addressMedicOriginal = null;
+    private String emailMedicOriginal = null;
 
     // the replacements
     // the document number found in the header part
     private String idnoAnonym = null;
+    private String dateDocumentAnonym = null;
 
     // patient information
     private String securitySocialNumberAnonym = null;
@@ -37,6 +42,7 @@ public class DataToBeAnonymized {
     private String middleNameMedicAnonym = null;
     private String lastNameMedicAnonym = null;
     private String addressMedicAnonym = null;
+    private String emailMedicAnonym = null;
 
 
     public String getIdnoOriginal() {
@@ -47,6 +53,22 @@ public class DataToBeAnonymized {
         this.idnoOriginal = idnoOriginal;
     }
 
+
+    public String getDateDocumentOriginal() {
+        return dateDocumentOriginal;
+    }
+
+    public void setDateDocumentOriginal(String dateDocumentOriginal) {
+        this.dateDocumentOriginal = dateDocumentOriginal;
+    }
+
+    public String getDateDocumentAnonym() {
+        return dateDocumentAnonym;
+    }
+
+    public void setDateDocumentAnonym(String dateDocumentAnonym) {
+        this.dateDocumentAnonym = dateDocumentAnonym;
+    }
 
     public String getSecuritySocialNumberOriginal() {
         return securitySocialNumberOriginal;
@@ -105,6 +127,23 @@ public class DataToBeAnonymized {
         this.emailPatientOriginal = emailPatientOriginal;
     }
 
+
+    public String getEmailMedicOriginal() {
+        return emailMedicOriginal;
+    }
+
+    public void setEmailMedicOriginal(String emailMedicOriginal) {
+        this.emailMedicOriginal = emailMedicOriginal;
+    }
+
+    public String getEmailMedicAnonym() {
+        return emailMedicAnonym;
+    }
+
+    public void setEmailMedicAnonym(String emailMedicAnonym) {
+        this.emailMedicAnonym = emailMedicAnonym;
+    }
+
     public String getPhonePatientAnonym() {
         return phonePatientAnonym;
     }
@@ -120,6 +159,7 @@ public class DataToBeAnonymized {
     public void setEmailPatientAnonym(String emailPatientAnonym) {
         this.emailPatientAnonym = emailPatientAnonym;
     }
+
 
     public String getDateBirthPatientOriginal() {
         return dateBirthPatientOriginal;

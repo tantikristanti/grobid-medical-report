@@ -3,7 +3,10 @@ package org.grobid.core.engines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,7 +20,6 @@ public class AnonymizeData {
                 // replace character at the specified position
                 idnoNew.setCharAt(i, Integer.toString(random_int).charAt(0));
             }
-
         }
         return idnoNew.toString();
     }
@@ -74,11 +76,19 @@ public class AnonymizeData {
     }
 
     // anonymize the dates in ISO Format (yyyy-mm-dd)
-    public List<String> anonymizeDateISOFormat(String date) {
+    public List<String> anonymizeDateISOFormat(String date, String mode) {
         List<String> dateSplit = Arrays.asList(date.split("-"));
         int random_int_date = 1;
         int random_int_month = 1;
         int currentYear = java.time.LocalDate.now().getYear(); // we use the current year for the new data
+
+        if (mode.equals("patient")) {
+            int min = 1;
+            int max = 200; // assuming patients born 200 years ago (max)
+            int random_int = (int) Math.floor(Math.random() * (max - min + 1) + min);
+            currentYear = currentYear - random_int;
+        }
+
         List<String> monthList = Arrays.asList("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre");
         String newMM="", newDD="";
 

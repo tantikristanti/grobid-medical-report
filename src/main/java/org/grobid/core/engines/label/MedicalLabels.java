@@ -1,6 +1,5 @@
 package org.grobid.core.engines.label;
 
-import org.grobid.core.GrobidMedicalReportModels;
 import org.grobid.core.GrobidModels;
 
 /**
@@ -185,6 +184,8 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel SUB_SECTION = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, SUB_SECTION_LABEL);
     public static final TaggingLabel FIGURE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, FIGURE_LABEL);
     public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
+    public static final TaggingLabel MEDIC = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, MEDIC_LABEL);
+    public static final TaggingLabel PATIENT = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, PATIENT_LABEL);
 
     // Dateline
     public static final TaggingLabel DATELINE_DOCTYPE = new TaggingLabelImpl(GrobidModels.DATELINE, DOCTYPE_LABEL);
@@ -338,6 +339,8 @@ public class MedicalLabels extends TaggingLabels {
         register(SUB_SECTION);
         register(FIGURE);
         register(TABLE);
+        register(PATIENT);
+        register(MEDIC);
 
         // dateline
         register(DATELINE_DOCTYPE);

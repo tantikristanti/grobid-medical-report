@@ -2,7 +2,6 @@ package org.grobid.core.engines;
 
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
-import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.factory.GrobidMedicalFactory;
 import org.grobid.core.main.batch.GrobidMainArgs;
 import org.grobid.core.main.batch.GrobidMedicalReportMainArgs;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -13,13 +13,13 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 
 /**
- * SAX parser for the TEI format for fulltext data encoded for training. Normally all training data should 
+ * SAX parser for the TEI format for fulltext data encoded for training. Normally all training data should
  * be in this unique format for the fulltext model.
  * The segmentation of tokens must be identical as the one from pdf2xml files so that
  * training and online input tokens are aligned.
- *
+ * <p>
  * This class is taken and adapted from the TEIFulltextSaxParser class (@author Patrice Lopez)
- *
+ * <p>
  * Tanti, 2021
  */
 public class TEIFullMedicalTextSaxParser extends DefaultHandler {
@@ -29,10 +29,10 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
 
     private String output = null;
     private Stack<String> currentTags = null;
-	private String currentTag = null;
+    private String currentTag = null;
 
     private boolean figureBlock = false;
-	private boolean tableBlock = false;
+    private boolean tableBlock = false;
 
     private ArrayList<String> labeled = null; // store line by line the labeled data
 
@@ -62,16 +62,16 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
     public void endElement(String uri,
                            String localName,
                            String qName) throws SAXException {
-		if ( (!qName.equals("lb")) && (!qName.equals("pb")) && (!qName.equals("space")) ) {
+        if ((!qName.equals("lb")) && (!qName.equals("pb")) && (!qName.equals("space"))) {
             writeData(qName, true);
-			if (!currentTags.empty()) {
-				currentTag = currentTags.peek();
-			}
+            if (!currentTags.empty()) {
+                currentTag = currentTags.peek();
+            }
         }
 
         if (qName.equals("figure") || qName.equals("table")) {
             figureBlock = false;
-			tableBlock = false;
+            tableBlock = false;
         }
     }
 
@@ -79,15 +79,13 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                              String localName,
                              String qName,
                              Attributes atts)
-            throws SAXException {
+        throws SAXException {
         if (qName.equals("lb")) {
             //accumulator.append(" +LINE+ ");
             accumulator.append(" ");
-        } 
-		else if (qName.equals("space")) {
+        } else if (qName.equals("space")) {
             accumulator.append(" ");
-        } 
-		else {
+        } else {
             // we have to write first what has been accumulated yet with the upper-level tag
             String text = getText();
             if (text != null) {
@@ -110,7 +108,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         if (name.equals("type")) {
                             if (value.equals("paragraph")) {
                                 currentTags.push("<paragraph>");
-								currentTag = "<paragraph>";
+                                currentTag = "<paragraph>";
                             } else {
                                 logger.error("Invalid attribute value for element div: " + name + "=" + value);
                             }
@@ -119,12 +117,10 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         }
                     }
                 }
-            } 
-			else if (qName.equals("p") ) {
+            } else if (qName.equals("p")) {
                 currentTags.push("<paragraph>");
-				currentTag = "<paragraph>";
-            }
-            else if (qName.equals("note")) { // for the head and foot notes still found in the body part
+                currentTag = "<paragraph>";
+            } else if (qName.equals("note")) { // for the head and foot notes still found in the body part
                 int length = atts.getLength();
 
                 // Process each attribute
@@ -138,9 +134,19 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                             if (value.equals("footnote") || value.equals("foot")) {
                                 currentTags.push("<footnote>");
                                 currentTag = "<footnote>";
-                            } else if (value.equals("headnote")|| value.equals("head")) {
+                            } else if (value.equals("headnote") || value.equals("head")) {
                                 currentTags.push("<headnote>");
                                 currentTag = "<headnote>";
+                            } else {
+                                logger.error("Invalid attribute value for element note: " + name + "=" + value);
+                            }
+                        } else if (name.equals("type")) {
+                            if (value.equals("licence")) {
+                                currentTags.push("<licence>");
+                                currentTag = "<licence>";
+                            } else if (value.equals("note")) {
+                                currentTags.push("<note>");
+                                currentTag = "<note>";
                             } else {
                                 logger.error("Invalid attribute value for element note: " + name + "=" + value);
                             }
@@ -149,8 +155,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         }
                     }
                 }
-            }
-			else if (qName.equals("ref")) {
+            } else if (qName.equals("ref")) {
                 int length = atts.getLength();
 
                 // Process each attribute
@@ -163,11 +168,11 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         if (name.equals("type")) {
                             if (value.equals("figure")) {
                                 currentTags.push("<figure_marker>");
-								currentTag = "<figure_marker>";
+                                currentTag = "<figure_marker>";
                             } else if (value.equals("table")) {
-								currentTags.push("<table_marker>");
-								currentTag = "<table_marker>";
-							} else if (value.equals("section")) {
+                                currentTags.push("<table_marker>");
+                                currentTag = "<table_marker>";
+                            } else if (value.equals("section")) {
                                 currentTags.push("<section_marker>");
                                 currentTag = "<section_marker>";
                             } else {
@@ -178,12 +183,10 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         }
                     }
                 }
-            }
-            else if (qName.equals("title")) {
+            } else if (qName.equals("title")) {
                 currentTags.push("<title>");
                 currentTag = "<title>";
-            }
-            else if (qName.equals("head")) {
+            } else if (qName.equals("head")) {
                 int length = atts.getLength();
 
                 // Process each attribute
@@ -208,54 +211,51 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                         }
                     }
                 }
-            }
-            /*else if (qName.equals("head")) {
-                currentTags.push("<section>");
-                currentTag = "<section>";
-            }*/
-            else if (qName.equals("table")) {
+            } else if (qName.equals("table")) {
                 currentTags.push("<table>");
-				currentTag = "<table>";
-            } 
-			else if (qName.equals("item")) {
+                currentTag = "<table>";
+            } else if (qName.equals("item")) {
                 currentTags.push("<paragraph>");
-				currentTag = "<paragraph>";
+                currentTag = "<paragraph>";
                 /*currentTags.push("<item>");
                 currentTag = "<item>";*/
-            } 
-			else if (qName.equals("figure")) {
-	            figureBlock = true;
-	            int length = atts.getLength();
+            } else if (qName.equals("figure")) {
+                figureBlock = true;
+                int length = atts.getLength();
 
-	            // Process each attribute
-	            for (int i = 0; i < length; i++) {
-	                // Get names and values for each attribute
-	                String name = atts.getQName(i);
-	                String value = atts.getValue(i);
+                // Process each attribute
+                for (int i = 0; i < length; i++) {
+                    // Get names and values for each attribute
+                    String name = atts.getQName(i);
+                    String value = atts.getValue(i);
 
-	                if (name != null) {
-	                    if (name.equals("type")) {
-	                        if (value.equals("table")) {
-	                            tableBlock = true;
-	                        } else {
+                    if (name != null) {
+                        if (name.equals("type")) {
+                            if (value.equals("table")) {
+                                tableBlock = true;
+                            } else {
                                 logger.error("Invalid attribute value for element figure: " + name + "=" + value);
                             }
-	                    } else {
+                        } else {
                             logger.error("Invalid attribute name for element figure: " + name);
                         }
-	                }
-	            }
-				if (tableBlock) {
-					figureBlock = false;
-	                currentTags.push("<table>");
-					currentTag = "<table>";
-				}
-				else {
-	                currentTags.push("<figure>");
-					currentTag = "<figure>";
-				}
-	        }
-            else if (qName.equals("other")) {
+                    }
+                }
+                if (tableBlock) {
+                    figureBlock = false;
+                    currentTags.push("<table>");
+                    currentTag = "<table>";
+                } else {
+                    currentTags.push("<figure>");
+                    currentTag = "<figure>";
+                }
+            } else if (qName.equals("medic")) {
+                currentTags.push("<medic>");
+                currentTag = "<medic>";
+            } else if (qName.equals("patient")) {
+                currentTags.push("<patient>");
+                currentTag = "<patient>";
+            } else if (qName.equals("other")) {
                 currentTags.push("<other>");
                 currentTag = "<other>";
             } else if (qName.equals("text")) {
@@ -272,29 +272,29 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
     }
 
     private void writeData(String qName, boolean pop) {
-        if ( (qName.equals("other")) || (qName.equals("p")) || (qName.equals("title")) ||
+        if ((qName.equals("other")) || (qName.equals("p")) || (qName.equals("title")) ||
             (qName.equals("ref")) || (qName.equals("head")) ||
-                (qName.equals("figure")) ||  (qName.equals("table")) ||
-                (qName.equals("paragraph")) || (qName.equals("div")) ||
-                (qName.equals("item")) || (qName.equals("note"))
-                ) {
-			if (currentTag == null) {
-				return;
-			}
-	
-            if (pop) {
-				if (!currentTags.empty()) {
-					currentTags.pop();
-				}
+            (qName.equals("figure")) || (qName.equals("table")) ||
+            (qName.equals("paragraph")) || (qName.equals("div")) ||
+            (qName.equals("item")) || (qName.equals("note")) ||
+            (qName.equals("medic")) || (qName.equals("patient"))
+        ) {
+            if (currentTag == null) {
+                return;
             }
 
-			// adjust tag (conservative)
-			if (tableBlock) {
-				currentTag = "<table>";
-			}
-			else if (figureBlock) {
-				currentTag = "<figure>";
-			}
+            if (pop) {
+                if (!currentTags.empty()) {
+                    currentTags.pop();
+                }
+            }
+
+            // adjust tag (conservative)
+            if (tableBlock) {
+                currentTag = "<table>";
+            } else if (figureBlock) {
+                currentTag = "<figure>";
+            }
 
             String text = getText();
             // we segment the text
@@ -302,21 +302,17 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
             boolean begin = true;
             while (st.hasMoreTokens()) {
                 String tok = st.nextToken().trim();
-                if (tok.length() == 0) 
-					continue;
+                if (tok.length() == 0)
+                    continue;
 
-                /*if (tok.equals("+LINE+")) {
-                    labeled.add("@newline\n");
-                } else*/ {
-                    String content = tok;
-                    int i = 0;
-                    if (content.length() > 0) {
-                        if (begin) {
-                            labeled.add(content + " I-" + currentTag + "\n");
-                            begin = false;
-                        } else {
-                            labeled.add(content + " " + currentTag + "\n");
-                        }
+                String content = tok;
+                int i = 0;
+                if (content.length() > 0) {
+                    if (begin) {
+                        labeled.add(content + " I-" + currentTag + "\n");
+                        begin = false;
+                    } else {
+                        labeled.add(content + " " + currentTag + "\n");
                     }
                 }
                 begin = false;

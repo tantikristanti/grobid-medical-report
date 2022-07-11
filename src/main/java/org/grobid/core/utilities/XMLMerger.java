@@ -1,6 +1,5 @@
 package org.grobid.core.utilities;
 
-import org.grobid.core.exceptions.GrobidException;
 import org.grobid.trainer.sax.FrMedicalNerCorpusSaxHandler;
 import org.grobid.trainer.sax.FrenchCorpusSaxHandler;
 import org.slf4j.Logger;

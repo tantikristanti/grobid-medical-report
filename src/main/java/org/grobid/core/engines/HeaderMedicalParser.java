@@ -385,45 +385,6 @@ public class HeaderMedicalParser extends AbstractParser {
                                     locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
                             }
 
-                            // if the Organization model exists
-                        /*if (resLeftNote.getGhu() != null || resLeftNote.getChu() != null || resLeftNote.getDmu() != null ||
-                            resLeftNote.getPole() != null || resLeftNote.getInstitution() != null || resLeftNote.getUniversity() != null ||
-                            resLeftNote.getSite()  != null || resLeftNote.getHospital() != null || resLeftNote.getCenter() != null ||
-                            resLeftNote.getService() != null || resLeftNote.getDepartment() != null|| resLeftNote.getUnit() != null ||
-                            resLeftNote.getSub() != null || resLeftNote.getOrg() != null
-                        ) {
-                            List<LayoutToken> organizationLayoutTokens = resLeftNote.getOrganizationLayoutTokens();
-                            List<List<LayoutToken>> organizationSegments = new ArrayList<>();
-                            if (isNotEmpty(organizationLayoutTokens)) {
-                                List<LayoutToken> currentSegment = new ArrayList<>();
-                                for (LayoutToken theToken : organizationLayoutTokens) {
-                                    // split the list of layout tokens when token "\n" is met
-                                    if (theToken.getText() != null && theToken.getText().equals("\n")) {
-                                        if (currentSegment.size() > 0)
-                                            organizationSegments.add(currentSegment);
-                                        currentSegment = new ArrayList<>();
-                                    } else
-                                        currentSegment.add(theToken);
-                                }
-                                // last segment
-                                if (currentSegment.size() > 0)
-                                    organizationSegments.add(currentSegment);
-
-                                for (int k = 0; k < organizationSegments.size(); k++) {
-                                    if (organizationSegments.get(k).size() == 0)
-                                        continue;
-                                    // further organization processing with the Organization model
-                                    List<Organization> localOrganizations = parsers.getOrganizationParser()
-                                        .processingWithLayoutTokens(organizationSegments.get(k));
-
-                                    for (Organization organization : localOrganizations) {
-                                        // add new organization
-                                        resLeftNote.addOrganization(organization);
-                                    }
-                                }
-                            }
-                        }*/
-
                             // medics processing
                             if (resLeftNote.getMedics() != null) {
                                 List<LayoutToken> medicLayoutTokens = resLeftNote.getMedicsLayoutTokens();
