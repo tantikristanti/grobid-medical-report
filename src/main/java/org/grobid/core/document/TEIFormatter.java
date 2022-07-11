@@ -573,7 +573,7 @@ public class TEIFormatter {
                 Element head = teiElement("head");
                 head.addAttribute(new Attribute("level", "1"));
                 // section numbers
-                org.grobid.core.utilities.Pair<String, String> numb = getSectionNumber(clusterContent);
+                Pair<String, String> numb = getSectionNumber(clusterContent);
                 if (numb != null) {
                     head.addAttribute(new Attribute("n", numb.b));
                     head.appendChild(numb.a);
@@ -601,7 +601,7 @@ public class TEIFormatter {
                 Element head = teiElement("head");
                 head.addAttribute(new Attribute("level", "2"));
                 // section numbers
-                org.grobid.core.utilities.Pair<String, String> numb = getSectionNumber(clusterContent);
+                Pair<String, String> numb = getSectionNumber(clusterContent);
                 if (numb != null) {
                     head.addAttribute(new Attribute("n", numb.b));
                     head.appendChild(numb.a);
@@ -684,6 +684,14 @@ public class TEIFormatter {
                 //figureBlock = true;
                 if (curParagraph != null)
                     curParagraph.appendChild(new Text(" "));
+            } if (clusterLabel.equals(MedicalLabels.PATIENT)) {
+                String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
+                Element note = teiElement("patient", clusterContent);
+                curDiv.appendChild(note);
+            } if (clusterLabel.equals(MedicalLabels.MEDIC)) {
+                String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
+                Element note = teiElement("medic", clusterContent);
+                curDiv.appendChild(note);
             } else if (clusterLabel.equals(MedicalLabels.OTHER)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 Element note = teiElement("note", clusterContent);
@@ -943,7 +951,7 @@ System.out.println(theSentences.toString());
         return result;
     }
 
-    private org.grobid.core.utilities.Pair<String, String> getSectionNumber(String text) {
+    private Pair<String, String> getSectionNumber(String text) {
         Matcher m1 = BasicStructureBuilder.headerNumbering1.matcher(text);
         Matcher m2 = BasicStructureBuilder.headerNumbering2.matcher(text);
         Matcher m3 = BasicStructureBuilder.headerNumbering3.matcher(text);
@@ -962,7 +970,7 @@ System.out.println(theSentences.toString());
         if (numb != null) {
             text = text.replace(numb, "").trim();
             numb = numb.replace(" ", "");
-            return new org.grobid.core.utilities.Pair<>(text, numb);
+            return new Pair<>(text, numb);
         } else {
             return null;
         }

@@ -62,7 +62,7 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
             evalOutputPath,
             splitRatio);
     }
-    
+
     /**
      * Add the selected features to the header model training
      * @param sourceFile source path

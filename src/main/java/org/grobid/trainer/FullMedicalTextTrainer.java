@@ -98,10 +98,6 @@ public class FullMedicalTextTrainer extends AbstractTrainer {
                 writer3 = new OutputStreamWriter(os3, "UTF8");
             }
 
-            // the file for writing the training data
-            /*OutputStream os2 = new FileOutputStream(outputPath);
-            Writer writer2 = new OutputStreamWriter(os2, "UTF8");*/
-
             // get a factory for SAX parser
             SAXParserFactory spf = SAXParserFactory.newInstance();
 
@@ -116,20 +112,6 @@ public class FullMedicalTextTrainer extends AbstractTrainer {
                 p.parse(tf, parser2);
 
                 List<String> labeled = parser2.getLabeledResult();
-
-                // removing the @newline
-                /*List<String> newLabeled = new ArrayList<String>();
-                for(String label : labeled) {
-                    if (!label.startsWith("@newline"))
-                        newLabeled.add(label);
-                }
-                labeled = newLabeled;*/
-
-/*StringBuilder temp = new StringBuilder();
-for(String label : labeled) {
-    temp.append(label);
-}
-FileUtils.writeStringToFile(new File("/tmp/expected-"+name+".txt"), temp.toString());*/
 
                 // we can now (try to) add the features
                 // we open the featured file

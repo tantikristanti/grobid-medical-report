@@ -1,12 +1,10 @@
 package org.grobid.core.engines;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.Medic;
-import org.grobid.core.data.Organization;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;

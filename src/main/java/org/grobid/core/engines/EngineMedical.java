@@ -16,14 +16,12 @@ import org.grobid.core.utilities.crossref.CrossrefClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A class for managing the extraction of medical information from PDF documents or raw text.
@@ -314,8 +312,8 @@ public class EngineMedical extends Engine {
      *                   file to be corrected for gold-level training data)
      * @param id         : an optional ID to be used in the TEI file, -1 if not used
      */
-    public void createTrainingAnonym(File inputFile, String pathOutput, List<String> dataAnonym, int id) {
-        parsers.getFullMedicalTextParser().createTrainingAnonym(inputFile, pathOutput, dataAnonym, id);
+    public void createTrainingAnonym(File inputFile, String pathOutput, int id) {
+        parsers.getFullMedicalTextParser().createTrainingAnonym(inputFile, pathOutput, id);
     }
 
     /**
@@ -356,14 +354,6 @@ public class EngineMedical extends Engine {
             if (refFilesAnonym == null)
                 return 0;
 
-            // put the anonymized data in a list
-            List<String> dataAnonym = new ArrayList<>();
-            for (final File file : refFilesAnonym) {
-                try (Stream<String> lines = Files.lines(Paths.get(file.getPath()))) {
-                    dataAnonym = lines.collect(Collectors.toList());
-                }
-            }
-
             System.out.println(refFiles.length + " files to be processed.");
 
             int n = 0;
@@ -373,7 +363,7 @@ public class EngineMedical extends Engine {
             }
             for (final File pdfFile : refFiles) {
                 try {
-                    createTrainingAnonym(pdfFile, resultPath, dataAnonym, ind + n);
+                    createTrainingAnonym(pdfFile, resultPath, ind + n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occurred while processing the following pdf: "
                         + pdfFile.getPath(), exp);

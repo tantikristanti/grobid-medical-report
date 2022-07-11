@@ -205,13 +205,15 @@ To anonymize the sensitive data in datasets and to assist annotators in referenc
 The input path is the path where PDF files containing the data to be extracted are saved. The output results are in TXT format. 
 The resulting file format is as follows:
 
-Element | Original data | Anonymized data
-------- |---------------| ---------------
-Security Social Number | 0123456789    | 5042697120
-Phone Number | 0760512430    | 0971642056
-Birth date | 2015-05-20    | 2022-02-17
-Firstname | Beau          | Belle  
-Lastname | GARCON        | FILLE
+| Element | Original data      | Anonymized data | 
+| ------- |--------------------| --------------- | 
+| Security Social Number | 0123456789         | 5042697120 | 
+| Phone Number | 0760512430         | 0971642056 | 
+| Birth date | 2015-05-20         | 2022-02-17 | 
+| Firstname | Beau               | Belle  |  
+| Lastname | GARCON             | FILLE | 
+| Email | beau.garcon@aphp.fr | belle.fille@aphp.fr |
+
 
 2. Extracting dataset with anonymized data based on reference data.
 
