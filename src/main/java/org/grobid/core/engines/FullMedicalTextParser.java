@@ -1440,7 +1440,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     inputs = new ArrayList<String>();
                     if (input != null && input.trim().length() > 0) {
                         inputs.add(input.trim());
-                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+                        bufferMedic = parsers.getMedicParser().trainingExtraction(inputs);
 
                         // force analyser with English, to avoid bad surprise
                         List<LayoutToken> medicTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
@@ -1992,13 +1992,11 @@ public class FullMedicalTextParser extends AbstractParser {
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.name"));
 
                     // buffer for the medics block
-                    StringBuilder bufferMedic = null;
                     // we need to rebuild the found string as it appears
                     String input = "";
                     int q = 0;
-                    String bodyLabeled = bufferFulltext.toString();
-                    StringTokenizer st = new StringTokenizer(bodyLabeled, "\n");
-                    while (st.hasMoreTokens() && (q < bodyLabeled.length())) {
+                    StringTokenizer st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < tokenizationsBody.size())) {
                         String line = st.nextToken();
                         String theTotalTok = tokenizationsBody.get(q).getText();
                         String theTok = tokenizationsBody.get(q).getText();
@@ -2070,8 +2068,8 @@ public class FullMedicalTextParser extends AbstractParser {
                     // we need to rebuild the found string as it appears
                     input = "";
                     q = 0;
-                    st = new StringTokenizer(bodyLabeled, "\n");
-                    while (st.hasMoreTokens() && (q < bodyLabeled.length())) {
+                    st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < tokenizationsBody.size())) {
                         String line = st.nextToken();
                         String theTotalTok = tokenizationsBody.get(q).getText();
                         String theTok = tokenizationsBody.get(q).getText();
@@ -3484,19 +3482,17 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.write("\n\t</text>\n</tei>\n");
                     writer.close();
 
-                    // 5d. NAME MODEL (from medics in the body part)
+                    // 5c. NAME MODEL (from medics in the body part)
                     // path for medic model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.name.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.name"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.medic.name.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.medic.name"));
 
                     // buffer for the medics block
-                    StringBuilder bufferMedic = null;
                     // we need to rebuild the found string as it appears
                     String input = "";
                     int q = 0;
-                    String bodyLabeled = bufferFulltextAnonym.toString();
-                    StringTokenizer st = new StringTokenizer(bodyLabeled, "\n");
-                    while (st.hasMoreTokens() && (q < bodyLabeled.length())) {
+                    StringTokenizer st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < tokenizationsBody.size())) {
                         String line = st.nextToken();
                         String theTotalTok = tokenizationsBody.get(q).getText();
                         String theTok = tokenizationsBody.get(q).getText();
@@ -3527,7 +3523,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
 
                                 // we write the name data with features
-                                String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
+                                String featuredName = FeaturesVectorPersonName.addFeaturesNameAnonym(nameTokenizations, null, titlePositions, suffixPositions, dataOriginal, dataAnonymized);
 
                                 if (featuredName != null) {
                                     writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
@@ -3538,7 +3534,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 inputs.add(name.trim());
 
                                 // buffer for the header block, take only the data with the label
-                                StringBuilder bufferName = parsers.getPersonNameParser().trainingExtraction(inputs);
+                                StringBuilder bufferName = parsers.getPersonNameParser().trainingExtractionAnonym(inputs, dataOriginal, dataAnonymized);
 
                                 if (bufferName != null && bufferName.length() > 0) {
                                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
@@ -3558,18 +3554,18 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
                     }
 
-                    // 5d. NAME MODEL (from medics in the body part)
+                    // 5d. NAME MODEL (from patients in the body part)
                     // path for medic model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.name.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.name"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.patient.name.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.patient.name"));
 
                     // buffer for the medics block
                     StringBuilder bufferPatient = null;
                     // we need to rebuild the found string as it appears
                     input = "";
                     q = 0;
-                    st = new StringTokenizer(bodyLabeled, "\n");
-                    while (st.hasMoreTokens() && (q < bodyLabeled.length())) {
+                    st = new StringTokenizer(rese, "\n");
+                    while (st.hasMoreTokens() && (q < tokenizationsBody.size())) {
                         String line = st.nextToken();
                         String theTotalTok = tokenizationsBody.get(q).getText();
                         String theTok = tokenizationsBody.get(q).getText();
@@ -3602,7 +3598,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(nameTokenizations);
 
                                 // we write the name data with features
-                                String featuredName = FeaturesVectorPersonName.addFeaturesName(nameTokenizations, null, titlePositions, suffixPositions);
+                                String featuredName = FeaturesVectorPersonName.addFeaturesNameAnonym(nameTokenizations, null, titlePositions, suffixPositions, dataOriginal, dataAnonymized);
 
                                 if (featuredName != null) {
                                     writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
@@ -3613,7 +3609,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 inputNames.add(name.trim());
 
                                 // buffer for the header block, take only the data with the label
-                                StringBuilder bufferName = parsers.getPersonNameParser().trainingExtraction(inputNames);
+                                StringBuilder bufferName = parsers.getPersonNameParser().trainingExtractionAnonym(inputNames, dataOriginal, dataAnonymized);
 
                                 if (bufferName != null && bufferName.length() > 0) {
                                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);

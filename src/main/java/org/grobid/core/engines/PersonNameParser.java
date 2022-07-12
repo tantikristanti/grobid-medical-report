@@ -300,7 +300,7 @@ public class PersonNameParser extends AbstractParser {
                         i++;
                     }
                     if (start && (s1 != null)) {
-                        buffer.append("\t<name>");
+                        buffer.append("<name>");
                         start = false;
                     }
                     // lastTag, lastTag0 (without I-)
