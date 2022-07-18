@@ -419,17 +419,24 @@ public class PersonNameParser extends AbstractParser {
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
                         if (i == 0) {
-                            for (int j=0; j<dataOriginal.size(); j++) {
-                                s = s.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                            // anonymize the data
+                            String newText = s;
+                            int idxFound =  dataOriginal.indexOf(s.trim());
+                            if (idxFound >=0) {
+                                newText = dataAnonymized.get(idxFound);
                             }
-                            s2 = TextUtilities.HTMLEncode(s); // the token
+
+                            s2 = TextUtilities.HTMLEncode(newText); // the token
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j=0; j<dataOriginal.size(); j++) {
-                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                // anonymize the data
+                                idxFound =  dataOriginal.indexOf(tokOriginal.trim());
+                                if (idxFound >=0) {
+                                    tokOriginal = dataAnonymized.get(idxFound);
                                 }
+
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
                                     addSpace = true;

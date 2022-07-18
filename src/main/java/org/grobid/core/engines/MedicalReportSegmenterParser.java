@@ -830,18 +830,19 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     }
 
                     // anonymize the data
+                    String newText = text, newText2 = text2;
                     for (int i=0; i<dataOriginal.size(); i++){
                         if (text != null) {
-                            text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                            newText = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
                         }
 
                         if (text2 != null) {
-                            text2 = text2.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                            newText2 = text2.replace(dataOriginal.get(i), dataAnonymized.get(i));
                         }
                     }
 
-                    features.string = text;
-                    features.secondString = text2;
+                    features.string = newText;
+                    features.secondString = newText2;
 
                     features.firstPageBlock = firstPageBlock;
                     features.lastPageBlock = lastPageBlock;

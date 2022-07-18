@@ -543,12 +543,16 @@ public class FeaturesVectorMedic {
                 continue;
             }
 
-            // remove blank spaces
-            for (int i=0; i<dataOriginal.size(); i++) {
-                text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+            // anonymize the data
+            String newText = text;
+            int idxFound =  dataOriginal.indexOf(text.trim());
+            if (idxFound >=0) {
+                newText = dataAnonymized.get(idxFound);
             }
-            text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+
+            // remove blank spaces
+            text = UnicodeUtil.normaliseTextAndRemoveSpaces(newText);
+            if (text.trim().length() == 0) {
                 continue;
             }
 
