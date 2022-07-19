@@ -55,7 +55,7 @@ public class MedicParser extends AbstractParser {
     /**
      * Processing of medics
      */
-    public List<Medic> processing(String input) throws Exception {
+    public Medic processing(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -66,7 +66,7 @@ public class MedicParser extends AbstractParser {
     }
 
 
-    public List<Medic> processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public Medic processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
@@ -76,7 +76,7 @@ public class MedicParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Medic entities as POJO.
      */
-    public List<Medic> processing(List<LayoutToken> tokens) {
+    public Medic processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
@@ -227,14 +227,14 @@ public class MedicParser extends AbstractParser {
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
                 }
-                if (medic != null){
+                /*if (medic != null){
                     fullMedics.add(medic);
-                }
+                }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return fullMedics;
+        return medic;
     }
     
     /**

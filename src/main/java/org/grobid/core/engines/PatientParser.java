@@ -55,7 +55,7 @@ public class PatientParser extends AbstractParser {
     /**
      * Processing of patients in the header part
      */
-    public List<Patient> processing(String input) throws Exception {
+    public Patient processing(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -66,7 +66,7 @@ public class PatientParser extends AbstractParser {
     }
 
 
-    public List<Patient> processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public Patient processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
@@ -76,7 +76,7 @@ public class PatientParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Patient entities as POJO.
      */
-    public List<Patient> processing(List<LayoutToken> tokens) {
+    public Patient processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
@@ -193,14 +193,14 @@ public class PatientParser extends AbstractParser {
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
-                if (patient != null) {
+                /*if (patient != null) {
                     fullPatients.add(patient);
-                }
+                }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return fullPatients;
+        return patient;
     }
 
     /**

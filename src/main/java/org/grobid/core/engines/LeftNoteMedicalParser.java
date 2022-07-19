@@ -132,7 +132,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     res = label(leftNote);
                     resLeftNote = resultExtraction(res, leftNoteTokenization, resLeftNote);
 
-                        // if the Organization model exists
+                    // if the Organization model exists
                         /*if (resLeftNote.getGhu() != null || resLeftNote.getChu() != null || resLeftNote.getDmu() != null ||
                             resLeftNote.getPole() != null || resLeftNote.getInstitution() != null || resLeftNote.getUniversity() != null ||
                             resLeftNote.getSite()  != null || resLeftNote.getHospital() != null || resLeftNote.getCenter() != null ||
@@ -194,20 +194,18 @@ public class LeftNoteMedicalParser extends AbstractParser {
                                 if (medicSegments.get(k).size() == 0)
                                     continue;
                                 // further medics processing with the Medic model
-                                List<Medic> localMedics = parsers.getMedicParser()
+                                Medic localMedics = parsers.getMedicParser()
                                     .processingWithLayoutTokens(medicSegments.get(k));
 
-                                for (Medic medic : localMedics) {
-                                    // add new medic
-                                    resLeftNote.addMedic(medic);
-                                }
+                                // add new medic
+                                resLeftNote.addMedic(localMedics);
                             }
                         }
                     }
                 }
                 if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote,null, config);
+                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, null, config);
                     tei.append("\t</text>\n");
                     tei.append("</TEI>\n");
                     return tei.toString();
@@ -624,9 +622,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * Return the left-note section with features to be processed by the sequence labelling model
      */
     public Pair<String, List<LayoutToken>> getSectionLeftNoteFeaturedAnonym(Document doc,
-                                                                      SortedSet<DocumentPiece> documentLeftNoteParts,
-                                                                      List<String> dataOriginal,
-                                                                      List<String> dataAnonymized) {
+                                                                            SortedSet<DocumentPiece> documentLeftNoteParts,
+                                                                            List<String> dataOriginal,
+                                                                            List<String> dataAnonymized) {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
         StringBuilder leftNote = new StringBuilder();
         String currentFont = null;
@@ -1335,7 +1333,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             while (stt.hasMoreTokens()) {
                 String s = stt.nextToken().trim();
                 if (i == 0) {
-                    for (int j=0; j<dataOriginal.size(); j++) {
+                    for (int j = 0; j < dataOriginal.size(); j++) {
                         s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
                     }
                     s2 = TextUtilities.HTMLEncode(s); // the text
@@ -1344,7 +1342,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     boolean strop = false;
                     while ((!strop) && (p < tokenizations.size())) {
                         String tokOriginal = tokenizations.get(p).t();
-                        for (int j=0; j<dataOriginal.size(); j++) {
+                        for (int j = 0; j < dataOriginal.size(); j++) {
                             tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
                         }
                         if (tokOriginal.equals(" ")
