@@ -1,14 +1,15 @@
 package org.grobid.core.engines;
 
+import org.grobid.core.data.Date;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.grobid.core.document.TEIFormatter.toISOString;
 
 public class AnonymizeData {
     // anonymize the document numbers
@@ -52,6 +53,23 @@ public class AnonymizeData {
             }
         }
         return newPersName.toString();
+    }
+
+    // anonymize email
+    public String anonymizeEmail(String email) {
+        List<String> emailSplitByExten = Arrays.asList(email.split("@"));
+        String emailBeforeExten = emailSplitByExten.get(0);
+        List<String> emailBeforeExtenSplit = Arrays.asList(emailBeforeExten.split("\\."));
+        StringBuilder anonymEmail = new StringBuilder();
+        for (int i=0; i<emailBeforeExtenSplit.size(); i++) {
+            anonymizePersonName(emailBeforeExtenSplit.get(i));
+            anonymEmail.append(anonymizePersonName(emailBeforeExtenSplit.get(i)).trim().toLowerCase());
+            if (i<emailBeforeExtenSplit.size()-1) {
+                anonymEmail.append(".");
+            }
+        }
+        anonymEmail.append("@").append(emailSplitByExten.get(1));
+        return anonymEmail.toString();
     }
 
     // anonymize the person names
@@ -150,6 +168,24 @@ public class AnonymizeData {
         return dateSplit;
     }
 
+    public String anonymizeDateRaw(String date) {
+        StringBuilder newDate = new StringBuilder();
+        List<String> originalBirthDateSplit = Arrays.asList(date.split(" "));
+        for (int i = 0; i < originalBirthDateSplit.size(); i++) {
+            String dateToBeChecked = originalBirthDateSplit.get(i);
+            if (dateToBeChecked.matches("^\\d{2}\\/\\d{2}\\/\\d{4}$") ||
+                dateToBeChecked.matches("^\\d{2}\\-\\d{2}\\-\\d{4}$") ||
+                dateToBeChecked.matches("^\\d{2}\\.\\d{2}\\.\\d{4}$")) {
+                originalBirthDateSplit.set(i, anonymizeDate(dateToBeChecked));
+            } else { // if not, whatever, just change the number
+                originalBirthDateSplit.set(i, anonymizeNumber(originalBirthDateSplit.get(i)));
+            }
+            newDate.append(originalBirthDateSplit.get(i)).append(" ");
+        }
+
+        return newDate.toString();
+    }
+
     // anonymize the dates
     public String anonymizeDate(String date) {
         String newDate = "";
@@ -158,84 +194,72 @@ public class AnonymizeData {
         int random_int_month = 1;
         int currentYear = java.time.LocalDate.now().getYear(); // we use the current year for the new data
         List<String> monthList = Arrays.asList("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre");
-        if (date.length() <= 2) { // we have only "dd" of dd/mm/yyy
-            random_int_date = (int) Math.floor(Math.random() * (28 - 1 + 1) + 1); // for any date, min : 1, max : 28
-            String newDD = "";
-            if (random_int_date < 10) {
-                newDD = "0" + String.valueOf(random_int_date);
-            } else {
-                newDD = String.valueOf(random_int_date);
-            }
-            newDate = newDD;
-        } else if (date.length() <= 4) { // we have only "yyyy" of dd/mm/yyy
-            newDate = String.valueOf(currentYear); // we simply change the dd
-        } else {
-            StringTokenizer dateTok = new StringTokenizer(date, " |\\-|\\.|\\/", true);
-            while (dateTok.hasMoreTokens()) {
-                dateTokens.add(dateTok.nextToken());
-            }
-            // if the month is not null
-            if (dateTokens.get(2) != null) {
-                String month = dateTokens.get(2);
-                if (month.matches("\\d+")) {
-                    random_int_month = (int) Math.floor(Math.random() * (12 - 1 + 1) + 1); // for the month number, min : 1, max : 12
-                    if (random_int_month == 1 || random_int_month == 3 || random_int_month == 5 || random_int_month == 7 ||
-                        random_int_month == 8 || random_int_month == 10 || random_int_month == 12) {
-                        random_int_date = (int) Math.floor(Math.random() * (31 - 1 + 1) + 1); // for the date, min : 1, max : 31
-                    } else if (random_int_month == 4 || random_int_month == 6 || random_int_month == 9 || random_int_month == 11) {
-                        random_int_date = (int) Math.floor(Math.random() * (30 - 1 + 1) + 1); // for the date, min : 1, max : 30
-                    } else if (random_int_month == 2) {
-                        if (currentYear % 4 == 0) {
-                            random_int_date = (int) Math.floor(Math.random() * (29 - 1 + 1) + 1); // for the date, min : 1, max : 29
-                        } else {
-                            random_int_date = (int) Math.floor(Math.random() * (28 - 1 + 1) + 1); // for the date, min : 1, max : 28
-                        }
-                    }
-                    String newDD = "", newMM = "";
-                    if (random_int_date < 10) {
-                        newDD = "0" + String.valueOf(random_int_date);
-                    } else {
-                        newDD = String.valueOf(random_int_date);
-                    }
-                    if (random_int_month < 10) {
-                        newMM = "0" + String.valueOf(random_int_month);
-                    } else {
-                        newMM = String.valueOf(random_int_month);
-                    }
-                    dateTokens.set(0, newDD);
-                    dateTokens.set(2, newMM);
-                } else {
-                    random_int_month = (int) Math.floor(Math.random() * (11 - 1 + 1) + 1); // for the month number, min : 1, max : 12
-                    if (random_int_month == 0 || random_int_month == 2 || random_int_month == 4 || random_int_month == 6 ||
-                        random_int_month == 7 || random_int_month == 9 || random_int_month == 11) {
-                        random_int_date = (int) Math.floor(Math.random() * (31 - 1 + 1) + 1); // for the date, min : 1, max : 31
-                    } else if (random_int_month == 3 || random_int_month == 5 || random_int_month == 8 || random_int_month == 10) {
-                        random_int_date = (int) Math.floor(Math.random() * (30 - 1 + 1) + 1); // for the date, min : 1, max : 30
-                    } else if (random_int_month == 1) {
-                        if (currentYear % 4 == 0) {
-                            random_int_date = (int) Math.floor(Math.random() * (29 - 1 + 1) + 1); // for the date, min : 1, max : 29
-                        } else {
-                            random_int_date = (int) Math.floor(Math.random() * (28 - 1 + 1) + 1); // for the date, min : 1, max : 28
-                        }
-                    }
-                    String newDD = "";
-                    if (random_int_date < 10) {
-                        newDD = "0" + String.valueOf(random_int_date);
-                    } else {
-                        newDD = String.valueOf(random_int_date);
-                    }
-                    dateTokens.set(0, newDD);
-                    dateTokens.set(2, monthList.get(random_int_month));
-                }
-            }
-
-            // if the year is not null
-            if (dateTokens.get(4) != null) {
-                dateTokens.set(4, String.valueOf(currentYear)); // we simply change the yyyy
-            }
-
-            newDate = String.join("", dateTokens);
+        StringTokenizer dateTok = new StringTokenizer(date, "\\-|\\.|\\/", true);
+        while (dateTok.hasMoreTokens()) {
+            dateTokens.add(dateTok.nextToken());
         }
+        // if the month is not null
+        if (dateTokens.get(2) != null) {
+            String month = dateTokens.get(2);
+            if (month.matches("\\d+")) {
+                random_int_month = (int) Math.floor(Math.random() * (12 - 1 + 1) + 1); // for the month number, min : 1, max : 12
+                if (random_int_month == 1 || random_int_month == 3 || random_int_month == 5 || random_int_month == 7 ||
+                    random_int_month == 8 || random_int_month == 10 || random_int_month == 12) {
+                    random_int_date = (int) Math.floor(Math.random() * (31 - 1 + 1) + 1); // for the date, min : 1, max : 31
+                } else if (random_int_month == 4 || random_int_month == 6 || random_int_month == 9 || random_int_month == 11) {
+                    random_int_date = (int) Math.floor(Math.random() * (30 - 1 + 1) + 1); // for the date, min : 1, max : 30
+                } else if (random_int_month == 2) {
+                    if (currentYear % 4 == 0) {
+                        random_int_date = (int) Math.floor(Math.random() * (29 - 1 + 1) + 1); // for the date, min : 1, max : 29
+                    } else {
+                        random_int_date = (int) Math.floor(Math.random() * (28 - 1 + 1) + 1); // for the date, min : 1, max : 28
+                    }
+                }
+                String newDD = "", newMM = "";
+                if (random_int_date < 10) {
+                    newDD = "0" + String.valueOf(random_int_date);
+                } else {
+                    newDD = String.valueOf(random_int_date);
+                }
+                if (random_int_month < 10) {
+                    newMM = "0" + String.valueOf(random_int_month);
+                } else {
+                    newMM = String.valueOf(random_int_month);
+                }
+                dateTokens.set(0, newDD);
+                dateTokens.set(2, newMM);
+            } else {
+                random_int_month = (int) Math.floor(Math.random() * (11 - 1 + 1) + 1); // for the month number, min : 1, max : 12
+                if (random_int_month == 0 || random_int_month == 2 || random_int_month == 4 || random_int_month == 6 ||
+                    random_int_month == 7 || random_int_month == 9 || random_int_month == 11) {
+                    random_int_date = (int) Math.floor(Math.random() * (31 - 1 + 1) + 1); // for the date, min : 1, max : 31
+                } else if (random_int_month == 3 || random_int_month == 5 || random_int_month == 8 || random_int_month == 10) {
+                    random_int_date = (int) Math.floor(Math.random() * (30 - 1 + 1) + 1); // for the date, min : 1, max : 30
+                } else if (random_int_month == 1) {
+                    if (currentYear % 4 == 0) {
+                        random_int_date = (int) Math.floor(Math.random() * (29 - 1 + 1) + 1); // for the date, min : 1, max : 29
+                    } else {
+                        random_int_date = (int) Math.floor(Math.random() * (28 - 1 + 1) + 1); // for the date, min : 1, max : 28
+                    }
+                }
+                String newDD = "";
+                if (random_int_date < 10) {
+                    newDD = "0" + String.valueOf(random_int_date);
+                } else {
+                    newDD = String.valueOf(random_int_date);
+                }
+                dateTokens.set(0, newDD);
+                dateTokens.set(2, monthList.get(random_int_month));
+            }
+        }
+
+        // if the year is not null
+        if (dateTokens.get(4) != null) {
+            dateTokens.set(4, String.valueOf(currentYear)); // we simply change the yyyy
+        }
+
+        newDate = String.join("", dateTokens);
+
         return newDate;
     }
 
@@ -262,6 +286,20 @@ public class AnonymizeData {
         System.out.println("Original date: " + date);
         String dateAnonymized = anonymizeData.anonymizeDate(date);
         System.out.println("Anonymized date: " + dateAnonymized);
+
+        System.out.println("==============");
+        // anonymize the email
+        String email = "belle.fille@aphp.fr";
+        System.out.println("Original email: " + email);
+        String emailAnonymized = anonymizeData.anonymizeEmail(email);
+        System.out.println("Anonymized email: " + emailAnonymized);
+
+        System.out.println("==============");
+        // anonymize the raw date
+        String rawDate = "Né(e) le : 21/01/1920 (102 ans)";
+        System.out.println("Original raw date: " + rawDate);
+        String rawDateAnonymized = anonymizeData.anonymizeDateRaw(rawDate);
+        System.out.println("Anonymized raw date: " + rawDateAnonymized);
     }
 }
 
