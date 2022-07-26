@@ -173,7 +173,6 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                             }
                         } else if (toLowerCaseName.endsWith(".jpg")
                             || toLowerCaseName.endsWith(".ppm")
-                            //	|| currFile.getName().toLowerCase().endsWith(".pbm")
                         ) {
 
                             String outputFilePath = "";
@@ -238,7 +237,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
         //guaranteeing quality of service. Otherwise, there are some PDF that may contain 300k blocks and thousands of extracted "images" that ruins the performance
         if (blocks.size() > GrobidProperties.getPdfBlocksMax()) {
-            throw new GrobidException("Postprocessed document is too big, contains: " + blocks.size(), GrobidExceptionStatus.TOO_MANY_BLOCKS);
+            throw new GrobidException("Post-processed document is too big, contains: " + blocks.size(), GrobidExceptionStatus.TOO_MANY_BLOCKS);
         }
 
         //boolean graphicVector = false;
@@ -421,11 +420,6 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     text = text.trim();
 
                     if ((text.length() == 0) ||
-                        /*
-                            (text.equals("\n")) ||
-                            (text.equals("\r")) ||
-                            (text.equals("\n\r")) ||
-                        */
                         (TextUtilities.filterLine(line))) {
                         continue;
                     }
@@ -561,9 +555,9 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     if (features.digit == null)
                         features.digit = "NODIGIT";
 
-                    //if (features.punctType == null)
-                    //    features.punctType = "NOPUNCT";
-
+                    /*if (features.punctType == null)
+                        features.punctType = "NOPUNCT";
+*/
                     features.relativeDocumentPosition = featureFactory
                         .linearScaling(nn, documentLength, NBBINS_POSITION);
 //System.out.println(nn + " " + documentLength + " " + NBBINS_POSITION + " " + features.relativeDocumentPosition);
@@ -636,7 +630,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
         //guaranteeing quality of service. Otherwise, there are some PDF that may contain 300k blocks and thousands of extracted "images" that ruins the performance
         if (blocks.size() > GrobidProperties.getPdfBlocksMax()) {
-            throw new GrobidException("Postprocessed document is too big, contains: " + blocks.size(), GrobidExceptionStatus.TOO_MANY_BLOCKS);
+            throw new GrobidException("Post-processed document is too big, contains: " + blocks.size(), GrobidExceptionStatus.TOO_MANY_BLOCKS);
         }
 
         //boolean graphicVector = false;
@@ -820,29 +814,23 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     text = text.trim();
 
                     if ((text.length() == 0) ||
-                        /*
-                            (text.equals("\n")) ||
-                            (text.equals("\r")) ||
-                            (text.equals("\n\r")) ||
-                        */
                         (TextUtilities.filterLine(line))) {
                         continue;
                     }
 
                     // anonymize the data
-                    String newText = text, newText2 = text2;
-                    for (int i=0; i<dataOriginal.size(); i++){
-                        if (text != null) {
-                            newText = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
-                        }
-
-                        if (text2 != null) {
-                            newText2 = text2.replace(dataOriginal.get(i), dataAnonymized.get(i));
-                        }
+                    int idx = dataOriginal.indexOf(text);
+                    if (idx >= 0) {
+                        text = dataAnonymized.get(idx).trim();
                     }
 
-                    features.string = newText;
-                    features.secondString = newText2;
+                    int idx2 = dataOriginal.indexOf(text2);
+                    if (idx2 >= 0) {
+                        text2 = dataAnonymized.get(idx2).trim();
+                    }
+
+                    features.string = text;
+                    features.secondString = text2;
 
                     features.firstPageBlock = firstPageBlock;
                     features.lastPageBlock = lastPageBlock;
@@ -972,8 +960,8 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     if (features.digit == null)
                         features.digit = "NODIGIT";
 
-                    //if (features.punctType == null)
-                    //    features.punctType = "NOPUNCT";
+                    /*if (features.punctType == null)
+                        features.punctType = "NOPUNCT";*/
 
                     features.relativeDocumentPosition = featureFactory
                         .linearScaling(nn, documentLength, NBBINS_POSITION);
@@ -1404,7 +1392,6 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                         indexLine = 0;
                         continue;
                     }
-                    //String[] lines = localText.split("\n");
                     String[] lines = localText.split("[\\n\\r]");
                     if ((lines.length == 0) || (indexLine >= lines.length)) {
                         currentBlockIndex++;
@@ -1527,10 +1514,10 @@ public class MedicalReportSegmenterParser extends AbstractParser {
      * @return extraction
      */
     public StringBuffer trainingExtractionAnonym(String result,
-                                           List<LayoutToken> tokenizations,
-                                           Document doc,
-                                           List<String> dataOriginal,
-                                           List<String> dataAnonymized) {
+                                                 List<LayoutToken> tokenizations,
+                                                 Document doc,
+                                                 List<String> dataOriginal,
+                                                 List<String> dataAnonymized) {
         // this is the main buffer for the whole full text
         StringBuffer buffer = new StringBuffer();
         try {
@@ -1564,20 +1551,15 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                 int ll = stt.countTokens();
                 while (stt.hasMoreTokens()) {
                     String s = stt.nextToken().trim();
+                    // anonymize the token
+                    int idx = dataOriginal.indexOf(s);
+                    if (idx >= 0) {
+                        s = dataAnonymized.get(idx);
+                    }
 
                     if (i == 0) {
-                        // anonymize the token
-                        int idx = dataOriginal.indexOf(s);
-                        if ( idx >= 0) {
-                            s = dataAnonymized.get(idx);
-                        }
                         s2 = TextUtilities.HTMLEncode(s); // lexical token
                     } else if (i == 1) {
-                        // anonymize the token
-                        int idx = dataOriginal.indexOf(s);
-                        if ( idx >= 0) {
-                            s = dataAnonymized.get(idx);
-                        }
                         s3 = TextUtilities.HTMLEncode(s); // second lexical token
                     } else if (i == ll - 1) {
                         s1 = s; // current label
@@ -1605,7 +1587,6 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                         indexLine = 0;
                         continue;
                     }
-                    //String[] lines = localText.split("\n");
                     String[] lines = localText.split("[\\n\\r]");
                     if ((lines.length == 0) || (indexLine >= lines.length)) {
                         currentBlockIndex++;
@@ -1625,7 +1606,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                         }
                     }
                 }
-                for (int j=0; j<dataOriginal.size(); j++) {
+                for (int j = 0; j < dataOriginal.size(); j++) {
                     line = line.replace(dataOriginal.get(j), dataAnonymized.get(j));
                     line = TextUtilities.HTMLEncode(line);
                 }
@@ -1653,7 +1634,6 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
                 //boolean closeParagraph = false;
                 if (lastTag != null) {
-                    //closeParagraph =
                     testClosingTag(buffer, currentTag0, lastTag0, s1);
                 }
 

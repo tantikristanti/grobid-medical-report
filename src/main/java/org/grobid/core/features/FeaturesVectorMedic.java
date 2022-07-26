@@ -544,14 +544,13 @@ public class FeaturesVectorMedic {
             }
 
             // anonymize the data
-            String newText = text;
             int idxFound =  dataOriginal.indexOf(text.trim());
             if (idxFound >=0) {
-                newText = dataAnonymized.get(idxFound);
+                text = dataAnonymized.get(idxFound);
             }
 
             // remove blank spaces
-            text = UnicodeUtil.normaliseTextAndRemoveSpaces(newText);
+            text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
             if (text.trim().length() == 0) {
                 continue;
             }

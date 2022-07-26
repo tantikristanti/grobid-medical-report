@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
  * */
 
 public class PersonNameParser extends AbstractParser {
-	private static Logger LOGGER = LoggerFactory.getLogger(PersonNameParser.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PersonNameParser.class);
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
 
@@ -163,7 +163,7 @@ public class PersonNameParser extends AbstractParser {
      * @return list of patients
      */
     public List<PersonName> resultExtractionLayoutTokens(String result,
-                                                      List<LayoutToken> tokenizations) {
+                                                         List<LayoutToken> tokenizations) {
         List<PersonName> listNames = new ArrayList<>();
         PersonName name = null;
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.NAMES_PERSON_MEDICAL, result, tokenizations);
@@ -367,7 +367,7 @@ public class PersonNameParser extends AbstractParser {
     /**
      * Extract results from a dateline string in the training format without any string modification.
      */
-    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String>  dataOriginal, List<String> dataAnonymized) {
+    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String> dataOriginal, List<String> dataAnonymized) {
         StringBuilder buffer = new StringBuilder();
         try {
             if (inputs == null)
@@ -419,23 +419,18 @@ public class PersonNameParser extends AbstractParser {
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
                         if (i == 0) {
-                            // anonymize the data
-                            String newText = s;
-                            int idxFound =  dataOriginal.indexOf(s.trim());
-                            if (idxFound >=0) {
-                                newText = dataAnonymized.get(idxFound);
+                            for (int j = 0; j < dataOriginal.size(); j++) {
+                                s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
                             }
-
-                            s2 = TextUtilities.HTMLEncode(newText); // the token
+                            s2 = TextUtilities.HTMLEncode(s);
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                // anonymize the data
-                                idxFound =  dataOriginal.indexOf(tokOriginal.trim());
-                                if (idxFound >=0) {
-                                    tokOriginal = dataAnonymized.get(idxFound);
+                                for (int j = 0; j < dataOriginal.size(); j++) {
+                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
                                 }
+                                s2 = TextUtilities.HTMLEncode(s);
 
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
@@ -516,12 +511,12 @@ public class PersonNameParser extends AbstractParser {
     }
 
     private String writeField(String s1,
-                               String lastTag0,
-                               String s2,
-                               String field,
-                               String outField,
-                               boolean addSpace,
-                               int nbIndent) {
+                              String lastTag0,
+                              String s2,
+                              String field,
+                              String outField,
+                              boolean addSpace,
+                              int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             if ((s1.equals("<other>") || s1.equals("I-<other>"))) {

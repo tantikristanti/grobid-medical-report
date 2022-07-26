@@ -902,13 +902,12 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // anonymize the data
-                    String newText = text;
-                    int idxFound = dataOriginal.indexOf(text.trim());
-                    if (idxFound >= 0) {
-                        newText = dataAnonymized.get(idxFound);
+                    int idx = dataOriginal.indexOf(text);
+                    if (idx >= 0) {
+                        text = dataAnonymized.get(idx);
                     }
 
-                    features.string = newText;
+                    features.string = text;
 
                     if (graphicBitmap) {
                         features.bitmapAround = true;
@@ -1519,7 +1518,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t<teiHeader>\n");
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<medic>\n");
                                     writer.write("\t\t\t\t" + bufferName);
+                                    writer.write("\t\t\t\t</medic>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -1632,7 +1633,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t<teiHeader>\n");
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<patients>\n");
+                                    writer.write("\t\t\t\t<patient>\n");
                                     writer.write("\t\t\t\t" + bufferName);
+                                    writer.write("\t\t\t\t</patient>\n");
                                     writer.write("\t\t\t</patients>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -1863,7 +1866,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t<teiHeader>\n");
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<medic>\n");
                                     writer.write("\t\t\t\t" + bufferName);
+                                    writer.write("\t\t\t\t</medic>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -2036,7 +2041,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<medic>\n");
                                 writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</medic>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -2107,7 +2114,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<patients>\n");
+                                writer.write("\t\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</patient>\n");
                                 writer.write("\t\t\t</patients>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -2903,9 +2912,9 @@ public class FullMedicalTextParser extends AbstractParser {
             Writer writer = null;
 
             // path for medical-report-segmenter model
-            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.medical.tei.xml"));
-            File outputTextFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.medical.rawtxt"));
-            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.medical"));
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.medical.tei.xml"));
+            File outputTextFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.medical.rawtxt"));
+            File outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.medical"));
 
             // 1. MEDICAL REPORT SEGMENTER MODEL
             documentSource = DocumentSource.fromPdf(inputFile, -1, -1, false, true, true);
@@ -2965,8 +2974,8 @@ public class FullMedicalTextParser extends AbstractParser {
             // 2. HEADER MEDICAL REPORT MODEL
 
             // path for header medical report model
-            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medical.tei.xml"));
-            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medical"));
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medical"));
 
             SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
             if (documentHeaderParts != null) {
@@ -3005,8 +3014,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 2a. MEDIC MODEL (from header information)
                     // path for medic  model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medic.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medic"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic"));
 
                     // buffer for the medics block
                     StringBuilder bufferMedic = null;
@@ -3077,8 +3086,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         // 2b. PERSON NAME MODEL (from medics in the header part)
                         // path for person name model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medic.name.tei.xml"));
-                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.medic.name"));
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.name"));
 
                         Medic medics = parsers.getMedicParser().processing(input);
 
@@ -3115,7 +3124,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t<teiHeader>\n");
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<medic>\n");
                                     writer.write("\t\t\t\t" + bufferName);
+                                    writer.write("\t\t\t\t</medic>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -3128,8 +3139,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 2c. PATIENT MODEL
                     // path for patient model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.patient.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.patient"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.patient.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.patient"));
 
                     // buffer for the patients block
                     StringBuilder bufferPatient = null;
@@ -3184,7 +3195,9 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t<teiHeader>\n");
                             writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                             writer.write("\t\t\t<patients>\n");
-                            writer.write("\t\t\t" + bufferPatient.toString());
+                            writer.write("\t\t\t\t<patient>\n");
+                            writer.write("\t\t\t\t" + bufferPatient.toString());
+                            writer.write("\t\t\t\t</patient>\n");
                             writer.write("\t\t\t</patients>\n");
                             writer.write("\t\t</fileDesc>\n");
                             writer.write("\t</teiHeader>\n");
@@ -3194,8 +3207,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                         // 2d. PERSON NAME MODEL (from patients in the header part)
                         // path for person name model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.patient.name.tei.xml"));
-                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.header.patient.name"));
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.name.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.name"));
 
                         Patient listPatients = parsers.getPatientParser().processing(input);
 
@@ -3231,7 +3244,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t<teiHeader>\n");
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<patients>\n");
+                                    writer.write("\t\t\t\t<patient>\n");
                                     writer.write("\t\t\t\t" + bufferName);
+                                    writer.write("\t\t\t\t<patient>\n");
                                     writer.write("\t\t\t</patients>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -3246,8 +3261,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
             // 3. LEFT NOTE MEDICAL REPORT MODEL
             // path for left note model
-            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medical.tei.xml"));
-            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medical"));
+            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medical.tei.xml"));
+            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medical"));
 
             // we take the left-note part only
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
@@ -3290,8 +3305,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 3a. MEDIC MODEL (from left note information)
                     // path for medic model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medic.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medic"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic"));
 
                     // buffer for the medics block
                     StringBuilder bufferMedic = null;
@@ -3362,8 +3377,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 2b. PERSON NAME MODEL (from medics in the left-note part)
                     // path for person name model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medic.name.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.left.note.medic.name"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.name.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.name"));
 
                     Medic medics = parsers.getMedicParser().processing(input);
 
@@ -3399,7 +3414,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<medic>\n");
                                 writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</medic>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -3425,7 +3442,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     String bodytextAnonym = featSegAnonym.getLeft();
 
                     // we write the full text untagged
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text"));
                     writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                     writer.write(bodytextAnonym + "\n");
                     writer.close();
@@ -3434,7 +3451,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     StringBuilder bufferFulltextAnonym = trainingExtractionAnonym(rese, tokenizationsBody, dataOriginal, dataAnonymized);
 
                     // write the TEI file to reflect the extract layout of the text as extracted from the pdf
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.tei.xml"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.tei.xml"));
                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                     if (id == -1) {
                         writer.write("<?xml version=\"1.0\" ?>\n<tei xml:space=\"preserve\">\n\t<teiHeader/>\n\t<text xml:lang=\"fr\">\n");
@@ -3448,8 +3465,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 5c. NAME MODEL (from medics in the body part)
                     // path for medic model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.medic.name.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.medic.name"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.name.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.name"));
 
                     // buffer for the medics block
                     // we need to rebuild the found string as it appears
@@ -3506,7 +3523,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<medic>\n");
                                 writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</medic>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -3518,8 +3537,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
                     // 5d. NAME MODEL (from patients in the body part)
                     // path for medic model
-                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.patient.name.tei.xml"));
-                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.anonym.full.medical.text.patient.name"));
+                    outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.name.tei.xml"));
+                    outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.name"));
 
                     // buffer for the medics block
                     StringBuilder bufferPatient = null;
@@ -3577,7 +3596,9 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<patients>\n");
+                                writer.write("\t\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</patient>\n");
                                 writer.write("\t\t\t</patients>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -4574,17 +4595,18 @@ public class FullMedicalTextParser extends AbstractParser {
                 while (stt.hasMoreTokens()) {
                     String s = stt.nextToken().trim();
                     if (i == 0) {
-                        for (int j = 0; j < dataOriginal.size(); j++) {
-                            s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                        // change the output token if it's necessary
+                        int idx = dataOriginal.indexOf(s);
+                        if (idx >=0 ) {
+                            s = dataAnonymized.get(idx);
                         }
+
                         s2 = TextUtilities.HTMLEncode(s); // lexical token
                         int p0 = p;
                         boolean strop = false;
                         while ((!strop) && (p < tokenizations.size())) {
                             String tokOriginal = tokenizations.get(p).t();
-                            for (int j = 0; j < dataOriginal.size(); j++) {
-                                tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
-                            }
+
                             if (tokOriginal.equals(" ")
                                 || tokOriginal.equals("\u00A0")) {
                                 addSpace = true;

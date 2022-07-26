@@ -24,8 +24,7 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
     /**
      * Add the selected features to the names of medics model training
      *
-     * @param corpusDir
-     *            a path where corpus files are located
+     * @param corpusDir a path where corpus files are located
      * @return the total number of used corpus items
      */
     @Override
@@ -37,14 +36,10 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
      * Add the selected features to the affiliation/address model training for
      * names
      *
-     * @param corpusDir
-     *            a path where corpus files are located
-     * @param trainingOutputPath
-     *            path where to store the temporary training data
-     * @param evalOutputPath
-     *            path where to store the temporary evaluation data
-     * @param splitRatio
-     *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @param corpusDir          a path where corpus files are located
+     * @param trainingOutputPath path where to store the temporary training data
+     * @param evalOutputPath     path where to store the temporary evaluation data
+     * @param splitRatio         ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
      * @return the total number of used corpus items
      */
     @Override
@@ -115,10 +110,10 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
                 totalExamples += parser2.nbNames;
 
                 // we can now add the features
-                for(int i=0; i<allTokens.size(); i++) {
+                for (int i = 0; i < allTokens.size(); i++) {
                     // fix the offsets
                     int pos = 0;
-                    for(LayoutToken token : allTokens.get(i)) {
+                    for (LayoutToken token : allTokens.get(i)) {
                         token.setOffset(pos);
                         pos += token.getText().length();
                     }
@@ -129,9 +124,9 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
                     final String names = FeaturesVectorPersonName.addFeaturesName(allTokens.get(i),
                         allLabeled.get(i), titlePositions, suffixPositions);
 
-                    if ( (writer2 == null) && (writer3 != null) )
+                    if ((writer2 == null) && (writer3 != null))
                         writer3.write(names + "\n \n");
-                    if ( (writer2 != null) && (writer3 == null) )
+                    if ((writer2 != null) && (writer3 == null))
                         writer2.write(names + "\n \n");
                     else {
                         if (Math.random() <= splitRatio)

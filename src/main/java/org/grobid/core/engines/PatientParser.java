@@ -542,7 +542,7 @@ public class PatientParser extends AbstractParser {
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
                         if (i == 0) {
-                            for (int j=0; j<dataOriginal.size(); j++) {
+                            for (int j = 0; j < dataOriginal.size(); j++) {
                                 s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
                             }
                             s2 = TextUtilities.HTMLEncode(s);
@@ -551,7 +551,7 @@ public class PatientParser extends AbstractParser {
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j=0; j<dataOriginal.size(); j++) {
+                                for (int j = 0; j < dataOriginal.size(); j++) {
                                     tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
                                 }
                                 if (tokOriginal.equals(" ")
@@ -659,7 +659,7 @@ public class PatientParser extends AbstractParser {
                               int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-             if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
+            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
                 if (addSpace)
                     result = " " + s2;
                 else

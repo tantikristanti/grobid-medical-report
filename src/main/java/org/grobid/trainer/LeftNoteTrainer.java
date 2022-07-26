@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
  *
  * @ Tanti, 2020
  */
-public class LeftNoteTrainer extends AbstractTrainer{
+public class LeftNoteTrainer extends AbstractTrainer {
 
     public LeftNoteTrainer() {
         super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
@@ -41,14 +41,10 @@ public class LeftNoteTrainer extends AbstractTrainer{
     /**
      * Add the selected features to left-note example set
      *
-     * @param corpusDir
-     *            a path where corpus files are located
-     * @param trainingOutputPath
-     *            path where to store the temporary training data
-     * @param evalOutputPath
-     *            path where to store the temporary evaluation data
-     * @param splitRatio
-     *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @param corpusDir          a path where corpus files are located
+     * @param trainingOutputPath path where to store the temporary training data
+     * @param evalOutputPath     path where to store the temporary evaluation data
+     * @param splitRatio         ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
      * @return the total number of used corpus items
      */
     @Override
@@ -65,16 +61,17 @@ public class LeftNoteTrainer extends AbstractTrainer{
 
     /**
      * Add the selected features to the organization model training
-     * @param sourceFile source path
-     * @param leftNotePath organization path
+     *
+     * @param sourceFile         source path
+     * @param leftNotePath       organization path
      * @param trainingOutputPath output training file
      * @return number of corpus files
      */
     public int addFeaturesLeftNote(String sourceFile,
-                                  String leftNotePath,
-                                  final File trainingOutputPath,
-                                  final File evalOutputPath,
-                                  double splitRatio) {
+                                   String leftNotePath,
+                                   final File trainingOutputPath,
+                                   final File evalOutputPath,
+                                   double splitRatio) {
         System.out.println(sourceFile);
         System.out.println(leftNotePath);
         System.out.println(trainingOutputPath);
@@ -143,12 +140,15 @@ public class LeftNoteTrainer extends AbstractTrainer{
                 for (File aRefFiles2 : refFiles2) {
                     String localFileName = aRefFiles2.getName();
                     if (localFileName.equals(parser2.getPDFName() + ".left.note.medical") ||
-                        localFileName.equals(parser2.getPDFName() + ".training.left.note.medical")) {
+                        localFileName.equals(parser2.getPDFName() + ".training.left.note.medical") ||
+                        localFileName.equals(parser2.getPDFName() + ".anonym.training.left.note.medical")) {
                         leftNoteFile = localFileName;
                         break;
                     }
                     if ((localFileName.startsWith(parser2.getPDFName() + "._")) &&
-                        (localFileName.endsWith(".left.note.medical") || localFileName.endsWith(".training.left.note.medical"))) {
+                        (localFileName.endsWith(".left.note.medical") ||
+                            localFileName.endsWith(".training.left.note.medical") ||
+                            localFileName.endsWith(".anonym.training.left.note.medical"))) {
                         leftNoteFile = localFileName;
                         break;
                     }
@@ -276,9 +276,9 @@ public class LeftNoteTrainer extends AbstractTrainer{
                     leftNote2.append("\n");
                 }
 
-                if ( (writer2 == null) && (writer3 != null) )
+                if ((writer2 == null) && (writer3 != null))
                     writer3.write(leftNote2.toString() + "\n");
-                if ( (writer2 != null) && (writer3 == null) )
+                if ((writer2 != null) && (writer3 == null))
                     writer2.write(leftNote2.toString() + "\n");
                 else {
                     if (Math.random() <= splitRatio)
@@ -315,7 +315,7 @@ public class LeftNoteTrainer extends AbstractTrainer{
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
@@ -324,7 +324,7 @@ public class LeftNoteTrainer extends AbstractTrainer{
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
-            System.out.println(">>>>>>>> GROBID_HOME="+GrobidProperties.getInstance().getGrobidHome());
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
         } catch (final Exception exp) {
             System.err.println("grobid-medical-report initialisation failed: " + exp);
             exp.printStackTrace();

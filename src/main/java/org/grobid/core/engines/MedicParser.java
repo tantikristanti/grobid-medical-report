@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /*
-* A class for parsing medics information
-*
-* Tanti, 2022
-* 
-* */
+ * A class for parsing medics information
+ *
+ * Tanti, 2022
+ *
+ * */
 
 public class MedicParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(MedicParser.class);
@@ -236,16 +236,16 @@ public class MedicParser extends AbstractParser {
         }
         return medic;
     }
-    
+
     /**
      * Extract results from a labeled sequence.
      *
-     * @param result            result
-     * @param tokenizations     list of tokens
+     * @param result        result
+     * @param tokenizations list of tokens
      * @return list of medics
      */
     public List<Medic> resultExtractionLayoutTokens(String result,
-                                       List<LayoutToken> tokenizations) {
+                                                    List<LayoutToken> tokenizations) {
         List<Medic> medics = new ArrayList<>();
         Medic medic = new Medic();
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.MEDIC, result, tokenizations);
@@ -374,7 +374,7 @@ public class MedicParser extends AbstractParser {
                 }
                 medic.addLayoutTokens(cluster.concatTokens());
             }
-            if (medic != null){
+            if (medic != null) {
                 medics.add(medic);
             }
         }
@@ -418,7 +418,7 @@ public class MedicParser extends AbstractParser {
                 urlPositions = lexicon.tokenPositionsUrlPattern(tokenizations);
 
                 String ress = FeaturesVectorMedic.addFeaturesMedic(tokenizations, null,
-                        locationsPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                    locationsPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
                 String res = label(ress);
 
                 String lastTag = null;
@@ -455,7 +455,7 @@ public class MedicParser extends AbstractParser {
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
                                 if (tokOriginal.equals(" ")
-                                        || tokOriginal.equals("\u00A0")) {
+                                    || tokOriginal.equals("\u00A0")) {
                                     addSpace = true;
                                 } else if (tokOriginal.equals(s)) {
                                     strop = true;
@@ -464,7 +464,7 @@ public class MedicParser extends AbstractParser {
                             }
                         } else if (i == ll - 1) {
                             s1 = s;
-                        } 
+                        }
                         i++;
                     }
 
@@ -502,31 +502,31 @@ public class MedicParser extends AbstractParser {
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<affiliation>", "<affiliation>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<institution>", "<orgName>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<settlement>", "<settlement>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
-                    } 
+                    }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<fax>", "<fax>", addSpace, 0);
                     }
@@ -555,7 +555,7 @@ public class MedicParser extends AbstractParser {
                     //buffer.append("</medic>\n");
                 }
             }
-            
+
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
@@ -629,7 +629,7 @@ public class MedicParser extends AbstractParser {
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
                         if (i == 0) {
-                            for (int j=0; j<dataOriginal.size(); j++) {
+                            for (int j = 0; j < dataOriginal.size(); j++) {
                                 s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
                             }
                             s2 = TextUtilities.HTMLEncode(s);
@@ -638,7 +638,7 @@ public class MedicParser extends AbstractParser {
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j=0; j<dataOriginal.size(); j++) {
+                                for (int j = 0; j < dataOriginal.size(); j++) {
                                     tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
                                 }
                                 if (tokOriginal.equals(" ")
