@@ -3789,7 +3789,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         List<String> tokenizeAddress = analyzer.tokenize(address);
                                         for (int i = 0; i < tokenizeAddress.size(); i++) {
                                             String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() < 5) {
+                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
                                                 dataToBeAnonymized = new DataToBeAnonymized();
                                                 String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
                                                 dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
@@ -3910,7 +3910,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         List<String> tokenizeAddress = analyzer.tokenize(address);
                                         for (int i = 0; i < tokenizeAddress.size(); i++) {
                                             String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() < 5) {
+                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
                                                 dataToBeAnonymized = new DataToBeAnonymized();
                                                 String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
                                                 dataToBeAnonymized.setAddressPatientOriginal(addressToBeChecked);
@@ -4031,7 +4031,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                         List<String> tokenizeAddress = analyzer.tokenize(address);
                                         for (int i = 0; i < tokenizeAddress.size(); i++) {
                                             String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() < 5) {
+                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
                                                 dataToBeAnonymized = new DataToBeAnonymized();
                                                 String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
                                                 dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
@@ -4193,7 +4193,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 List<String> tokenizeAddress = analyzer.tokenize(address);
                                 for (int i = 0; i < tokenizeAddress.size(); i++) {
                                     String addressToBeChecked = tokenizeAddress.get(i);
-                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() < 5) {
+                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
                                         dataToBeAnonymized = new DataToBeAnonymized();
                                         String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
                                         dataToBeAnonymized.setAddressPatientOriginal(addressToBeChecked);
@@ -4278,7 +4278,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 List<String> tokenizeAddress = analyzer.tokenize(address);
                                 for (int i = 0; i < tokenizeAddress.size(); i++) {
                                     String addressToBeChecked = tokenizeAddress.get(i);
-                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() < 5) {
+                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
                                         dataToBeAnonymized = new DataToBeAnonymized();
                                         String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
                                         dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
@@ -4312,7 +4312,7 @@ public class FullMedicalTextParser extends AbstractParser {
             // collect unique names
             Set<String> uniqueOriginalFirstName = new HashSet<String>(collectedFirstNames);
             for (String name : uniqueOriginalFirstName) {
-                if (!(name.trim().endsWith("."))) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedFirstName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setFirstNameMedicOriginal(name);
@@ -4324,7 +4324,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             Set<String> uniqueOriginalMiddleName = new HashSet<String>(collectedMiddleNames);
             for (String name : uniqueOriginalMiddleName) {
-                if (!(name.trim().endsWith("."))) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedMiddleName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setMiddleNameMedicOriginal(name);
@@ -4336,7 +4336,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             Set<String> uniqueOriginalLastName = new HashSet<String>(collectedLastNames);
             for (String name : uniqueOriginalLastName) {
-                if (!(name.trim().endsWith("."))) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedLastName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setLastNameMedicOriginal(name);
@@ -4597,7 +4597,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     if (i == 0) {
                         // change the output token if it's necessary
                         int idx = dataOriginal.indexOf(s);
-                        if (idx >=0 ) {
+                        if (idx >= 0) {
                             s = dataAnonymized.get(idx);
                         }
 
