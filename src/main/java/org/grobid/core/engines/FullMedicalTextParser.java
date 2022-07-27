@@ -4595,7 +4595,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 while (stt.hasMoreTokens()) {
                     String s = stt.nextToken().trim();
                     if (i == 0) {
-                        // change the output token if it's necessary
+                        // anonymize the token
                         int idx = dataOriginal.indexOf(s);
                         if (idx >= 0) {
                             s = dataAnonymized.get(idx);

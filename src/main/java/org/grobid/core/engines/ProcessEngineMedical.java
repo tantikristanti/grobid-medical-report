@@ -358,6 +358,18 @@ public class ProcessEngineMedical implements Closeable {
     }
 
     /**
+     * Generate training data for the French medical NER with data anonymization
+     *
+     * @param pGbdArgs The parameters.
+     */
+    public void createTrainingAnonymFrenchMedicalNER(final GrobidMedicalReportMainArgs pGbdArgs) {
+        inferPdfInputPath(pGbdArgs);
+        inferOutputPath(pGbdArgs);
+        int result = getEngine().batchCreateTrainingAnonymFrenchMedicalNER(pGbdArgs.getPath2Input(), pGbdArgs.getPath2Output(), -1);
+        LOGGER.info(result + " files processed.");
+    }
+
+    /**
      * List the engine methods that can be called.
      *
      * @return List<String> containing the list of the methods.

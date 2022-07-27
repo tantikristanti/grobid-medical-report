@@ -39,11 +39,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -960,7 +961,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 // also write the raw text (it's needed for further process, for example, with DeLFT)
                 StringBuffer rawtxt = new StringBuffer();
                 for (LayoutToken txtline : tokenizationsBody) {
-                    rawtxt.append(TextUtilities.HTMLEncode(txtline.getText()));
+                    rawtxt.append(txtline.getText());
                 }
                 // path for the output
                 String outPathRawtext = pathOutput + File.separator +
@@ -1004,6 +1005,173 @@ public class FrenchMedicalNERParser extends AbstractParser {
                             emailPositions, urlPositions);
                         String labeledNerData = label(featuresNERData);
                         String bufferNer = trainingExtraction(labeledNerData, tokensText).toString();
+
+                        if ((bufferNer != null) && (bufferNer.length() > 0)) {
+                            writer.write("\t\t\t<p " + "xml:id=\"p" + p + "\">");
+                            writer.write(bufferNer);
+                            writer.write("</p>\n");
+                            p++;
+                        }
+                    }
+                }
+                writer.write("\n\t\t</document>\n");
+                writer.write("\t</subcorpus>\n</corpus>\n");
+                writer.close();
+            }
+
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running Grobid training" +
+                " data generation for full text.", e);
+        } finally {
+            DocumentSource.close(documentSource, true, true, true);
+        }
+
+        return doc;
+    }
+
+    /**
+     * Process the specified pdf and format the result as training data for all the models.
+     *
+     * @param inputFile  input file
+     * @param pathOutput path for result
+     * @param id         id
+     */
+    public Document createTrainingAnonymFromPDF(File inputFile,
+                                                String pathOutput,
+                                                int id) {
+        if (tmpPath == null)
+            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
+        if (!tmpPath.exists()) {
+            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
+                tmpPath.getAbsolutePath() + "' does not exists.");
+        }
+        DocumentSource documentSource = null;
+        Document doc = null;
+        StringBuilder result = new StringBuilder();
+        String lang = Language.FR; // by default, it's French
+        try {
+            if (!inputFile.exists()) {
+                throw new GrobidResourceException("Cannot train for full-medical-text, because the file '" +
+                    inputFile.getAbsolutePath() + "' does not exists.");
+            }
+            String pdfFileName = inputFile.getName();
+
+            File fileAnonymData = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonymized.data.txt"));
+
+            // put the anonymized data in a list
+            List<String> dataAnonym = new ArrayList<>();
+            try (Stream<String> lines = Files.lines(Paths.get(fileAnonymData.getPath()))) {
+                dataAnonym = lines.collect(Collectors.toList());
+            }
+
+            // treat the anonymized data first
+            List<String> dataOriginal = new ArrayList<>();
+            List<String> dataAnonymized = new ArrayList<>();
+
+            for (int i = 0; i < dataAnonym.size(); i++) {
+                List<String> dataAnonymSplit = Arrays.asList(dataAnonym.get(i).split("\t"));
+                if (dataAnonymSplit.get(0) != null) {
+                    dataOriginal.add(dataAnonymSplit.get(0));
+                } else {
+                    dataOriginal.add("");
+                }
+                if (dataAnonymSplit.get(1) != null) {
+                    dataAnonymized.add(dataAnonymSplit.get(1));
+                } else {
+                    dataAnonymized.add("");
+                }
+            }
+
+            Writer writer = null;
+
+            // path for the output
+            File outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.french.medical.ner.tei.xml"));
+
+            documentSource = DocumentSource.fromPdf(inputFile, -1, -1, true, true, true);
+            doc = new Document(documentSource);
+            doc.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
+
+            if (doc.getBlocks() == null) {
+                throw new Exception("PDF parsing resulted in empty content");
+            }
+            doc.produceStatistics();
+
+            // first, call the medical-report-segmenter model to have high level segmentation
+            doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, GrobidAnalysisConfig.defaultInstance());
+
+            // in this case, we only take the body part for further process with the French medical NER model
+            SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+            List<LayoutToken> tokenizations = doc.getTokenizations();
+
+            if (documentBodyParts != null) {
+                List<LayoutToken> tokenizationsBody = new ArrayList<LayoutToken>();
+
+                for (DocumentPiece docPiece : documentBodyParts) {
+                    DocumentPointer dp1 = docPiece.getLeft();
+                    DocumentPointer dp2 = docPiece.getRight();
+
+                    int tokens = dp1.getTokenDocPos();
+                    int tokene = dp2.getTokenDocPos();
+                    for (int i = tokens; i < tokene; i++) {
+                        tokenizationsBody.add(tokenizations.get(i));
+                    }
+                }
+
+                StringBuilder bufferBody = new StringBuilder();
+
+                for (LayoutToken token : tokenizationsBody) {
+                    bufferBody.append(token.getText());
+                }
+
+                // also write the raw text (it's needed for further process, for example, with DeLFT)
+                StringBuffer rawtxt = new StringBuffer();
+                for (LayoutToken txtline : tokenizationsBody) {
+                    String text = txtline.getText();
+                    int idx = dataOriginal.indexOf(text);
+                    if (idx >= 0) {
+                        text = dataAnonymized.get(idx).trim();
+                    }
+                    rawtxt.append(text);
+                }
+
+                // path for the output
+                String outPathRawtext = pathOutput + File.separator +
+                    pdfFileName.replace(".pdf", ".anonym.training.french.medical.ner.rawtext.txt");
+                FileUtils.writeStringToFile(new File(outPathRawtext), rawtxt.toString(), "UTF-8");
+
+                // write the TEI file to reflect the extract layout of the text as extracted from the pdf
+                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<corpus>\n\t<subcorpus>\n");
+                writer.write("\t\t<document name=\"" + pdfFileName.replace(" ", "_") + "\"" + " xml:lang=\"" + lang + "\">\n");
+
+                List<OffsetPosition> locationsPositions = null;
+                List<OffsetPosition> titlesPositions = null;
+                List<OffsetPosition> suffixesPositions = null;
+                List<OffsetPosition> emailPositions = null;
+                List<OffsetPosition> urlPositions = null;
+
+                // read the paragraph by lines
+                String[] lines = bufferBody.toString().split("[\\n\\r]");
+                int p = 1;
+                for (String line : lines) {
+                    if ((line != null) && (line.length() > 0)) {
+                        // we segment the text
+                        List<LayoutToken> tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line);
+
+                        if (tokensText == null) {
+                            tokensText = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(line, new Language("en", 1.0)); // by default, we tokenize with English language
+                        }
+
+                        locationsPositions = lexicon.tokenPositionsLocationNames(tokensText);
+                        titlesPositions = lexicon.tokenPositionsPersonTitle(tokensText);
+                        suffixesPositions = lexicon.tokenPositionsPersonSuffix(tokensText);
+                        emailPositions = lexicon.tokenPositionsEmailPattern(tokensText);
+                        urlPositions = lexicon.tokenPositionsUrlPattern(tokensText);
+
+                        String featuresNERData = FeaturesVectorMedicalNER.addFeaturesNER(tokensText, null, locationsPositions, titlesPositions, suffixesPositions,
+                            emailPositions, urlPositions);
+                        String labeledNerData = label(featuresNERData);
+                        String bufferNer = trainingExtractionAnonym(labeledNerData, tokensText, dataOriginal, dataAnonymized).toString();
 
                         if ((bufferNer != null) && (bufferNer.length() > 0)) {
                             writer.write("\t\t\t<p " + "xml:id=\"p" + p + "\">");
@@ -1203,11 +1371,204 @@ public class FrenchMedicalNERParser extends AbstractParser {
             while (stt.hasMoreTokens()) {
                 String s = stt.nextToken().trim();
                 if (i == 0) {
-                    s2 = TextUtilities.HTMLEncode(s); // the text
-
+                    s2 = TextUtilities.HTMLEncode(s); // lexical token
+                    int p0 = p;
                     boolean strop = false;
                     while ((!strop) && (p < tokenizations.size())) {
                         String tokOriginal = tokenizations.get(p).t();
+
+                        if (tokOriginal.equals(" ")
+                            || tokOriginal.equals("\u00A0")) {
+                            addSpace = true;
+                        } else if (tokOriginal.equals("\n")) {
+                            newLine = true;
+                        } else if (tokOriginal.equals(s)) {
+                            strop = true;
+                        }
+                        p++;
+                    }
+                    if (p == tokenizations.size()) {
+                        // either we are at the end of the header, or we might have
+                        // a problematic token in tokenization for some reasons
+                        if ((p - p0) > 2) {
+                            // we loose the synchronicity, so we reinit p for the next token
+                            p = p0;
+                        }
+                    }
+                } else if (i == ll - 1) {
+                    s1 = s; // current tag
+                } else {
+                    if (s.equals("LINESTART"))
+                        newLine = true;
+                }
+                i++;
+            }
+
+            if (newLine) { // it's not the case for this model
+                buffer.append("<lb/>");
+            }
+
+            String lastTag0 = null;
+            if (lastTag != null) {
+                if (lastTag.startsWith("I-")) {
+                    lastTag0 = lastTag.substring(2, lastTag.length());
+                } else {
+                    lastTag0 = lastTag;
+                }
+            }
+            String currentTag0 = null;
+            if (s1 != null) {
+                if (s1.startsWith("I-")) {
+                    currentTag0 = s1.substring(2, s1.length());
+                } else {
+                    currentTag0 = s1;
+                }
+            }
+
+            if (lastTag != null) {
+                testClosingTag(buffer, currentTag0, lastTag0);
+            }
+
+            boolean output;
+
+            output = writeField(buffer, s1, lastTag0, s2, "<anatomy>", "<ENAMEX type=\"anatomy\">", addSpace);
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"date\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<device>", "<ENAMEX type=\"device\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<dose>", "<ENAMEX type=\"dose\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<email>", "<ENAMEX type=\"email\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<ENAMEX type=\"fax\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<location>", "<ENAMEX type=\"location\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<measure>", "<ENAMEX type=\"measure\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<medicament>", "<ENAMEX type=\"medicament\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<object>", "<ENAMEX type=\"object\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<orgname>", "<ENAMEX type=\"orgName\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<pathology>", "<ENAMEX type=\"pathology\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<persname>", "<ENAMEX type=\"persName\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<perstype>", "<ENAMEX type=\"persType\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<phone>", "<ENAMEX type=\"phone\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<physiology>", "<ENAMEX type=\"physiology\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<procedure>", "<ENAMEX type=\"procedure\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<rolename>", "<ENAMEX type=\"roleName\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<substance>", "<ENAMEX type=\"substance\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<symptom>", "<ENAMEX type=\"symptom\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<time>", "<ENAMEX type=\"time\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<unit>", "<ENAMEX type=\"unit\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<value>", "<ENAMEX type=\"value\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ENAMEX type=\"web\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<other>", "", addSpace);
+            }
+
+            lastTag = s1;
+
+            if (!st.hasMoreTokens()) {
+                if (lastTag != null && lastTag.length() > 0) {
+                    testClosingTag(buffer, "", currentTag0);
+                }
+            }
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Extract results from a labelled medical terminology recognition in the training data format without any
+     * string modification.
+     *
+     * @param result        result
+     * @param tokenizations list of tokens
+     * @return a result
+     */
+    public StringBuilder trainingExtractionAnonym(String result,
+                                                  List<LayoutToken> tokenizations,
+                                                  List<String> dataOriginal,
+                                                  List<String> dataAnonymized) {
+        // this is the main buffer for the whole header
+        StringBuilder buffer = new StringBuilder();
+
+        StringTokenizer st = new StringTokenizer(result, "\n");
+        String s1 = null;
+        String s2 = null;
+        String lastTag = null;
+
+        int p = 0;
+
+        while (st.hasMoreTokens()) {
+            boolean addSpace = false;
+            String tok = st.nextToken().trim();
+
+            if (tok.length() == 0) {
+                continue;
+            }
+            StringTokenizer stt = new StringTokenizer(tok, "\t");
+            int i = 0;
+
+            boolean newLine = false;
+            int ll = stt.countTokens();
+            while (stt.hasMoreTokens()) {
+                String s = stt.nextToken().trim();
+                if (i == 0) {
+                    // anonymize the token
+                    int idx = dataOriginal.indexOf(s);
+                    if (idx >= 0) {
+                        s = dataAnonymized.get(idx);
+                    }
+
+                    s2 = TextUtilities.HTMLEncode(s); // lexical token
+                    int p0 = p;
+                    boolean strop = false;
+                    while ((!strop) && (p < tokenizations.size())) {
+                        String tokOriginal = tokenizations.get(p).t();
+
                         if (tokOriginal.equals(" ")
                             || tokOriginal.equals("\u00A0")) {
                             addSpace = true;
@@ -1216,8 +1577,16 @@ public class FrenchMedicalNERParser extends AbstractParser {
                         }
                         p++;
                     }
+                    if (p == tokenizations.size()) {
+                        // either we are at the end of the header, or we might have
+                        // a problematic token in tokenization for some reasons
+                        if ((p - p0) > 2) {
+                            // we loose the synchronicity, so we reinit p for the next token
+                            p = p0;
+                        }
+                    }
                 } else if (i == ll - 1) {
-                    s1 = s; // the label
+                    s1 = s; // current tag
                 } else {
                     if (s.equals("LINESTART"))
                         newLine = true;
@@ -1401,7 +1770,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
     }
 
     // s1: the label; s2: the text
-    private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
+    /*private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             result = true;
@@ -1418,7 +1787,27 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
         }
         return result;
+    }*/
+
+    private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
+        boolean result = false;
+        if ((s1.equals(field)) || (s1.equals("I-" + field))) {
+            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) { // if current tag is the same the last one, just concatenate the string
+                if (addSpace)
+                    buffer.append(" ").append(s2);
+                else
+                    buffer.append(s2);
+            } else {
+                if (addSpace)
+                    buffer.append(" ").append(outField).append(s2);
+                else
+                    buffer.append(outField).append(s2); // otherwise, add the current label with the concatenated string
+            }
+        }
+        return result;
     }
+
+
 
     @Override
     public void close() throws IOException {
