@@ -1430,7 +1430,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
 
             boolean output;
-
+            // s1: tag, s2: token
             output = writeField(buffer, s1, lastTag0, s2, "<anatomy>", "<ENAMEX type=\"anatomy\">", addSpace);
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"date\">", addSpace);
@@ -1560,7 +1560,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     // anonymize the token
                     int idx = dataOriginal.indexOf(s);
                     if (idx >= 0) {
-                        s = dataAnonymized.get(idx);
+                        s = dataAnonymized.get(idx).trim();
                     }
 
                     s2 = TextUtilities.HTMLEncode(s); // lexical token
@@ -1623,7 +1623,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
 
             output = writeField(buffer, s1, lastTag0, s2, "<anatomy>", "<ENAMEX type=\"anatomy\">", addSpace);
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"date\">", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<date>", "<ENAMEX type=\"date\">", false);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<device>", "<ENAMEX type=\"device\">", addSpace);
