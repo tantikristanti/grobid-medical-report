@@ -4516,12 +4516,12 @@ public class FullMedicalTextParser extends AbstractParser {
                         "<item>", addSpace, 3, false);
                 }
                 if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<medic>",
-                        "<medic>", addSpace, 3, false);
+                    output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<medic>",
+                        addSpace, 3, false);
                 }
                 if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<patient>",
-                        "<patient>", addSpace, 3, false);
+                    output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<patient>",
+                        addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<licence>",

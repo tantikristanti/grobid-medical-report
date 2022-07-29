@@ -1770,25 +1770,6 @@ public class FrenchMedicalNERParser extends AbstractParser {
     }
 
     // s1: the label; s2: the text
-    /*private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
-        boolean result = false;
-        if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-            result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if current tag is the same the last one, just concatenate the string
-                if (addSpace)
-                    buffer.append(" ").append(s2);
-                else
-                    buffer.append(s2);
-            } else {
-                if (addSpace)
-                    buffer.append(" ").append(outField).append(s2);
-                else
-                    buffer.append(outField).append(s2); // otherwise, add the current label with the concatenated string
-            }
-        }
-        return result;
-    }*/
-
     private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
         boolean result = false;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
