@@ -120,7 +120,7 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
             } else if (qName.equals("p")) {
                 currentTags.push("<paragraph>");
                 currentTag = "<paragraph>";
-            } else if (qName.equals("note")) { // for the head and foot notes still found in the body part
+            } else if (qName.equals("note")) { // for the head and foot-notes still found in the body part
                 int length = atts.getLength();
 
                 // Process each attribute
@@ -144,9 +144,15 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                             if (value.equals("licence")) {
                                 currentTags.push("<licence>");
                                 currentTag = "<licence>";
-                            } else if (value.equals("note")) {
+                            } else if (value.equals("note") || value.equals("other")) {
                                 currentTags.push("<note>");
                                 currentTag = "<note>";
+                            } else if (value.equals("medic")) { // the information concerning medics still found in the body
+                                currentTags.push("<medic>");
+                                currentTag = "<medic>";
+                            } else if (value.equals("patient")) { // the information concerning patients still found in the body
+                                currentTags.push("<patient>");
+                                currentTag = "<patient>";
                             } else {
                                 logger.error("Invalid attribute value for element note: " + name + "=" + value);
                             }

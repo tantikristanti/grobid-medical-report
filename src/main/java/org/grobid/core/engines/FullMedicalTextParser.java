@@ -727,7 +727,8 @@ public class FullMedicalTextParser extends AbstractParser {
 
     static public Pair<String, LayoutTokenization> getBodyTextFeaturedAnonym(Document doc,
                                                                              SortedSet<DocumentPiece> documentBodyParts,
-                                                                             List<String> dataOriginal, List<String> dataAnonymized) {
+                                                                             List<String> dataOriginal,
+                                                                             List<String> dataAnonymized) {
         if ((documentBodyParts == null) || (documentBodyParts.size() == 0)) {
             return null;
         }
@@ -4374,8 +4375,7 @@ public class FullMedicalTextParser extends AbstractParser {
             String s1 = null;
             String s2 = null;
             String lastTag = null;
-            //System.out.println(tokenizations.toString());
-            //System.out.println(result);
+
             // current token position
             int p = 0;
             boolean start = true;
@@ -4516,12 +4516,12 @@ public class FullMedicalTextParser extends AbstractParser {
                         "<item>", addSpace, 3, false);
                 }
                 if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<medic>",
-                        addSpace, 3, false);
+                    output = writeField(buffer, s1, lastTag0, s2, "<medic>",
+                        "<note type=\"medic\">", addSpace, 3, false);
                 }
                 if (!output) {
-                    output = writeField(buffer, s1, lastTag0, s2, "<patient>", "<patient>",
-                        addSpace, 3, false);
+                    output = writeField(buffer, s1, lastTag0, s2, "<patient>",
+                        "<note type=\"patient\">", addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<licence>",
@@ -4569,8 +4569,7 @@ public class FullMedicalTextParser extends AbstractParser {
             String s1 = null;
             String s2 = null;
             String lastTag = null;
-            //System.out.println(tokenizations.toString());
-            //System.out.println(result);
+
             // current token position
             int p = 0;
             boolean start = true;
@@ -4719,11 +4718,11 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<medic>",
-                        "<medic>", addSpace, 3, false);
+                        "<note type=\"medic\">", addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<patient>",
-                        "<patient>", addSpace, 3, false);
+                        "<note type=\"patient\">", addSpace, 3, false);
                 }
                 if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<licence>",
@@ -4929,9 +4928,9 @@ public class FullMedicalTextParser extends AbstractParser {
             } else if (lastTag0.equals("<table_marker>")) {
                 buffer.append("</ref>");
             } else if (lastTag0.equals("<medic>")) {
-                buffer.append("</medic>\n");
+                buffer.append("</note>\n");
             } else if (lastTag0.equals("<patient>")) {
-                buffer.append("</patient>\n");
+                buffer.append("</note>\n");
             } else if (lastTag0.equals("<licence>")) {
                 buffer.append("</note>\n");
             } else if (lastTag0.equals("<note>")) {
