@@ -4313,7 +4313,7 @@ public class FullMedicalTextParser extends AbstractParser {
             // collect unique names
             Set<String> uniqueOriginalFirstName = new HashSet<String>(collectedFirstNames);
             for (String name : uniqueOriginalFirstName) {
-                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedFirstName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setFirstNameMedicOriginal(name);
@@ -4325,7 +4325,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             Set<String> uniqueOriginalMiddleName = new HashSet<String>(collectedMiddleNames);
             for (String name : uniqueOriginalMiddleName) {
-                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedMiddleName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setMiddleNameMedicOriginal(name);
@@ -4337,7 +4337,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             Set<String> uniqueOriginalLastName = new HashSet<String>(collectedLastNames);
             for (String name : uniqueOriginalLastName) {
-                if (!(name.trim().endsWith(".")) || name.trim().length() > 1) { // no need to anonymize initials
+                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
                     dataToBeAnonymized = new DataToBeAnonymized();
                     String anonymizedLastName = anonymizeData.anonymizePersonName(name);
                     dataToBeAnonymized.setLastNameMedicOriginal(name);
