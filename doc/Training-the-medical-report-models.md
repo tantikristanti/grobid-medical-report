@@ -20,15 +20,15 @@ The models prepared are:
 
 - [x] dateline
 
-- [x] organization-medical-report
+- [x] organization
 
 - [x] medic
 
 - [x] patient
 
-- [x] name-medic
+- [x] address
 
-- [x] name-patient
+- [x] person-name (medics, patients)
 
 Note:
 - [x] (A completed model)

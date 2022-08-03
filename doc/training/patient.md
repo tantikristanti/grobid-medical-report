@@ -21,7 +21,7 @@ For the patient model, we use the following TEI elements:
 * `<phone>` for the phone number
 * `<note type="patient">` for the notes concerning the patients
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
+> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding.
 > It is recommended to study first the existing training documents for the __patient__ model (`grobid/grobid-trainer/resources/dataset/patient`) to see some examples of how these elements should be used.
 
 

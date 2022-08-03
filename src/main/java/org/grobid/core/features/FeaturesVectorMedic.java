@@ -158,7 +158,7 @@ public class FeaturesVectorMedic {
     }
 
     /**
-     * Add feature for medic parsing.
+     * Add features for the medic model.
      */
     static public String addFeaturesMedic(List<LayoutToken> tokens,
                                           List<String> labels,

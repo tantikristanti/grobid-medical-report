@@ -1481,7 +1481,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // 5a. PERSON NAME MODEL (from medics in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name"));
 
@@ -1529,11 +1529,56 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.address.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.address"));
+                            inputs = new ArrayList<String>();
+                            // buffer for the address block
+                            if (medics.getAddress() != null) {
+                                String address = medics.getAddress();
+
+                                // force analyser with English, to avoid bad surprise
+                                List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // we write the name data with features
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+
+                                inputs.add(address.trim());
+
+                                // buffer for the header block, take only the data with the label
+                                StringBuilder bufferAddress = parsers.getAddressParser().trainingExtraction(inputs);
+
+                                if (bufferAddress != null && bufferAddress.length() > 0) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write("\t\t\t\t" + bufferAddress);
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</medics>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                }
+                            }
                         }
                     }
 
                     // 6. PATIENT MODEL
-                    // path for patient model
+                    // path for the patient model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient"));
 
@@ -1596,7 +1641,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // 5b. PERSON NAME MODEL (from patients in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name"));
 
@@ -1644,11 +1689,56 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.address.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.address"));
+                            inputs = new ArrayList<String>();
+                            // buffer for the address block
+                            if (listPatients.getAddress() != null) {
+                                String address = listPatients.getAddress();
+
+                                // force analyser with English, to avoid bad surprise
+                                List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // we write the name data with features
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+
+                                inputs.add(address.trim());
+
+                                // buffer for the header block, take only the data with the label
+                                StringBuilder bufferAddress = parsers.getAddressParser().trainingExtraction(inputs);
+
+                                if (bufferAddress != null && bufferAddress.length() > 0) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<patient>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write("\t\t\t\t" + bufferAddress);
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</patient>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                }
+                            }
                         }
                     }
 
                     // 6a. ORGANIZATION MODEL (from header information)
-                    // path for medic model
+                    // path for the organization model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.organization"));
 
@@ -1760,7 +1850,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // 4b. MEDIC MODEL (from left note information)
-                    // path for medic model
+                    // path for the medic model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic"));
 
@@ -1829,7 +1919,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // 5c. PERSON NAME MODEL (from medics in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name"));
 
@@ -1877,11 +1967,56 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.address.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.address"));
+                            inputs = new ArrayList<String>();
+                            // buffer for the address block
+                            if (medics.getAddress() != null) {
+                                String address = medics.getAddress();
+
+                                // force analyser with English, to avoid bad surprise
+                                List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // we write the name data with features
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+
+                                inputs.add(address.trim());
+
+                                // buffer for the header block, take only the data with the label
+                                StringBuilder bufferAddress = parsers.getAddressParser().trainingExtraction(inputs);
+
+                                if (bufferAddress != null && bufferAddress.length() > 0) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write("\t\t\t\t" + bufferAddress);
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</medics>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                }
+                            }
                         }
                     }
 
                     // 6b. ORGANIZATION MODEL (from left note information)
-                    // path for medic model
+                    // path for the organization model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.organization"));
 
@@ -1984,7 +2119,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.close();
 
                     // 5d. NAME MODEL (from medics in the body part)
-                    // path for medic model
+                    // path for the person name model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.name.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.name"));
 
@@ -2052,14 +2187,59 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.close();
                             }
                         }
+
+                        // path for the address model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.address.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.medic.address"));
+                        inputs = new ArrayList<String>();
+                        // buffer for the address block
+                        if (medics.getAddress() != null) {
+                            String address = medics.getAddress();
+
+                            // force analyser with English, to avoid bad surprise
+                            List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                            // we write the name data with features
+                            String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                            if (featuredAddress != null) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                writer.write(featuredAddress + "\n");
+                                writer.close();
+                            }
+
+                            inputs.add(address.trim());
+
+                            // buffer for the header block, take only the data with the label
+                            StringBuilder bufferAddress = parsers.getAddressParser().trainingExtraction(inputs);
+
+                            if (bufferAddress != null && bufferAddress.length() > 0) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write("\t\t\t\t" + bufferAddress);
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</medics>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                            }
+                        }
                     }
 
-                    // 5d. NAME MODEL (from medics in the body part)
-                    // path for medic model
+                    // 5d. NAME MODEL (from patients in the body part)
+                    // path for the patient names model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.name.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.name"));
 
-                    // buffer for the medics block
+                    // buffer for the patients block
                     StringBuilder bufferPatient = null;
                     // we need to rebuild the found string as it appears
                     input = "";
@@ -2119,6 +2299,52 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t\t\t" + bufferName);
                                 writer.write("\t\t\t\t</patient>\n");
                                 writer.write("\t\t\t</patients>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                            }
+                        }
+
+                        // path for the address model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.address.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.full.medical.text.patient.address"));
+
+                        List<String> inputAddress = new ArrayList<String>();
+                        // buffer for the address block
+                        if (listPatients.getAddress() != null) {
+                            String address = listPatients.getAddress();
+
+                            // force analyser with English, to avoid bad surprise
+                            List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                            // we write the name data with features
+                            String featuredAddress = FeaturesVectorPersonName.addFeaturesName(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                            if (featuredAddress != null) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                writer.write(featuredAddress + "\n");
+                                writer.close();
+                            }
+
+                            inputAddress.add(address.trim());
+
+                            // buffer for the header block, take only the data with the label
+                            StringBuilder bufferAddress = parsers.getPersonNameParser().trainingExtraction(inputAddress);
+
+                            if (bufferAddress != null && bufferAddress.length() > 0) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<patient>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write("\t\t\t\t" + bufferAddress);
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
                                 writer.write("</tei>");
@@ -2378,14 +2604,14 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.close();
 
                         // 5a. PERSON NAME MODEL (from medics in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name.blank.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.name"));
 
                         Medic medics = parsers.getMedicParser().processing(input);
 
                         if (medics != null) {
-                            if (medics.getPersName() != null) { // take only the names
+                            if (medics.getPersName() != null) { // take the names
                                 // write the labeled data
                                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                                 writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -2417,11 +2643,46 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.address.blank.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.medic.address"));
+                            if (medics.getAddress() != null) { // take the address
+                                // write the labeled data
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write(medics.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</medics>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                                List<LayoutToken> addressTokenizations = analyzer.tokenizeWithLayoutToken(medics.getAddress());
+
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // get the features for the name
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                // write the data with features
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+                            }
                         }
                     }
 
                     // 6. PATIENT MODEL
-                    // path for patient model
+                    // path for the patient model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient.blank.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.patient"));
 
@@ -2483,25 +2744,25 @@ public class FullMedicalTextParser extends AbstractParser {
                         writer.close();
 
                         // 5b. PERSON NAME MODEL (from patients in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name.blank.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.name"));
 
                         Patient listPatients = parsers.getPatientParser().processing(input);
 
                         if (listPatients != null) {
-                            if (listPatients.getPersName() != null) { // take only the names
+                            if (listPatients.getPersName() != null) { // take the names
                                 // write the labeled data
                                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                                 writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                                 writer.write("<tei xml:space=\"preserve\">\n");
                                 writer.write("\t<teiHeader>\n");
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
-                                writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t<patients>\n");
                                 writer.write("\t\t\t\t<name>\n");
                                 writer.write(listPatients.getPersName().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
                                 writer.write("\t\t\t\t</name>\n");
-                                writer.write("\t\t\t</medics>\n");
+                                writer.write("\t\t\t</patients>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
                                 writer.write("</tei>");
@@ -2519,6 +2780,41 @@ public class FullMedicalTextParser extends AbstractParser {
                                 if (featuredName != null) {
                                     writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                                     writer.write(featuredName + "\n");
+                                    writer.close();
+                                }
+                            }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.address.blank.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.header.patient.address"));
+                            if (listPatients.getAddress() != null) { // take the address
+                                // write the labeled data
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<patient>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write(listPatients.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</patient>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                                List<LayoutToken> addressTokenizations = analyzer.tokenizeWithLayoutToken(listPatients.getAddress());
+
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // get the features for the name
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                // write the data with features
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
                                     writer.close();
                                 }
                             }
@@ -2696,14 +2992,14 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.close();
 
                             // 5c. PERSON NAME MODEL (from medics in the left note part)
-                            // path for person name model
+                            // path for the person name model
                             outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name.blank.tei.xml"));
                             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.name"));
 
                             Medic medics = parsers.getMedicParser().processing(input);
 
                             if (medics != null) {
-                                if (medics.getPersName() != null) { // take only the names
+                                if (medics.getPersName() != null) { // take the names
                                     // write the labeled data
                                     writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                                     writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -2732,6 +3028,42 @@ public class FullMedicalTextParser extends AbstractParser {
                                     if (featuredName != null) {
                                         writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
                                         writer.write(featuredName + "\n");
+                                        writer.close();
+                                    }
+                                }
+
+                                // path for the address model
+                                outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.address.blank.tei.xml"));
+                                outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".training.left.note.medic.address"));
+
+                                if (medics.getAddress() != null) { // take the address
+                                    // write the labeled data
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write(medics.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</medics>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                    List<LayoutToken> addressTokenizations = analyzer.tokenizeWithLayoutToken(medics.getAddress());
+
+                                    locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                    List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                    // get the features for the name
+                                    String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
+
+                                    // write the data with features
+                                    if (featuredAddress != null) {
+                                        writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                        writer.write(featuredAddress + "\n");
                                         writer.close();
                                     }
                                 }
@@ -3086,14 +3418,13 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // 2b. PERSON NAME MODEL (from medics in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.name"));
 
                         Medic medics = parsers.getMedicParser().processing(input);
 
                         if (medics != null) {
-
                             inputs = new ArrayList<String>();
                             // buffer for the name block
                             if (medics.getPersName() != null) {
@@ -3135,11 +3466,56 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.close();
                                 }
                             }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.address.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.address"));
+                            inputs = new ArrayList<String>();
+                            // buffer for the address block
+                            if (medics.getAddress() != null) {
+                                String address = medics.getAddress();
+
+                                // force analyser with English, to avoid bad surprise
+                                List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // we write the name data with features
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
+
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+
+                                inputs.add(address.trim());
+
+                                // buffer for the header block, take only the data with the label
+                                StringBuilder bufferAddress = parsers.getAddressParser().trainingExtractionAnonym(inputs, dataOriginal, dataAnonymized);
+
+                                if (bufferAddress != null && bufferAddress.length() > 0) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<medics>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write("\t\t\t\t" + bufferAddress);
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</medics>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                }
+                            }
                         }
                     }
 
                     // 2c. PATIENT MODEL
-                    // path for patient model
+                    // path for the patient model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.patient.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.patient"));
 
@@ -3207,7 +3583,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // 2d. PERSON NAME MODEL (from patients in the header part)
-                        // path for person name model
+                        // path for the person name model
                         outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.name.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.name"));
 
@@ -3249,6 +3625,51 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t\t\t" + bufferName);
                                     writer.write("\t\t\t\t</patient>\n");
                                     writer.write("\t\t\t</patients>\n");
+                                    writer.write("\t\t</fileDesc>\n");
+                                    writer.write("\t</teiHeader>\n");
+                                    writer.write("</tei>");
+                                    writer.close();
+                                }
+                            }
+
+                            // path for the address model
+                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.address.tei.xml"));
+                            outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.address"));
+                            inputs = new ArrayList<String>();
+                            // buffer for the address block
+                            if (listPatients.getAddress() != null) {
+                                String address = listPatients.getAddress();
+
+                                // force analyser with English, to avoid bad surprise
+                                List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                                locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                                List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                                // we write the name data with features
+                                String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
+
+                                if (featuredAddress != null) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                    writer.write(featuredAddress + "\n");
+                                    writer.close();
+                                }
+
+                                inputs.add(address.trim());
+
+                                // buffer for the header block, take only the data with the label
+                                StringBuilder bufferAddress = parsers.getAddressParser().trainingExtractionAnonym(inputs, dataOriginal, dataAnonymized);
+
+                                if (bufferAddress != null && bufferAddress.length() > 0) {
+                                    writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                    writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                    writer.write("<tei xml:space=\"preserve\">\n");
+                                    writer.write("\t<teiHeader>\n");
+                                    writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                    writer.write("\t\t\t<patient>\n");
+                                    writer.write("\t\t\t\t<address>\n");
+                                    writer.write("\t\t\t\t" + bufferAddress);
+                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t</patient>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
                                     writer.write("</tei>");
@@ -3305,7 +3726,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // 3a. MEDIC MODEL (from left note information)
-                    // path for medic model
+                    // path for the medic model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic"));
 
@@ -3377,7 +3798,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     // 2b. PERSON NAME MODEL (from medics in the left-note part)
-                    // path for person name model
+                    // path for the person name model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.name.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.name"));
 
@@ -3425,6 +3846,51 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.close();
                             }
                         }
+
+                        // path for the address model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.address.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.address"));
+                        inputs = new ArrayList<String>();
+                        // buffer for the address block
+                        if (medics.getAddress() != null) {
+                            String address = medics.getAddress();
+
+                            // force analyser with English, to avoid bad surprise
+                            List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                            // we write the name data with features
+                            String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
+
+                            if (featuredAddress != null) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                writer.write(featuredAddress + "\n");
+                                writer.close();
+                            }
+
+                            inputs.add(address.trim());
+
+                            // buffer for the header block, take only the data with the label
+                            StringBuilder bufferAddress = parsers.getAddressParser().trainingExtractionAnonym(inputs, dataOriginal, dataAnonymized);
+
+                            if (bufferAddress != null && bufferAddress.length() > 0) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write("\t\t\t\t" + bufferAddress);
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</medics>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                            }
+                        }
                     }
                 }
             }
@@ -3465,7 +3931,7 @@ public class FullMedicalTextParser extends AbstractParser {
                     writer.close();
 
                     // 5c. NAME MODEL (from medics in the body part)
-                    // path for medic model
+                    // path for the person name model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.name.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.name"));
 
@@ -3534,10 +4000,55 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.close();
                             }
                         }
+
+                        // path for the address model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.address.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.address"));
+                        inputs = new ArrayList<String>();
+                        // buffer for the address block
+                        if (medics.getAddress() != null) {
+                            String address = medics.getAddress();
+
+                            // force analyser with English, to avoid bad surprise
+                            List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(addressTokenizations);
+                            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
+
+                            // we write the name data with features
+                            String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
+
+                            if (featuredAddress != null) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                writer.write(featuredAddress + "\n");
+                                writer.close();
+                            }
+
+                            inputs.add(address.trim());
+
+                            // buffer for the header block, take only the data with the label
+                            StringBuilder bufferAddress = parsers.getAddressParser().trainingExtractionAnonym(inputs, dataOriginal, dataAnonymized);
+
+                            if (bufferAddress != null && bufferAddress.length() > 0) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<medics>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write("\t\t\t\t" + bufferAddress);
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</medics>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                            }
+                        }
                     }
 
                     // 5d. NAME MODEL (from patients in the body part)
-                    // path for medic model
+                    // path for the patient name model
                     outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.name.tei.xml"));
                     outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.name"));
 
@@ -3601,6 +4112,51 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t\t\t" + bufferName);
                                 writer.write("\t\t\t\t</patient>\n");
                                 writer.write("\t\t\t</patients>\n");
+                                writer.write("\t\t</fileDesc>\n");
+                                writer.write("\t</teiHeader>\n");
+                                writer.write("</tei>");
+                                writer.close();
+                            }
+                        }
+
+                        // path for the address model
+                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.address.tei.xml"));
+                        outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.address"));
+                        List<String> inputAddress = new ArrayList<String>();
+                        // buffer for the name block
+                        if (listPatients.getAddress() != null) {
+                            String address = listPatients.getAddress();
+
+                            // force analyser with English, to avoid bad surprise
+                            List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
+                            List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokenizations);
+                            List<OffsetPosition>  cityNamePositions = lexicon.tokenPositionsCityNames(tokenizations);
+
+                            // we write the name data with features
+                            String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
+
+                            if (featuredAddress != null) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
+                                writer.write(featuredAddress + "\n");
+                                writer.close();
+                            }
+
+                            inputAddress.add(address.trim());
+
+                            // buffer for the header block, take only the data with the label
+                            StringBuilder bufferName = parsers.getPersonNameParser().trainingExtractionAnonym(inputNames, dataOriginal, dataAnonymized);
+
+                            if (bufferName != null && bufferName.length() > 0) {
+                                writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
+                                writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                                writer.write("<tei xml:space=\"preserve\">\n");
+                                writer.write("\t<teiHeader>\n");
+                                writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
+                                writer.write("\t\t\t<patient>\n");
+                                writer.write("\t\t\t\t<address>\n");
+                                writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
                                 writer.write("</tei>");

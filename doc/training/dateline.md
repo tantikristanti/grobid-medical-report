@@ -15,7 +15,7 @@ For the dateline model, we use the following TEI elements:
   * `<note type="doctype">` for the document type
   * `<note type="date">` for short notes of date
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
+> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding. 
 
 ## Analysis
 

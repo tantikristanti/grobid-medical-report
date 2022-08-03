@@ -6,9 +6,9 @@ For the following guidelines, we first need to generate the training data as exp
 
 In __grobid-medical-report__, __name_person__ corresponds to the person's name information. 
 
-For identifying the exact pieces of person's name (`medic` or `patient`), see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
+For identifying the exact pieces of person's name (`medic` or `patient`), see the Annotation guidelines of the <persName> element in the [medic](medic.md) or [patient](patient.md) models.
 
-For the medic model, we use the following TEI elements:
+For the person's name model, we use the following TEI elements:
 
 * `<title>` for the titles 
 * `<forename>` for the first name

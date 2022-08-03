@@ -63,6 +63,14 @@ public class MedicalLabels extends TaggingLabels {
     public static final String UNIT_LABEL = "<unit>";
     public static final String ADMINISTRATION_LABEL = "<administration>";
     public static final String SUB_LABEL = "<sub>";
+    public static final String STREET_NUMBER_LABEL = "<streetnumber>";
+    public static final String STREET_NAME_LABEL = "<entrancenumber>";
+    public static final String BUILDING_NUMBER_LABEL = "<buildingnumber>";
+    public static final String BUILDING_NAME_LABEL = "<buildingname>";
+    public static final String CITY_LABEL = "<city>";
+    public static final String POST_CODE_LABEL = "<postcode>";
+    public static final String PO_BOX_LABEL = "<pobox>";
+    public static final String DISTRICT_LABEL = "<district>";
 
     // particularly, for the NER medical model
     public static final String ANATOMY_LABEL = "<anatomy>";
@@ -237,6 +245,18 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel PATIENT_PHONE = new TaggingLabelImpl(GrobidModels.PATIENT, PHONE_LABEL);
     public static final TaggingLabel PATIENT_NOTE = new TaggingLabelImpl(GrobidModels.PATIENT, NOTE_LABEL);
 
+    // Address
+    public static final TaggingLabel ADDRESS_STREET_NUMBER = new TaggingLabelImpl(GrobidModels.ADDRESS, STREET_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_STREET_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, STREET_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_BUILDING_NUMBER = new TaggingLabelImpl(GrobidModels.MEDIC, BUILDING_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_BUILDING_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, BUILDING_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_CITY = new TaggingLabelImpl(GrobidModels.MEDIC, CITY_LABEL);
+    public static final TaggingLabel ADDRESS_POST_CODE = new TaggingLabelImpl(GrobidModels.MEDIC, POST_CODE_LABEL);
+    public static final TaggingLabel ADDRESS_PO_BOX = new TaggingLabelImpl(GrobidModels.MEDIC, PO_BOX_LABEL);
+    public static final TaggingLabel ADDRESS_DEPARTMENT = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_LABEL);
+    public static final TaggingLabel ADDRESS_DISTRICT = new TaggingLabelImpl(GrobidModels.MEDIC, DISTRICT_LABEL);
+    public static final TaggingLabel ADDRESS_COUNTRY = new TaggingLabelImpl(GrobidModels.MEDIC, COUNTRY_LABEL);
+
     // Names
     public static final TaggingLabel NAMES_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, TITLE_LABEL);
     public static final TaggingLabel NAMES_FORENAME = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, FORENAME_LABEL);
@@ -380,6 +400,18 @@ public class MedicalLabels extends TaggingLabels {
         register(PATIENT_TOWN);
         register(PATIENT_PHONE);
         register(PATIENT_NOTE);
+
+        // address
+        register(ADDRESS_STREET_NUMBER);
+        register(ADDRESS_STREET_NAME);
+        register(ADDRESS_BUILDING_NUMBER);
+        register(ADDRESS_BUILDING_NAME);
+        register(ADDRESS_CITY);
+        register(ADDRESS_POST_CODE);
+        register(ADDRESS_PO_BOX);
+        register(ADDRESS_DEPARTMENT);
+        register(ADDRESS_DISTRICT);
+        register(ADDRESS_COUNTRY);
 
         // person's name
         register(NAMES_TITLE);

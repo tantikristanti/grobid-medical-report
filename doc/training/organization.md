@@ -35,7 +35,7 @@ For the organization-medical-report model, we use the following TEI elements:
 * `<ptr type="web">` for the web URL
 * `<note type="short">` for the any short notes in the header part
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
+> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding. 
 > It is recommended to study first the existing training documents for the __organization-medical-report__ model (`grobid/grobid-trainer/resources/dataset/organization-medical-report`) to see some examples of how these elements should be used.
 
 

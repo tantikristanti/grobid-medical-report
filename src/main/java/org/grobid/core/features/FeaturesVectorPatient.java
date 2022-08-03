@@ -158,9 +158,8 @@ public class FeaturesVectorPatient {
         return res.toString();
     }
 
-
     /**
-     * Add features for patient parsing
+     * Add features for the patient model.
      */
     static public String addFeaturesPatient(List<LayoutToken> tokens,
                                             List<String> labels,

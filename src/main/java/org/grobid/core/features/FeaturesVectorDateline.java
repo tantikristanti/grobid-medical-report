@@ -126,6 +126,9 @@ public class FeaturesVectorDateline {
         return res.toString();
     }
 
+    /**
+     * Add features for the dateline model.
+     */
     static public String addFeaturesDateline(List<LayoutToken> tokens,
                                              List<String> labels,
                                              List<OffsetPosition> locationPositions) throws Exception {
