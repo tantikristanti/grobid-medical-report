@@ -2321,7 +2321,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(addressTokenizations);
 
                             // we write the name data with features
-                            String featuredAddress = FeaturesVectorPersonName.addFeaturesName(addressTokenizations, null, locationPositions, cityNamePositions);
+                            String featuredAddress = FeaturesVectorAddress.addFeaturesAddress(addressTokenizations, null, locationPositions, cityNamePositions);
 
                             if (featuredAddress != null) {
                                 writer = new OutputStreamWriter(new FileOutputStream(outputRawFile, false), StandardCharsets.UTF_8);
