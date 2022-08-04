@@ -2332,7 +2332,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             inputAddress.add(address.trim());
 
                             // buffer for the header block, take only the data with the label
-                            StringBuilder bufferAddress = parsers.getPersonNameParser().trainingExtraction(inputAddress);
+                            StringBuilder bufferAddress = parsers.getAddressParser().trainingExtraction(inputAddress);
 
                             if (bufferAddress != null && bufferAddress.length() > 0) {
                                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
@@ -4144,9 +4144,9 @@ public class FullMedicalTextParser extends AbstractParser {
                             inputAddress.add(address.trim());
 
                             // buffer for the header block, take only the data with the label
-                            StringBuilder bufferName = parsers.getPersonNameParser().trainingExtractionAnonym(inputNames, dataOriginal, dataAnonymized);
+                            StringBuilder bufferAddress = parsers.getAddressParser().trainingExtractionAnonym(inputNames, dataOriginal, dataAnonymized);
 
-                            if (bufferName != null && bufferName.length() > 0) {
+                            if (bufferAddress != null && bufferAddress.length() > 0) {
                                 writer = new OutputStreamWriter(new FileOutputStream(outputTEIFile, false), StandardCharsets.UTF_8);
                                 writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                                 writer.write("<tei xml:space=\"preserve\">\n");
@@ -4154,7 +4154,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferName);
+                                writer.write("\t\t\t\t" + bufferAddress);
                                 writer.write("\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
