@@ -176,6 +176,7 @@ def trainerTasks = [
     "train_patient"                         : "org.grobid.trainer.PatientTrainer",
     "train_medic"                           : "org.grobid.trainer.MedicTrainer",
     "train_organization"                    : "org.grobid.trainer.OrganizationTrainer",
+    "train_address"                         : "org.grobid.trainer.AddressTrainer",
     "train_name_person_medical"             : "org.grobid.trainer.PersonNameMedicalTrainer"
 ]
 
@@ -317,6 +318,22 @@ task train_organization_split(dependsOn: 'classes', type: JavaExec, group: 'trai
     mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
     classpath = sourceSets.main.runtimeClasspath
     args 2, 'organization', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew eval_address -gH /path/to/grobid-home
+task eval_address(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 1, 'address', '-gH', getArg('gH', '../grobid-home')
+    jvmArgs '-Xmx3072m'
+}
+
+// as running this command: $ ./gradlew train_address_split -gH /path/to/grobid-home -s [training:test]
+task train_address_split(dependsOn: 'classes', type: JavaExec, group: 'training') {
+    mainClass = 'org.grobid.trainer.MedicalReportTrainerRunner'
+    classpath = sourceSets.main.runtimeClasspath
+    args 2, 'address', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
 
