@@ -9,21 +9,24 @@ For identifying the exact pieces of addresses (for `medics` or `patients`), see 
 
 For the address line model, we use the following TEI elements:
 
-* `<streetNumber>` for the street number 
-* `<streetName>` for the street name
-* `<buildingNumber>` for the entrance number (normally for the number of residence in apartements)
+* `<streetNumber>` for the street numbers
+* `<streetName>` for the street names
+* `<buildingNumber>` for the entrance numbers (residences or apartments)
 * `<buildingName>` for the building name (e.g., Résidence de Lilas)
-* `<city>` for the city name (e.g., Lyon, Paris)
+* `<city>` for the city names (e.g., Lyon, Paris)
 * `<postCode>` for the postal code (e.g., 75001)
 * `<poBox>` for the PO box number (e.g., BP 123)
-* `<department>` for the department or community name (e.g., Creteil)
+* `<community>` for the community names (e.g., Créteil)
 * `<district>` for the district name or number (e.g., IIème arrodissement, quartier Perrache)
-* `<country>` for the country name (e.g., France)
+* `<departmentNumber>` for the department numbers (e.g., `75` for `Paris`, 9175` for `Essone`, `77` for `Seine-et-Marne`)
+* `<departmentName>` for the department names (e.g., Paris, Essone, Seine-et-Marne)
+* `<region>` for the region names (e.g., Île-de-France, Bretagne, Normandie, Départements de DOM-TOM)
+* `<country>` for the country names (e.g., France)
 * `<note type="address">` for the notes concerning the address
 
 > Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-trainer/resources/dataset/addressline`) to see some examples of how these elements should be used.
-
+> It is recommended to study first the existing training documents for the __address__ model (`grobid/grobid-trainer/resources/dataset/address`) to see some examples of how these elements should be used.
+> THe list of regions, departments, cities in France can be found here [Liste régions, départements et communes de France](https://www.villesfrance.fr/fr/).
 
 ## Analysis
 

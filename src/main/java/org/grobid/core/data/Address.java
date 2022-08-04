@@ -14,9 +14,13 @@ public class Address {
     private String city = null;
     private String postCode = null;
     private String poBox = null;
-    private String department = null;
+    private String community = null;
     private String district = null;
+    private String departmentNumber = null;
+    private String departmentName= null;
+    private String region = null;
     private String country = null;
+    private String note = null;
 
     private List<LayoutToken> layoutTokens = new ArrayList<>();
 
@@ -27,6 +31,7 @@ public class Address {
     public void setRawAddress(String rawAddress) {
         this.rawAddress = rawAddress;
     }
+
 
     public String getStreetNumber() {
         return streetNumber;
@@ -40,8 +45,8 @@ public class Address {
         return streetName;
     }
 
-    public void setStreetName(String streetNumber) {
-        this.streetNumber = streetNumber;
+    public void setStreetName(String streetName) {
+        this.streetName = streetName;
     }
 
     public String getBuildingNumber() {
@@ -84,12 +89,12 @@ public class Address {
         this.poBox = poBox;
     }
 
-    public String getDepartment() {
-        return department;
+    public String getCommunity() {
+        return community;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setCommunity(String community) {
+        this.community = community;
     }
 
     public String getDistrict() {
@@ -100,12 +105,44 @@ public class Address {
         this.district = district;
     }
 
+    public String getDepartmentNumber() {
+        return departmentNumber;
+    }
+
+    public void setDepartmentNumber(String departmentNumber) {
+        this.departmentNumber = departmentNumber;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public String getCountry() {
         return country;
     }
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public boolean isNotNull() {
@@ -117,9 +154,13 @@ public class Address {
             (city != null) ||
             (postCode != null) ||
             (poBox != null) ||
-            (department != null) ||
+            (community != null) ||
             (district != null) ||
-            (country != null);
+            (departmentNumber != null) ||
+            (departmentName != null) ||
+            (region != null) ||
+            (country != null) ||
+            (note != null);
     }
 
     public List<LayoutToken> getLayoutTokens() {

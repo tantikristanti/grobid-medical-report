@@ -166,11 +166,11 @@ public class AddressParser extends AbstractParser {
                     }
                     address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT)) {
-                    if (address.getDepartment() != null) {
-                        address.setDepartment(address.getDepartment() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_COMMUNITY)) {
+                    if (address.getCommunity() != null) {
+                        address.setCommunity(address.getCommunity() + "\t" + clusterContent);
                     } else {
-                        address.setDepartment(clusterContent);
+                        address.setCommunity(clusterContent);
                     }
                     address.addLayoutTokens(cluster.concatTokens());
                 }
@@ -182,11 +182,43 @@ public class AddressParser extends AbstractParser {
                     }
                     address.addLayoutTokens(cluster.concatTokens());
                 }
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NUMBER)) {
+                    if (address.getDepartmentNumber() != null) {
+                        address.setDepartmentNumber(address.getDepartmentNumber() + "\t" + clusterContent);
+                    } else {
+                        address.setDepartmentNumber(clusterContent);
+                    }
+                    address.addLayoutTokens(cluster.concatTokens());
+                }
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NAME)) {
+                    if (address.getDepartmentName() != null) {
+                        address.setDepartmentName(address.getDepartmentName() + "\t" + clusterContent);
+                    } else {
+                        address.setDepartmentName(clusterContent);
+                    }
+                    address.addLayoutTokens(cluster.concatTokens());
+                }
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_REGION)) {
+                    if (address.getRegion() != null) {
+                        address.setRegion(address.getRegion() + "\t" + clusterContent);
+                    } else {
+                        address.setRegion(clusterContent);
+                    }
+                    address.addLayoutTokens(cluster.concatTokens());
+                }
                 if (clusterLabel.equals(MedicalLabels.ADDRESS_COUNTRY)) {
                     if (address.getCountry() != null) {
                         address.setCountry(address.getCountry() + "\t" + clusterContent);
                     } else {
                         address.setCountry(clusterContent);
+                    }
+                    address.addLayoutTokens(cluster.concatTokens());
+                }
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_NOTE)) {
+                    if (address.getNote() != null) {
+                        address.setNote(address.getNote() + "\t" + clusterContent);
+                    } else {
+                        address.setNote(clusterContent);
                     }
                     address.addLayoutTokens(cluster.concatTokens());
                 }
@@ -280,11 +312,11 @@ public class AddressParser extends AbstractParser {
                 }
                 address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT)) {
-                if (address.getDepartment() != null) {
-                    address.setDepartment(address.getDepartment() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_COMMUNITY)) {
+                if (address.getCommunity() != null) {
+                    address.setCommunity(address.getCommunity() + "\t" + clusterContent);
                 } else {
-                    address.setDepartment(clusterContent);
+                    address.setCommunity(clusterContent);
                 }
                 address.addLayoutTokens(cluster.concatTokens());
             }
@@ -296,11 +328,43 @@ public class AddressParser extends AbstractParser {
                 }
                 address.addLayoutTokens(cluster.concatTokens());
             }
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NUMBER)) {
+                if (address.getDepartmentNumber() != null) {
+                    address.setDepartmentNumber(address.getDepartmentNumber() + "\t" + clusterContent);
+                } else {
+                    address.setDepartmentNumber(clusterContent);
+                }
+                address.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NAME)) {
+                if (address.getDepartmentName() != null) {
+                    address.setDepartmentName(address.getDepartmentName() + "\t" + clusterContent);
+                } else {
+                    address.setDepartmentName(clusterContent);
+                }
+                address.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_REGION)) {
+                if (address.getRegion() != null) {
+                    address.setRegion(address.getRegion() + "\t" + clusterContent);
+                } else {
+                    address.setRegion(clusterContent);
+                }
+                address.addLayoutTokens(cluster.concatTokens());
+            }
             if (clusterLabel.equals(MedicalLabels.ADDRESS_COUNTRY)) {
                 if (address.getCountry() != null) {
                     address.setCountry(address.getCountry() + "\t" + clusterContent);
                 } else {
                     address.setCountry(clusterContent);
+                }
+                address.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_NOTE)) {
+                if (address.getNote() != null) {
+                    address.setNote(address.getNote() + "\t" + clusterContent);
+                } else {
+                    address.setNote(clusterContent);
                 }
                 address.addLayoutTokens(cluster.concatTokens());
             }
@@ -439,13 +503,25 @@ public class AddressParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<pobox>", "<poBox>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<department>", "<department>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<community>", "<community>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<district>", "<district>", addSpace, 0);
                     }
                     if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentnumber>", "<departmentNumber>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentname>", "<departmentName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<region>", "<region>", addSpace, 0);
+                    }
+                    if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"address\">", addSpace, 0);
                     }
 
                     if (output != null) {
@@ -609,13 +685,25 @@ public class AddressParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<pobox>", "<poBox>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<department>", "<department>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<community>", "<community>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<district>", "<district>", addSpace, 0);
                     }
                     if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentnumber>", "<departmentNumber>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentname>", "<departmentName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<region>", "<region>", addSpace, 0);
+                    }
+                    if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"address\">", addSpace, 0);
                     }
 
                     if (output != null) {
@@ -691,12 +779,20 @@ public class AddressParser extends AbstractParser {
                 buffer.append("</postCode>");
             } else if (lastTag0.equals("<pobox>")) {
                 buffer.append("</poBox>");
-            } else if (lastTag0.equals("<department>")) {
-                buffer.append("</department>");
+            } else if (lastTag0.equals("<community>")) {
+                buffer.append("</community>");
             } else if (lastTag0.equals("<district>")) {
                 buffer.append("</district>");
+            } else if (lastTag0.equals("<departmentnumber>")) {
+                buffer.append("</departmentNumber>");
+            } else if (lastTag0.equals("<departmentname>")) {
+                buffer.append("</departmentName>");
+            } else if (lastTag0.equals("<region>")) {
+                buffer.append("</region>");
             } else if (lastTag0.equals("<country>")) {
                 buffer.append("</country>");
+            } else if (lastTag0.equals("<note>")) {
+                buffer.append("</note>");
             } else {
                 res = false;
             }

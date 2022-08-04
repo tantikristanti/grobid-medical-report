@@ -71,6 +71,9 @@ public class MedicalLabels extends TaggingLabels {
     public static final String POST_CODE_LABEL = "<postcode>";
     public static final String PO_BOX_LABEL = "<pobox>";
     public static final String DISTRICT_LABEL = "<district>";
+    public static final String COMMUNITY_LABEL = "<community>";
+    public static final String DEPARTMENT_NUMBER_LABEL = "<departementnumber>";
+    public static final String DEPARTMENT_NAME_LABEL = "<departementname>";
 
     // particularly, for the NER medical model
     public static final String ANATOMY_LABEL = "<anatomy>";
@@ -253,9 +256,13 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel ADDRESS_CITY = new TaggingLabelImpl(GrobidModels.MEDIC, CITY_LABEL);
     public static final TaggingLabel ADDRESS_POST_CODE = new TaggingLabelImpl(GrobidModels.MEDIC, POST_CODE_LABEL);
     public static final TaggingLabel ADDRESS_PO_BOX = new TaggingLabelImpl(GrobidModels.MEDIC, PO_BOX_LABEL);
-    public static final TaggingLabel ADDRESS_DEPARTMENT = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_LABEL);
+    public static final TaggingLabel ADDRESS_COMMUNITY= new TaggingLabelImpl(GrobidModels.MEDIC, COMMUNITY_LABEL);
     public static final TaggingLabel ADDRESS_DISTRICT = new TaggingLabelImpl(GrobidModels.MEDIC, DISTRICT_LABEL);
+    public static final TaggingLabel ADDRESS_DEPARTMENT_NUMBER = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_DEPARTMENT_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_REGION = new TaggingLabelImpl(GrobidModels.MEDIC, REGION_LABEL);
     public static final TaggingLabel ADDRESS_COUNTRY = new TaggingLabelImpl(GrobidModels.MEDIC, COUNTRY_LABEL);
+    public static final TaggingLabel ADDRESS_NOTE= new TaggingLabelImpl(GrobidModels.MEDIC, NOTE_LABEL);
 
     // Names
     public static final TaggingLabel NAMES_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, TITLE_LABEL);
@@ -409,9 +416,13 @@ public class MedicalLabels extends TaggingLabels {
         register(ADDRESS_CITY);
         register(ADDRESS_POST_CODE);
         register(ADDRESS_PO_BOX);
-        register(ADDRESS_DEPARTMENT);
+        register(ADDRESS_COMMUNITY);
         register(ADDRESS_DISTRICT);
+        register(ADDRESS_DEPARTMENT_NUMBER);
+        register(ADDRESS_DEPARTMENT_NAME);
+        register(ADDRESS_REGION);
         register(ADDRESS_COUNTRY);
+        register(ADDRESS_NOTE);
 
         // person's name
         register(NAMES_TITLE);

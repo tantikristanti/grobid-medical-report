@@ -67,7 +67,8 @@ public class TEIAddressSaxParser extends DefaultHandler {
 
         if ((qName.equals("streetnumber")) || (qName.equals("streetname")) || (qName.equals("buildingnumber")) || (qName.equals("buildingname")) ||
             (qName.equals("city")) || (qName.equals("postcode")) || (qName.equals("pobox")) ||
-            (qName.equals("department")) || (qName.equals("district")) || (qName.equals("country")) ||
+            (qName.equals("community")) || (qName.equals("district")) || (qName.equals("departmentnumber")) ||
+            (qName.equals("departmentname")) || (qName.equals("region")) || (qName.equals("country")) ||
             (qName.equals("note"))
         ) {
             String text = getText();
@@ -105,24 +106,30 @@ public class TEIAddressSaxParser extends DefaultHandler {
         accumulator.setLength(0);
 
         qName = qName.toLowerCase();
-        if (qName.equals("streetNumber")) {
+        if (qName.equals("streetnumber")) {
             currentTag = "<streetnumber>";
-        } else if (qName.equals("streetName")) {
+        } else if (qName.equals("streetname")) {
             currentTag = "<streetname>";
-        } else if (qName.equals("buildingNumber")) {
+        } else if (qName.equals("buildingnumber")) {
             currentTag = "<buildingnumber>";
-        } else if (qName.equals("buildingName")) {
+        } else if (qName.equals("buildingname")) {
             currentTag = "<buildingname>";
         } else if (qName.equals("city")) {
             currentTag = "<city>";
-        } else if (qName.equals("postCode")) {
+        } else if (qName.equals("postcode")) {
             currentTag = "<postcode>";
-        } else if (qName.equals("poBox")) {
+        } else if (qName.equals("pobox")) {
             currentTag = "<pobox>";
-        } else if (qName.equals("department")) {
-            currentTag = "<department>";
+        } else if (qName.equals("community")) {
+            currentTag = "<community>";
         } else if (qName.equals("district")) {
             currentTag = "<district>";
+        } else if (qName.equals("departmentnumber")) {
+            currentTag = "<departmentnumber>";
+        } else if (qName.equals("departmentname")) {
+            currentTag = "<departmentname>";
+        } else if (qName.equals("region")) {
+            currentTag = "<region>";
         } else if (qName.equals("country")) {
             currentTag = "<country>";
         } else if (qName.equals("note")) {
