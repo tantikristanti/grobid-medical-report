@@ -11,6 +11,7 @@ For identifying the exact pieces of patient information to be part of the `heade
 For the patient model, we use the following TEI elements:
 
 * `<idno>` for the ID number of patients
+* `<idType>` for the ID types
 * `<persName>` for the name of patients
 * `<sex>` for the sex type of patients
 * `<birthDate>` for the date of birth
@@ -46,7 +47,7 @@ Similarly, line break tags `<lb/>` are present in the generated XML training dat
 The identifier name is kept with the identifier value so that Grobid can classify more easily the type of identifier:
 
 ```xml
-    NIP : <idno type="patient">1234567890</idno>
+    <idType>NIP</idType> : <idno>1234567890</idno>
 ```
 
 ### Personal names

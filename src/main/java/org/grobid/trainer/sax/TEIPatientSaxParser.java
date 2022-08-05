@@ -17,8 +17,8 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
  * SAX parser for the XML format for the patient data.
  * Segmentation of tokens must be identical as the one from pdf2xml files to that
  * training and online input tokens are identical.
- *
- *
+ * <p>
+ * <p>
  * Tanti, 2021
  */
 
@@ -65,9 +65,9 @@ public class TEIPatientSaxParser extends DefaultHandler {
                            java.lang.String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("idno")) || (qName.equals("persname")) || (qName.equals("sex")) ||
-            (qName.equals("birthdate")) || (qName.equals("birthplace")) || (qName.equals("age")) ||
-            (qName.equals("death")) || (qName.equals("address")) || (qName.equals("email")) ||
+        if ((qName.equals("idno")) || (qName.equals("idtype")) || (qName.equals("persname")) ||
+            (qName.equals("sex")) || (qName.equals("birthdate")) || (qName.equals("birthplace")) ||
+            (qName.equals("age")) || (qName.equals("death")) || (qName.equals("address")) || (qName.equals("email")) ||
             (qName.equals("country")) || (qName.equals("settlement")) || (qName.equals("phone")) || (qName.equals("note"))
         ) {
             String text = getText();
@@ -107,6 +107,8 @@ public class TEIPatientSaxParser extends DefaultHandler {
         qName = qName.toLowerCase();
         if (qName.equals("idno")) {
             currentTag = "<idno>";
+        } else if (qName.equals("idtype")) {
+            currentTag = "<idtype>";
         } else if ((qName.equals("persname") || (qName.equals("name")))) {
             currentTag = "<persname>";
         } else if (qName.equals("sex")) {

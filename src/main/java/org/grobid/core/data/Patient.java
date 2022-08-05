@@ -12,6 +12,7 @@ import java.util.List;
 
 public class Patient {
     private String ID = null;
+    private String IDType = null;
     private String dateBirth = null;
     private String age = null;
     private String placeBirth = null;
@@ -34,6 +35,14 @@ public class Patient {
 
     public void setID(String ID) {
         this.ID = ID;
+    }
+
+    public String getIDType() {
+        return IDType;
+    }
+
+    public void setIDType(String IDType) {
+        this.IDType = IDType;
     }
 
     public String getDateBirth() {
@@ -143,6 +152,7 @@ public class Patient {
 
     public boolean isNotNull() {
         return (ID != null) ||
+            (IDType != null) ||
             (persName != null) ||
             (dateBirth != null) ||
             (placeBirth != null) ||

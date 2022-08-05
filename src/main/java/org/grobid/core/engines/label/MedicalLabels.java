@@ -27,6 +27,7 @@ public class MedicalLabels extends TaggingLabels {
 
     // grobid-medical-report specific labels
     public final static String ID_NUMBER_LABEL = "<idno>";
+    public final static String ID_TYPELABEL = "<idtype>";
     public final static String DOCNUM_LABEL = "<docnum>";
     public static final String DOCTYPE_LABEL = "<doctype>";
     public final static String TITLE_LABEL = "<title>";
@@ -106,7 +107,9 @@ public class MedicalLabels extends TaggingLabels {
     public static final String PERSON_NAME_LABEL = "<persname>";
     public static final String PERSON_TYPE_LABEL = "<perstype>";
     public static final String PERSON_SEX_LABEL = "<sex>";
-    public static final String PERSON_BIRTH_LABEL = "<birth>";
+    public static final String PERSON_BIRTH_DATE_LABEL = "<birthdate>";
+    public static final String PERSON_AGE = "<age>";
+    public static final String PERSON_BIRTH_PLACE_LABEL = "<birthplace>";
     public static final String PERSON_DEATH_LABEL = "<death>";
 
     // names
@@ -238,14 +241,18 @@ public class MedicalLabels extends TaggingLabels {
 
     // Patient
     public static final TaggingLabel PATIENT_ID = new TaggingLabelImpl(GrobidModels.PATIENT, ID_NUMBER_LABEL);
+    public static final TaggingLabel PATIENT_ID_TYPE = new TaggingLabelImpl(GrobidModels.PATIENT, ID_TYPELABEL);
     public static final TaggingLabel PATIENT_NAME = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_NAME_LABEL);
     public static final TaggingLabel PATIENT_SEX = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_SEX_LABEL);
-    public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_LABEL);
+    public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_DATE_LABEL);
+    public static final TaggingLabel PATIENT_AGE = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_AGE);
+    public static final TaggingLabel PATIENT_PLACE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_PLACE_LABEL);
     public static final TaggingLabel PATIENT_DATE_DEATH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_DEATH_LABEL);
     public static final TaggingLabel PATIENT_ADDRESS = new TaggingLabelImpl(GrobidModels.PATIENT, ADDRESS_LABEL);
     public static final TaggingLabel PATIENT_COUNTRY = new TaggingLabelImpl(GrobidModels.PATIENT, COUNTRY_LABEL);
     public static final TaggingLabel PATIENT_TOWN = new TaggingLabelImpl(GrobidModels.PATIENT, SETTLEMENT_LABEL);
     public static final TaggingLabel PATIENT_PHONE = new TaggingLabelImpl(GrobidModels.PATIENT, PHONE_LABEL);
+    public static final TaggingLabel PATIENT_EMAIL = new TaggingLabelImpl(GrobidModels.PATIENT, EMAIL_LABEL);
     public static final TaggingLabel PATIENT_NOTE = new TaggingLabelImpl(GrobidModels.PATIENT, NOTE_LABEL);
 
     // Address
