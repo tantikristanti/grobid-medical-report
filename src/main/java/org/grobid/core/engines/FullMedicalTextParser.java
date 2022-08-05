@@ -1632,7 +1632,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t<teiHeader>\n");
                             writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                             writer.write("\t\t\t<patients>\n");
-                            writer.write("\t\t\t" + bufferPatient.toString());
+                            writer.write("\t\t\t\t\t\t" + bufferPatient.toString());
                             writer.write("\t\t\t</patients>\n");
                             writer.write("\t\t</fileDesc>\n");
                             writer.write("\t</teiHeader>\n");
@@ -3573,7 +3573,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                             writer.write("\t\t\t<patients>\n");
                             writer.write("\t\t\t\t<patient>\n");
-                            writer.write("\t\t\t\t" + bufferPatient.toString());
+                            writer.write("\t\t\t\t\t\t" + bufferPatient.toString());
                             writer.write("\t\t\t\t</patient>\n");
                             writer.write("\t\t\t</patients>\n");
                             writer.write("\t\t</fileDesc>\n");
