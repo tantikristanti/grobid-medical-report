@@ -13,12 +13,15 @@ For the patient model, we use the following TEI elements:
 * `<idno>` for the ID number of patients
 * `<persName>` for the name of patients
 * `<sex>` for the sex type of patients
-* `<birth>` for the birth date and place of birth of patients
-* `<death>` for the death date of patients
+* `<birthDate>` for the date of birth
+* `<birthPlace>` for the place of birth of patients
+* `<age>` for the age
+* `<death>` for the date of death
 * `<address>` for the address elements of patients
 * `<country>` for the country 
 * `<settlement>` for the city
 * `<phone>` for the phone number
+* `<email>` for the email if it exists 
 * `<note type="patient">` for the notes concerning the patients
 
 > Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding.

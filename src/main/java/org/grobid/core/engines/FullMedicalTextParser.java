@@ -1565,8 +1565,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
                                     writer.write("\t\t\t\t<address>\n");
-                                    writer.write("\t\t\t\t" + bufferAddress);
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t\t\t" + bufferAddress);
+                                    writer.write("\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -1725,8 +1725,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<patient>\n");
                                     writer.write("\t\t\t\t<address>\n");
-                                    writer.write("\t\t\t\t" + bufferAddress);
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t\t\t" + bufferAddress);
+                                    writer.write("\\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</patient>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -2003,8 +2003,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
                                     writer.write("\t\t\t\t<address>\n");
-                                    writer.write("\t\t\t\t" + bufferAddress);
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t\t\t" + bufferAddress);
+                                    writer.write("\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -2223,8 +2223,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferAddress);
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t\t\t" + bufferAddress);
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -2342,8 +2342,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferAddress);
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t\t\t" + bufferAddress);
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -2657,7 +2657,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t\t<medics>\n");
                                 writer.write("\t\t\t\t<address>\n");
                                 writer.write(medics.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -2797,7 +2797,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t<address>\n");
                                 writer.write(listPatients.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -3046,7 +3046,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t\t<medics>\n");
                                     writer.write("\t\t\t\t<address>\n");
                                     writer.write(medics.getAddress().replaceAll("\t", "\t\t\t\t\t\n")); // unlabelled data
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -3502,8 +3502,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<medics>\n");
                                     writer.write("\t\t\t\t<address>\n");
-                                    writer.write("\t\t\t\t" + bufferAddress);
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t\t\t" + bufferAddress);
+                                    writer.write("\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</medics>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -3667,8 +3667,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                     writer.write("\t\t\t<patient>\n");
                                     writer.write("\t\t\t\t<address>\n");
-                                    writer.write("\t\t\t\t" + bufferAddress);
-                                    writer.write("\t\t\t\t</address>\n");
+                                    writer.write("\t\t\t\t\t" + bufferAddress);
+                                    writer.write("\n\t\t\t\t</address>\n");
                                     writer.write("\t\t\t</patient>\n");
                                     writer.write("\t\t</fileDesc>\n");
                                     writer.write("\t</teiHeader>\n");
@@ -3882,8 +3882,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferAddress);
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t\t\t" + bufferAddress);
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -4036,8 +4036,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<medics>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferAddress);
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t\t\t" + bufferAddress);
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</medics>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");
@@ -4154,8 +4154,8 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("\t\t<fileDesc xml:id=\"" + pdfFileName.replace(".pdf", "") + "\">\n");
                                 writer.write("\t\t\t<patient>\n");
                                 writer.write("\t\t\t\t<address>\n");
-                                writer.write("\t\t\t\t" + bufferAddress);
-                                writer.write("\t\t\t\t</address>\n");
+                                writer.write("\t\t\t\t\t" + bufferAddress);
+                                writer.write("\n\t\t\t\t</address>\n");
                                 writer.write("\t\t\t</patient>\n");
                                 writer.write("\t\t</fileDesc>\n");
                                 writer.write("\t</teiHeader>\n");

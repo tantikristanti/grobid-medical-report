@@ -1,14 +1,9 @@
 package org.grobid.trainer.sax;
 
-import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.utilities.OffsetPosition;
-import org.grobid.core.utilities.TextUtilities;
-import org.grobid.core.utilities.UnicodeUtil;
+import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.lang.Language;
-import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.layout.LayoutToken;
-import org.grobid.core.analyzers.*;
-
+import org.grobid.core.utilities.UnicodeUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -71,7 +66,8 @@ public class TEIPatientSaxParser extends DefaultHandler {
         qName = qName.toLowerCase();
 
         if ((qName.equals("idno")) || (qName.equals("persname")) || (qName.equals("sex")) ||
-            (qName.equals("birth")) || (qName.equals("death")) || (qName.equals("address")) ||
+            (qName.equals("birthdate")) || (qName.equals("birthplace")) || (qName.equals("age")) ||
+            (qName.equals("death")) || (qName.equals("address")) || (qName.equals("email")) ||
             (qName.equals("country")) || (qName.equals("settlement")) || (qName.equals("phone")) || (qName.equals("note"))
         ) {
             String text = getText();
@@ -115,8 +111,12 @@ public class TEIPatientSaxParser extends DefaultHandler {
             currentTag = "<persname>";
         } else if (qName.equals("sex")) {
             currentTag = "<sex>";
-        } else if (qName.equals("birth")) {
-            currentTag = "<birth>";
+        } else if (qName.equals("birthdate")) {
+            currentTag = "<birthdate>";
+        } else if (qName.equals("birthplace")) {
+            currentTag = "<birthplace>";
+        } else if (qName.equals("age")) {
+            currentTag = "<age>";
         } else if (qName.equals("death")) {
             currentTag = "<death>";
         } else if (qName.equals("address")) {
@@ -127,6 +127,8 @@ public class TEIPatientSaxParser extends DefaultHandler {
             currentTag = "<settlement>";
         } else if (qName.equals("phone")) {
             currentTag = "<phone>";
+        } else if (qName.equals("email")) {
+            currentTag = "<email>";
         } else if (qName.equals("note")) {
             int length = atts.getLength();
 

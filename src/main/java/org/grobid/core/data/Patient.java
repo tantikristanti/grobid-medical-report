@@ -13,6 +13,8 @@ import java.util.List;
 public class Patient {
     private String ID = null;
     private String dateBirth = null;
+    private String age = null;
+    private String placeBirth = null;
     private String dateDeath = null;
     private String persName = null;
     private String sex = null;
@@ -40,6 +42,22 @@ public class Patient {
 
     public void setDateBirth(String dateBirth) {
         this.dateBirth = dateBirth;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public String getPlaceBirth() {
+        return placeBirth;
+    }
+
+    public void setPlaceBirth(String placeBirth) {
+        this.placeBirth = placeBirth;
     }
 
     public String getDateDeath() {
@@ -125,9 +143,11 @@ public class Patient {
 
     public boolean isNotNull() {
         return (ID != null) ||
-            (dateBirth != null) ||
-            (dateDeath != null) ||
             (persName != null) ||
+            (dateBirth != null) ||
+            (placeBirth != null) ||
+            (age != null) ||
+            (dateDeath != null) ||
             (sex != null) ||
             (address != null) ||
             (country != null) ||
