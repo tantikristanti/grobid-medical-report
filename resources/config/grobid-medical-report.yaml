@@ -152,48 +152,14 @@ models:
       architecture: "BidLSTM_CRF_FEATURES"
 
   - name: "address"
-      # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
-      engine: "wapiti"
-      #engine: "delft"
-      wapiti:
-        # wapiti training parameters, they will be used at training time only
-        epsilon: 0.000001
-        window: 20
-        nbMaxIterations: 1000
-      delft:
-        # deep learning parameters
-        architecture: "BidLSTM_CRF_FEATURES"
-
-  # for **service only**: how to load the models,
-  # false -> models are loaded when needed (default), avoiding putting in memory useless models but slow down significantly the service at first call
-  # true -> all the models are loaded into memory at the server startup, slow the start of the services and models
-#  modelPreload: false
-#
-#server:
-#  type: custom
-#  applicationConnectors:
-#    - type: http
-#      port: 8090
-#  adminConnectors:
-#    - type: http
-#      port: 8091
-#  registerDefaultExceptionMappers: false
-#  maxThreads: 128
-#  maxQueuedRequests: 2048
-#  acceptQueueSize: 2048
-#
-#logging:
-#  level: INFO
-#  loggers:
-#    org.apache.pdfbox.pdmodel.font.PDSimpleFont: "OFF"
-#  appenders:
-#    - type: console
-#      threshold: ALL
-#      timeZone: UTC
-#    - type: file
-#      currentLogFilename: logs/grobid-medical-report.log
-#      threshold: ALL
-#      archive: true
-#      archivedLogFilenamePattern: logs/grobid-medical-report-%d.log
-#      archivedFileCount: 5
-#      timeZone: UTC
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    #engine: "delft"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
