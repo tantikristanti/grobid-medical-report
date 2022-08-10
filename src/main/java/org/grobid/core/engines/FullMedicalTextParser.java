@@ -4726,28 +4726,32 @@ public class FullMedicalTextParser extends AbstractParser {
             // anonymize email
             Set<String> uniqueEmails = new HashSet<String>(collectedEmails);
             for (String email : uniqueEmails) {
-                String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                bufferDataAnonymized.append(email.trim().toLowerCase()).append("\t").append(anonymizedEmail.trim().toLowerCase()).append("\n");
+                if (email.contains("@")) {
+                    String anonymizedEmail = anonymizeData.anonymizeEmail(email);
+                    bufferDataAnonymized.append(email.trim().toLowerCase()).append("\t").append(anonymizedEmail.trim().toLowerCase()).append("\n");
+                }
             }
 
             // anonymize address
             Set<String> uniqueAddresses = new HashSet<String>(collectedAddress);
             for (String address : uniqueAddresses) {
-                DataToBeAnonymized anonymizeAddress = anonymizeData.anonymizeAddress(address);
-                if (anonymizeAddress.getAddressOriginal() != null && anonymizeAddress.getAddressAnonym() != null) {
-                    bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toUpperCase()).append("\n");
-                    bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toLowerCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toLowerCase()).append("\n");
-                    bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getAddressOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getAddressAnonym())).append("\n");
-                }
-                if (anonymizeAddress.getNumberOriginal() != null && anonymizeAddress.getNumberAnonym() != null) {
-                    bufferDataAnonymized.append(anonymizeAddress.getNumberOriginal()).append("\t").append(anonymizeAddress.getNumberAnonym()).append("\n");
-                }
-                if (anonymizeAddress.getPostCodeOriginal() != null && anonymizeAddress.getPostCodeAnonym() != null) {
-                    bufferDataAnonymized.append(anonymizeAddress.getPostCodeOriginal()).append("\t").append(anonymizeAddress.getPostCodeAnonym()).append("\n");
-                }
-                if (anonymizeAddress.getCityOriginal() != null && anonymizeAddress.getCityAnonym() != null) {
-                    bufferDataAnonymized.append(anonymizeAddress.getCityOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getCityAnonym().toUpperCase()).append("\n");
-                    bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getCityOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getCityAnonym())).append("\n");
+                if (address.matches("[A-Za-z0-9]+")) {
+                    DataToBeAnonymized anonymizeAddress = anonymizeData.anonymizeAddress(address);
+                    if (anonymizeAddress.getAddressOriginal() != null && anonymizeAddress.getAddressAnonym() != null) {
+                        bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toUpperCase()).append("\n");
+                        bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toLowerCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toLowerCase()).append("\n");
+                        bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getAddressOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getAddressAnonym())).append("\n");
+                    }
+                    if (anonymizeAddress.getNumberOriginal() != null && anonymizeAddress.getNumberAnonym() != null) {
+                        bufferDataAnonymized.append(anonymizeAddress.getNumberOriginal()).append("\t").append(anonymizeAddress.getNumberAnonym()).append("\n");
+                    }
+                    if (anonymizeAddress.getPostCodeOriginal() != null && anonymizeAddress.getPostCodeAnonym() != null) {
+                        bufferDataAnonymized.append(anonymizeAddress.getPostCodeOriginal()).append("\t").append(anonymizeAddress.getPostCodeAnonym()).append("\n");
+                    }
+                    if (anonymizeAddress.getCityOriginal() != null && anonymizeAddress.getCityAnonym() != null) {
+                        bufferDataAnonymized.append(anonymizeAddress.getCityOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getCityAnonym().toUpperCase()).append("\n");
+                        bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getCityOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getCityAnonym())).append("\n");
+                    }
                 }
             }
 
