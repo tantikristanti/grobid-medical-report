@@ -778,7 +778,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                     double coordinateLineY = token.getY();
 
                     features = new FeaturesVectorMedical();
-                    features.token = token;
+                    features.token = token; // tokenization information
                     features.line = line;
 
                     if ((blockIndex < 2) || (blockIndex > page.getBlocks().size() - 2)) {
@@ -810,7 +810,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                         continue;
 
                     // final sanitization and filtering
-                    text = text.replaceAll("[ \n\r]", "");
+                    text = text.replaceAll("[ \n\r]", ""); // the text is tokenized by blank spaces
                     text = text.trim();
 
                     if ((text.length() == 0) ||
@@ -1606,10 +1606,16 @@ public class MedicalReportSegmenterParser extends AbstractParser {
                         }
                     }
                 }
-                for (int j = 0; j < dataOriginal.size(); j++) {
-                    line = line.replace(dataOriginal.get(j), dataAnonymized.get(j));
-                    line = TextUtilities.HTMLEncode(line);
+                line = TextUtilities.HTMLEncode(line);
+                List<String> splitLine = analyzer.tokenize(line);
+                for(int j = 0; j < splitLine.size(); j++) {
+                    int idx = dataOriginal.indexOf(splitLine.get(j));
+                    if (idx >= 0) {
+                        splitLine.set(j, dataAnonymized.get(idx));
+                    }
                 }
+                line = String.join("", splitLine);
+                line = TextUtilities.HTMLEncode(line); // encode the text to its HTML equivalent
 
                 if (newLine && !start) {
                     buffer.append("<lb/>");

@@ -1,291 +1,170 @@
 package org.grobid.core.data;
 
+import java.util.List;
+
 public class DataToBeAnonymized {
-    // we keep the original information
-    // the document number found in the header part
-    private String idnoOriginal = null;
-    private String dateDocumentOriginal = null;
+    String addressOriginal;
+    String idOriginal;
+    String numberOriginal;
+    String nameOriginal;
+    String dateOriginal;
+    String phoneOriginal;
+    String emailOriginal;
+    String postCodeOriginal;
+    String cityOriginal;
 
-    // patient information
-    private String securitySocialNumberOriginal = null;
-    private String firstNamePatientOriginal = null;
-    private String middleNamePatientOriginal = null;
-    private String lastNamePatientOriginal = null;
-    private String phonePatientOriginal = null;
-    private String dateBirthPatientOriginal = null;
-    private String addressPatientOriginal = null;
-    private String emailPatientOriginal = null;
+    String addressAnonym;
+    String idAnonym;
+    String numberAnonym;
+    String nameAnonym;
+    String dateAnonym;
+    String phoneAnonym;
+    String emailAnonym;
+    String postCodeAnonym;
+    String cityAnonym;
 
-    // medic information
-    private String firstNameMedicOriginal = null;
-    private String middleNameMedicOriginal = null;
-    private String lastNameMedicOriginal = null;
-    private String addressMedicOriginal = null;
-    private String emailMedicOriginal = null;
-
-    // the replacements
-    // the document number found in the header part
-    private String idnoAnonym = null;
-    private String dateDocumentAnonym = null;
-
-    // patient information
-    private String securitySocialNumberAnonym = null;
-    private String firstNamePatientAnonym = null;
-    private String middleNamePatientAnonym = null;
-    private String lastNamePatientAnonym = null;
-    private String phonePatientAnonym = null;
-    private String dateBirthPatientAnonym = null;
-    private String addressPatientAnonym = null;
-    private String emailPatientAnonym = null;
-    // medic information
-    private String firstNameMedicAnonym = null;
-    private String middleNameMedicAnonym = null;
-    private String lastNameMedicAnonym = null;
-    private String addressMedicAnonym = null;
-    private String emailMedicAnonym = null;
-
-
-    public String getIdnoOriginal() {
-        return idnoOriginal;
+    public String getAddressOriginal() {
+        return addressOriginal;
     }
 
-    public void setIdnoOriginal(String idnoOriginal) {
-        this.idnoOriginal = idnoOriginal;
+    public void setAddressOriginal(String addressOriginal) {
+        this.addressOriginal = addressOriginal;
+    }
+
+    public String getAddressAnonym() {
+        return addressAnonym;
+    }
+
+    public void setAddressAnonym(String addressAnonym) {
+        this.addressAnonym = addressAnonym;
+    }
+
+    public String getIdOriginal() {
+        return idOriginal;
+    }
+
+    public void setIdOriginal(String idOriginal) {
+        this.idOriginal = idOriginal;
     }
 
 
-    public String getDateDocumentOriginal() {
-        return dateDocumentOriginal;
+    public String getNumberOriginal() {
+        return numberOriginal;
     }
 
-    public void setDateDocumentOriginal(String dateDocumentOriginal) {
-        this.dateDocumentOriginal = dateDocumentOriginal;
+    public void setNumberOriginal(String numberOriginal) {
+        this.numberOriginal = numberOriginal;
     }
 
-    public String getDateDocumentAnonym() {
-        return dateDocumentAnonym;
+    public String getNumberAnonym() {
+        return numberAnonym;
     }
 
-    public void setDateDocumentAnonym(String dateDocumentAnonym) {
-        this.dateDocumentAnonym = dateDocumentAnonym;
+    public void setNumberAnonym(String numberAnonym) {
+        this.numberAnonym = numberAnonym;
     }
 
-    public String getSecuritySocialNumberOriginal() {
-        return securitySocialNumberOriginal;
+    public String getNameOriginal() {
+        return nameOriginal;
     }
 
-    public void setSecuritySocialNumberOriginal(String securitySocialNumberOriginal) {
-        this.securitySocialNumberOriginal = securitySocialNumberOriginal;
+    public void setNameOriginal(String nameOriginal) {
+        this.nameOriginal = nameOriginal;
     }
 
-    public String getSecuritySocialNumberAnonym() {
-        return securitySocialNumberAnonym;
+    public String getDateOriginal() {
+        return dateOriginal;
     }
 
-    public void setSecuritySocialNumberAnonym(String securitySocialNumberAnonym) {
-        this.securitySocialNumberAnonym = securitySocialNumberAnonym;
+    public void setDateOriginal(String dateOriginal) {
+        this.dateOriginal = dateOriginal;
     }
 
-    public String getFirstNamePatientOriginal() {
-        return firstNamePatientOriginal;
+    public String getPhoneOriginal() {
+        return phoneOriginal;
     }
 
-    public void setFirstNamePatientOriginal(String firstNamePatientOriginal) {
-        this.firstNamePatientOriginal = firstNamePatientOriginal;
+    public void setPhoneOriginal(String phoneOriginal) {
+        this.phoneOriginal = phoneOriginal;
     }
 
-    public String getMiddleNamePatientOriginal() {
-        return middleNamePatientOriginal;
+    public String getEmailOriginal() {
+        return emailOriginal;
     }
 
-    public void setMiddleNamePatientOriginal(String middleNamePatientOriginal) {
-        this.middleNamePatientOriginal = middleNamePatientOriginal;
+    public void setEmailOriginal(String emailOriginal) {
+        this.emailOriginal = emailOriginal;
     }
 
-    public String getLastNamePatientOriginal() {
-        return lastNamePatientOriginal;
+    public String getPostCodeOriginal() {
+        return postCodeOriginal;
     }
 
-    public void setLastNamePatientOriginal(String lastNamePatientOriginal) {
-        this.lastNamePatientOriginal = lastNamePatientOriginal;
+    public void setPostCodeOriginal(String postCodeOriginal) {
+        this.postCodeOriginal = postCodeOriginal;
     }
 
-
-    public String getPhonePatientOriginal() {
-        return phonePatientOriginal;
+    public String getCityOriginal() {
+        return cityOriginal;
     }
 
-    public void setPhonePatientOriginal(String phonePatientOriginal) {
-        this.phonePatientOriginal = phonePatientOriginal;
+    public void setCityOriginal(String cityOriginal) {
+        this.cityOriginal = cityOriginal;
     }
 
-    public String getEmailPatientOriginal() {
-        return emailPatientOriginal;
+    public String getIdAnonym() {
+        return idAnonym;
     }
 
-    public void setEmailPatientOriginal(String emailPatientOriginal) {
-        this.emailPatientOriginal = emailPatientOriginal;
+    public void setIdAnonym(String idAnonym) {
+        this.idAnonym = idAnonym;
     }
 
-
-    public String getEmailMedicOriginal() {
-        return emailMedicOriginal;
+    public String getNameAnonym() {
+        return nameAnonym;
     }
 
-    public void setEmailMedicOriginal(String emailMedicOriginal) {
-        this.emailMedicOriginal = emailMedicOriginal;
+    public void setNameAnonym(String nameAnonym) {
+        this.nameAnonym = nameAnonym;
     }
 
-    public String getEmailMedicAnonym() {
-        return emailMedicAnonym;
+    public String getDateAnonym() {
+        return dateAnonym;
     }
 
-    public void setEmailMedicAnonym(String emailMedicAnonym) {
-        this.emailMedicAnonym = emailMedicAnonym;
+    public void setDateAnonym(String dateAnonym) {
+        this.dateAnonym = dateAnonym;
     }
 
-    public String getPhonePatientAnonym() {
-        return phonePatientAnonym;
+    public String getPhoneAnonym() {
+        return phoneAnonym;
     }
 
-    public void setPhonePatientAnonym(String phonePatientAnonym) {
-        this.phonePatientAnonym = phonePatientAnonym;
+    public void setPhoneAnonym(String phoneAnonym) {
+        this.phoneAnonym = phoneAnonym;
     }
 
-    public String getEmailPatientAnonym() {
-        return emailPatientAnonym;
+    public String getEmailAnonym() {
+        return emailAnonym;
     }
 
-    public void setEmailPatientAnonym(String emailPatientAnonym) {
-        this.emailPatientAnonym = emailPatientAnonym;
+    public void setEmailAnonym(String emailAnonym) {
+        this.emailAnonym = emailAnonym;
     }
 
-
-    public String getDateBirthPatientOriginal() {
-        return dateBirthPatientOriginal;
+    public String getPostCodeAnonym() {
+        return postCodeAnonym;
     }
 
-    public void setDateBirthPatientOriginal(String dateBirthPatientOriginal) {
-        this.dateBirthPatientOriginal = dateBirthPatientOriginal;
+    public void setPostCodeAnonym(String postCodeAnonym) {
+        this.postCodeAnonym = postCodeAnonym;
     }
 
-    public String getAddressPatientOriginal() {
-        return addressPatientOriginal;
+    public String getCityAnonym() {
+        return cityAnonym;
     }
 
-    public void setAddressPatientOriginal(String addressPatientOriginal) {
-        this.addressPatientOriginal = addressPatientOriginal;
-    }
-
-    public String getFirstNameMedicOriginal() {
-        return firstNameMedicOriginal;
-    }
-
-    public void setFirstNameMedicOriginal(String firstNameMedicOriginal) {
-        this.firstNameMedicOriginal = firstNameMedicOriginal;
-    }
-
-    public String getMiddleNameMedicOriginal() {
-        return middleNameMedicOriginal;
-    }
-
-    public void setMiddleNameMedicOriginal(String middleNameMedicOriginal) {
-        this.middleNameMedicOriginal = middleNameMedicOriginal;
-    }
-
-    public String getLastNameMedicOriginal() {
-        return lastNameMedicOriginal;
-    }
-
-    public void setLastNameMedicOriginal(String lastNameMedicOriginal) {
-        this.lastNameMedicOriginal = lastNameMedicOriginal;
-    }
-
-    public String getAddressMedicOriginal() {
-        return addressMedicOriginal;
-    }
-
-    public void setAddressMedicOriginal(String addressMedicOriginal) {
-        this.addressMedicOriginal = addressMedicOriginal;
-    }
-
-    public String getIdnoAnonym() {
-        return idnoAnonym;
-    }
-
-    public void setIdnoAnonym(String idnoAnonym) {
-        this.idnoAnonym = idnoAnonym;
-    }
-
-    public String getFirstNamePatientAnonym() {
-        return firstNamePatientAnonym;
-    }
-
-    public void setFirstNamePatientAnonym(String firstNamePatientAnonym) {
-        this.firstNamePatientAnonym = firstNamePatientAnonym;
-    }
-
-    public String getMiddleNamePatientAnonym() {
-        return middleNamePatientAnonym;
-    }
-
-    public void setMiddleNamePatientAnonym(String middleNamePatientAnonym) {
-        this.middleNamePatientAnonym = middleNamePatientAnonym;
-    }
-
-    public String getLastNamePatientAnonym() {
-        return lastNamePatientAnonym;
-    }
-
-    public void setLastNamePatientAnonym(String lastNamePatientAnonym) {
-        this.lastNamePatientAnonym = lastNamePatientAnonym;
-    }
-
-    public String getDateBirthPatientAnonym() {
-        return dateBirthPatientAnonym;
-    }
-
-    public void setDateBirthPatientAnonym(String dateBirthPatientAnonym) {
-        this.dateBirthPatientAnonym = dateBirthPatientAnonym;
-    }
-
-    public String getAddressPatientAnonym() {
-        return addressPatientAnonym;
-    }
-
-    public void setAddressPatientAnonym(String addressPatientAnonym) {
-        this.addressPatientAnonym = addressPatientAnonym;
-    }
-
-    public String getFirstNameMedicAnonym() {
-        return firstNameMedicAnonym;
-    }
-
-    public void setFirstNameMedicAnonym(String firstNameMedicAnonym) {
-        this.firstNameMedicAnonym = firstNameMedicAnonym;
-    }
-
-    public String getMiddleNameMedicAnonym() {
-        return middleNameMedicAnonym;
-    }
-
-    public void setMiddleNameMedicAnonym(String middleNameMedicAnonym) {
-        this.middleNameMedicAnonym = middleNameMedicAnonym;
-    }
-
-    public String getLastNameMedicAnonym() {
-        return lastNameMedicAnonym;
-    }
-
-    public void setLastNameMedicAnonym(String lastNameMedicAnonym) {
-        this.lastNameMedicAnonym = lastNameMedicAnonym;
-    }
-
-    public String getAddressMedicAnonym() {
-        return addressMedicAnonym;
-    }
-
-    public void setAddressMedicAnonym(String addressMedicAnonym) {
-        this.addressMedicAnonym = addressMedicAnonym;
+    public void setCityAnonym(String cityAnonym) {
+        this.cityAnonym = cityAnonym;
     }
 }

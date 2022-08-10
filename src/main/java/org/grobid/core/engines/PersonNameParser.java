@@ -407,7 +407,7 @@ public class PersonNameParser extends AbstractParser {
                     addSpace = false;
                     String tok = st.nextToken().trim();
                     if (tok.length() == 0) {
-                        // new dateline
+                        // new name
                         start = true;
                         continue;
                     }
@@ -418,20 +418,23 @@ public class PersonNameParser extends AbstractParser {
                     int ll = stt.countTokens();
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
+
+                        // anonymize the token
+                        int idx = dataOriginal.indexOf(s);
+                        if (idx >= 0) {
+                            s = dataAnonymized.get(idx);
+                        }
+
                         if (i == 0) {
-                            for (int j = 0; j < dataOriginal.size(); j++) {
-                                s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
-                            }
                             s2 = TextUtilities.HTMLEncode(s);
+                            //s2 = s;
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j = 0; j < dataOriginal.size(); j++) {
-                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                if (dataOriginal.indexOf(tokOriginal) >= 0) {
+                                    tokOriginal = dataAnonymized.get(idx);
                                 }
-                                s2 = TextUtilities.HTMLEncode(s);
-
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
                                     addSpace = true;

@@ -1379,6 +1379,8 @@ public class FullMedicalTextParser extends AbstractParser {
                     if (input != null && input.trim().length() > 0) {
                         inputs.add(input.trim());
                         bufferDateline = parsers.getDatelineParser().trainingExtraction(inputs);
+
+                        // normalize from white spaces and tokenize using delimiters of TextUtilities, collect as well the layout tokens
                         tokenizations = analyzer.tokenizeWithLayoutToken(input);
                         if (tokenizations.size() == 0)
                             return null;
@@ -2508,11 +2510,12 @@ public class FullMedicalTextParser extends AbstractParser {
                     }
 
                     if ((input != null) && (input.length() > 0)) {
+                        // normalize from white spaces and tokenize using delimiters of TextUtilities
                         List<String> tokenizationDateline = analyzer.tokenize(input);
                         if (tokenizationDateline.size() == 0)
                             return null;
 
-                        // take the tokens information of the dateline part
+                        // collect the tokens information of the dateline part
                         List<LayoutToken> tokenizationsDateline = analyzer.tokenizeWithLayoutToken(input);
                         if (tokenizationsDateline.size() == 0)
                             return null;
@@ -3272,7 +3275,7 @@ public class FullMedicalTextParser extends AbstractParser {
             // also write the raw text as seen before segmentation
             StringBuffer rawtxt = new StringBuffer();
             for (LayoutToken txtline : tokenizations) {
-                String text = txtline.getText();
+                String text = txtline.getText(); // the text by tokens
                 int idx = dataOriginal.indexOf(text);
                 if (idx >= 0) {
                     text = dataAnonymized.get(idx);
@@ -3468,7 +3471,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
 
                             // path for the address model
-                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.address.tei.xml"));
+                            /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.address.tei.xml"));
                             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.medic.address"));
                             inputs = new ArrayList<String>();
                             // buffer for the address block
@@ -3510,7 +3513,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("</tei>");
                                     writer.close();
                                 }
-                            }
+                            }*/
                         }
                     }
 
@@ -3633,7 +3636,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
 
                             // path for the address model
-                            outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.address.tei.xml"));
+                            /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.address.tei.xml"));
                             outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.header.patient.address"));
                             inputs = new ArrayList<String>();
                             // buffer for the address block
@@ -3675,7 +3678,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                     writer.write("</tei>");
                                     writer.close();
                                 }
-                            }
+                            }*/
                         }
                     }
                 }
@@ -3848,7 +3851,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // path for the address model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.address.tei.xml"));
+                        /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.address.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.left.note.medic.address"));
                         inputs = new ArrayList<String>();
                         // buffer for the address block
@@ -3890,7 +3893,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("</tei>");
                                 writer.close();
                             }
-                        }
+                        }*/
                     }
                 }
             }
@@ -4002,7 +4005,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // path for the address model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.address.tei.xml"));
+                        /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.address.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.medic.address"));
                         inputs = new ArrayList<String>();
                         // buffer for the address block
@@ -4044,7 +4047,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("</tei>");
                                 writer.close();
                             }
-                        }
+                        }*/
                     }
 
                     // 5d. NAME MODEL (from patients in the body part)
@@ -4120,7 +4123,7 @@ public class FullMedicalTextParser extends AbstractParser {
                         }
 
                         // path for the address model
-                        outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.address.tei.xml"));
+                        /*outputTEIFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.address.tei.xml"));
                         outputRawFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonym.training.full.medical.text.patient.address"));
                         List<String> inputAddress = new ArrayList<String>();
                         // buffer for the name block
@@ -4130,7 +4133,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             // force analyser with English, to avoid bad surprise
                             List<LayoutToken> addressTokenizations = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(address, new Language("en", 1.0));
                             List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokenizations);
-                            List<OffsetPosition>  cityNamePositions = lexicon.tokenPositionsCityNames(tokenizations);
+                            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(tokenizations);
 
                             // we write the name data with features
                             String featuredAddress = FeaturesVectorAddress.addFeaturesAddressAnonym(addressTokenizations, null, locationPositions, cityNamePositions, dataOriginal, dataAnonymized);
@@ -4162,7 +4165,7 @@ public class FullMedicalTextParser extends AbstractParser {
                                 writer.write("</tei>");
                                 writer.close();
                             }
-                        }
+                        }*/
                     }
                 }
             }
@@ -4207,14 +4210,15 @@ public class FullMedicalTextParser extends AbstractParser {
             File outputAnonymizedFile = new File(pathOutput + File.separator + pdfFileName.replace(".pdf", ".anonymized.data.txt"));
 
             StringBuilder bufferDataAnonymized = new StringBuilder();
-            List<DataToBeAnonymized> dataToBeAnonymizedList = new ArrayList<>();
-            DataToBeAnonymized dataToBeAnonymized;
             AnonymizeData anonymizeData = new AnonymizeData();
 
-            // collect all names
-            List<String> collectedFirstNames = new ArrayList<>();
-            List<String> collectedMiddleNames = new ArrayList<>();
-            List<String> collectedLastNames = new ArrayList<>();
+            // collect all data to be anonymized
+            List<String> collectedIDs = new ArrayList<>();
+            List<String> collectedNames = new ArrayList<>();
+            List<String> collectedDates = new ArrayList<>();
+            List<String> collectedPhones = new ArrayList<>();
+            List<String> collectedEmails = new ArrayList<>();
+            List<String> collectedAddress = new ArrayList<>();
 
             Writer writer = null;
 
@@ -4260,7 +4264,7 @@ public class FullMedicalTextParser extends AbstractParser {
                             }
 
                             // buffer for the document number block
-                            if (line.endsWith("<idno>")) {
+                            if (line.endsWith("<docnum>")) {
                                 inputIdno += theTotalTok;
                             }
 
@@ -4276,32 +4280,15 @@ public class FullMedicalTextParser extends AbstractParser {
                             q++;
                         }
 
+                        // collect IDs
                         if (inputIdno != null && inputIdno.length() > 0) {
                             String originalIdno = inputIdno;
-                            List<String> originalIdnoSplit = Arrays.asList(originalIdno.split("[\\t\\n\\r]"));
-                            List<String> collectedID = new ArrayList<>();
+                            List<String> originalIdnoSplit = Arrays.asList(originalIdno.split("[ \\t\\n\\r]"));
                             for (String number : originalIdnoSplit) {
                                 if (number.trim().startsWith("*") || number.trim().endsWith("*")) {
                                     number = number.replaceAll("\\*", "");
                                 }
-                                collectedID.add(number);
-                            }
-
-                            Set<String> uniqueID = new HashSet<String>(collectedID);
-                            for (String ID : uniqueID) {
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                String anonymizedIdno = anonymizeData.anonymizeNumber(ID);
-                                dataToBeAnonymized.setIdnoOriginal(ID);
-                                dataToBeAnonymized.setIdnoAnonym(anonymizedIdno);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-
-                                List<String> tokenizeID = analyzer.tokenize(ID);
-                                List<String> tokenizeIDAnonym = analyzer.tokenize(anonymizedIdno);
-                                for (int i = 0; i < tokenizeID.size(); i++) {
-                                    if (tokenizeID.get(i).matches("\\d+")) {
-                                        bufferDataAnonymized.append(tokenizeID.get(i)).append("\t").append(tokenizeIDAnonym.get(i)).append("\n");
-                                    }
-                                }
+                                collectedIDs.add(number);
                             }
                         }
 
@@ -4316,60 +4303,42 @@ public class FullMedicalTextParser extends AbstractParser {
                                         PersonName extractedName = parsers.getPersonNameParser().process(persName);
                                         if (extractedName != null) {
                                             if (extractedName.getFirstName() != null) {
-                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("\t"));
+                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("[ \\t]"));
                                                 for (String first : firstNameSplit) {
-                                                    collectedFirstNames.add(first);
+                                                    collectedNames.add(first);
                                                 }
                                             }
                                             if (extractedName.getMiddleName() != null) {
-                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("\t"));
+                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("[ \\t]"));
                                                 for (String middle : middleNameSplit) {
-                                                    collectedMiddleNames.add(middle);
+                                                    collectedNames.add(middle);
                                                 }
                                             }
                                             if (extractedName.getLastName() != null) {
-                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("\t"));
+                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("[ \\t]"));
                                                 for (String last : lastNameSplit) {
-                                                    collectedLastNames.add(last);
+                                                    collectedNames.add(last);
                                                 }
                                             }
                                         }
                                     }
                                 }
 
-                                // anonymize medic address
+                                // collect medic address
                                 if (medics.getAddress() != null) {
                                     String originalAddress = medics.getAddress();
                                     List<String> originalAddressSplit = Arrays.asList(originalAddress.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueAddress = new HashSet<String>(originalAddressSplit);
-                                    for (String address : uniqueAddress) {
-                                        List<String> tokenizeAddress = analyzer.tokenize(address);
-                                        for (int i = 0; i < tokenizeAddress.size(); i++) {
-                                            String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
-                                                dataToBeAnonymized = new DataToBeAnonymized();
-                                                String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressMedicAnonym(anonymizedAddress);
-                                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                                bufferDataAnonymized.append(addressToBeChecked).append("\t").append(anonymizedAddress).append("\n");
-                                            }
-                                        }
+                                    for (String address : originalAddressSplit) {
+                                        collectedAddress.add(address);
                                     }
                                 }
 
-                                // anonymize medic email
+                                // collect medic email
                                 if (medics.getEmail() != null) {
                                     String originalEmail = medics.getEmail();
-                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueEmail = new HashSet<String>(originalEmailSplit);
-                                    for (String email : uniqueEmail) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                                        dataToBeAnonymized.setEmailMedicOriginal(email);
-                                        dataToBeAnonymized.setEmailMedicAnonym(anonymizedEmail);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(email).append("\t").append(anonymizedEmail).append("\n");
+                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[ \\t\\n\\r]"));
+                                    for (String email : originalEmailSplit) {
+                                        collectedEmails.add(email);
                                     }
                                 }
                             }
@@ -4381,29 +4350,12 @@ public class FullMedicalTextParser extends AbstractParser {
                                 // anonymize patient security social number and id number
                                 if (patients.getID() != null) {
                                     String originalID = patients.getID();
-                                    List<String> originalIDSplit = Arrays.asList(originalID.split("[\\t\\n\\r]"));
-                                    List<String> collectedID = new ArrayList<>();
+                                    List<String> originalIDSplit = Arrays.asList(originalID.split("[ \\t\\n\\r]"));
                                     for (String number : originalIDSplit) {
                                         if (number.trim().startsWith("*") || number.trim().endsWith("*")) {
                                             number = number.replace("*", "");
                                         }
-                                        collectedID.add(number);
-                                    }
-                                    Set<String> uniqueID = new HashSet<String>(collectedID);
-                                    for (String ID : uniqueID) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedNumber = anonymizeData.anonymizeNumber(ID);
-                                        dataToBeAnonymized.setSecuritySocialNumberOriginal(ID);
-                                        dataToBeAnonymized.setSecuritySocialNumberAnonym(anonymizedNumber);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-
-                                        List<String> tokenizeID = analyzer.tokenize(ID);
-                                        List<String> tokenizeIDAnonym = analyzer.tokenize(anonymizedNumber);
-                                        for (int i = 0; i < tokenizeID.size(); i++) {
-                                            if (tokenizeID.get(i).matches("\\d+")) {
-                                                bufferDataAnonymized.append(tokenizeID.get(i)).append("\t").append(tokenizeIDAnonym.get(i)).append("\n");
-                                            }
-                                        }
+                                        collectedIDs.add(number);
                                     }
                                 }
 
@@ -4415,97 +4367,60 @@ public class FullMedicalTextParser extends AbstractParser {
                                         PersonName extractedName = parsers.getPersonNameParser().process(persName);
                                         if (extractedName != null) {
                                             if (extractedName.getFirstName() != null) {
-                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("\t"));
+                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("[ \\t]"));
                                                 for (String first : firstNameSplit) {
-                                                    collectedFirstNames.add(first);
+                                                    collectedNames.add(first);
                                                 }
                                             }
                                             if (extractedName.getMiddleName() != null) {
-                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("\t"));
+                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("[ \\t]"));
                                                 for (String middle : middleNameSplit) {
-                                                    collectedMiddleNames.add(middle);
+                                                    collectedNames.add(middle);
                                                 }
                                             }
                                             if (extractedName.getLastName() != null) {
-                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("\t"));
+                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("[ \\t]"));
                                                 for (String last : lastNameSplit) {
-                                                    collectedLastNames.add(last);
+                                                    collectedNames.add(last);
                                                 }
                                             }
                                         }
                                     }
                                 }
 
-                                // anonymize patient birth date
+                                // collect patient birth date
                                 if (patients.getDateBirth() != null) {
                                     String originalBirthDate = patients.getDateBirth();
                                     List<String> originalBirthDateSplit = Arrays.asList(originalBirthDate.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueOriginalBirthDateSplit = new HashSet<String>(originalBirthDateSplit);
-                                    for (String date : uniqueOriginalBirthDateSplit) {
-                                        String anonymizedBirthDate = anonymizeData.anonymizeDateRaw(date); // if the date is not in ISO format, call the raw date method
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        dataToBeAnonymized.setDateBirthPatientOriginal(date);
-                                        dataToBeAnonymized.setDateBirthPatientAnonym(anonymizedBirthDate);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-
-                                        List<String> tokenizeDate = analyzer.tokenize(date);
-                                        List<String> tokenizeDateAnonym = analyzer.tokenize(anonymizedBirthDate);
-                                        for (int i = 0; i < tokenizeDate.size(); i++) {
-                                            if (tokenizeDate.get(i).matches("\\d+")) {
-                                                bufferDataAnonymized.append(tokenizeDate.get(i)).append("\t").append(tokenizeDateAnonym.get(i)).append("\n");
-                                            }
-                                        }
+                                    for (String date : originalBirthDateSplit) {
+                                        collectedDates.add(date);
                                     }
                                 }
 
-                                // anonymize patient address
+                                // collect patient address
                                 if (patients.getAddress() != null) {
                                     String originalAddress = patients.getAddress();
                                     List<String> originalAddressSplit = Arrays.asList(originalAddress.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueAddress = new HashSet<String>(originalAddressSplit);
-                                    for (String address : uniqueAddress) {
-                                        List<String> tokenizeAddress = analyzer.tokenize(address);
-                                        for (int i = 0; i < tokenizeAddress.size(); i++) {
-                                            String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
-                                                dataToBeAnonymized = new DataToBeAnonymized();
-                                                String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressPatientOriginal(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressPatientAnonym(anonymizedAddress);
-                                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                                bufferDataAnonymized.append(addressToBeChecked).append("\t").append(anonymizedAddress).append("\n");
-                                            }
-                                        }
+                                    for (String address : originalAddressSplit) {
+                                        collectedAddress.add(address);
                                     }
                                 }
 
-                                // anonymize patient phone number
+                                // collect patient phone number
                                 if (patients.getPhone() != null) {
                                     String originalPhone = patients.getPhone();
                                     List<String> originalPhoneSplit = Arrays.asList(originalPhone.split("[\\t\\n\\r]"));
-                                    Set<String> uniquePhone = new HashSet<String>(originalPhoneSplit);
-                                    for (String phone : uniquePhone) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedNumber = anonymizeData.anonymizeNumber(phone);
-                                        dataToBeAnonymized.setPhonePatientOriginal(phone);
-                                        dataToBeAnonymized.setPhonePatientAnonym(anonymizedNumber);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(phone).append("\t").append(anonymizedNumber).append("\n");
+                                    for (String phone : originalPhoneSplit) {
+                                        collectedPhones.add(phone);
                                     }
                                 }
 
-                                // anonymize patient email
+                                // collect patient email
                                 if (patients.getEmail() != null) {
                                     String originalEmail = patients.getEmail();
-                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueEmail = new HashSet<String>(originalEmailSplit);
-                                    for (String email : uniqueEmail) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                                        dataToBeAnonymized.setEmailPatientOriginal(email);
-                                        dataToBeAnonymized.setEmailPatientAnonym(anonymizedEmail);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(email).append("\t").append(anonymizedEmail).append("\n");
+                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[ \\t\\n\\r]"));
+                                    for (String email : originalEmailSplit) {
+                                        collectedEmails.add(email);
                                     }
                                 }
                             }
@@ -4558,60 +4473,33 @@ public class FullMedicalTextParser extends AbstractParser {
                                         PersonName extractedName = parsers.getPersonNameParser().process(persName);
                                         if (extractedName != null) {
                                             if (extractedName.getFirstName() != null) {
-                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("\t"));
+                                                List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("[ \\t]"));
                                                 for (String first : firstNameSplit) {
-                                                    collectedFirstNames.add(first);
+                                                    collectedNames.add(first);
                                                 }
                                             }
                                             if (extractedName.getMiddleName() != null) {
-                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("\t"));
+                                                List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("[ \\t]"));
                                                 for (String middle : middleNameSplit) {
-                                                    collectedMiddleNames.add(middle);
+                                                    collectedNames.add(middle);
                                                 }
                                             }
                                             if (extractedName.getLastName() != null) {
-                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("\t"));
+                                                List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("[ \\t]"));
                                                 for (String last : lastNameSplit) {
-                                                    collectedLastNames.add(last);
+                                                    collectedNames.add(last);
                                                 }
                                             }
                                         }
                                     }
                                 }
 
-                                // anonymize medic address
-                                if (medics.getAddress() != null) {
-                                    String originalAddress = medics.getAddress();
-                                    List<String> originalAddressSplit = Arrays.asList(originalAddress.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueAddress = new HashSet<String>(originalAddressSplit);
-                                    for (String address : uniqueAddress) {
-                                        List<String> tokenizeAddress = analyzer.tokenize(address);
-                                        for (int i = 0; i < tokenizeAddress.size(); i++) {
-                                            String addressToBeChecked = tokenizeAddress.get(i);
-                                            if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
-                                                dataToBeAnonymized = new DataToBeAnonymized();
-                                                String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
-                                                dataToBeAnonymized.setAddressMedicAnonym(anonymizedAddress);
-                                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                                bufferDataAnonymized.append(addressToBeChecked).append("\t").append(anonymizedAddress).append("\n");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // anonymize medic email
+                                // collect medic email
                                 if (medics.getEmail() != null) {
                                     String originalEmail = medics.getEmail();
-                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[\\t\\n\\r]"));
-                                    Set<String> uniqueEmail = new HashSet<String>(originalEmailSplit);
-                                    for (String email : uniqueEmail) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                                        dataToBeAnonymized.setEmailMedicOriginal(email);
-                                        dataToBeAnonymized.setEmailMedicAnonym(anonymizedEmail);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(email).append("\t").append(anonymizedEmail).append("\n");
+                                    List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[ \\t\\n\\r]"));
+                                    for (String email : originalEmailSplit) {
+                                        collectedEmails.add(email);
                                     }
                                 }
                             }
@@ -4620,7 +4508,7 @@ public class FullMedicalTextParser extends AbstractParser {
                 }
             }
 
-            // anonymize body information
+            // collect body information
             SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
             Pair<String, LayoutTokenization> featSeg = getBodyTextFeatured(doc, documentBodyParts);
             String resultBody = null;
@@ -4664,29 +4552,12 @@ public class FullMedicalTextParser extends AbstractParser {
                         // anonymize patient security social number and id number
                         if (patients.getID() != null) {
                             String originalID = patients.getID();
-                            List<String> originalIDSplit = Arrays.asList(originalID.split("[\\t\\n\\r]"));
-                            List<String> collectedID = new ArrayList<>();
+                            List<String> originalIDSplit = Arrays.asList(originalID.split("[ \\t\\n\\r]"));
                             for (String number : originalIDSplit) {
                                 if (number.trim().startsWith("*") || number.trim().endsWith("*")) {
                                     number = number.replace("*", "");
                                 }
-                                collectedID.add(number);
-                            }
-                            Set<String> uniqueID = new HashSet<String>(collectedID);
-                            for (String ID : uniqueID) {
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                String anonymizedNumber = anonymizeData.anonymizeNumber(ID);
-                                dataToBeAnonymized.setSecuritySocialNumberOriginal(ID);
-                                dataToBeAnonymized.setSecuritySocialNumberAnonym(anonymizedNumber);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-
-                                List<String> tokenizeID = analyzer.tokenize(ID);
-                                List<String> tokenizeIDAnonym = analyzer.tokenize(anonymizedNumber);
-                                for (int i = 0; i < tokenizeID.size(); i++) {
-                                    if (tokenizeID.get(i).matches("\\d+")) {
-                                        bufferDataAnonymized.append(tokenizeID.get(i)).append("\t").append(tokenizeIDAnonym.get(i)).append("\n");
-                                    }
-                                }
+                                collectedIDs.add(number);
                             }
                         }
 
@@ -4698,97 +4569,60 @@ public class FullMedicalTextParser extends AbstractParser {
                                 PersonName extractedName = parsers.getPersonNameParser().process(persName);
                                 if (extractedName != null) {
                                     if (extractedName.getFirstName() != null) {
-                                        List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("\t"));
+                                        List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("[ \\t]"));
                                         for (String first : firstNameSplit) {
-                                            collectedFirstNames.add(first);
+                                            collectedNames.add(first);
                                         }
                                     }
                                     if (extractedName.getMiddleName() != null) {
-                                        List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("\t"));
+                                        List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("[ \\t]"));
                                         for (String middle : middleNameSplit) {
-                                            collectedMiddleNames.add(middle);
+                                            collectedNames.add(middle);
                                         }
                                     }
                                     if (extractedName.getLastName() != null) {
-                                        List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("\t"));
+                                        List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("[ \\t]"));
                                         for (String last : lastNameSplit) {
-                                            collectedLastNames.add(last);
+                                            collectedNames.add(last);
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // anonymize patient birth date
+                        // collect patient birth date
                         if (patients.getDateBirth() != null) {
                             String originalBirthDate = patients.getDateBirth();
                             List<String> originalBirthDateSplit = Arrays.asList(originalBirthDate.split("[\\t\\n\\r]"));
-                            Set<String> uniqueOriginalBirthDateSplit = new HashSet<String>(originalBirthDateSplit);
-                            for (String date : uniqueOriginalBirthDateSplit) {
-                                String anonymizedBirthDate = anonymizeData.anonymizeDateRaw(date); // if the date is not in ISO format, call the raw date method
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                dataToBeAnonymized.setDateBirthPatientOriginal(date);
-                                dataToBeAnonymized.setDateBirthPatientAnonym(anonymizedBirthDate);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-
-                                List<String> tokenizeDate = analyzer.tokenize(date);
-                                List<String> tokenizeDateAnonym = analyzer.tokenize(anonymizedBirthDate);
-                                for (int i = 0; i < tokenizeDate.size(); i++) {
-                                    if (tokenizeDate.get(i).matches("\\d+")) {
-                                        bufferDataAnonymized.append(tokenizeDate.get(i)).append("\t").append(tokenizeDateAnonym.get(i)).append("\n");
-                                    }
-                                }
+                            for (String date : originalBirthDateSplit) {
+                                collectedDates.add(date);
                             }
                         }
 
-                        // anonymize patient address
+                        // collect patient address
                         if (patients.getAddress() != null) {
                             String originalAddress = patients.getAddress();
                             List<String> originalAddressSplit = Arrays.asList(originalAddress.split("[\\t\\n\\r]"));
-                            Set<String> uniqueAddress = new HashSet<String>(originalAddressSplit);
-                            for (String address : uniqueAddress) {
-                                List<String> tokenizeAddress = analyzer.tokenize(address);
-                                for (int i = 0; i < tokenizeAddress.size(); i++) {
-                                    String addressToBeChecked = tokenizeAddress.get(i);
-                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
-                                        dataToBeAnonymized.setAddressPatientOriginal(addressToBeChecked);
-                                        dataToBeAnonymized.setAddressPatientAnonym(anonymizedAddress);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(addressToBeChecked).append("\t").append(anonymizedAddress).append("\n");
-                                    }
-                                }
+                            for (String address : originalAddressSplit) {
+                                collectedAddress.add(address);
                             }
                         }
 
-                        // anonymize patient phone number
+                        // collect patient phone number
                         if (patients.getPhone() != null) {
                             String originalPhone = patients.getPhone();
                             List<String> originalPhoneSplit = Arrays.asList(originalPhone.split("[\\t\\n\\r]"));
-                            Set<String> uniquePhone = new HashSet<String>(originalPhoneSplit);
-                            for (String phone : uniquePhone) {
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                String anonymizedNumber = anonymizeData.anonymizeNumber(phone);
-                                dataToBeAnonymized.setPhonePatientOriginal(phone);
-                                dataToBeAnonymized.setPhonePatientAnonym(anonymizedNumber);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                bufferDataAnonymized.append(phone).append("\t").append(anonymizedNumber).append("\n");
+                            for (String phone : originalPhoneSplit) {
+                                collectedPhones.add(phone);
                             }
                         }
 
-                        // anonymize patient email
+                        // collect patient email
                         if (patients.getEmail() != null) {
                             String originalEmail = patients.getEmail();
-                            List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[\\t\\n\\r]"));
-                            Set<String> uniqueEmail = new HashSet<String>(originalEmailSplit);
-                            for (String email : uniqueEmail) {
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                                dataToBeAnonymized.setEmailPatientOriginal(email);
-                                dataToBeAnonymized.setEmailPatientAnonym(anonymizedEmail);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                bufferDataAnonymized.append(email).append("\t").append(anonymizedEmail).append("\n");
+                            List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[ \\t\\n\\r]"));
+                            for (String email : originalEmailSplit) {
+                                collectedEmails.add(email);
                             }
                         }
                     }
@@ -4805,101 +4639,115 @@ public class FullMedicalTextParser extends AbstractParser {
                                 PersonName extractedName = parsers.getPersonNameParser().process(persName);
                                 if (extractedName != null) {
                                     if (extractedName.getFirstName() != null) {
-                                        List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("\t"));
+                                        List<String> firstNameSplit = Arrays.asList(extractedName.getFirstName().split("[ \\t]"));
                                         for (String first : firstNameSplit) {
-                                            collectedFirstNames.add(first);
+                                            collectedNames.add(first);
                                         }
                                     }
                                     if (extractedName.getMiddleName() != null) {
-                                        List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("\t"));
+                                        List<String> middleNameSplit = Arrays.asList(extractedName.getMiddleName().split("[ \\t]"));
                                         for (String middle : middleNameSplit) {
-                                            collectedMiddleNames.add(middle);
+                                            collectedNames.add(middle);
                                         }
                                     }
                                     if (extractedName.getLastName() != null) {
-                                        List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("\t"));
+                                        List<String> lastNameSplit = Arrays.asList(extractedName.getLastName().split("[ \\t]"));
                                         for (String last : lastNameSplit) {
-                                            collectedLastNames.add(last);
+                                            collectedNames.add(last);
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // anonymize medic address
+                        // collect medic address
                         if (medics.getAddress() != null) {
                             String originalAddress = medics.getAddress();
                             List<String> originalAddressSplit = Arrays.asList(originalAddress.split("[\\t\\n\\r]"));
-                            Set<String> uniqueAddress = new HashSet<String>(originalAddressSplit);
-                            for (String address : uniqueAddress) {
-                                List<String> tokenizeAddress = analyzer.tokenize(address);
-                                for (int i = 0; i < tokenizeAddress.size(); i++) {
-                                    String addressToBeChecked = tokenizeAddress.get(i);
-                                    if (addressToBeChecked.matches("\\d+") && addressToBeChecked.length() > 1 && addressToBeChecked.length() < 5) {
-                                        dataToBeAnonymized = new DataToBeAnonymized();
-                                        String anonymizedAddress = anonymizeData.anonymizeNumber(addressToBeChecked);
-                                        dataToBeAnonymized.setAddressMedicOriginal(addressToBeChecked);
-                                        dataToBeAnonymized.setAddressMedicAnonym(anonymizedAddress);
-                                        dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                        bufferDataAnonymized.append(addressToBeChecked).append("\t").append(anonymizedAddress).append("\n");
-                                    }
-                                }
+                            for (String address : originalAddressSplit) {
+                                collectedAddress.add(address);
                             }
                         }
 
-                        // anonymize medic email
+                        // collect medic email
                         if (medics.getEmail() != null) {
                             String originalEmail = medics.getEmail();
-                            List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[\\t\\n\\r]"));
-                            Set<String> uniqueEmail = new HashSet<String>(originalEmailSplit);
-                            for (String email : uniqueEmail) {
-                                dataToBeAnonymized = new DataToBeAnonymized();
-                                String anonymizedEmail = anonymizeData.anonymizeEmail(email);
-                                dataToBeAnonymized.setEmailMedicOriginal(email);
-                                dataToBeAnonymized.setEmailMedicAnonym(anonymizedEmail);
-                                dataToBeAnonymizedList.add(dataToBeAnonymized);
-                                bufferDataAnonymized.append(email).append("\t").append(anonymizedEmail).append("\n");
+                            List<String> originalEmailSplit = Arrays.asList(originalEmail.split("[ \\t\\n\\r]"));
+                            for (String email : originalEmailSplit) {
+                                collectedEmails.add(email);
                             }
                         }
                     }
                 }
             }
 
-            // anonymize first, middle, last name separately
-            // collect unique names
-            Set<String> uniqueOriginalFirstName = new HashSet<String>(collectedFirstNames);
-            for (String name : uniqueOriginalFirstName) {
-                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
-                    dataToBeAnonymized = new DataToBeAnonymized();
-                    String anonymizedFirstName = anonymizeData.anonymizePersonName(name);
-                    dataToBeAnonymized.setFirstNameMedicOriginal(name);
-                    dataToBeAnonymized.setFirstNameMedicAnonym(anonymizedFirstName);
-                    dataToBeAnonymizedList.add(dataToBeAnonymized);
-                    bufferDataAnonymized.append(name).append("\t").append(anonymizedFirstName.trim()).append("\n");
+            // anonymize IDs
+            Set<String> uniqueIDs = new HashSet<String>(collectedIDs);
+            for (String ids : uniqueIDs) {
+                List<String> idSplit = analyzer.tokenize(ids);
+                for (String tokID : idSplit) {
+                    String anonymizedId = anonymizeData.anonymizeNumber(tokID);
+                    bufferDataAnonymized.append(tokID).append("\t").append(anonymizedId).append("\n");
                 }
             }
 
-            Set<String> uniqueOriginalMiddleName = new HashSet<String>(collectedMiddleNames);
-            for (String name : uniqueOriginalMiddleName) {
-                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
-                    dataToBeAnonymized = new DataToBeAnonymized();
-                    String anonymizedMiddleName = anonymizeData.anonymizePersonName(name);
-                    dataToBeAnonymized.setMiddleNameMedicOriginal(name);
-                    dataToBeAnonymized.setMiddleNameMedicAnonym(anonymizedMiddleName);
-                    dataToBeAnonymizedList.add(dataToBeAnonymized);
-                    bufferDataAnonymized.append(name).append("\t").append(anonymizedMiddleName.trim()).append("\n");
+            // anonymize names
+            List<String> distinctNames = collectedNames.stream().distinct().collect(Collectors.toList());
+            for (String name : distinctNames) {
+                if (!name.endsWith(".") && name.trim().length() > 2) { // no need to anonymize initials
+                    String anonymizedName = anonymizeData.anonymizePersonName(name);
+                    bufferDataAnonymized.append(name.trim().toUpperCase()).append("\t").append(anonymizedName.trim().toUpperCase()).append("\n");
+                    bufferDataAnonymized.append(name.trim().toLowerCase()).append("\t").append(anonymizedName.trim().toLowerCase()).append("\n");
+                    bufferDataAnonymized.append(toTitleCase(name.trim().toUpperCase())).append("\t").append(toTitleCase(anonymizedName.trim())).append("\n");
                 }
             }
 
-            Set<String> uniqueOriginalLastName = new HashSet<String>(collectedLastNames);
-            for (String name : uniqueOriginalLastName) {
-                if (!(name.trim().endsWith(".")) && name.trim().length() > 1) { // no need to anonymize initials
-                    dataToBeAnonymized = new DataToBeAnonymized();
-                    String anonymizedLastName = anonymizeData.anonymizePersonName(name);
-                    dataToBeAnonymized.setLastNameMedicOriginal(name);
-                    dataToBeAnonymized.setLastNameMedicAnonym(anonymizedLastName);
-                    dataToBeAnonymizedList.add(dataToBeAnonymized);
-                    bufferDataAnonymized.append(name).append("\t").append(anonymizedLastName.trim()).append("\n");
+            // anonyize dates
+            Set<String> uniqueDates = new HashSet<String>(collectedDates);
+            for (String date : uniqueDates) {
+                String anonymizedDate = anonymizeData.anonymizeDateRaw(date);
+                bufferDataAnonymized.append(date).append("\t").append(anonymizedDate).append("\n");
+                List<String> splitDate = analyzer.tokenize(date);
+                List<String> splitAnonymDate = analyzer.tokenize(anonymizedDate);
+                for(int i=0; i<splitDate.size(); i++) {
+                    if(splitDate.get(i).matches("\\d+") && splitAnonymDate.get(i).matches("\\d+")) {
+                        bufferDataAnonymized.append(splitDate.get(i)).append("\t").append(splitAnonymDate.get(i)).append("\n");
+                    }
+                }
+            }
+
+            // anonymize phone number
+            Set<String> uniquePhones = new HashSet<String>(collectedPhones);
+            for (String phone : uniquePhones) {
+                String anonymizedPhone = anonymizeData.anonymizeNumber(phone);
+                bufferDataAnonymized.append(phone).append("\t").append(anonymizedPhone).append("\n");
+            }
+
+            // anonymize email
+            Set<String> uniqueEmails = new HashSet<String>(collectedEmails);
+            for (String email : uniqueEmails) {
+                String anonymizedEmail = anonymizeData.anonymizeEmail(email);
+                bufferDataAnonymized.append(email.trim().toLowerCase()).append("\t").append(anonymizedEmail.trim().toLowerCase()).append("\n");
+            }
+
+            // anonymize address
+            Set<String> uniqueAddresses = new HashSet<String>(collectedAddress);
+            for (String address : uniqueAddresses) {
+                DataToBeAnonymized anonymizeAddress = anonymizeData.anonymizeAddress(address);
+                if (anonymizeAddress.getAddressOriginal() != null && anonymizeAddress.getAddressAnonym() != null) {
+                    bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toUpperCase()).append("\n");
+                    bufferDataAnonymized.append(anonymizeAddress.getAddressOriginal().toLowerCase()).append("\t").append(anonymizeAddress.getAddressAnonym().toLowerCase()).append("\n");
+                    bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getAddressOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getAddressAnonym())).append("\n");
+                }
+                if (anonymizeAddress.getNumberOriginal() != null && anonymizeAddress.getNumberAnonym() != null) {
+                    bufferDataAnonymized.append(anonymizeAddress.getNumberOriginal()).append("\t").append(anonymizeAddress.getNumberAnonym()).append("\n");
+                }
+                if (anonymizeAddress.getPostCodeOriginal() != null && anonymizeAddress.getPostCodeAnonym() != null) {
+                    bufferDataAnonymized.append(anonymizeAddress.getPostCodeOriginal()).append("\t").append(anonymizeAddress.getPostCodeAnonym()).append("\n");
+                }
+                if (anonymizeAddress.getCityOriginal() != null && anonymizeAddress.getCityAnonym() != null) {
+                    bufferDataAnonymized.append(anonymizeAddress.getCityOriginal().toUpperCase()).append("\t").append(anonymizeAddress.getCityAnonym().toUpperCase()).append("\n");
+                    bufferDataAnonymized.append(toTitleCase(anonymizeAddress.getCityOriginal())).append("\t").append(toTitleCase(anonymizeAddress.getCityAnonym())).append("\n");
                 }
             }
 
@@ -5149,19 +4997,24 @@ public class FullMedicalTextParser extends AbstractParser {
                 int ll = stt.countTokens();
                 while (stt.hasMoreTokens()) {
                     String s = stt.nextToken().trim();
-                    if (i == 0) {
-                        // anonymize the token
-                        int idx = dataOriginal.indexOf(s);
-                        if (idx >= 0) {
-                            s = dataAnonymized.get(idx);
-                        }
 
+                    // anonymize the token
+                    int idx = dataOriginal.indexOf(s);
+                    if (idx >= 0) {
+                        s = dataAnonymized.get(idx);
+                    }
+
+                    if (i == 0) {
                         s2 = TextUtilities.HTMLEncode(s); // lexical token
+                        //s2 = s;
+
                         int p0 = p;
                         boolean strop = false;
                         while ((!strop) && (p < tokenizations.size())) {
                             String tokOriginal = tokenizations.get(p).t();
-
+                            if (dataOriginal.indexOf(tokOriginal) >= 0) {
+                                tokOriginal = dataAnonymized.get(idx);
+                            }
                             if (tokOriginal.equals(" ")
                                 || tokOriginal.equals("\u00A0")) {
                                 addSpace = true;
@@ -6177,6 +6030,46 @@ public class FullMedicalTextParser extends AbstractParser {
         } finally {
             DocumentSource.close(documentSource, true, true, true);
         }
+    }
+
+    public static String toTitleCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean convertNext = true;
+        for (char ch : text.toCharArray()) {
+            if (Character.isSpaceChar(ch)) {
+                convertNext = true;
+            } else if (convertNext) {
+                ch = Character.toTitleCase(ch);
+                convertNext = false;
+            } else {
+                ch = Character.toLowerCase(ch);
+            }
+            converted.append(ch);
+        }
+
+        return converted.toString();
+    }
+
+    private static boolean hasMatchingSubstring(String str, List<String> substrings) {
+        return substrings.stream().anyMatch(str::contains);
+    }
+
+    private static String getMatchingSubstring(String str, List<String> substrings) {
+        return substrings.stream().filter(str::contains).findAny().orElse(null);
+    }
+
+    private static int getPositionMatchingSubstring(String str, List<String> substrings) {
+        for (int i = 0; i < substrings.size(); i++) {
+            if (str.contains(substrings.get(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
