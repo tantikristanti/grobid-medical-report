@@ -14,7 +14,7 @@ import java.util.List;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
- * SAX parser for the XML format for the patient data.
+ * SAX parser for the XML format for the address data.
  * Segmentation of tokens must be identical as the one from pdf2xml files to that
  * training and online input tokens are identical.
  * <p>
@@ -22,7 +22,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
  * Tanti, 2021
  */
 
-public class TEIPatientSaxParser extends DefaultHandler {
+public class TEIAddressSaxParser extends DefaultHandler {
 
     private StringBuffer accumulator = new StringBuffer(); // Accumulate parsed text
     private StringBuffer allContent = new StringBuffer();
@@ -34,9 +34,9 @@ public class TEIPatientSaxParser extends DefaultHandler {
     private List<List<String>> allLabeled = null; // list of labels
     private List<LayoutToken> tokens = null;
     private List<List<LayoutToken>> allTokens = null; // list of LayoutToken segmentation
-    public int nbPatients = 0;
+    public int nbAddress = 0;
 
-    public TEIPatientSaxParser() {
+    public TEIAddressSaxParser() {
         allTokens = new ArrayList<List<LayoutToken>>();
         allLabeled = new ArrayList<List<String>>();
     }
@@ -60,15 +60,16 @@ public class TEIPatientSaxParser extends DefaultHandler {
         return allTokens;
     }
 
-    public void endElement(java.lang.String uri,
-                           java.lang.String localName,
-                           java.lang.String qName) throws SAXException {
+    public void endElement(String uri,
+                           String localName,
+                           String qName) throws SAXException {
         qName = qName.toLowerCase();
 
-        if ((qName.equals("idno")) || (qName.equals("idtype")) || (qName.equals("persname")) ||
-            (qName.equals("sex")) || (qName.equals("birthdate")) || (qName.equals("birthplace")) ||
-            (qName.equals("age")) || (qName.equals("death")) || (qName.equals("address")) || (qName.equals("email")) ||
-            (qName.equals("country")) || (qName.equals("settlement")) || (qName.equals("phone")) || (qName.equals("note"))
+        if ((qName.equals("streetnumber")) || (qName.equals("streetname")) || (qName.equals("buildingnumber")) || (qName.equals("buildingname")) ||
+            (qName.equals("city")) || (qName.equals("postcode")) || (qName.equals("pobox")) ||
+            (qName.equals("community")) || (qName.equals("district")) || (qName.equals("departmentnumber")) ||
+            (qName.equals("departmentname")) || (qName.equals("region")) || (qName.equals("country")) ||
+            (qName.equals("note"))
         ) {
             String text = getText();
             writeField(text);
@@ -77,13 +78,13 @@ public class TEIPatientSaxParser extends DefaultHandler {
             accumulator.append(" +L+ ");
         } else if (qName.equals("pb")) {
             accumulator.append(" +PAGE+ ");
-        } else if (qName.equals("patient")) {
+        } else if (qName.equals("address")) {
             String text = getText();
             currentTag = "<other>";
             if (text.length() > 0) {
                 writeField(text);
             }
-            nbPatients++;
+            nbAddress++;
             allLabeled.add(labeled);
             allTokens.add(tokens);
             allContent = null;
@@ -105,32 +106,32 @@ public class TEIPatientSaxParser extends DefaultHandler {
         accumulator.setLength(0);
 
         qName = qName.toLowerCase();
-        if (qName.equals("idno")) {
-            currentTag = "<idno>";
-        } else if (qName.equals("idtype")) {
-            currentTag = "<idtype>";
-        } else if ((qName.equals("persname") || (qName.equals("name")))) {
-            currentTag = "<persname>";
-        } else if (qName.equals("sex")) {
-            currentTag = "<sex>";
-        } else if (qName.equals("birthdate")) {
-            currentTag = "<birthdate>";
-        } else if (qName.equals("birthplace")) {
-            currentTag = "<birthplace>";
-        } else if (qName.equals("age")) {
-            currentTag = "<age>";
-        } else if (qName.equals("death")) {
-            currentTag = "<death>";
-        } else if (qName.equals("address")) {
-            currentTag = "<address>";
+        if (qName.equals("streetnumber")) {
+            currentTag = "<streetnumber>";
+        } else if (qName.equals("streetname")) {
+            currentTag = "<streetname>";
+        } else if (qName.equals("buildingnumber")) {
+            currentTag = "<buildingnumber>";
+        } else if (qName.equals("buildingname")) {
+            currentTag = "<buildingname>";
+        } else if (qName.equals("city")) {
+            currentTag = "<city>";
+        } else if (qName.equals("postcode")) {
+            currentTag = "<postcode>";
+        } else if (qName.equals("pobox")) {
+            currentTag = "<pobox>";
+        } else if (qName.equals("community")) {
+            currentTag = "<community>";
+        } else if (qName.equals("district")) {
+            currentTag = "<district>";
+        } else if (qName.equals("departmentnumber")) {
+            currentTag = "<departmentnumber>";
+        } else if (qName.equals("departmentname")) {
+            currentTag = "<departmentname>";
+        } else if (qName.equals("region")) {
+            currentTag = "<region>";
         } else if (qName.equals("country")) {
             currentTag = "<country>";
-        } else if (qName.equals("settlement")) {
-            currentTag = "<settlement>";
-        } else if (qName.equals("phone")) {
-            currentTag = "<phone>";
-        } else if (qName.equals("email")) {
-            currentTag = "<email>";
         } else if (qName.equals("note")) {
             int length = atts.getLength();
 
@@ -145,14 +146,14 @@ public class TEIPatientSaxParser extends DefaultHandler {
 
                     if ((name != null) && (value != null)) {
                         if (name.equals("type")) {
-                            if (value.equals("patient")) {
+                            if (value.equals("address")) {
                                 currentTag = "<note>";
                             }
                         }
                     }
                 }
             }
-        } else if (qName.equals("patient")) {
+        } else if (qName.equals("address")) {
             accumulator = new StringBuffer();
             allContent = new StringBuffer();
             labeled = new ArrayList<String>();

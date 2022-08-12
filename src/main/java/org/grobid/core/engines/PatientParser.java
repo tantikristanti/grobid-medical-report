@@ -55,7 +55,7 @@ public class PatientParser extends AbstractParser {
     /**
      * Processing of patients in the header part
      */
-    public List<Patient> processing(String input) throws Exception {
+    public Patient processing(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -66,7 +66,7 @@ public class PatientParser extends AbstractParser {
     }
 
 
-    public List<Patient> processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public Patient processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
@@ -76,7 +76,7 @@ public class PatientParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Patient entities as POJO.
      */
-    public List<Patient> processing(List<LayoutToken> tokens) {
+    public Patient processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
@@ -121,6 +121,14 @@ public class PatientParser extends AbstractParser {
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+                    if (patient.getID() != null) {
+                        patient.setID(patient.getID() + "\t" + clusterContent);
+                    } else {
+                        patient.setID(clusterContent);
+                    }
+                    patient.addLayoutTokens(cluster.concatTokens());
+                }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
                     if (patient.getPersName() != null) {
                         patient.setPersName(patient.getPersName() + "\t" + clusterContent);
@@ -139,9 +147,25 @@ public class PatientParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
                     if (patient.getDateBirth() != null) {
-                        patient.setSex(patient.getDateBirth() + "\t" + clusterContent);
+                        patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
                     } else {
                         patient.setDateBirth(clusterContent);
+                    }
+                    patient.addLayoutTokens(cluster.concatTokens());
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_PLACE_BIRTH)) {
+                    if (patient.getPlaceBirth() != null) {
+                        patient.setPlaceBirth(patient.getPlaceBirth() + "\t" + clusterContent);
+                    } else {
+                        patient.setPlaceBirth(clusterContent);
+                    }
+                    patient.addLayoutTokens(cluster.concatTokens());
+                }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_AGE)) {
+                    if (patient.getAge() != null) {
+                        patient.setAge(patient.getAge() + "\t" + clusterContent);
+                    } else {
+                        patient.setAge(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
@@ -185,6 +209,14 @@ public class PatientParser extends AbstractParser {
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
+                if (clusterLabel.equals(MedicalLabels.PATIENT_EMAIL)) {
+                    if (patient.getEmail() != null) {
+                        patient.setEmail(patient.getEmail() + "\t" + clusterContent);
+                    } else {
+                        patient.setEmail(clusterContent);
+                    }
+                    patient.addLayoutTokens(cluster.concatTokens());
+                }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                     if (patient.getNote() != null) {
                         patient.setNote(patient.getNote() + "\t" + clusterContent);
@@ -193,14 +225,14 @@ public class PatientParser extends AbstractParser {
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
-                if (patient != null) {
+                /*if (patient != null) {
                     fullPatients.add(patient);
-                }
+                }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return fullPatients;
+        return patient;
     }
 
     /**
@@ -235,6 +267,14 @@ public class PatientParser extends AbstractParser {
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+                if (patient.getID() != null) {
+                    patient.setID(patient.getID() + "\t" + clusterContent);
+                } else {
+                    patient.setID(clusterContent);
+                }
+                patient.addLayoutTokens(cluster.concatTokens());
+            }
             if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
                 if (patient.getPersName() != null) {
                     patient.setPersName(patient.getPersName() + "\t" + clusterContent);
@@ -253,9 +293,25 @@ public class PatientParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
                 if (patient.getDateBirth() != null) {
-                    patient.setSex(patient.getDateBirth() + "\t" + clusterContent);
+                    patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
                 } else {
                     patient.setDateBirth(clusterContent);
+                }
+                patient.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_PLACE_BIRTH)) {
+                if (patient.getPlaceBirth() != null) {
+                    patient.setPlaceBirth(patient.getPlaceBirth() + "\t" + clusterContent);
+                } else {
+                    patient.setPlaceBirth(clusterContent);
+                }
+                patient.addLayoutTokens(cluster.concatTokens());
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_AGE)) {
+                if (patient.getAge() != null) {
+                    patient.setAge(patient.getAge() + "\t" + clusterContent);
+                } else {
+                    patient.setAge(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
@@ -299,6 +355,14 @@ public class PatientParser extends AbstractParser {
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
+            if (clusterLabel.equals(MedicalLabels.PATIENT_EMAIL)) {
+                if (patient.getEmail() != null) {
+                    patient.setEmail(patient.getEmail() + "\t" + clusterContent);
+                } else {
+                    patient.setEmail(clusterContent);
+                }
+                patient.addLayoutTokens(cluster.concatTokens());
+            }
             if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                 if (patient.getNote() != null) {
                     patient.setNote(patient.getNote() + "\t" + clusterContent);
@@ -307,6 +371,7 @@ public class PatientParser extends AbstractParser {
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
+
             if (patient != null) {
                 patients.add(patient);
             }
@@ -427,13 +492,22 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<idtype>", "<idType>", addSpace, 0);
+                    }
+                    if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<sex>", "<sex>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<birth>", "<birth>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<birthdate>", "<birthDate>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<birthplace>", "<birthPlace>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<age>", "<age>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<death>", "<death>", addSpace, 0);
@@ -449,6 +523,9 @@ public class PatientParser extends AbstractParser {
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"patient\">", addSpace, 0);
@@ -541,18 +618,22 @@ public class PatientParser extends AbstractParser {
                     int ll = stt.countTokens();
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
+
+                        // anonymize the token
+                        int idx = dataOriginal.indexOf(s);
+                        if (idx >= 0) {
+                            s = dataAnonymized.get(idx);
+                        }
+
                         if (i == 0) {
-                            for (int j=0; j<dataOriginal.size(); j++) {
-                                s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
-                            }
                             s2 = TextUtilities.HTMLEncode(s);
                             //s2 = s;
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j=0; j<dataOriginal.size(); j++) {
-                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                if (dataOriginal.indexOf(tokOriginal) >= 0) {
+                                    tokOriginal = dataAnonymized.get(idx);
                                 }
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
@@ -598,13 +679,22 @@ public class PatientParser extends AbstractParser {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<idtype>", "<idType>", addSpace, 0);
+                    }
+                    if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<sex>", "<sex>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<birth>", "<birth>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<birthdate>", "<birthDate>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<birthplace>", "<birthPlace>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<age>", "<age>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<death>", "<death>", addSpace, 0);
@@ -620,6 +710,9 @@ public class PatientParser extends AbstractParser {
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"patient\">", addSpace, 0);
@@ -659,7 +752,7 @@ public class PatientParser extends AbstractParser {
                               int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-             if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
+            if (s1.equals(lastTag0) || s1.equals("I-" + lastTag0)) {
                 if (addSpace)
                     result = " " + s2;
                 else
@@ -688,12 +781,18 @@ public class PatientParser extends AbstractParser {
                 buffer.append("");
             } else if (lastTag0.equals("<idno>")) {
                 buffer.append("</idno>");
+            } else if (lastTag0.equals("<idtype>")) {
+                buffer.append("</idType>");
             } else if (lastTag0.equals("<persname>")) {
                 buffer.append("</persName>");
             } else if (lastTag0.equals("<sex>")) {
                 buffer.append("</sex>");
-            } else if (lastTag0.equals("<birth>")) {
-                buffer.append("</birth>");
+            } else if (lastTag0.equals("<birthdate>")) {
+                buffer.append("</birthDate>");
+            } else if (lastTag0.equals("<birthplace>")) {
+                buffer.append("</birthPlace>");
+            } else if (lastTag0.equals("<age>")) {
+                buffer.append("</age>");
             } else if (lastTag0.equals("<death>")) {
                 buffer.append("</death>");
             } else if (lastTag0.equals("<address>")) {
@@ -704,6 +803,8 @@ public class PatientParser extends AbstractParser {
                 buffer.append("</settlement>");
             } else if (lastTag0.equals("<phone>")) {
                 buffer.append("</phone>");
+            }  else if (lastTag0.equals("<email>")) {
+                buffer.append("</email>");
             } else if (lastTag0.equals("<note>")) {
                 buffer.append("</note>");
             } else {

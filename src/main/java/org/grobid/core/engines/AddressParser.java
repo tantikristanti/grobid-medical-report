@@ -4,11 +4,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
-import org.grobid.core.data.Medic;
+import org.grobid.core.data.Address;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.features.FeaturesVectorMedic;
+import org.grobid.core.features.FeaturesVectorAddress;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
@@ -17,6 +17,7 @@ import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.LayoutTokensUtil;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.utilities.TextUtilities;
+import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.core.utilities.counters.CntManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,39 +27,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-/*
- * A class for parsing medics information
- *
- * Tanti, 2022
- *
- * */
-
-public class MedicParser extends AbstractParser {
-    private static Logger LOGGER = LoggerFactory.getLogger(MedicParser.class);
+public class AddressParser extends AbstractParser {
+    private static Logger LOGGER = LoggerFactory.getLogger(AddressParser.class);
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
 
-    public MedicParser() {
-        super(GrobidModels.MEDIC);
+    public AddressParser() {
+        super(GrobidModels.ADDRESS);
     }
 
-    public MedicParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.MEDIC, cntManager);
+    public AddressParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.ADDRESS, cntManager);
         this.parsers = parsers;
     }
 
-    public MedicParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.MEDIC);
+    public AddressParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.ADDRESS);
         this.parsers = parsers;
     }
 
     /**
-     * Processing of medics
+     * Processing of address
      */
-    public Medic processing(String input) throws Exception {
+    public Address processing(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
+
+        input = UnicodeUtil.normaliseText(input);
+        input = input.trim();
+
+        input = TextUtilities.dehyphenize(input);
 
         // for language to English for the analyser to avoid any bad surprises
         List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
@@ -66,31 +65,28 @@ public class MedicParser extends AbstractParser {
     }
 
 
-    public Medic processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public Address processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
     /**
-     * Common processing of medics (mostly for the header part, but it can be used in other parts, such as for the body part)
+     * Common processing of address
      *
      * @param tokens list of LayoutToken object to process
-     * @return List of identified Medic entities as POJO.
+     * @return List of identified Address entities as POJO.
      */
-    public Medic processing(List<LayoutToken> tokens) {
+    public Address processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<Medic> fullMedics = new ArrayList<>();
-        Medic medic = null;
+        List<Address> fullAddress = new ArrayList<>();
+        Address address = null;
         try {
             List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
-            List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
-            List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
-            List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
-            List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
-            // get the features for the medic
-            String sequence = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
-                locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+            List<OffsetPosition> cityNamePositions = lexicon.tokenPositionsCityNames(tokens);
+
+            // get the features for the address
+            String sequence = FeaturesVectorAddress.addFeaturesAddress(tokens, null, locationPositions, cityNamePositions);
 
             if (StringUtils.isEmpty(sequence))
                 return null;
@@ -98,8 +94,8 @@ public class MedicParser extends AbstractParser {
             String res = label(sequence);
             //System.out.println(res);
 
-            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.MEDIC, res, tokens);
-            medic = new Medic();
+            TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.ADDRESS, res, tokens);
+            address = new Address();
 
             List<TaggingTokenCluster> clusters = clusteror.cluster();
             for (TaggingTokenCluster cluster : clusters) {
@@ -114,127 +110,126 @@ public class MedicParser extends AbstractParser {
                 if (clusterContent.trim().length() == 0)
                     continue;
 
-                if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
-                    if (medic.getIdno() != null) {
-                        medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_STREET_NUMBER)) {
+                    if (address.getStreetNumber() != null) {
+                        address.setStreetNumber(address.getStreetNumber() + "\t" + clusterContent);
                     } else {
-                        medic.setIdno(clusterContent);
+                        address.setStreetNumber(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
-                    if (medic.getRole() != null) {
-                        medic.setRole(medic.getRole() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_STREET_NAME)) {
+                    if (address.getStreetName() != null) {
+                        address.setStreetName(address.getStreetName() + "\t" + clusterContent);
                     } else {
-                        medic.setRole(clusterContent);
+                        address.setStreetName(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
-                    if (medic.getPersName() != null) {
-                        medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_BUILDING_NUMBER)) {
+                    if (address.getBuildingNumber() != null) {
+                        address.setBuildingNumber(address.getBuildingNumber() + "\t" + clusterContent);
                     } else {
-                        medic.setPersName(clusterContent);
+                        address.setBuildingNumber(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
-                    if (medic.getAffiliation() != null) {
-                        medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_BUILDING_NAME)) {
+                    if (address.getBuildingName() != null) {
+                        address.setBuildingName(address.getBuildingName() + "\t" + clusterContent);
                     } else {
-                        medic.setAffiliation(clusterContent);
+                        address.setBuildingName(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
-                    (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
-                    if (medic.getOrganisation() != null) {
-                        medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_CITY)) {
+                    if (address.getCity() != null) {
+                        address.setCity(address.getCity() + "\t" + clusterContent);
                     } else {
-                        medic.setOrganisation(clusterContent);
+                        address.setCity(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
-                    if (medic.getInstitution() != null) {
-                        medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_POST_CODE)) {
+                    if (address.getPostCode() != null) {
+                        address.setPostCode(address.getPostCode() + "\t" + clusterContent);
                     } else {
-                        medic.setInstitution(clusterContent);
+                        address.setPostCode(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
-                    if (medic.getAddress() != null) {
-                        medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_PO_BOX)) {
+                    if (address.getPoBox() != null) {
+                        address.setPoBox(address.getPoBox() + "\t" + clusterContent);
                     } else {
-                        medic.setAddress(clusterContent);
+                        address.setPoBox(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
-                    if (medic.getCountry() != null) {
-                        medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_COMMUNITY)) {
+                    if (address.getCommunity() != null) {
+                        address.setCommunity(address.getCommunity() + "\t" + clusterContent);
                     } else {
-                        medic.setCountry(clusterContent);
+                        address.setCommunity(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
-                    if (medic.getTown() != null) {
-                        medic.setTown(medic.getTown() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_DISTRICT)) {
+                    if (address.getDistrict() != null) {
+                        address.setDistrict(address.getDistrict() + "\t" + clusterContent);
                     } else {
-                        medic.setTown(clusterContent);
+                        address.setDistrict(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
-                    if (medic.getEmail() != null) {
-                        medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NUMBER)) {
+                    if (address.getDepartmentNumber() != null) {
+                        address.setDepartmentNumber(address.getDepartmentNumber() + "\t" + clusterContent);
                     } else {
-                        medic.setEmail(clusterContent);
+                        address.setDepartmentNumber(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
-                    if (medic.getPhone() != null) {
-                        medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NAME)) {
+                    if (address.getDepartmentName() != null) {
+                        address.setDepartmentName(address.getDepartmentName() + "\t" + clusterContent);
                     } else {
-                        medic.setPhone(clusterContent);
+                        address.setDepartmentName(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
-                    if (medic.getFax() != null) {
-                        medic.setFax(medic.getFax() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_REGION)) {
+                    if (address.getRegion() != null) {
+                        address.setRegion(address.getRegion() + "\t" + clusterContent);
                     } else {
-                        medic.setFax(clusterContent);
+                        address.setRegion(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
-                    if (medic.getWeb() != null) {
-                        medic.setWeb(medic.getFax() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_COUNTRY)) {
+                    if (address.getCountry() != null) {
+                        address.setCountry(address.getCountry() + "\t" + clusterContent);
                     } else {
-                        medic.setWeb(clusterContent);
+                        address.setCountry(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
-                    if (medic.getNote() != null) {
-                        medic.setNote(medic.getNote() + "\t" + clusterContent);
+                if (clusterLabel.equals(MedicalLabels.ADDRESS_NOTE)) {
+                    if (address.getNote() != null) {
+                        address.setNote(address.getNote() + "\t" + clusterContent);
                     } else {
-                        medic.setNote(clusterContent);
+                        address.setNote(clusterContent);
                     }
-                    medic.addLayoutTokens(cluster.concatTokens());
+                    address.addLayoutTokens(cluster.concatTokens());
                 }
-                /*if (medic != null){
-                    fullMedics.add(medic);
+                /*if (address != null){
+                    fullAddress.add(address);
                 }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return medic;
+        return address;
     }
 
     /**
@@ -242,13 +237,13 @@ public class MedicParser extends AbstractParser {
      *
      * @param result        result
      * @param tokenizations list of tokens
-     * @return list of medics
+     * @return list of address
      */
-    public List<Medic> resultExtractionLayoutTokens(String result,
-                                                    List<LayoutToken> tokenizations) {
-        List<Medic> medics = new ArrayList<>();
-        Medic medic = new Medic();
-        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.MEDIC, result, tokenizations);
+    public List<Address> resultExtractionLayoutTokens(String result,
+                                                      List<LayoutToken> tokenizations) {
+        List<Address> fullAddress = new ArrayList<>();
+        Address address = new Address();
+        TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.ADDRESS, result, tokenizations);
 
         List<TaggingTokenCluster> clusters = clusteror.cluster();
 
@@ -261,129 +256,127 @@ public class MedicParser extends AbstractParser {
             Engine.getCntManager().i(clusterLabel);
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
-                if (medic.getIdno() != null) {
-                    medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_STREET_NUMBER)) {
+                if (address.getStreetNumber() != null) {
+                    address.setStreetNumber(address.getStreetNumber() + "\t" + clusterContent);
                 } else {
-                    medic.setIdno(clusterContent);
+                    address.setStreetNumber(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
-                if (medic.getRole() != null) {
-                    medic.setRole(medic.getRole() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_STREET_NAME)) {
+                if (address.getStreetName() != null) {
+                    address.setStreetName(address.getStreetName() + "\t" + clusterContent);
                 } else {
-                    medic.setRole(clusterContent);
+                    address.setStreetName(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
-                if (medic.getPersName() != null) {
-                    medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_BUILDING_NUMBER)) {
+                if (address.getBuildingNumber() != null) {
+                    address.setBuildingNumber(address.getBuildingNumber() + "\t" + clusterContent);
                 } else {
-                    medic.setPersName(clusterContent);
+                    address.setBuildingNumber(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
-                if (medic.getAffiliation() != null) {
-                    medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_BUILDING_NAME)) {
+                if (address.getBuildingName() != null) {
+                    address.setBuildingName(address.getBuildingName() + "\t" + clusterContent);
                 } else {
-                    medic.setAffiliation(clusterContent);
+                    address.setBuildingName(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
-                (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
-                if (medic.getOrganisation() != null) {
-                    medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_CITY)) {
+                if (address.getCity() != null) {
+                    address.setCity(address.getCity() + "\t" + clusterContent);
                 } else {
-                    medic.setOrganisation(clusterContent);
+                    address.setCity(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
-                if (medic.getInstitution() != null) {
-                    medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_POST_CODE)) {
+                if (address.getPostCode() != null) {
+                    address.setPostCode(address.getPostCode() + "\t" + clusterContent);
                 } else {
-                    medic.setInstitution(clusterContent);
+                    address.setPostCode(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
-                if (medic.getAddress() != null) {
-                    medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_PO_BOX)) {
+                if (address.getPoBox() != null) {
+                    address.setPoBox(address.getPoBox() + "\t" + clusterContent);
                 } else {
-                    medic.setAddress(clusterContent);
+                    address.setPoBox(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
-                if (medic.getCountry() != null) {
-                    medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_COMMUNITY)) {
+                if (address.getCommunity() != null) {
+                    address.setCommunity(address.getCommunity() + "\t" + clusterContent);
                 } else {
-                    medic.setCountry(clusterContent);
+                    address.setCommunity(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
-                if (medic.getTown() != null) {
-                    medic.setTown(medic.getTown() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_DISTRICT)) {
+                if (address.getDistrict() != null) {
+                    address.setDistrict(address.getDistrict() + "\t" + clusterContent);
                 } else {
-                    medic.setTown(clusterContent);
+                    address.setDistrict(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
-                if (medic.getEmail() != null) {
-                    medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NUMBER)) {
+                if (address.getDepartmentNumber() != null) {
+                    address.setDepartmentNumber(address.getDepartmentNumber() + "\t" + clusterContent);
                 } else {
-                    medic.setEmail(clusterContent);
+                    address.setDepartmentNumber(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
-                if (medic.getPhone() != null) {
-                    medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_DEPARTMENT_NAME)) {
+                if (address.getDepartmentName() != null) {
+                    address.setDepartmentName(address.getDepartmentName() + "\t" + clusterContent);
                 } else {
-                    medic.setPhone(clusterContent);
+                    address.setDepartmentName(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
-                if (medic.getFax() != null) {
-                    medic.setFax(medic.getFax() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_REGION)) {
+                if (address.getRegion() != null) {
+                    address.setRegion(address.getRegion() + "\t" + clusterContent);
                 } else {
-                    medic.setFax(clusterContent);
+                    address.setRegion(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
-                if (medic.getWeb() != null) {
-                    medic.setWeb(medic.getFax() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_COUNTRY)) {
+                if (address.getCountry() != null) {
+                    address.setCountry(address.getCountry() + "\t" + clusterContent);
                 } else {
-                    medic.setWeb(clusterContent);
+                    address.setCountry(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
-                if (medic.getNote() != null) {
-                    medic.setNote(medic.getNote() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.ADDRESS_NOTE)) {
+                if (address.getNote() != null) {
+                    address.setNote(address.getNote() + "\t" + clusterContent);
                 } else {
-                    medic.setNote(clusterContent);
+                    address.setNote(clusterContent);
                 }
-                medic.addLayoutTokens(cluster.concatTokens());
+                address.addLayoutTokens(cluster.concatTokens());
             }
-            if (medic != null) {
-                medics.add(medic);
+            if (address != null) {
+                fullAddress.add(address);
             }
         }
-        return medics;
+        return fullAddress;
     }
 
     /**
-     * Extract results from a list of medics strings in the training format
-     * without any string modification.
+     * Extract results from a list of address strings in the training format without any string modification.
      *
      * @param inputs list of input data
      * @return result
@@ -397,11 +390,8 @@ public class MedicParser extends AbstractParser {
             if (inputs.size() == 0)
                 return null;
 
-            List<OffsetPosition> locationsPositions = null;
-            List<OffsetPosition> titlePositions = null;
-            List<OffsetPosition> suffixPositions = null;
-            List<OffsetPosition> emailPositions = null;
-            List<OffsetPosition> urlPositions = null;
+            List<OffsetPosition> locationPositions = null;
+            List<OffsetPosition> cityNamePositions = null;
 
             for (String input : inputs) {
                 if (input == null)
@@ -411,14 +401,11 @@ public class MedicParser extends AbstractParser {
                 if (tokenizations.size() == 0)
                     return null;
 
-                locationsPositions = lexicon.tokenPositionsLocationNames(tokenizations);
-                titlePositions = lexicon.tokenPositionsPersonTitle(tokenizations);
-                suffixPositions = lexicon.tokenPositionsPersonSuffix(tokenizations);
-                emailPositions = lexicon.tokenPositionsEmailPattern(tokenizations);
-                urlPositions = lexicon.tokenPositionsUrlPattern(tokenizations);
+                locationPositions = lexicon.tokenPositionsLocationNames(tokenizations);
+                cityNamePositions = lexicon.tokenPositionsCityNames(tokenizations);
 
-                String ress = FeaturesVectorMedic.addFeaturesMedic(tokenizations, null,
-                    locationsPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                // get the features for the address
+                String ress = FeaturesVectorAddress.addFeaturesAddress(tokenizations, null, locationPositions, cityNamePositions);
                 String res = label(ress);
 
                 String lastTag = null;
@@ -436,7 +423,7 @@ public class MedicParser extends AbstractParser {
                     String tok = st.nextToken().trim();
 
                     if (tok.length() == 0) {
-                        // new medic
+                        // new address
                         start = true;
                         continue;
                     }
@@ -469,7 +456,7 @@ public class MedicParser extends AbstractParser {
                     }
 
                     if (start && (s1 != null)) {
-                        //buffer.append("\t<medic>");
+                        //buffer.append("\t<address>");
                         start = false;
                     }
 
@@ -493,49 +480,50 @@ public class MedicParser extends AbstractParser {
                         testClosingTag(buffer, currentTag0, lastTag0);
 
 
-                    String output = writeField(s1, lastTag0, s2, "<idno>", "<idno>", addSpace, 0);
+                    String output = writeField(s1, lastTag0, s2, "<streetnumber>", "<streetNumber>", addSpace, 0);
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<rolename>", "<roleName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<streetname>", "<streetName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<buildingnumber>", "<buildingNumber>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<affiliation>", "<affiliation>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<buildingname>", "<buildingName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<city>", "<city>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<institution>", "<orgName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<postcode>", "<postCode>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<pobox>", "<poBox>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<community>", "<community>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<district>", "<district>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentnumber>", "<departmentNumber>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentname>", "<departmentName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<region>", "<region>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<settlement>", "<settlement>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"address\">", addSpace, 0);
                     }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<fax>", "<fax>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"medic\">", addSpace, 0);
-                    }
+
                     if (output != null) {
                         buffer.append(output);
                         lastTag = s1;
@@ -552,7 +540,7 @@ public class MedicParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    //buffer.append("</medic>\n");
+                    //buffer.append("</address>\n");
                 }
             }
 
@@ -563,7 +551,7 @@ public class MedicParser extends AbstractParser {
     }
 
     /**
-     * Extract results from a list of medics strings in the training format
+     * Extract results from a list of address strings in the training format
      * without any string modification.
      *
      * @param inputs list of input data
@@ -578,11 +566,8 @@ public class MedicParser extends AbstractParser {
             if (inputs.size() == 0)
                 return null;
 
-            List<OffsetPosition> locationsPositions = null;
-            List<OffsetPosition> titlePositions = null;
-            List<OffsetPosition> suffixPositions = null;
-            List<OffsetPosition> emailPositions = null;
-            List<OffsetPosition> urlPositions = null;
+            List<OffsetPosition> locationPositions = null;
+            List<OffsetPosition> cityNamePositions = null;
 
             for (String input : inputs) {
                 if (input == null)
@@ -592,14 +577,11 @@ public class MedicParser extends AbstractParser {
                 if (tokenizations.size() == 0)
                     return null;
 
-                locationsPositions = lexicon.tokenPositionsLocationNames(tokenizations);
-                titlePositions = lexicon.tokenPositionsPersonTitle(tokenizations);
-                suffixPositions = lexicon.tokenPositionsPersonSuffix(tokenizations);
-                emailPositions = lexicon.tokenPositionsEmailPattern(tokenizations);
-                urlPositions = lexicon.tokenPositionsUrlPattern(tokenizations);
+                locationPositions = lexicon.tokenPositionsLocationNames(tokenizations);
+                cityNamePositions = lexicon.tokenPositionsCityNames(tokenizations);
 
-                String ress = FeaturesVectorMedic.addFeaturesMedic(tokenizations, null,
-                    locationsPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
+                // get the features for the address
+                String ress = FeaturesVectorAddress.addFeaturesAddress(tokenizations, null, locationPositions, cityNamePositions);
                 String res = label(ress);
 
                 String lastTag = null;
@@ -617,7 +599,7 @@ public class MedicParser extends AbstractParser {
                     String tok = st.nextToken().trim();
 
                     if (tok.length() == 0) {
-                        // new medic
+                        // new address
                         start = true;
                         continue;
                     }
@@ -628,22 +610,18 @@ public class MedicParser extends AbstractParser {
                     int ll = stt.countTokens();
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
-
-                        // anonymize the token
-                        int idx = dataOriginal.indexOf(s);
-                        if (idx >= 0) {
-                            s = dataAnonymized.get(idx);
-                        }
-
                         if (i == 0) {
+                            for (int j = 0; j < dataOriginal.size(); j++) {
+                                s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                            }
                             s2 = TextUtilities.HTMLEncode(s);
                             //s2 = s;
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                if (dataOriginal.indexOf(tokOriginal) >= 0) {
-                                    tokOriginal = dataAnonymized.get(idx);
+                                for (int j = 0; j < dataOriginal.size(); j++) {
+                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
                                 }
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
@@ -660,7 +638,7 @@ public class MedicParser extends AbstractParser {
                     }
 
                     if (start && (s1 != null)) {
-                        //buffer.append("\t<medic>");
+                        //buffer.append("\t<address>");
                         start = false;
                     }
 
@@ -684,49 +662,50 @@ public class MedicParser extends AbstractParser {
                         testClosingTag(buffer, currentTag0, lastTag0);
 
 
-                    String output = writeField(s1, lastTag0, s2, "<idno>", "<idno>", addSpace, 0);
+                    String output = writeField(s1, lastTag0, s2, "<streetnumber>", "<streetNumber>", addSpace, 0);
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<other>", "", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<rolename>", "<roleName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<streetname>", "<streetName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<persname>", "<persName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<buildingnumber>", "<buildingNumber>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<affiliation>", "<affiliation>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<buildingname>", "<buildingName>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<orgname>", "<orgName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<city>", "<city>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<institution>", "<orgName>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<postcode>", "<postCode>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<address>", "<address>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<pobox>", "<poBox>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<community>", "<community>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<district>", "<district>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentnumber>", "<departmentNumber>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<departmentname>", "<departmentName>", addSpace, 0);
+                    }
+                    if (output == null) {
+                        output = writeField(s1, lastTag0, s2, "<region>", "<region>", addSpace, 0);
                     }
                     if (output == null) {
                         output = writeField(s1, lastTag0, s2, "<country>", "<country>", addSpace, 0);
                     }
                     if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<settlement>", "<settlement>", addSpace, 0);
+                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"address\">", addSpace, 0);
                     }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<email>", "<email>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<phone>", "<phone>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<fax>", "<fax>", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace, 0);
-                    }
-                    if (output == null) {
-                        output = writeField(s1, lastTag0, s2, "<note>", "<note type=\"medic\">", addSpace, 0);
-                    }
+
                     if (output != null) {
                         buffer.append(output);
                         lastTag = s1;
@@ -743,7 +722,7 @@ public class MedicParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    //buffer.append("</medic>\n");
+                    //buffer.append("</address>\n");
                 }
             }
 
@@ -786,32 +765,32 @@ public class MedicParser extends AbstractParser {
             // we close the current tag
             if (lastTag0.equals("<other>")) {
                 buffer.append("");
-            } else if (lastTag0.equals("<idno>")) {
-                buffer.append("</idno>");
-            } else if (lastTag0.equals("<rolename>")) {
-                buffer.append("</roleName>");
-            } else if (lastTag0.equals("<persname>")) {
-                buffer.append("</persName>");
-            } else if (lastTag0.equals("<affiliation>")) {
-                buffer.append("</affiliation>");
-            } else if (lastTag0.equals("<orgname>")) {
-                buffer.append("</orgName>");
-            } else if (lastTag0.equals("<institution>")) {
-                buffer.append("</orgName>");
-            } else if (lastTag0.equals("<address>")) {
-                buffer.append("</address>");
+            } else if (lastTag0.equals("<streetnumber>")) {
+                buffer.append("</streetNumber>");
+            } else if (lastTag0.equals("<streetname>")) {
+                buffer.append("</streetName>");
+            } else if (lastTag0.equals("<buildingnumber>")) {
+                buffer.append("</buildingNumber>");
+            } else if (lastTag0.equals("<buildingname>")) {
+                buffer.append("</buildingName>");
+            } else if (lastTag0.equals("<city>")) {
+                buffer.append("</city>");
+            } else if (lastTag0.equals("<postcode>")) {
+                buffer.append("</postCode>");
+            } else if (lastTag0.equals("<pobox>")) {
+                buffer.append("</poBox>");
+            } else if (lastTag0.equals("<community>")) {
+                buffer.append("</community>");
+            } else if (lastTag0.equals("<district>")) {
+                buffer.append("</district>");
+            } else if (lastTag0.equals("<departmentnumber>")) {
+                buffer.append("</departmentNumber>");
+            } else if (lastTag0.equals("<departmentname>")) {
+                buffer.append("</departmentName>");
+            } else if (lastTag0.equals("<region>")) {
+                buffer.append("</region>");
             } else if (lastTag0.equals("<country>")) {
                 buffer.append("</country>");
-            } else if (lastTag0.equals("<settlement>")) {
-                buffer.append("</settlement>");
-            } else if (lastTag0.equals("<email>")) {
-                buffer.append("</email>");
-            } else if (lastTag0.equals("<phone>")) {
-                buffer.append("</phone>");
-            } else if (lastTag0.equals("<fax>")) {
-                buffer.append("</fax>");
-            } else if (lastTag0.equals("<web>")) {
-                buffer.append("</ptr>");
             } else if (lastTag0.equals("<note>")) {
                 buffer.append("</note>");
             } else {
@@ -823,8 +802,7 @@ public class MedicParser extends AbstractParser {
     }
 
     /**
-     * In the context of field extraction, check if a newly extracted content is not redundant
-     * with the already extracted content
+     * In the context of field extraction, check if a newly extracted content is not redundant with the already extracted content
      */
     private boolean isDifferentContent(String existingContent, String newContent) {
         if (existingContent == null) {

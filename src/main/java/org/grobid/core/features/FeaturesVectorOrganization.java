@@ -158,7 +158,7 @@ public class FeaturesVectorOrganization {
     }
 
     /**
-     * Add feature for organization parsing.
+     * Add features for the organization model.
      */
     static public String addFeaturesOrganization(List<LayoutToken> tokens,
                                           List<String> labels,

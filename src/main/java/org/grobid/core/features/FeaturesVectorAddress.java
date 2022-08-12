@@ -1,37 +1,41 @@
 package org.grobid.core.features;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.core.utilities.TextUtilities;
 import org.grobid.core.utilities.UnicodeUtil;
 
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 
 /**
- * Class for features used for parsing sequence of names.
- *
- * Taken and adapted from the class FeaturesVectorName
- *
+ * Class for features used for parsing sequence of address.
+ * <p>
  * Tanti, 2022
- *
  */
-public class FeaturesVectorPersonName {
+public class FeaturesVectorAddress {
     public String string = null; // lexical feature
     public String label = null; // label if known
     public String lineStatus = null; // one of LINESTART, LINEIN, LINEEND
     public String capitalisation = null; // one of INITCAP, ALLCAPS, NOCAPS
     public String digit;  // one of ALLDIGIT, CONTAINDIGIT, NODIGIT
     public boolean singleChar = false;
+    public boolean properName = false;
     public boolean commonName = false;
     public boolean firstName = false;
     public boolean lastName = false;
+    public boolean locationName = false;
+    public boolean countryName = false;
     public String punctType = null;
+    public String wordShape = null;
     // one of NOPUNCT, OPENBRACKET, ENDBRACKET, DOT, COMMA, HYPHEN, QUOTE, PUNCT (default)
 
-    public boolean isKnownTitle = false;
-    public boolean isKnownSuffix = false;
+    // true if the token is part of a predefinied name (single or multi-token)
+    public boolean isLocationToken = false;
+    public boolean isCityNameToken = false;
 
     public String printVector() {
         if (string == null) return null;
@@ -75,6 +79,11 @@ public class FeaturesVectorPersonName {
             res.append(" 0");
 
         // lexical information (3)
+        if (properName)
+            res.append(" 1");
+        else
+            res.append(" 0");
+
         if (commonName)
             res.append(" 1");
         else
@@ -90,18 +99,20 @@ public class FeaturesVectorPersonName {
         else
             res.append(" 0");
 
-        if (isKnownTitle)
+        if (locationName)
             res.append(" 1");
         else
             res.append(" 0");
 
-        if (isKnownSuffix)
+        if (countryName)
             res.append(" 1");
         else
             res.append(" 0");
 
         // punctuation information (1)
         res.append(" " + punctType); // in case the token is a punctuation (NO otherwise)
+
+        res.append(" ").append(wordShape);
 
         // label - for training data (1)
         if (label != null)
@@ -113,30 +124,30 @@ public class FeaturesVectorPersonName {
     }
 
     /**
-     * Add features for the person name model.
+     * Add features for the address model.
      */
-    static public String addFeaturesName(List<LayoutToken> tokens, List<String> labels,
-            List<OffsetPosition> titlePosition, List<OffsetPosition> suffixPosition) throws Exception {
+    static public String addFeaturesAddress(List<LayoutToken> tokens, List<String> labels,
+                                            List<OffsetPosition> locationPositions, List<OffsetPosition> cityNamePositions) throws Exception {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
 
         StringBuffer name = new StringBuffer();
         boolean newline = true;
         String previousTag = null;
         String previousText = null;
-        FeaturesVectorName features = null;
+        FeaturesVectorAddress features = null;
         LayoutToken token = null;
 
-        int currentTitlePosition = 0;
-        int currentSuffixPosition = 0;
+        int currentLocationPosition = 0;
+        int currentCityNamePosition = 0;
 
-        boolean isTitleToken;
-        boolean isSuffixToken;
+        boolean isLocationToken;
+        boolean isCityNameToken;
         boolean skipTest;
 
-        for(int n=0; n<tokens.size(); n++) {
+        for (int n = 0; n < tokens.size(); n++) {
             boolean outputLineStatus = false;
-            isTitleToken = false;
-            isSuffixToken = false;
+            isLocationToken = false;
+            isCityNameToken = false;
             skipTest = false;
 
             token = tokens.get(n);
@@ -154,27 +165,27 @@ public class FeaturesVectorPersonName {
 
             // remove spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+            if (text.trim().length() == 0) {
                 continue;
             }
 
             // check the position of matched title
-            if ((titlePosition != null) && (titlePosition.size() > 0)) {
-                if (currentTitlePosition == titlePosition.size() - 1) {
-                    if (titlePosition.get(currentTitlePosition).end < n) {
+            if ((locationPositions != null) && (locationPositions.size() > 0)) {
+                if (currentLocationPosition == locationPositions.size() - 1) {
+                    if (locationPositions.get(currentLocationPosition).end < n) {
                         skipTest = true;
                     }
                 }
                 if (!skipTest) {
-                    for (int i = currentTitlePosition; i < titlePosition.size(); i++) {
-                        if ((titlePosition.get(i).start <= n) &&
-                                (titlePosition.get(i).end >= n)) {
-                            isTitleToken = true;
-                            currentTitlePosition = i;
+                    for (int i = currentLocationPosition; i < locationPositions.size(); i++) {
+                        if ((locationPositions.get(i).start <= n) &&
+                            (locationPositions.get(i).end >= n)) {
+                            isLocationToken = true;
+                            currentLocationPosition = i;
                             break;
-                        } else if (titlePosition.get(i).start > n) {
-                            isTitleToken = false;
-                            currentTitlePosition = i;
+                        } else if (locationPositions.get(i).start > n) {
+                            isLocationToken = false;
+                            currentLocationPosition = i;
                             break;
                         }
                     }
@@ -182,22 +193,22 @@ public class FeaturesVectorPersonName {
             }
             // check the position of matched suffix
             skipTest = false;
-            if (suffixPosition != null) {
-                if (currentSuffixPosition == suffixPosition.size() - 1) {
-                    if (suffixPosition.get(currentSuffixPosition).end < n) {
+            if (cityNamePositions != null) {
+                if (currentCityNamePosition == cityNamePositions.size() - 1) {
+                    if (cityNamePositions.get(currentCityNamePosition).end < n) {
                         skipTest = true;
                     }
                 }
                 if (!skipTest) {
-                    for (int i = currentSuffixPosition; i < suffixPosition.size(); i++) {
-                        if ((suffixPosition.get(i).start <= n) &&
-                                (suffixPosition.get(i).end >= n)) {
-                            isSuffixToken = true;
-                            currentSuffixPosition = i;
+                    for (int i = currentCityNamePosition; i < cityNamePositions.size(); i++) {
+                        if ((cityNamePositions.get(i).start <= n) &&
+                            (cityNamePositions.get(i).end >= n)) {
+                            isCityNameToken = true;
+                            currentCityNamePosition = i;
                             break;
-                        } else if (suffixPosition.get(i).start > n) {
-                            isSuffixToken = false;
-                            currentSuffixPosition = i;
+                        } else if (cityNamePositions.get(i).start > n) {
+                            isCityNameToken = false;
+                            currentCityNamePosition = i;
                             break;
                         }
                     }
@@ -213,7 +224,7 @@ public class FeaturesVectorPersonName {
                 continue;
             }
 
-            features = new FeaturesVectorName();
+            features = new FeaturesVectorAddress();
             features.string = text;
 
             if (newline) {
@@ -320,12 +331,12 @@ public class FeaturesVectorPersonName {
             if (features.punctType == null)
                 features.punctType = "NOPUNCT";
 
-            if (isTitleToken) {
-                features.isKnownTitle = true;
+            if (isLocationToken) {
+                features.isLocationToken = true;
             }
 
-            if (isSuffixToken) {
-                features.isKnownSuffix = true;
+            if (isCityNameToken) {
+                features.isCityNameToken = true;
             }
 
             features.label = tag;
@@ -342,29 +353,29 @@ public class FeaturesVectorPersonName {
     /**
      * Add features for name parsing.
      */
-    static public String addFeaturesNameAnonym(List<LayoutToken> tokens, List<String> labels,
-                                         List<OffsetPosition> titlePosition, List<OffsetPosition> suffixPosition,
-                                         List<String> dataOriginal, List<String> dataAnonymized) throws Exception {
+    static public String addFeaturesAddressAnonym(List<LayoutToken> tokens, List<String> labels,
+                                               List<OffsetPosition> locationPositions, List<OffsetPosition> cityNamePositions,
+                                               List<String> dataOriginal, List<String> dataAnonymized) throws Exception {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
 
         StringBuffer name = new StringBuffer();
         boolean newline = true;
         String previousTag = null;
         String previousText = null;
-        FeaturesVectorName features = null;
+        FeaturesVectorAddress features = null;
         LayoutToken token = null;
 
-        int currentTitlePosition = 0;
-        int currentSuffixPosition = 0;
+        int currentLocationPosition = 0;
+        int currentCityNamePosition = 0;
 
-        boolean isTitleToken;
-        boolean isSuffixToken;
+        boolean isLocationToken;
+        boolean isCityNameToken;
         boolean skipTest;
 
-        for(int n=0; n<tokens.size(); n++) {
+        for (int n = 0; n < tokens.size(); n++) {
             boolean outputLineStatus = false;
-            isTitleToken = false;
-            isSuffixToken = false;
+            isLocationToken = false;
+            isCityNameToken = false;
             skipTest = false;
 
             token = tokens.get(n);
@@ -381,34 +392,34 @@ public class FeaturesVectorPersonName {
             }
 
             // anonymize the data
-            int idxFound =  dataOriginal.indexOf(text.trim());
-            if (idxFound >=0) {
+            int idxFound = dataOriginal.indexOf(text.trim());
+            if (idxFound >= 0) {
                 text = dataAnonymized.get(idxFound);
             }
 
             // remove blank spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+            if (text.trim().length() == 0) {
                 continue;
             }
 
             // check the position of matched title
-            if ((titlePosition != null) && (titlePosition.size() > 0)) {
-                if (currentTitlePosition == titlePosition.size() - 1) {
-                    if (titlePosition.get(currentTitlePosition).end < n) {
+            if ((locationPositions != null) && (locationPositions.size() > 0)) {
+                if (currentLocationPosition == locationPositions.size() - 1) {
+                    if (locationPositions.get(currentLocationPosition).end < n) {
                         skipTest = true;
                     }
                 }
                 if (!skipTest) {
-                    for (int i = currentTitlePosition; i < titlePosition.size(); i++) {
-                        if ((titlePosition.get(i).start <= n) &&
-                            (titlePosition.get(i).end >= n)) {
-                            isTitleToken = true;
-                            currentTitlePosition = i;
+                    for (int i = currentLocationPosition; i < locationPositions.size(); i++) {
+                        if ((locationPositions.get(i).start <= n) &&
+                            (locationPositions.get(i).end >= n)) {
+                            isLocationToken = true;
+                            currentLocationPosition = i;
                             break;
-                        } else if (titlePosition.get(i).start > n) {
-                            isTitleToken = false;
-                            currentTitlePosition = i;
+                        } else if (locationPositions.get(i).start > n) {
+                            isLocationToken = false;
+                            currentLocationPosition = i;
                             break;
                         }
                     }
@@ -416,28 +427,27 @@ public class FeaturesVectorPersonName {
             }
             // check the position of matched suffix
             skipTest = false;
-            if (suffixPosition != null) {
-                if (currentSuffixPosition == suffixPosition.size() - 1) {
-                    if (suffixPosition.get(currentSuffixPosition).end < n) {
+            if (cityNamePositions != null) {
+                if (currentCityNamePosition == cityNamePositions.size() - 1) {
+                    if (cityNamePositions.get(currentCityNamePosition).end < n) {
                         skipTest = true;
                     }
                 }
                 if (!skipTest) {
-                    for (int i = currentSuffixPosition; i < suffixPosition.size(); i++) {
-                        if ((suffixPosition.get(i).start <= n) &&
-                            (suffixPosition.get(i).end >= n)) {
-                            isSuffixToken = true;
-                            currentSuffixPosition = i;
+                    for (int i = currentCityNamePosition; i < cityNamePositions.size(); i++) {
+                        if ((cityNamePositions.get(i).start <= n) &&
+                            (cityNamePositions.get(i).end >= n)) {
+                            isCityNameToken = true;
+                            currentCityNamePosition = i;
                             break;
-                        } else if (suffixPosition.get(i).start > n) {
-                            isSuffixToken = false;
-                            currentSuffixPosition = i;
+                        } else if (cityNamePositions.get(i).start > n) {
+                            isCityNameToken = false;
+                            currentCityNamePosition = i;
                             break;
                         }
                     }
                 }
             }
-
             String tag = null;
             if (!CollectionUtils.isEmpty(labels) && (labels.size() > n)) {
                 tag = labels.get(n);
@@ -447,7 +457,7 @@ public class FeaturesVectorPersonName {
                 continue;
             }
 
-            features = new FeaturesVectorName();
+            features = new FeaturesVectorAddress();
             features.string = text;
 
             if (newline) {
@@ -554,12 +564,12 @@ public class FeaturesVectorPersonName {
             if (features.punctType == null)
                 features.punctType = "NOPUNCT";
 
-            if (isTitleToken) {
-                features.isKnownTitle = true;
+            if (isLocationToken) {
+                features.isLocationToken = true;
             }
 
-            if (isSuffixToken) {
-                features.isKnownSuffix = true;
+            if (isCityNameToken) {
+                features.isCityNameToken = true;
             }
 
             features.label = tag;

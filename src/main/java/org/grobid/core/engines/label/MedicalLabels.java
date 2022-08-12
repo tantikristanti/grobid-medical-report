@@ -27,6 +27,7 @@ public class MedicalLabels extends TaggingLabels {
 
     // grobid-medical-report specific labels
     public final static String ID_NUMBER_LABEL = "<idno>";
+    public final static String ID_TYPELABEL = "<idtype>";
     public final static String DOCNUM_LABEL = "<docnum>";
     public static final String DOCTYPE_LABEL = "<doctype>";
     public final static String TITLE_LABEL = "<title>";
@@ -63,6 +64,17 @@ public class MedicalLabels extends TaggingLabels {
     public static final String UNIT_LABEL = "<unit>";
     public static final String ADMINISTRATION_LABEL = "<administration>";
     public static final String SUB_LABEL = "<sub>";
+    public static final String STREET_NUMBER_LABEL = "<streetnumber>";
+    public static final String STREET_NAME_LABEL = "<entrancenumber>";
+    public static final String BUILDING_NUMBER_LABEL = "<buildingnumber>";
+    public static final String BUILDING_NAME_LABEL = "<buildingname>";
+    public static final String CITY_LABEL = "<city>";
+    public static final String POST_CODE_LABEL = "<postcode>";
+    public static final String PO_BOX_LABEL = "<pobox>";
+    public static final String DISTRICT_LABEL = "<district>";
+    public static final String COMMUNITY_LABEL = "<community>";
+    public static final String DEPARTMENT_NUMBER_LABEL = "<departementnumber>";
+    public static final String DEPARTMENT_NAME_LABEL = "<departementname>";
 
     // particularly, for the NER medical model
     public static final String ANATOMY_LABEL = "<anatomy>";
@@ -95,7 +107,9 @@ public class MedicalLabels extends TaggingLabels {
     public static final String PERSON_NAME_LABEL = "<persname>";
     public static final String PERSON_TYPE_LABEL = "<perstype>";
     public static final String PERSON_SEX_LABEL = "<sex>";
-    public static final String PERSON_BIRTH_LABEL = "<birth>";
+    public static final String PERSON_BIRTH_DATE_LABEL = "<birthdate>";
+    public static final String PERSON_AGE = "<age>";
+    public static final String PERSON_BIRTH_PLACE_LABEL = "<birthplace>";
     public static final String PERSON_DEATH_LABEL = "<death>";
 
     // names
@@ -227,15 +241,35 @@ public class MedicalLabels extends TaggingLabels {
 
     // Patient
     public static final TaggingLabel PATIENT_ID = new TaggingLabelImpl(GrobidModels.PATIENT, ID_NUMBER_LABEL);
+    public static final TaggingLabel PATIENT_ID_TYPE = new TaggingLabelImpl(GrobidModels.PATIENT, ID_TYPELABEL);
     public static final TaggingLabel PATIENT_NAME = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_NAME_LABEL);
     public static final TaggingLabel PATIENT_SEX = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_SEX_LABEL);
-    public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_LABEL);
+    public static final TaggingLabel PATIENT_DATE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_DATE_LABEL);
+    public static final TaggingLabel PATIENT_AGE = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_AGE);
+    public static final TaggingLabel PATIENT_PLACE_BIRTH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_BIRTH_PLACE_LABEL);
     public static final TaggingLabel PATIENT_DATE_DEATH = new TaggingLabelImpl(GrobidModels.PATIENT, PERSON_DEATH_LABEL);
     public static final TaggingLabel PATIENT_ADDRESS = new TaggingLabelImpl(GrobidModels.PATIENT, ADDRESS_LABEL);
     public static final TaggingLabel PATIENT_COUNTRY = new TaggingLabelImpl(GrobidModels.PATIENT, COUNTRY_LABEL);
     public static final TaggingLabel PATIENT_TOWN = new TaggingLabelImpl(GrobidModels.PATIENT, SETTLEMENT_LABEL);
     public static final TaggingLabel PATIENT_PHONE = new TaggingLabelImpl(GrobidModels.PATIENT, PHONE_LABEL);
+    public static final TaggingLabel PATIENT_EMAIL = new TaggingLabelImpl(GrobidModels.PATIENT, EMAIL_LABEL);
     public static final TaggingLabel PATIENT_NOTE = new TaggingLabelImpl(GrobidModels.PATIENT, NOTE_LABEL);
+
+    // Address
+    public static final TaggingLabel ADDRESS_STREET_NUMBER = new TaggingLabelImpl(GrobidModels.ADDRESS, STREET_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_STREET_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, STREET_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_BUILDING_NUMBER = new TaggingLabelImpl(GrobidModels.MEDIC, BUILDING_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_BUILDING_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, BUILDING_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_CITY = new TaggingLabelImpl(GrobidModels.MEDIC, CITY_LABEL);
+    public static final TaggingLabel ADDRESS_POST_CODE = new TaggingLabelImpl(GrobidModels.MEDIC, POST_CODE_LABEL);
+    public static final TaggingLabel ADDRESS_PO_BOX = new TaggingLabelImpl(GrobidModels.MEDIC, PO_BOX_LABEL);
+    public static final TaggingLabel ADDRESS_COMMUNITY= new TaggingLabelImpl(GrobidModels.MEDIC, COMMUNITY_LABEL);
+    public static final TaggingLabel ADDRESS_DISTRICT = new TaggingLabelImpl(GrobidModels.MEDIC, DISTRICT_LABEL);
+    public static final TaggingLabel ADDRESS_DEPARTMENT_NUMBER = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_NUMBER_LABEL);
+    public static final TaggingLabel ADDRESS_DEPARTMENT_NAME = new TaggingLabelImpl(GrobidModels.MEDIC, DEPARTMENT_NAME_LABEL);
+    public static final TaggingLabel ADDRESS_REGION = new TaggingLabelImpl(GrobidModels.MEDIC, REGION_LABEL);
+    public static final TaggingLabel ADDRESS_COUNTRY = new TaggingLabelImpl(GrobidModels.MEDIC, COUNTRY_LABEL);
+    public static final TaggingLabel ADDRESS_NOTE= new TaggingLabelImpl(GrobidModels.MEDIC, NOTE_LABEL);
 
     // Names
     public static final TaggingLabel NAMES_TITLE = new TaggingLabelImpl(GrobidModels.NAMES_PERSON_MEDICAL, TITLE_LABEL);
@@ -380,6 +414,22 @@ public class MedicalLabels extends TaggingLabels {
         register(PATIENT_TOWN);
         register(PATIENT_PHONE);
         register(PATIENT_NOTE);
+
+        // address
+        register(ADDRESS_STREET_NUMBER);
+        register(ADDRESS_STREET_NAME);
+        register(ADDRESS_BUILDING_NUMBER);
+        register(ADDRESS_BUILDING_NAME);
+        register(ADDRESS_CITY);
+        register(ADDRESS_POST_CODE);
+        register(ADDRESS_PO_BOX);
+        register(ADDRESS_COMMUNITY);
+        register(ADDRESS_DISTRICT);
+        register(ADDRESS_DEPARTMENT_NUMBER);
+        register(ADDRESS_DEPARTMENT_NAME);
+        register(ADDRESS_REGION);
+        register(ADDRESS_COUNTRY);
+        register(ADDRESS_NOTE);
 
         // person's name
         register(NAMES_TITLE);

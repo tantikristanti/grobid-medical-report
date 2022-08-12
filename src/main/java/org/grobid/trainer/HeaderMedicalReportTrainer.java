@@ -25,12 +25,12 @@ import java.util.StringTokenizer;
  *
  * @ Tanti, 2020
  */
-public class HeaderMedicalReportTrainer extends AbstractTrainer{
+public class HeaderMedicalReportTrainer extends AbstractTrainer {
 
     public HeaderMedicalReportTrainer() {
         super(GrobidModels.HEADER_MEDICAL_REPORT);
     }
-    
+
     @Override
     public int createCRFPPData(File corpusPath, File trainingOutputPath) {
         return addFeaturesHeaders(corpusPath.getAbsolutePath() + "/tei",
@@ -41,14 +41,10 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
     /**
      * Add the selected features to a header example set
      *
-     * @param corpusDir
-     *            a path where corpus files are located
-     * @param trainingOutputPath
-     *            path where to store the temporary training data
-     * @param evalOutputPath
-     *            path where to store the temporary evaluation data
-     * @param splitRatio
-     *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @param corpusDir          a path where corpus files are located
+     * @param trainingOutputPath path where to store the temporary training data
+     * @param evalOutputPath     path where to store the temporary evaluation data
+     * @param splitRatio         ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
      * @return the total number of used corpus items
      */
     @Override
@@ -65,8 +61,9 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
 
     /**
      * Add the selected features to the header model training
-     * @param sourceFile source path
-     * @param headerPath header path
+     *
+     * @param sourceFile         source path
+     * @param headerPath         header path
      * @param trainingOutputPath output training file
      * @return number of corpus files
      */
@@ -143,12 +140,15 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
                 for (File aRefFiles2 : refFiles2) {
                     String localFileName = aRefFiles2.getName();
                     if (localFileName.equals(parser2.getPDFName() + ".header.medical") ||
-                        localFileName.equals(parser2.getPDFName() + ".training.header.medical")) {
+                        localFileName.equals(parser2.getPDFName() + ".training.header.medical") ||
+                        localFileName.equals(parser2.getPDFName() + ".anonym.training.header.medical")) {
                         headerFile = localFileName;
                         break;
                     }
                     if ((localFileName.startsWith(parser2.getPDFName() + "._")) &&
-                        (localFileName.endsWith(".header.medical") || localFileName.endsWith(".training.header.medical"))) {
+                        (localFileName.endsWith(".header.medical") ||
+                            localFileName.endsWith(".training.header.medical") ||
+                            localFileName.endsWith(".anonym.training.header.medical"))) {
                         headerFile = localFileName;
                         break;
                     }
@@ -268,9 +268,9 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
                     header2.append("\n");
                 }
 
-                if ( (writer2 == null) && (writer3 != null) )
+                if ((writer2 == null) && (writer3 != null))
                     writer3.write(header2.toString() + "\n");
-                if ( (writer2 != null) && (writer3 == null) )
+                if ((writer2 != null) && (writer3 == null))
                     writer2.write(header2.toString() + "\n");
                 else {
                     if (Math.random() <= splitRatio)
@@ -307,7 +307,7 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
@@ -316,7 +316,7 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer{
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
-            System.out.println(">>>>>>>> GROBID_HOME="+GrobidProperties.getInstance().getGrobidHome());
+            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
         } catch (final Exception exp) {
             System.err.println("grobid-medical-report initialisation failed: " + exp);
             exp.printStackTrace();

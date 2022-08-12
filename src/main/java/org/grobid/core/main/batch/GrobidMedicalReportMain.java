@@ -121,11 +121,10 @@ public class GrobidMedicalReportMain {
     }*/
 
     /**
-     * Init process with the provided grobid-home or  default value of the grobid home
-     *
+     * Init GROBID by loading the configuration and the native libraries.
      * @param grobidHome
      */
-    protected static void initProcess(String grobidHome) {
+    protected static void initGrobid(String grobidHome) {
         MedicalReportConfiguration medicalReportConfiguration = null;
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -141,8 +140,9 @@ public class GrobidMedicalReportMain {
 
             System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
 
-            for (ModelParameters theModel : medicalReportConfiguration.getModels())
+            for (ModelParameters theModel : medicalReportConfiguration.getModels()) {
                 GrobidProperties.getInstance().addModel(theModel);
+            }
 
             LibraryLoader.load();
         } catch (final Exception exp) {
@@ -261,67 +261,14 @@ public class GrobidMedicalReportMain {
         if (processArgs(args)) {
             inferParamsNotSet();
             if (isNotEmpty(gbdArgs.getPath2grobidHome())) {
-                initProcess(gbdArgs.getPath2grobidHome());
+                initGrobid(gbdArgs.getPath2grobidHome());
             } else {
                 LOGGER.warn("Grobid home not provided, using default. ");
-                initProcess(null);
+                initGrobid(null);
             }
             ProcessEngineMedical processEngine = new ProcessEngineMedical();
             Utilities.launchMethod(processEngine, new Object[] { gbdArgs }, gbdArgs.getProcessMethodName());
             processEngine.close();
         }
-
-        /*if (processArgs(args) && (gbdArgs.getProcessMethodName() != null)) {
-            inferParamsNotSet();
-            if (isNotEmpty(gbdArgs.getPath2grobidHome())) {
-                initProcess(gbdArgs.getPath2grobidHome());
-            } else {
-                LOGGER.warn("Grobid home not provided, using default. ");
-                initProcess(null);
-            }
-
-            int nb = 0;
-            long time = System.currentTimeMillis();
-
-            EngineMedicalParsers parsers = new EngineMedicalParsers();
-
-            if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "training", -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "blank",-1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_SEGMENTATION)) {
-                nb = parsers.getMedicalReportSegmenterParser().createTrainingMedicalSegmentationBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), "anonym",-1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL_BLANK)) {
-                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true, -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_FULL)) {
-                nb = parsers.getFullMedicalTextParser().createTrainingFullMedicalTextBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false, -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER_BLANK)) {
-                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true, -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_HEADER)) {
-                nb = parsers.getHeaderMedicalParser().createTrainingMedicalHeaderBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false, -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK)) {
-                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), true,-1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_TRAINING_LEFT_NOTE)) {
-                nb = parsers.getLeftNoteMedicalParser().createTrainingMedicalLeftNoteBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), false,-1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_FULL_TEXT)) {
-                nb = parsers.getFullMedicalTextParser().processFullTextDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(),
-                    gbdArgs.isRecursive(), gbdArgs.getSaveAssets(), gbdArgs.getTeiCoordinates(), gbdArgs.getSegmentSentences(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_HEADER)) {
-                nb = parsers.getHeaderMedicalParser().processHeaderDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_PROCESS_LEFT_NOTE)) {
-                nb = parsers.getLeftNoteMedicalParser().processLeftNoteDirectory(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_CREATE_MEDICAL_NER_TRAINING)) {
-                // create training data using French Medical NER model (built on the Corpus QUAERO)
-                nb = parsers.getFrenchMedicalNERParser().createTrainingFrenchMedicalNerBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-
-            } else if (gbdArgs.getProcessMethodName().equals(COMMAND_EXTRACT_NER)) {
-                // process NER using grobid-ner model
-                nb = parsers.getFrMedicalNERParser().processNERBatch(gbdArgs.getPath2Input(), gbdArgs.getPath2Output(), -1);
-            } else {
-                throw new RuntimeException("Command not yet implemented.");
-            }
-            LOGGER.info(nb + " files processed in " + (System.currentTimeMillis() - time) + " milliseconds");
-            parsers.close();
-        }*/
     }
 }

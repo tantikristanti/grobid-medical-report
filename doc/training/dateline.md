@@ -2,9 +2,9 @@
 
 ## Introduction
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-In __grobid-medical-report__, the __dateline__ corresponds to the date information combined with other information such as locations, name of days, and time. 
+To identify the dateline (`<dateline>`) element, see the annotation guidelines of the [header-medical-report](header-medical-report.md) model.
 
 For the dateline model, we use the following TEI elements:
 
@@ -15,7 +15,9 @@ For the dateline model, we use the following TEI elements:
   * `<note type="doctype">` for the document type
   * `<note type="date">` for short notes of date
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding. 
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __dateline__ model in `grobid/grobid-trainer/resources/dataset/dateline/corpus/` or `grobid/grobid-trainer/resources/dataset/dateline/evaluation/`.
 
 ## Analysis
 
@@ -28,7 +30,7 @@ Dates are enclosed in a [\<date\>](https://www.tei-c.org/release/doc/tei-p5-doc/
 
 For example:
 ```xml
-    Examen reçu le : <date>01/01/2020</date> <lb/>
+    Examen reçu le : <dateline><date>01/01/2020</date> <lb/> à <placeName>Paris</placeName></dateline> 
 ```
 
 ### Times
@@ -48,7 +50,7 @@ For example:
 ```
 
 ### Notes
-Place names are enclosed in a [\<note\>](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-note.html) element.
+Notes are enclosed in a [\<note\>](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-note.html) element.
 
 For example:
 ```xml

@@ -158,7 +158,7 @@ public class FeaturesVectorMedic {
     }
 
     /**
-     * Add feature for medic parsing.
+     * Add features for the medic model.
      */
     static public String addFeaturesMedic(List<LayoutToken> tokens,
                                           List<String> labels,
@@ -543,12 +543,15 @@ public class FeaturesVectorMedic {
                 continue;
             }
 
-            // remove blank spaces
-            for (int i=0; i<dataOriginal.size(); i++) {
-                text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+            // anonymize the data
+            int idxFound =  dataOriginal.indexOf(text.trim());
+            if (idxFound >=0) {
+                text = dataAnonymized.get(idxFound);
             }
+
+            // remove blank spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+            if (text.trim().length() == 0) {
                 continue;
             }
 

@@ -94,7 +94,7 @@ public class HeaderMedicalParser extends AbstractParser {
             Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
             // then take only the header and left note parts for further process with this method
-            String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote,  true);
+            String tei = processingHeaderLeftNoteSection(config, doc, resHeader, resLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -250,15 +250,13 @@ public class HeaderMedicalParser extends AbstractParser {
                                         if (medicSegments.get(k).size() == 0)
                                             continue;
                                         // further medics processing with the Medic model
-                                        List<Medic> localMedics = parsers.getMedicParser()
+                                        Medic localMedics = parsers.getMedicParser()
                                             .processingWithLayoutTokens(medicSegments.get(k));
 
-                                        for (Medic medic : localMedics) {
-                                            // TBD : remove duplicate names and information related to it
-                                            //see how it works wit PersonMedical.deduplicate()
-                                            // add new medic to the medics item
-                                            resHeader.addMedic(medic);
-                                        }
+                                        // TBD : remove duplicate names and information related to it
+                                        //see how it works wit PersonMedical.deduplicate()
+                                        // add new medic to the medics item
+                                        resHeader.addMedic(localMedics);
                                     }
                                 }
                             }
@@ -287,31 +285,29 @@ public class HeaderMedicalParser extends AbstractParser {
                                             continue;
 
                                         // further patient processing with the Patient model
-                                        List<Patient> localPatients = parsers.getPatientParser()
+                                        Patient localPatients = parsers.getPatientParser()
                                             .processingWithLayoutTokens(patientSegments.get(k));
 
-                                        for (Patient patient : localPatients) {
-                                            // normalization of all birth and death dates of patients
+                                        // normalization of all birth and death dates of patients
 
-                                            if (patient.getDateBirth() != null) {
+                                        if (localPatients.getDateBirth() != null) {
 
-                                                Optional<Date> normalisedDate = getNormalizedDate(patient.getDateBirth());
-                                                if (normalisedDate.isPresent()) {
-                                                    patient.setDateBirth(toISOString(normalisedDate.get())); // yyyy-mm-dd
-                                                }
-
+                                            Optional<Date> normalisedDate = getNormalizedDate(localPatients.getDateBirth());
+                                            if (normalisedDate.isPresent()) {
+                                                localPatients.setDateBirth(toISOString(normalisedDate.get())); // yyyy-mm-dd
                                             }
-                                            if (patient.getDateDeath() != null) {
-                                                Optional<Date> normalisedDate = getNormalizedDate(patient.getDateDeath());
-                                                if (normalisedDate.isPresent()) {
-                                                    patient.setDateDeath(toISOString(normalisedDate.get()));
-                                                }
-                                            }
-                                            // TBD : remove duplicate names and information related to it
-                                            //see how it works wit PersonMedical.deduplicate()
-                                            // add new medic to the medics item
-                                            resHeader.addPatient(patient);
+
                                         }
+                                        if (localPatients.getDateDeath() != null) {
+                                            Optional<Date> normalisedDate = getNormalizedDate(localPatients.getDateDeath());
+                                            if (normalisedDate.isPresent()) {
+                                                localPatients.setDateDeath(toISOString(normalisedDate.get()));
+                                            }
+                                        }
+                                        // TBD : remove duplicate names and information related to it
+                                        //see how it works wit PersonMedical.deduplicate()
+                                        // add new medic to the medics item
+                                        resHeader.addPatient(localPatients);
                                     }
                                 }
                             }
@@ -408,13 +404,11 @@ public class HeaderMedicalParser extends AbstractParser {
                                         if (medicSegments.get(k).size() == 0)
                                             continue;
                                         // further medics processing with the Medic model
-                                        List<Medic> localMedics = parsers.getMedicParser()
+                                        Medic localMedics = parsers.getMedicParser()
                                             .processingWithLayoutTokens(medicSegments.get(k));
 
-                                        for (Medic medic : localMedics) {
-                                            // add new medic
-                                            resLeftNote.addMedic(medic);
-                                        }
+                                        // add new medic
+                                        resLeftNote.addMedic(localMedics);
                                     }
                                 }
                             }
@@ -860,7 +854,7 @@ public class HeaderMedicalParser extends AbstractParser {
      * Return the header section with features to be processed by the sequence labelling model
      */
     public Pair<String, List<LayoutToken>> getSectionHeaderFeaturedAnonym(Document doc,
-                                                                    SortedSet<DocumentPiece> documentHeaderParts,
+                                                                          SortedSet<DocumentPiece> documentHeaderParts,
                                                                           List<String> dataOriginal,
                                                                           List<String> dataAnonymized) {
         FeatureFactory featureFactory = FeatureFactory.getInstance();
@@ -1029,12 +1023,15 @@ public class HeaderMedicalParser extends AbstractParser {
 
                     features = new FeaturesVectorHeaderMedical();
 
-                    for (int i=0; i<dataOriginal.size(); i++) {
-                         text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+                    // anonymize the data
+                    String newText = text;
+                    int idxFound = dataOriginal.indexOf(text.trim());
+                    if (idxFound >= 0) {
+                        newText = dataAnonymized.get(idxFound);
                     }
 
                     features.token = token;
-                    features.string = text;
+                    features.string = newText;
 
                     if (newline)
                         features.lineStatus = "LINESTART";
@@ -1222,10 +1219,6 @@ public class HeaderMedicalParser extends AbstractParser {
                         features.smallestFont = true;
                     if (token.getFontSize() > averageFontSize)
                         features.largerThanAverageFont = true;
-
-                    // not used
-                    /*if (token.isSuperscript())
-                        features.superscript = true;*/
 
                     if (token.isBold())
                         features.bold = true;
@@ -1624,20 +1617,23 @@ public class HeaderMedicalParser extends AbstractParser {
             int ll = stt.countTokens();
             while (stt.hasMoreTokens()) {
                 String s = stt.nextToken().trim();
+
+                // anonymize the token
+                int idx = dataOriginal.indexOf(s);
+                if (idx >= 0) {
+                    s = dataAnonymized.get(idx);
+                }
+
                 if (i == 0) {
-                    for (int j=0; j<dataOriginal.size(); j++) {
-                        s = s.replace(dataOriginal.get(j), dataAnonymized.get(j));
-                    }
                     s2 = TextUtilities.HTMLEncode(s);
                     //s2 = s;
 
                     boolean strop = false;
                     while ((!strop) && (p < tokenizations.size())) {
                         String tokOriginal = tokenizations.get(p).t();
-                        for (int j=0; j<dataOriginal.size(); j++) {
-                            tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                        if (dataOriginal.indexOf(tokOriginal) >= 0) {
+                            tokOriginal = dataAnonymized.get(idx);
                         }
-
                         if (tokOriginal.equals(" ")
                             || tokOriginal.equals("\u00A0")) {
                             addSpace = true;

@@ -2,11 +2,9 @@
 
 ## Introduction
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-In __grobid-medical-report__, __medic__ corresponds to the medic information. 
-
-For identifying the exact pieces of medic information to be part of the `header-medical-report` or `left-note-medical-report`, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
+To identify the medic (`<medic>`) element, see the annotation guidelines of the [header-medical-report](header-medical-report.md), [left-note-medical-report](left-note-medical-report), and [full-medical-text](full-medical-text) models.
 
 For the medic model, we use the following TEI elements:
 
@@ -25,9 +23,9 @@ For the medic model, we use the following TEI elements:
 * `<ptr type="web">` for the web URL 
 * `<note type="medic">` for the notes concerning the medics
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-trainer/resources/dataset/medic`) to see some examples of how these elements should be used.
-
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __medic__ model in `grobid/grobid-trainer/resources/dataset/medic/corpus/` or `grobid/grobid-trainer/resources/dataset/medic/evaluation/`.
 
 ## Analysis
 

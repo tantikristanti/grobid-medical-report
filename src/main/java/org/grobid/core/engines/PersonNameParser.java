@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
  * */
 
 public class PersonNameParser extends AbstractParser {
-	private static Logger LOGGER = LoggerFactory.getLogger(PersonNameParser.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PersonNameParser.class);
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
 
@@ -163,7 +163,7 @@ public class PersonNameParser extends AbstractParser {
      * @return list of patients
      */
     public List<PersonName> resultExtractionLayoutTokens(String result,
-                                                      List<LayoutToken> tokenizations) {
+                                                         List<LayoutToken> tokenizations) {
         List<PersonName> listNames = new ArrayList<>();
         PersonName name = null;
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.NAMES_PERSON_MEDICAL, result, tokenizations);
@@ -300,7 +300,7 @@ public class PersonNameParser extends AbstractParser {
                         i++;
                     }
                     if (start && (s1 != null)) {
-                        buffer.append("\t<name>");
+                        buffer.append("<name>");
                         start = false;
                     }
                     // lastTag, lastTag0 (without I-)
@@ -367,7 +367,7 @@ public class PersonNameParser extends AbstractParser {
     /**
      * Extract results from a dateline string in the training format without any string modification.
      */
-    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String>  dataOriginal, List<String> dataAnonymized) {
+    public StringBuilder trainingExtractionAnonym(List<String> inputs, List<String> dataOriginal, List<String> dataAnonymized) {
         StringBuilder buffer = new StringBuilder();
         try {
             if (inputs == null)
@@ -407,7 +407,7 @@ public class PersonNameParser extends AbstractParser {
                     addSpace = false;
                     String tok = st.nextToken().trim();
                     if (tok.length() == 0) {
-                        // new dateline
+                        // new name
                         start = true;
                         continue;
                     }
@@ -418,17 +418,22 @@ public class PersonNameParser extends AbstractParser {
                     int ll = stt.countTokens();
                     while (stt.hasMoreTokens()) {
                         String s = stt.nextToken().trim();
+
+                        // anonymize the token
+                        int idx = dataOriginal.indexOf(s);
+                        if (idx >= 0) {
+                            s = dataAnonymized.get(idx);
+                        }
+
                         if (i == 0) {
-                            for (int j=0; j<dataOriginal.size(); j++) {
-                                s = s.replace(dataOriginal.get(i), dataAnonymized.get(i));
-                            }
-                            s2 = TextUtilities.HTMLEncode(s); // the token
+                            s2 = TextUtilities.HTMLEncode(s);
+                            //s2 = s;
 
                             boolean strop = false;
                             while ((!strop) && (p < tokenizations.size())) {
                                 String tokOriginal = tokenizations.get(p).t();
-                                for (int j=0; j<dataOriginal.size(); j++) {
-                                    tokOriginal = tokOriginal.replace(dataOriginal.get(j), dataAnonymized.get(j));
+                                if (dataOriginal.indexOf(tokOriginal) >= 0) {
+                                    tokOriginal = dataAnonymized.get(idx);
                                 }
                                 if (tokOriginal.equals(" ")
                                     || tokOriginal.equals("\u00A0")) {
@@ -509,12 +514,12 @@ public class PersonNameParser extends AbstractParser {
     }
 
     private String writeField(String s1,
-                               String lastTag0,
-                               String s2,
-                               String field,
-                               String outField,
-                               boolean addSpace,
-                               int nbIndent) {
+                              String lastTag0,
+                              String s2,
+                              String field,
+                              String outField,
+                              boolean addSpace,
+                              int nbIndent) {
         String result = null;
         if ((s1.equals(field)) || (s1.equals("I-" + field))) {
             if ((s1.equals("<other>") || s1.equals("I-<other>"))) {

@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 
 /**
  * Class for features used for header parsing.
- *
  */
 public class FeaturesVectorPatient {
     // default bins for relative position, set experimentally
@@ -159,15 +158,14 @@ public class FeaturesVectorPatient {
         return res.toString();
     }
 
-
     /**
-     * Add features for patient parsing
+     * Add features for the patient model.
      */
     static public String addFeaturesPatient(List<LayoutToken> tokens,
-                                             List<String> labels,
-                                             List<OffsetPosition> locationPositions,
-                                             List<OffsetPosition> titlePositions,
-                                             List<OffsetPosition> suffixPositions) throws Exception {
+                                            List<String> labels,
+                                            List<OffsetPosition> locationPositions,
+                                            List<OffsetPosition> titlePositions,
+                                            List<OffsetPosition> suffixPositions) throws Exception {
         if ((locationPositions == null) ||
             (titlePositions == null) ||
             (suffixPositions == null)) {
@@ -191,10 +189,10 @@ public class FeaturesVectorPatient {
         String previousText = null;
         FeaturesVectorPatient features = null;
         int sentenceLenth = tokens.size(); // length of the current sentence
-        for (int n=0; n < tokens.size(); n++) {
+        for (int n = 0; n < tokens.size(); n++) {
             LayoutToken token = tokens.get(n);
             String tag = null;
-            if ( (labels != null) && (labels.size() > 0) && (n < labels.size()) )
+            if ((labels != null) && (labels.size() > 0) && (n < labels.size()))
                 tag = labels.get(n);
 
             boolean outputLineStatus = false;
@@ -215,7 +213,7 @@ public class FeaturesVectorPatient {
 
             // remove blank spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+            if (text.trim().length() == 0) {
                 continue;
             }
 
@@ -230,7 +228,7 @@ public class FeaturesVectorPatient {
                 if (!skipTest) {
                     for (int i = currentLocationPositions; i < locationPositions.size(); i++) {
                         if ((locationPositions.get(i).start <= n) &&
-                                (locationPositions.get(i).end >= n)) {
+                            (locationPositions.get(i).end >= n)) {
                             isLocationToken = true;
                             currentLocationPositions = i;
                             break;
@@ -267,7 +265,7 @@ public class FeaturesVectorPatient {
             }
             // check the position of matched suffix
             skipTest = false;
-            if (suffixPositions != null  && (suffixPositions.size() > 0)) {
+            if (suffixPositions != null && (suffixPositions.size() > 0)) {
                 if (currentSuffixPositions == suffixPositions.size() - 1) {
                     if (suffixPositions.get(currentSuffixPositions).end < n) {
                         skipTest = true;
@@ -276,7 +274,7 @@ public class FeaturesVectorPatient {
                 if (!skipTest) {
                     for (int i = currentSuffixPositions; i < suffixPositions.size(); i++) {
                         if ((suffixPositions.get(i).start <= n) &&
-                                (suffixPositions.get(i).end >= n)) {
+                            (suffixPositions.get(i).end >= n)) {
                             isSuffixToken = true;
                             currentSuffixPositions = i;
                             break;
@@ -325,12 +323,12 @@ public class FeaturesVectorPatient {
                     features.lineStatus = "LINESTART";
                     outputLineStatus = true;
                 }
-            } else if (tokens.size() == n+1) {
+            } else if (tokens.size() == n + 1) {
                 if (!outputLineStatus) {
                     features.lineStatus = "LINEEND";
                     outputLineStatus = true;
                 }
-            } 
+            }
 
             if (!outputLineStatus) {
                 features.lineStatus = "LINEIN";
@@ -428,12 +426,12 @@ public class FeaturesVectorPatient {
      * Add features for patient parsing
      */
     static public String addFeaturesPatientAnonym(List<LayoutToken> tokens,
-                                            List<String> labels,
-                                            List<OffsetPosition> locationPositions,
-                                            List<OffsetPosition> titlePositions,
-                                            List<OffsetPosition> suffixPositions,
-                                            List<String> dataOriginal,
-                                            List<String> dataAnonymized) throws Exception {
+                                                  List<String> labels,
+                                                  List<OffsetPosition> locationPositions,
+                                                  List<OffsetPosition> titlePositions,
+                                                  List<OffsetPosition> suffixPositions,
+                                                  List<String> dataOriginal,
+                                                  List<String> dataAnonymized) throws Exception {
         if ((locationPositions == null) ||
             (titlePositions == null) ||
             (suffixPositions == null)) {
@@ -457,10 +455,10 @@ public class FeaturesVectorPatient {
         String previousText = null;
         FeaturesVectorPatient features = null;
         int sentenceLenth = tokens.size(); // length of the current sentence
-        for (int n=0; n < tokens.size(); n++) {
+        for (int n = 0; n < tokens.size(); n++) {
             LayoutToken token = tokens.get(n);
             String tag = null;
-            if ( (labels != null) && (labels.size() > 0) && (n < labels.size()) )
+            if ((labels != null) && (labels.size() > 0) && (n < labels.size()))
                 tag = labels.get(n);
 
             boolean outputLineStatus = false;
@@ -479,12 +477,15 @@ public class FeaturesVectorPatient {
                 continue;
             }
 
-            // remove blank spaces
-            for (int i=0; i<dataOriginal.size(); i++) {
-                text = text.replace(dataOriginal.get(i), dataAnonymized.get(i));
+            // anonymize the data
+            int idxFound = dataOriginal.indexOf(text.trim());
+            if (idxFound >= 0) {
+                text = dataAnonymized.get(idxFound);
             }
+
+            // remove blank spaces
             text = UnicodeUtil.normaliseTextAndRemoveSpaces(text);
-            if (text.trim().length() == 0 ) {
+            if (text.trim().length() == 0) {
                 continue;
             }
 
@@ -536,7 +537,7 @@ public class FeaturesVectorPatient {
             }
             // check the position of matched suffix
             skipTest = false;
-            if (suffixPositions != null  && (suffixPositions.size() > 0)) {
+            if (suffixPositions != null && (suffixPositions.size() > 0)) {
                 if (currentSuffixPositions == suffixPositions.size() - 1) {
                     if (suffixPositions.get(currentSuffixPositions).end < n) {
                         skipTest = true;
@@ -594,7 +595,7 @@ public class FeaturesVectorPatient {
                     features.lineStatus = "LINESTART";
                     outputLineStatus = true;
                 }
-            } else if (tokens.size() == n+1) {
+            } else if (tokens.size() == n + 1) {
                 if (!outputLineStatus) {
                     features.lineStatus = "LINEEND";
                     outputLineStatus = true;

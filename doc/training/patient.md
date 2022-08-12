@@ -1,29 +1,30 @@
 # Annotation guidelines for the _patient_ model
 
 ## Introduction
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
-
-In __grobid-medical-report__, __patient__ corresponds to the patient information. 
-
-For identifying the exact pieces of patient information to be part of the `header-medical-report`, see the [Annotation guidelines of the header-medical-report model](header-medical-report.md).
+To identify the patient (`<patient>`) element, see the annotation guidelines of the [header-medical-report](header-medical-report.md) and [full-medical-text](full-medical-text) models.
 
 For the patient model, we use the following TEI elements:
 
 * `<idno>` for the ID number of patients
+* `<idType>` for the ID types
 * `<persName>` for the name of patients
 * `<sex>` for the sex type of patients
-* `<birth>` for the birth date and place of birth of patients
-* `<death>` for the death date of patients
+* `<birthDate>` for the date of birth
+* `<birthPlace>` for the place of birth of patients
+* `<age>` for the age
+* `<death>` for the date of death
 * `<address>` for the address elements of patients
 * `<country>` for the country 
 * `<settlement>` for the city
 * `<phone>` for the phone number
+* `<email>` for the email if it exists 
 * `<note type="patient">` for the notes concerning the patients
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __patient__ model (`grobid/grobid-trainer/resources/dataset/patient`) to see some examples of how these elements should be used.
-
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __patient__ model in `grobid/grobid-trainer/resources/dataset/patient/corpus/` or `grobid/grobid-trainer/resources/dataset/patient/evaluation/`.
 
 ## Analysis
 
@@ -43,7 +44,7 @@ Similarly, line break tags `<lb/>` are present in the generated XML training dat
 The identifier name is kept with the identifier value so that Grobid can classify more easily the type of identifier:
 
 ```xml
-    NIP : <idno type="patient">1234567890</idno>
+    <idType>NIP</idType> : <idno>1234567890</idno>
 ```
 
 ### Personal names

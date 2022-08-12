@@ -245,7 +245,7 @@ public class FeaturesVectorMedicalNER {
     }
 
     /**
-     * Add feature for medic parsing.
+     * Add features for the French medical NER model.
      */
     static public String addFeaturesNER(List<LayoutToken> tokens, // tokens and layouts
                                           List<String> labels, // labels

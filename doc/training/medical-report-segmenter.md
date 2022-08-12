@@ -1,8 +1,7 @@
 # Annotation guidelines for the _medical-report-segmenter_ model
 
 ## Introduction
-
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
 For the medical report segmentation model, we use the following TEI elements:
 
@@ -19,9 +18,10 @@ For the medical report segmentation model, we use the following TEI elements:
 * `<other>` for unknown (yet) part
 
 Figures and tables (including their potential titles, captions, and notes) are considered part of the body, so contained by the `<body>` element.
-Note that the mark-up follows overall the [TEI](http://www.tei-c.org). 
 
-> Note: It is recommended to study first the existing training documents for the __medical-report-segmenter__ model (`grobid/grobid-trainer/resources/dataset/medical-report-segmenter`) to see some examples of how these elements should be used.
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __medical-report-segmenter__ model in `grobid/grobid-trainer/resources/dataset/medical-report-segmenter/corpus/tei/` or `grobid/grobid-trainer/resources/dataset/medical-report-segmenter/evaluation/tei/`.
 
 <img src="../img/Segmented_document.png" alt="Segmented_medical_document" width="70%"/>
 
@@ -37,7 +37,7 @@ The header section typically contains document information (i.e., document numbe
 
 There should be as many `<front>` elements as necessary that contain all the contents identified as 'front contents'. Note that for the segmentation model, there aren't any `<title>`, `<medic>` or `<patient>` elements, as they are handled in the cascaded `header-medical-report` model, applied in the next stage.
 
-> Note: In general, whether the `<lb/>` (line break) element is inside or outside the `<front>` or other elements is of no importance. However as indicated [here](General-principles.md#correcting-pre-annotated-files), the <lb/> element should not be removed and should follow the stream of text. 
+> Note: In general, whether the `<lb/>` (line break) element is inside or outside the `<front>` or other elements is of no importance. However as indicated [here](Annotation_guidelines.md#correcting-pre-annotated-files), the <lb/> element should not be removed and should follow the stream of text. 
 
 ### Page header (headnote)
 

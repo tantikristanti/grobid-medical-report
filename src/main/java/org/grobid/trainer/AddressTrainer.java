@@ -2,12 +2,12 @@ package org.grobid.trainer;
 
 import org.grobid.core.GrobidModels;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.features.FeaturesVectorMedic;
+import org.grobid.core.features.FeaturesVectorAddress;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.OffsetPosition;
-import org.grobid.trainer.sax.TEIMedicSaxParser;
+import org.grobid.trainer.sax.TEIAddressSaxParser;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -16,18 +16,18 @@ import java.util.List;
 
 
 /**
- * A class for training the medic model
+ * A class for training the address model
  * <p>
  * Tanti, 2022
  */
-public class MedicTrainer extends AbstractTrainer {
+public class AddressTrainer extends AbstractTrainer {
 
-    public MedicTrainer() {
-        super(GrobidModels.MEDIC);
+    public AddressTrainer() {
+        super(GrobidModels.ADDRESS);
     }
 
     /**
-     * Add the selected features to the medic model example set, default
+     * Add the selected features to the address model example set, default
      *
      * @param corpusDir a path where corpus files are located
      * @return the total number of used corpus items
@@ -38,7 +38,7 @@ public class MedicTrainer extends AbstractTrainer {
     }
 
     /**
-     * Add the selected features to the medic model example set
+     * Add the selected features to the address model example set
      *
      * @param corpusDir          a path where corpus files are located
      * @param trainingOutputPath path where to store the temporary training data
@@ -95,10 +95,7 @@ public class MedicTrainer extends AbstractTrainer {
             SAXParserFactory spf = SAXParserFactory.newInstance();
 
             List<OffsetPosition> locationsPositions;
-            List<OffsetPosition> titlesPositions;
-            List<OffsetPosition> suffixesPositions;
-            List<OffsetPosition> emailPositions;
-            List<OffsetPosition> urlPositions;
+            List<OffsetPosition> cityNamePositions;
 
             int n = 0;
             for (; n < refFiles.length; n++) {
@@ -106,7 +103,7 @@ public class MedicTrainer extends AbstractTrainer {
                 String name = teifile.getName();
                 System.out.println(name);
 
-                final TEIMedicSaxParser parser2 = new TEIMedicSaxParser();
+                final TEIAddressSaxParser parser2 = new TEIAddressSaxParser();
 
                 // get a new instance of parser
                 final SAXParser p = spf.newSAXParser();
@@ -114,7 +111,7 @@ public class MedicTrainer extends AbstractTrainer {
 
                 final List<List<String>> allLabeled = parser2.getLabeledResult();
                 final List<List<LayoutToken>> allTokens = parser2.getTokensResult();
-                totalExamples += parser2.nbMedics;
+                totalExamples += parser2.nbAddress;
 
                 // we can now add the features
                 for (int i = 0; i < allTokens.size(); i++) {
@@ -126,24 +123,19 @@ public class MedicTrainer extends AbstractTrainer {
                     }
 
                     locationsPositions = lexicon.tokenPositionsLocationNames(allTokens.get(i));
-                    titlesPositions = lexicon.tokenPositionsPersonTitle(allTokens.get(i));
-                    suffixesPositions = lexicon.tokenPositionsPersonSuffix(allTokens.get(i));
-                    emailPositions = lexicon.tokenPositionsEmailPattern(allTokens.get(i));
-                    urlPositions = lexicon.tokenPositionsUrlPattern(allTokens.get(i));
+                    cityNamePositions = lexicon.tokenPositionsCityNames(allTokens.get(i));
 
-                    String medic = FeaturesVectorMedic.addFeaturesMedic(allTokens.get(i),
-                        allLabeled.get(i), locationsPositions, titlesPositions, suffixesPositions,
-                        emailPositions, urlPositions);
+                    String address = FeaturesVectorAddress.addFeaturesAddress(allTokens.get(i), allLabeled.get(i), locationsPositions, cityNamePositions);
 
                     if ((writer2 == null) && (writer3 != null))
-                        writer3.write(medic + "\n \n");
+                        writer3.write(address + "\n \n");
                     if ((writer2 != null) && (writer3 == null))
-                        writer2.write(medic + "\n \n");
+                        writer2.write(address + "\n \n");
                     else {
                         if (Math.random() <= splitRatio)
-                            writer2.write(medic + "\n \n");
+                            writer2.write(address + "\n \n");
                         else
-                            writer3.write(medic + "\n \n");
+                            writer3.write(address + "\n \n");
                     }
                 }
             }
@@ -172,7 +164,7 @@ public class MedicTrainer extends AbstractTrainer {
      */
     public static void main(String[] args) throws Exception {
         GrobidProperties.getInstance();
-        Trainer trainer = new MedicTrainer();
+        Trainer trainer = new AddressTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));
         System.exit(0);
