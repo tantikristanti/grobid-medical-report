@@ -99,5 +99,12 @@ To install and build **grobid-medical-report** under the proxy, we need to add t
 $  ./gradlew -DproxySet=true -DproxyHost=[proxy_host] -DproxyPort=[proxy_port] clean install
 ```
 
+## Models
+Following [GROBID](https://grobid.readthedocs.io/en/latest/Principles/#document-parsing-as-a-cascade-of-sequence-labeling-models), __grobid-medical-report__ also builds models with a waterfall (cascade) approach. We prepare 11 sequence labeling models to parse medical documents in different hierarchical structures of the document. 
+
+![Models_grobid_medical_report](doc/img/Training_the_medical_report_models.png)
+
+Each of these models can be retrained by using additional data. A more detailed explanation of how to retrain and to evaluate the models can be found in [Train and evaluate the models](doc/Training-the-medical-report-models.md)
+
 ## Copyright
 This repository was originally prepared for a collaborative project between [INRIA](https://www.inria.fr/) and  [APHP](https://www.aphp.fr/). Original datasets and models containing genuine sensitive data are not possible to share publicly. 

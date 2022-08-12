@@ -1,12 +1,6 @@
 <h1>Training and evaluating grobid-medical-report models</h1>
 
-## Models
-
-__grobid-medical-report__ prepares 11 sequence labeling models built with the same approach as GROBID, the cascade (waterfall) approach. 
-
-![Models_grobid_medical_report](img/Training_the_medical_report_models.png)
-
-The models placed under `grobid/grobid-home/models are`:
+We have 11 models placed under `grobid/grobid-home/models` to extract and to parse medical documents (PDF formats) and re-structure the information in TEI/XML format. The models are built in a modular manner with a cascade approach so that they are able to extract documents at different hierarchical levels.
 
 - [x] medical-report-segmenter
 
@@ -30,7 +24,7 @@ The models placed under `grobid/grobid-home/models are`:
 
 - [x] fr-medical-ner (the French medical terminology recognition)
 
-Each of these models can be retrained by using additional data. The following subsections explain the commands to train and evaluate the models. 
+Each of these models can be retrained by using additional data. The following subsections explain the commands to train and to evaluate the models. 
 
 ## Train and evaluate
 The train data is placed under `grobid/grobid-trainer/resources/dataset/[MODEL]/corpus`. [MODEL] is the corresponding model name. 
