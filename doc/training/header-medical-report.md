@@ -1,12 +1,9 @@
 # Annotation guidelines for the _header-medical-report_ model
 
 ## Introduction
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
-
-In __grobid-medical-report__, the document __header-medical-report__ corresponds to the metadata information sections about the document. This is typical information that can be found at the beginning of the article (i.e., `front`).
-
-For identifying the exact pieces of information to be part of the `header-medical-report` segments, see the [Annotation guidelines of the medical-report-segmenter model](medical-report-segmenter.md).
+To identify the header (`<front>`) element, see the annotation guidelines of the [medical-report-segmenter](medical-report-segmenter.md) model.
 
 For the header-medical-report model, we use the following TEI elements:
 
@@ -27,12 +24,10 @@ For the header-medical-report model, we use the following TEI elements:
 * `<ptr type="web">` for the web URL 
 * `<note type="short">` for short notes in the header part
 
-
-> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding. 
-
-Encoding the header section is challenging because of the variety of information that appears in this section can be in unexpected and overlapped manners. Some information is often redundant (for example, medics, patients, and affiliations can be mentioned several times among different levels of details). These annotation guidelines are thus particularly important to follow to ensure stable encoding practices in the complete training data and to avoid the machine learning models learn contradictory labeling resulting in poorer performance and less valuable training data.
-> Note: It is recommended to study first the existing training documents for the __header-medical-report__ model (`grobid/grobid-trainer/resources/dataset/header-medical-report`) to see some examples of how these elements should be used.
-
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- Encoding the header section is challenging because of the variety of information can be in unexpected or overlapped manners. 
+- It is therefore recommended to see some examples of how these elements should be used for the __header-medical-report__ model in `grobid/grobid-trainer/resources/dataset/header-medical-report/corpus/tei/` or `grobid/grobid-trainer/resources/dataset/header-medical-report/evaluation/tei/`.
 
 ## Analysis
 

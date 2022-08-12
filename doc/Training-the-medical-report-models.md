@@ -2,11 +2,11 @@
 
 ## Models
 
-As in Grobid, __grobid-medical-report__ also uses different sequence labeling models. For more complex extraction and parsing tasks, it uses several models in cascade.
+__grobid-medical-report__ prepares 11 sequence labeling models built with the same approach as GROBID, the cascade (waterfall) approach. 
 
 ![Models_grobid_medical_report](img/Training_the_medical_report_models.png)
 
-The models prepared are:
+The models placed under `grobid/grobid-home/models are`:
 
 - [x] medical-report-segmenter
 
@@ -16,7 +16,7 @@ The models prepared are:
 
 - [x] full-medical-text
 
-- [x] French medical terminology recognition 
+- [x] address
 
 - [x] dateline
 
@@ -26,204 +26,177 @@ The models prepared are:
 
 - [x] patient
 
-- [x] address
+- [x] name/person-medical (medics and patients' names)
 
-- [x] person-name (medics, patients)
+- [x] fr-medical-ner (the French medical terminology recognition)
 
-Note:
-- [x] (A completed model)
-- [ ] (An uncompleted model - work in progress)
-
-The models are placed under `grobid/grobid-home/models`. Each of these models can be re-trained using additional training data. For production, a model is trained with all available training data to maximize performance. For development purposes, it is possible to evaluate a model with part of the training data.
+Each of these models can be retrained by using additional data. The following subsections explain the commands to train and evaluate the models. 
 
 ## Train and evaluate
-
-For the __grobid-medical-report__ models, the training data is located under `grobid/grobid-medical-report/resources/dataset/*MODEL*/corpus/` where *MODEL* is the name of the model (e.g., `grobid/grobid-medical-report/resources/dataset/medical-report-segmenter/corpus`).
-
-TEI files can be divided (e.g., 80%-20%) into training and evaluation datasets in the following ways: 
-
-- manually: we choose and put the annotated datasets in two folders separately.
-  
-    The training data is present under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus/` while the evaluation data is present under  `grobid/grobid-trainer/resources/dataset/*MODEL*/evaluation/`.
-
-
-- automatically: we put the the datasets under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus` and let grobid-medical-report choose and split them randomly as a given ratio (e.g., 0.8 for 80%). The first part of the data is the training data, while the second is the evaluation data.
-
-Regardless of the method chosen (i.e., manual or automatic), the built model is placed under `grobid/grobid-home/models/*MODEL*/model.wapiti`. The newly built model will automatically replace the previous one. It is possible to rollback the process by replacing the current generated model with the backup record (`<model name>.wapiti.old`).
+The train data is placed under `grobid/grobid-trainer/resources/dataset/[MODEL]/corpus`. [MODEL] is the corresponding model name. 
 
 ### Train
-The considered training dataset is under `grobid/grobid-medical-report/resources/dataset/*MODEL*/corpus`.
-To train and to generate a new model, under the project directory `grobid/grobid-medical-report` run the following command:
+To train and to generate a new model, under the project directory `grobid/grobid-medical-report`, run the following command:
 
 ```bash
-> ./gradlew <training-goal-name>
+$ ./gradlew <training-goal-name>
 ```
-Training goal names are: `train_medical_report_segmenter`, `train_header_medical_report`, `train_left_note_medical_report`, `train_full_medical_text`, `train_dateline`, `train_organization`, `train_medic`, `train_patient`.
+Training goal names are: 
+- `train_medical_report_segmenter`
+- `train_header_medical_report`
+- `train_left_note_medical_report`
+- `train_full_medical_text`
+- `train_address`
+- `train_dateline`
+- `train_organization`
+- `train_medic`
+- `train_patient`
+- `train_name_person_medical`
+- `train_french_medical_ner`
 
 An example of a command for training the __medical-report-segmenter__ model:
 ```bash
-> ./gradlew train_medical_report_segmenter
+$ ./gradlew train_medical_report_segmenter
 ```
 
-An example of a command for training the __header-medical-report__ model: 
-```bash
-> ./gradlew train_header_medical_report
-```
-
-An example of a command for training the __left-note-medical-report__ model: 
-```bash
-> ./gradlew train_left_note_medical_report
-```
-
-An example of a command for training the __train_full_medical_text__ model:
-```bash
-> ./gradlew train_full_medical_text
-```
-
-An example of a command for training the __train_dateline__ model:
-```bash
-> ./gradlew train_dateline
-```
-
-An example of a command for training the __train_dateline__ model:
-```bash
-> ./gradlew train_organization
-```
-
-An example of a command for training the __french_medical_ner__ model:
-```bash
-> ./gradlew train_french_medical_ner
-```
-
-Notes of errors :
-- warning: missing tokens, cannot apply pattern
-  - Solution:  check if every line in a training data has the expected number of features (also compared to the CRFPP template)
-
-As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. Further, to increase the speed, we can also modify the stopping criteria. For more information, please refer [this comment](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).
+As explain in [GROBID](https://grobid.readthedocs.io/en/latest/Training-the-models-of-Grobid/#train-and-evaluation-separately), we can control the training process (e.g., process speed) by using different parameters. To speed up the process, we can increase the `grobid.nb_thread` in the file `grobid-home/config/grobid.properties`. We can also modify the stopping criteria. For more information, please refer [this issue](https://github.com/kermitt2/grobid/issues/336#issuecomment-412516422).
 
 ### Evaluate
-The considered evaluation dataset is under `grobid/grobid-trainer/resources/dataset/*MODEL*/evaluation`
+The test data is placed under `grobid/grobid-trainer/resources/dataset/[MODEL]/evaluation`. [MODEL] is the corresponding model name.
 To evaluate the model, under the project directory `grobid/grobid-medical-report/` execute the following command:
 ```bash
-> ./gradlew <evaluation-goal-name>
+$ ./gradlew <evaluation-goal-name>
 ```
 
-Evaluation goal names are: `eval_medical_report_segmenter`, `eval_header_medical_report`, `eval_left_note_medical_report`, `eval_full_medical_text`.
+Evaluation goal names are: 
+- `eval_medical_report_segmenter`
+- `eval_header_medical_report`
+- `eval_left_note_medical_report`
+- `eval_full_medical_text`
+- `eval_address`
+- `eval_dateline`
+- `eval_organization`
+- `eval_medic`
+- `eval_patient`
+- `eval_name_person_medical`
+- `eval_french_medical_ner`
 
-#### Automatically split data, train and evaluate
-To split (e.g., training:evaluation = 80:20) automatically and randomly the dataset under `resources/dataset/*MODEL*/corpus/` into training and evaluation datasets, execute the following command:
+### Automatic data split, train and evaluate
+We can split the datasets manually or automatically. With the manual way, the chosen train and test sets are located in the respective train and test folders manually as explained in the previous sections. Meanwhile, with the automatic way, the entire datasets are put under  `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus/`. By default, the split portion is set into 80. However, the portion can be changed by updating the parameter `-s` in the `build.gradle` file. For example, `-s 0.9` is the train:test split portion of 90:10.
+
+After preparing the datasets and set the split portion, to train and evaluate automatically, we run the following command:
 
 ```bash
-> ./gradlew <automatic-evaluation-goal-name>
+$ ./gradlew <automatic-split-train-evaluation-goal-name>
 ```
 
-Automatic train goal names are: `train_medical_report_segmenter_split`, `train_header_medical_report_split`, `train_left_note_medical_report_split`, `train_full_medical_text`, `train_french_medical_ner_split`
+Automatic split, train and evaluation goal names are: 
+- `train_medical_report_segmenter_split`
+- `train_header_medical_report_split`
+- `train_left_note_medical_report_split`
+- `train_full_medical_text_split`
+- `train_address_split`
+- `train_dateline_split`
+- `train_organization_split`
+- `train_medic_split`
+- `train_patient_split`
+- `train_name_person_medical_split`
+- `train_french_medical_ner_split`
 
-By default, the training and evaluation data partition is 80:20 (i.e., the datasets are under `grobid/grobid-trainer/resources/dataset/*MODEL*/corpus`). To change it, add the `-s` parameter or change the `-s` `build.gradle` to the desired proportion.
+## Generate new datasets
+With Pdf files as input, we can generate new datasets using pre-trained models.
 
-## Generation of training data
-For each input Pdf file, __grobid-medical-report__ generates XML files according to the models adopted since each model uses different training data (e.g., *.training.medical.tei.xml, *.training.header.medical.tei.xml, *.training.left.note.medical.tei.xml). To use these automatically-generated XML files as a gold standard,  we need first to check and correct them.
 
-When the models use PDF layout features, __grobid-medical-report__ generates additional feature files (e.g., *.training.medical, *.training.header.medical, *.training.left.note.medical).
+For each input Pdf file and for each model, __grobid-medical-report__ generates two types of files:
+- TEI/XML files (with `*.tei.xml` extensions) contain extracted and labeled text. Class definitions (for labels or tags) as well as annotation rules are different for each model.
+- Raw files (without `*.tei.xml` extensions) contain extracted and tokenized text with their corresponding features. The features used are also different for each model.
 
-To generate a new training data, under the project directory `grobid/grobid-medical-report/` execute the following command:
+The labeled files (`*.tei.xml`) can then be edited by human annotators to get new train or test data. However the files containing features should be left untouched.
+
+There are three possibilities for generating new data:
+- Extraction of original data with labels
+- Extraction of pseudo data with labels
+- Extraction of original data without labels
+
+### Generate original data with labels 
+For the provided PDF files, this batch command will generate training data for all **grobid-medical-report** models. 
 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe <generation-of-training-data-command>
+$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTraining
 ```
 
-Generation of training data commands are: `createTrainingBlank`, `createTraining`, `createTrainingBlankFrenchMedicalNER`, `createTrainingFrenchMedicalNER` .
+This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted files are stored.
 
-Particularly for the `createTrainingBlank` and `createTrainingBlankFrenchMedicalNER`, these commands are used for generating datasets without labels. In general, they are used for building new models from scratch.
-.
+Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
 
-<!---
-An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentationBlank
-```
+![createTraining](img/CreateTraining.png)
 
-An example of a command for generating a new training data for the __medical-report-segmenter__ model: 
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingSegmentation
-```
+The file in column `[Input]` is the input PDF file. The files in column `[TEI/XML]` are files containing the extracted text with labels according to each model in column `[Model]`. The files in column `[Raw]` are files containing features for each token of the extracted text for each model in column `[Model]`.  
 
-An example of a command for generating a new training data for the __header-medical-report__ model: 
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeaderBlank
-```
+### Generate pseudo data with labels
+What distinguishes this procedure from the previous one is that in this section, we want to anonymize sensitive data. Sensitive data can be found in labeled files as well as in files containing features, and thus we need to anonymize them.
 
-An example of a command for generating a new training data for the __header-medical-report__ model: 
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingHeader
-```
+For each input PDF file, there are two steps to anonymize data:
+1. Create a reference file containing the data we want to anonymize and their corresponding changes. This reference file is very useful for human anontators for not losing the track track between the original data in the input file and the anonymized ones.
+2. Generate pseudo data.
 
-An example of a command for generating a new training data for the __left-note-medical-report__ model:
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingLeftNote
-```
---->
+Both steps are performed automatically with the following commands.
 
-An example of a command for generating blank training data for all models (including the segmentation model):   
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFullBlank
-```
-
-An example of a command for generating pre-annotated training data for all models (including the segmentation model):
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createTrainingFull
-```
-
-With this command, for each PDF file as input, for each model, two types of files will be generated. They are files containing features (without *.xml extension) and files containing pre-annotated data using existing trained models (e.g., medical-report-segmenter model, header-medical-report model). 
-These files can then be corrected and be used for re-training new models. Only pre-annotated TEI files can be revised while the feature files cannot be corrected manually.
-
-Depending on what model we want to retrain, these files will then need to be placed under grobid-trainer directory (`grobid-trainer/resources/dataset/*MODEL*/`), especially under `grobid-trainer/resources/dataset/*MODEL*/corpus` for training data and under `grobid-trainer/resources/dataset/*MODEL*/evaluation` for evaluation data. The corrected TEI files need to be put under `grobid-trainer/resources/dataset/*MODEL*/corpus/tei` and the feature files under `grobid-trainer/resources/dataset/*MODEL*/corpus/raw`.
-
-An example of a command for generating a new training data for the __fr-medical-NER__ model:
-```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH grobid-home -dIn ~/path_to_input_directory/ -dOut ~/path_to_output_directory -exe createMedicalNerTraining
-```
-
-## Training guidelines
-Annotation guidelines for creating the training data corresponding to the different GROBID models are available from the [following page](training/General-principles.md).
-
-## Data Anonymization 
-With the awareness that we work with confidential data, we also provide facilities to anonymize sensitive data.
-There are two types of anonymized data:
-- data to conduct training and testing activities for all levels of the models;
-- final results for end-user
-
-The data that we anonymize includes the social security numbers, the names, the phone numbers, the address, and the dates of birth of patients, names of doctors and health practitioners, document numbers.
-
-### Data Anonymization for Training and Testing Datasets
-To anonymize the sensitive data in datasets and to assist annotators in referencing the anonymized data to the original data, two steps are required:
-1. Extracting reference data containing original data and anonymized data.
+#### 1. Generate reference files for pseudo data
+For the provided PDF files, this command will generate reference files for data pseudonymization.
 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory_containing_PDF/ -dOut  ~/path_to_output_directory_containing_result_TXT/ -exe createDataAnonymized
+$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createDataAnonymized
 ```
-The input path is the path where PDF files containing the data to be extracted are saved. The output results are in TXT format. 
-The resulting file format is as follows:
 
-| Element                | Original data       | Anonymized data | 
-|------------------------|---------------------| --------------- | 
-| Security Social Number | 0123456789          | 5042697120 | 
-| Phone Number           | 0760512430          | 0971642056 | 
-| Birth date             | 2015-05-20          | 2022-02-17 | 
-| Firstname              | Beau                | Belle  |  
-| Lastname               | GARCON              | FILLE | 
+This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the reference files are stored.
+
+#### 2. Generate pseudo data
+For the provided PDF files, this batch command will generate pseudo data for all **grobid-medical-report** models.
+
+```bash
+$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTrainingAnonym
+```
+
+This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted pseudo data are stored.
+
+Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
+
+![createTraining](img/CreateTrainingAnonym.png)
+
+The file in column `[Input]` is the input PDF file. The files in column `[TEI/XML]` are files containing the extracted pseudo data with labels according to each model in column `[Model]`. The files in column `[Raw]` are files containing features for each token of the extracted pseudo data for each model in column `[Model]`.
+
+Anonymized data includes:
+1. medical personnel data: names, addresses (personal addresses), emails
+2. patient data: social security numbers, names, addresses, phone numbers, emails, dates of birth
+3. document data: document numbers
+
+| Element                | Original data       | Anonymized data     | 
+|------------------------|---------------------|---------------------| 
+| Security Social Number | 0123456789          | 5042697120          | 
+| Phone Number           | 0760512430          | 0971642056          | 
+| Birth date             | 2015-05-20          | 2022-02-17          | 
+| Firstname              | Beau                | Belle               |  
+| Lastname               | GARCON              | FILLE               | 
 | Email                  | beau.garcon@aphp.fr | belle.fille@aphp.fr |
-| Postcode               | 75000               | 55120 |
+| Address                | 44000 NANTES        | 38000 GRENOBLE              |
 
 
-2. Extracting dataset with anonymized data based on reference data.
+### Generate blank data
+This procedure will also generate new training data for all **grobid-medical-report** models. What distinguishes this procedure from the previous ones is that the TEI/XML files contain unlabeled texts. This procedure is useful if we want to build models from scratch.
+
+For the provided PDF files, this batch command will generate blank training data for all **grobid-medical-report** models.
 
 ```bash
-> java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn ~/path_to_input_directory_containing_PDFs/ -dOut  ~/path_to_output_directory_containing_results/ -exe createTrainingAnonym
+$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTrainingBlank
 ```
-The input path is the path where PDF files containing the data to be extracted are saved.
-As training files used in Grobid family projects, for each PDF file as input and for each model, two types of files will be generated. 
-- files containing features (without *.xml extension) 
-- files containing pre-annotated data using existing trained models
 
-The difference with ordinary training data generation is that with this method, sensitive data are anonymized.
+This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted data are stored.
+
+Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
+
+![createTraining](img/CreateTrainingBlank.png)
+
+
+## Annotation guidelines
+After generating the new data, the next step before we can use them as train and test datasets is to correct the pre-annotated data (`*.tei.xml`). Guidance on how to correct pre-annotated data can be found here [Annotation guidelines](training/Annotation_guidelines.md).

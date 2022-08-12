@@ -1,14 +1,11 @@
 # Annotation guidelines for the _organization-medical-report_ model
 
 ## Introduction
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+To identify the organization (`<org>`) element, see the annotation guidelines of the [header-medical-report](header-medical-report.md) and [left-note-medical-report](left-note-medical-report) models.
 
-In __grobid-medical-report__, the document __organization-medical-report__ corresponds to the information of organization structures. 
-
-For identifying the exact pieces of organization information to be part of the `header-medical-report` or `left-note-medical-report`, see the [Annotation guidelines of the left-note-medical-report model](left-note-medical-report.md).
-
-For the organization-medical-report model, we use the following TEI elements:
+For the organization model, we use the following TEI elements:
 
 * `<affiliation>` for the affiliation name (i.e., the hospital name)
 * `<orgName>` for the organization name
@@ -35,9 +32,9 @@ For the organization-medical-report model, we use the following TEI elements:
 * `<ptr type="web">` for the web URL
 * `<note type="short">` for the any short notes in the header part
 
-> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding. 
-> It is recommended to study first the existing training documents for the __organization-medical-report__ model (`grobid/grobid-trainer/resources/dataset/organization-medical-report`) to see some examples of how these elements should be used.
-
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __organization__ model in `grobid/grobid-trainer/resources/dataset/organization/corpus/` or `grobid/grobid-trainer/resources/dataset/organization/evaluation/`.
 
 ## Analysis
 

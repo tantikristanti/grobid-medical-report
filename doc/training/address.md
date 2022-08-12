@@ -1,14 +1,11 @@
 # Annotation guidelines for the _address_ model
 
 ## Introduction
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-In __grobid-medical-report__, __address_line__ corresponds to the address information. 
+To identify the address (`<address>`) element, see the annotation guidelines of the [medic](medic.md) and [patient](patient.md) models.
 
-For identifying the exact pieces of addresses (for `medics` or `patients`), see the annotation guidelines of the [patient](medic.md) or [patient](patient.md) models.
-
-For the address line model, we use the following TEI elements:
-
+For the address model, we use the following TEI elements:
 * `<streetNumber>` for the street numbers
 * `<streetName>` for the street names
 * `<buildingNumber>` for the entrance numbers (residences or apartments)
@@ -24,9 +21,10 @@ For the address line model, we use the following TEI elements:
 * `<country>` for the country names (e.g., France)
 * `<note type="address">` for the notes concerning the address
 
-> Note that the mark-up follows approximately the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __address__ model (`grobid/grobid-trainer/resources/dataset/address`) to see some examples of how these elements should be used.
-> THe list of regions, departments, cities in France can be found here [Liste régions, départements et communes de France](https://www.villesfrance.fr/fr/).
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __address__ model in `grobid/grobid-trainer/resources/dataset/address/corpus/` or `grobid/grobid-trainer/resources/dataset/address/evaluation/`.
+> The list of regions, departments, cities in France can be found here [Liste régions, départements et communes de France](https://www.villesfrance.fr/fr/).
 
 ## Analysis
 

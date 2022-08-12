@@ -1,8 +1,7 @@
 # Annotation guidelines for the _full-medical-text_ model
 
 ## Introduction
-
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
 Full-medical-text model attempts to recognize and struture information appearing in the body area of medical reports.  This model is totally different from the `medical-report-segmenter` model which tries to recognize general sections (front, left-note, body) and which is applied before the `full-medical-text` model.
 
@@ -30,9 +29,9 @@ For the full-medical-text model, we use the following TEI elements:
     * `<note type="note">` for other type of notes
 * `<other>` for unknown (yet) part
 
-> Note: It is recommended to study first the existing training documents for the __full-medical-text__ model (`grobid/grobid-trainer/resources/dataset/full-medical-text`) to see some examples of how these elements should be used.
-
-The following sections will give examples for each of the objects above and how they should be marked up. Note that the mark-up follows nearly overall the [TEI](http://www.tei-c.org).
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __full-medical-text__ model in `grobid/grobid-trainer/resources/dataset/full-medical-text/corpus/tei/` or `grobid/grobid-trainer/resources/dataset/full-medical-text/evaluation/tei`.
 
 ## Analysis
 
@@ -89,7 +88,7 @@ Paragraphs constitute the main bulk and contain text which in turn may contain i
 </p>
 ```
 
-> Note: The `<lb/>` (line break) elements are there because they have been recognized as such in the PDF in the text flow. However the fact that they are located within or outside a tagged paragraph or section title has no impact. Just be sure NOT to modify the order of the text flow and `<lb/>` as mentionned [here](General-principles.md#correcting-pre-annotated-files).
+> Note: The `<lb/>` (line break) elements are there because they have been recognized as such in the PDF in the text flow. However the fact that they are located within or outside a tagged paragraph or section title has no impact. Just be sure NOT to modify the order of the text flow and `<lb/>` as mentionned [here](Annotation_guidelines.md#correcting-pre-annotated-files).
 
 ### List items
 

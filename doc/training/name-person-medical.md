@@ -1,12 +1,9 @@
 # Annotation guidelines for the _name person_ model
 
 ## Introduction
+Before performing this procedure, pre-annotated data must be prepared as explained in [generate new datasets](../Training-the-medical-report-models.md#generate-new-datasets).
 
-For the following guidelines, we first need to generate the training data as explained [here](../Training-the-medical-report-models.md#generation-of-training-data).
-
-In __grobid-medical-report__, __name_person__ corresponds to the person's name information. 
-
-For identifying the exact pieces of person's name (`medic` or `patient`), see the Annotation guidelines of the <persName> element in the [medic](medic.md) or [patient](patient.md) models.
+To identify the person name (`<persName>`) element, see the annotation guidelines of the [medic](medic.md) and [patient](patient.md) models.
 
 For the person's name model, we use the following TEI elements:
 
@@ -16,9 +13,9 @@ For the person's name model, we use the following TEI elements:
 * `<surname>` for the last name 
 * `<suffix>` for the suffixs
 
-> Note that the mark-up follows approximatively the [TEI](http://www.tei-c.org) when used for inline encoding.
-> It is recommended to study first the existing training documents for the __medic__ model (`grobid/grobid-trainer/resources/dataset/medic`) to see some examples of how these elements should be used.
-
+> Notes:
+- The mark-up follows approximately the [TEI](http://www.tei-c.org) format.
+- It is therefore recommended to see some examples of how these elements should be used for the __name-person-medical__ model in `grobid/grobid-trainer/resources/dataset/name/person-medical/corpus/` or `grobid/grobid-trainer/resources/dataset/name/person-medical/evaluation/`.
 
 ## Analysis
 
