@@ -89,12 +89,14 @@ public class AnonymizeData {
     }
 
     // anonymize the address with thise format: zip;city_community
-    public DataToBeAnonymized anonymizeAddress(String address) throws Exception {
+    public List<DataToBeAnonymized> anonymizeAddress(String address) throws Exception {
+        List<DataToBeAnonymized> listDataToBeAnonymized = new ArrayList<>();
+        DataToBeAnonymized dataToBeAnonymized = new DataToBeAnonymized();
+        String newAddress = address;
         String inputFileName = "resources/lexicon/ADDRESS_ANONYM.txt";
+        List<String> determinant = Arrays.asList("AU", "AUX", "DU", "DES", "D\\'", "LA", "LE", "LES", "L\\'", "UN", "UNE");
         List<String> dicAddrressList = new ArrayList<>();
-        String number = "", newNumber = "", postCode = "", newCityPostCode = "", city = "", newCity = "", newPostCode = "", newAddress = "";
-        DataToBeAnonymized result = new DataToBeAnonymized();
-        result.setAddressOriginal(address);
+        String number = "", newNumber = "", postCode = "", newCityPostCode = "", city = "", newCity = "", newPostCode = "";
         try (Stream<String> lineAddress = Files.lines(Paths.get(inputFileName))) {
             int cityNumToken = 0, newCityNumToken = 0;
             List<String> addressSplit = analyzer.tokenize(address);
@@ -102,12 +104,9 @@ public class AnonymizeData {
                 if (addressSplit.get(i).matches("\\d{2,3}")) { // the street or the building number
                     number = addressSplit.get(i);
                     newNumber = anonymizeNumber(number);
-                    result.setNumberOriginal(number);
-                    result.setNumberAnonym(newNumber);
                 }
                 if (addressSplit.get(i).matches("\\d{5}")) { // the post code
                     postCode = addressSplit.get(i);
-                    result.setPostCodeOriginal(postCode);
                 }
             }
 
@@ -119,34 +118,77 @@ public class AnonymizeData {
                     cityNumToken = analyzer.tokenize(city).size();
                 }
             }
-            int min = 0;
-            int max = dicAddrressList.size();
-            int newPosition = (int) Math.floor(Math.random() * (max - min + 1) + min);
-            newCityPostCode = dicAddrressList.get(newPosition);
-            newCity = StringUtils.substringBefore(newCityPostCode, ";");
-            newPostCode = newCityPostCode.substring(newCityPostCode.length() - 5);
-            newCityNumToken = analyzer.tokenize(newCity).size();
-            while (newCityNumToken != cityNumToken) {
-                newPosition = (int) Math.floor(Math.random() * (max - min + 1) + min);
+            if (city.length() > 0) { // not found post code and city name in the dictionary
+                int min = 0;
+                int max = dicAddrressList.size();
+                int newPosition = (int) Math.floor(Math.random() * (max - min + 1) + min);
                 newCityPostCode = dicAddrressList.get(newPosition);
                 newCity = StringUtils.substringBefore(newCityPostCode, ";");
                 newPostCode = newCityPostCode.substring(newCityPostCode.length() - 5);
                 newCityNumToken = analyzer.tokenize(newCity).size();
-                if (newCityNumToken == cityNumToken) {
-                    break;
+
+                boolean containDeterminant = false;
+                for (String det : determinant) {
+                    if (newCity.contains(det)) {
+                        containDeterminant = true;
+                        break;
+                    }
+                }
+                while (newCityNumToken != cityNumToken && containDeterminant) { // take only the postal code where city/community name doesn't contain determinant (to avoid errors with body parts)
+                    newPosition = (int) Math.floor(Math.random() * (max - min + 1) + min);
+                    newCityPostCode = dicAddrressList.get(newPosition);
+                    newCity = StringUtils.substringBefore(newCityPostCode, ";");
+                    newPostCode = newCityPostCode.substring(newCityPostCode.length() - 5);
+                    newCityNumToken = analyzer.tokenize(newCity).size();
+
+                    containDeterminant = false;
+                    for (String det : determinant) {
+                        if (newCity.contains(det)) {
+                            containDeterminant = true;
+                            break;
+                        }
+                    }
+                    if (newCityNumToken == cityNumToken && !containDeterminant) {
+                        break;
+                    }
                 }
             }
-            newAddress = address.replace(number, newNumber).replace(postCode, newPostCode).replace(city, newCity);
-            result.setAddressAnonym(newAddress);
-            result.setPostCodeOriginal(postCode);
-            result.setPostCodeAnonym(newPostCode);
-            result.setCityOriginal(city);
-            result.setCityAnonym(newCity);
+
+            if (number.length() > 0 && newNumber.length() > 0) {
+                dataToBeAnonymized = new DataToBeAnonymized();
+                dataToBeAnonymized.setDataOriginal(number.trim());
+                dataToBeAnonymized.setDataPseudo(newNumber.trim());
+                listDataToBeAnonymized.add(dataToBeAnonymized);
+                newAddress = newAddress.replace(number, newNumber);
+            }
+
+            if (postCode.length() > 0 && newPostCode.length() > 0) {
+                dataToBeAnonymized = new DataToBeAnonymized();
+                dataToBeAnonymized.setDataOriginal(postCode.trim());
+                dataToBeAnonymized.setDataPseudo(newPostCode.trim());
+                listDataToBeAnonymized.add(dataToBeAnonymized);
+                newAddress = newAddress.replace(postCode, newPostCode);
+            }
+
+            if (city.length() > 0 && newCity.length() > 0) {
+                dataToBeAnonymized = new DataToBeAnonymized();
+                dataToBeAnonymized.setDataOriginal(city);
+                dataToBeAnonymized.setDataPseudo(newCity);
+                listDataToBeAnonymized.add(dataToBeAnonymized);
+                newAddress = newAddress.replace(city, newCity);
+            }
+
+            if (address.length() > 0 && newAddress.length() > 0) {
+                dataToBeAnonymized = new DataToBeAnonymized();
+                dataToBeAnonymized.setDataOriginal(address);
+                dataToBeAnonymized.setDataPseudo(newAddress);
+                listDataToBeAnonymized.add(dataToBeAnonymized);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+        return listDataToBeAnonymized;
     }
 
     // anonymize the dates in ISO Format (yyyy-mm-dd)
@@ -235,6 +277,20 @@ public class AnonymizeData {
             newDate = anonymizeDate(date);
         }
         return newDate;
+    }
+
+    public boolean isContainDigit(String text) {
+        boolean digit = false;
+        if (text.matches("^\\d+\\/\\d+\\/\\d{4}$") ||
+            text.matches("^\\d+ \\d+ \\d{4}$") ||
+            text.matches("^\\d+\\-\\d+\\-\\d{4}$") ||
+            text.matches("^\\d+\\.\\d+\\.\\d{4}$") ||
+            text.matches("^\\d+ \\D+ \\d{4}$") ||
+            text.matches("^\\d+\\.\\D+\\.\\d{4}$") ||
+            (text.matches("\\d+"))) {
+            digit = true;
+        }
+        return digit;
     }
 
     // anonymize the dates
@@ -349,8 +405,8 @@ public class AnonymizeData {
         System.out.println("==============");
         String address = "10 RUE ROGER SALENGRO 94270 LE KREMLIN BICETRE";
         System.out.println("Original address: " + address);
-        DataToBeAnonymized newAddress = anonymizeData.anonymizeAddress(address);
-        System.out.println("Anonym address: " + newAddress.getAddressAnonym());
+        List<DataToBeAnonymized> newAddress = anonymizeData.anonymizeAddress(address);
+        System.out.println("Anonym address: " + newAddress.get(0).getDataPseudo());
 
         // check upper, lower, title case
         System.out.println("==============");
