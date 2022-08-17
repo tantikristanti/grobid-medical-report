@@ -104,6 +104,12 @@ Following [GROBID](https://grobid.readthedocs.io/en/latest/Principles/#document-
 
 ![Models_grobid_medical_report](doc/img/Training_the_medical_report_models.png)
 
+Using these models, we can extract medical documents, in this case in French, with the following steps:
+1. Firstly,  we use the `medical-report-segmenter` model to segment the input document (PDF) into the header, the body, notes (headnote, footnote, left-note, right-note), and page sections.
+2. Then, from the results at the segmentation stage, we extract information on each part by using the appropriate model. For example, we use a `header-medical-report` model for extracting information concerning patients, medical personnel, and documents (e.g., document number, document type, and date) found in the header section.
+3. Information gathered from each section is aggregated using the `full-medical-text` model.
+4. In addition to the models for parsing and restructuring, we also provide the `French-medical-NER` model for recognizing medical terminologies found mainly in body parts.
+
 Each of these models can be retrained by using additional data. A more detailed explanation of how to retrain and to evaluate the models can be found in [Train and evaluate the models](doc/Training-the-medical-report-models.md)
 
 ## Copyright
