@@ -165,15 +165,16 @@ Anonymized data includes:
 2. patient data: social security numbers, names, addresses, phone numbers, emails, dates of birth
 3. document data: document numbers
 
-| Element                | Original data       | Anonymized data     | 
-|------------------------|---------------------|---------------------| 
-| Security Social Number | 0123456789          | 5042697120          | 
-| Phone Number           | 0760512430          | 0971642056          | 
-| Birth date             | 2015-05-20          | 2022-02-17          | 
-| Firstname              | Beau                | Belle               |  
-| Lastname               | GARCON              | FILLE               | 
-| Email                  | beau.garcon@aphp.fr | belle.fille@aphp.fr |
-| Address                | 44000 NANTES        | 38000 GRENOBLE              |
+| Element                | Original data           | Pseudo data             | 
+|------------------------|-------------------------|-------------------------| 
+| Security Social Number | 0123456789              | 5042697120              | 
+| Phone Number           | 0760512430              | 0971642056              | 
+| Birth date             | 2015-05-20              | 2022-02-17              | 
+| Birth date             | 01 janvier 1970         | 10 mars 2000            | 
+| Firstname              | Beau                    | Belle                   |  
+| Lastname               | GARCON                  | FILLE                   | 
+| Email                  | beau.garcon@tnn.aphp.fr | belle.fille@tnn.aphp.fr |
+| Address                | 44000 NANTES            | 38000 GRENOBLE          |
 
 
 ### Generate blank data
