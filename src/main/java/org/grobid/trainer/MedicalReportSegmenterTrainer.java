@@ -8,7 +8,7 @@ import org.grobid.core.engines.NERParsers;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.core.utilities.GrobidMedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.trainer.sax.TEIMedicalReportSegmenterSaxParser;
 
@@ -267,15 +267,15 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
      */
 
     public static void main(String[] args) throws Exception {
-        MedicalReportConfiguration medicalReportConfiguration = null;
+        GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+            grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
         } catch(Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+            String pGrobidHome = grobidMedicalReportConfiguration.getGrobidHome();
             String pGrobidProperties = "../grobid-home/config/grobid.properties";
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));

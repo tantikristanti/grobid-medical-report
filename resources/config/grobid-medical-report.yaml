@@ -1,7 +1,6 @@
-grobidHome: "../grobid-home/"
+# Configuration file for the grobid-medical-report instance
 
-# path relative to the corpus and template path
-dataPath: "resources/dataset/"
+grobidHome: "../grobid-home/"
 
 models:
   # we configure here how each sequence labeling model should be implemented

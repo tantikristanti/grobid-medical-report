@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.core.utilities.GrobidMedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.trainer.sax.TEIFullMedicalTextSaxParser;
 
@@ -228,15 +228,15 @@ public class FullMedicalTextTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        MedicalReportConfiguration medicalReportConfiguration = null;
+        GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+            grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
         } catch (Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+            String pGrobidHome = grobidMedicalReportConfiguration.getGrobidHome();
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);

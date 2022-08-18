@@ -65,14 +65,14 @@ public class LeftNoteMedicalParser extends AbstractParser {
         super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
+        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(GrobidMedicalReportProperties.get("grobid.home"))));
     }
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers) {
         super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
         this.parsers = parsers;
         tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
+        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(GrobidMedicalReportProperties.get("grobid.home"))));
     }
 
     /**

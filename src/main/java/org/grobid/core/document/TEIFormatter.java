@@ -309,7 +309,7 @@ public class TEIFormatter {
             df.setTimeZone(tz);
             String dateISOString = df.format(new java.util.Date());
 
-            tei.append("\t\t\t\t<application version=\"" + MedicalReportProperties.getVersion() +
+            tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
                 "\" ident=\"grobid-medical-report\" when=\"" + dateISOString + "\">\n");
             tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
             tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");

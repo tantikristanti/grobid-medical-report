@@ -7,7 +7,7 @@ import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
 import org.grobid.core.utilities.GrobidConfig;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.core.utilities.GrobidMedicalReportConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,22 +56,22 @@ public class MedicalReportTrainerRunner {
      * @param grobidHome
      */
     protected static void initProcess(String grobidHome) {
-        MedicalReportConfiguration medicalReportConfiguration = null;
+        GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+            grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
         } catch (Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+            String pGrobidHome = grobidMedicalReportConfiguration.getGrobidHome();
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
             System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
 
-            for (GrobidConfig.ModelParameters theModel : medicalReportConfiguration.getModels())
+            for (GrobidConfig.ModelParameters theModel : grobidMedicalReportConfiguration.getModels())
                 GrobidProperties.getInstance().addModel(theModel);
 
             LibraryLoader.load();

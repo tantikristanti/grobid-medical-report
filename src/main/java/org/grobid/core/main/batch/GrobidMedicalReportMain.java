@@ -7,7 +7,7 @@ import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.main.LibraryLoader;
 import org.grobid.core.utilities.GrobidConfig.ModelParameters;
 import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.core.utilities.GrobidMedicalReportConfiguration;
 import org.grobid.core.utilities.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,39 +25,30 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class GrobidMedicalReportMain {
     private static Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportMain.class);
     // commands for creating training data (for annotators)
-    private static final String COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK = "createTrainingSegmentationBlank";
-    private static final String COMMAND_CREATE_TRAINING_SEGMENTATION = "createTrainingSegmentation";
-    private static final String COMMAND_CREATE_TRAINING_FULL_BLANK = "createTrainingFullBlank";
-    private static final String COMMAND_CREATE_TRAINING_FULL = "createTrainingFull";
-    private static final String COMMAND_CREATE_TRAINING_HEADER_BLANK = "createTrainingHeaderBlank";
-    private static final String COMMAND_CREATE_TRAINING_HEADER = "createTrainingHeader";
-    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK = "createTrainingLeftNoteBlank";
-    private static final String COMMAND_CREATE_TRAINING_LEFT_NOTE = "createTrainingLeftNote";
+    private static final String COMMAND_CREATE_TRAINING_BLANK = "createTrainingBlank";
+    private static final String COMMAND_CREATE_TRAINING = "createTraining";
+    private static final String COMMAND_CREATE_DATA_ANONYM = "createDataAnonymized";
+    private static final String COMMAND_CREATE_TRAINING_ANONYM = "createTrainingAnonym";
+    private static final String COMMAND_CREATE_TRAINING_BLANK_FRENCH_MEDICAL_NER = "createTrainingBlankFrenchMedicalNER";
+    private static final String COMMAND_CREATE_TRAINING_FRENCH_MEDICAL_NER = "createTrainingFrenchMedicalNER";
+    private static final String COMMAND_CREATE_TRAINING_ANONYM_FRENCH_MEDICAL_NER = "createTrainingAnonymFrenchMedicalNER";
 
     // commands for processing the data (for end-users)
-    private static final String COMMAND_PROCESS_HEADER_HIGH_LEVEL = "processHeader";
-    private static final String COMMAND_PROCESS_HEADER = "processHeaderUser";
-    private static final String COMMAND_PROCESS_LEFT_NOTE = "processLeftNote";
+    private static final String COMMAND_PROCESS_HEADER = "processHeader";
     private static final String COMMAND_PROCESS_FULL_TEXT = "processFullText";
-    private static final String COMMAND_CREATE_MEDICAL_NER_TRAINING = "createMedicalNerTraining";
-    private static final String COMMAND_EXTRACT_NER = "extractNER";
 
     private static List<String> availableCommands = Arrays.asList(
-        COMMAND_CREATE_TRAINING_SEGMENTATION_BLANK,
-        COMMAND_CREATE_TRAINING_SEGMENTATION,
-        COMMAND_CREATE_TRAINING_FULL_BLANK,
-        COMMAND_CREATE_TRAINING_FULL,
-        COMMAND_CREATE_TRAINING_HEADER_BLANK,
-        COMMAND_CREATE_TRAINING_HEADER,
-        COMMAND_CREATE_TRAINING_LEFT_NOTE_BLANK,
-        COMMAND_CREATE_TRAINING_LEFT_NOTE,
+        COMMAND_CREATE_TRAINING_BLANK,
+        COMMAND_CREATE_TRAINING,
+        COMMAND_CREATE_DATA_ANONYM,
+        COMMAND_CREATE_TRAINING_ANONYM,
 
-        COMMAND_PROCESS_FULL_TEXT,
-        COMMAND_PROCESS_HEADER_HIGH_LEVEL,
+        COMMAND_CREATE_TRAINING_BLANK_FRENCH_MEDICAL_NER,
+        COMMAND_CREATE_TRAINING_FRENCH_MEDICAL_NER,
+        COMMAND_CREATE_TRAINING_ANONYM_FRENCH_MEDICAL_NER,
+
         COMMAND_PROCESS_HEADER,
-        COMMAND_PROCESS_LEFT_NOTE,
-        COMMAND_CREATE_MEDICAL_NER_TRAINING,
-        COMMAND_EXTRACT_NER
+        COMMAND_PROCESS_FULL_TEXT
     );
 
     /**
@@ -73,7 +64,7 @@ public class GrobidMedicalReportMain {
      * @return the path to grobid.properties.
      */
     protected final static String getPath2GbdProperties(final String pPath2GbdHome) {
-        return pPath2GbdHome + File.separator + "config" + File.separator + "grobid.properties";
+        return pPath2GbdHome + File.separator + "config" + File.separator + "grobid.properties"; // ../grobid-home/config/grobid.properties
     }
 
     /**
@@ -82,15 +73,15 @@ public class GrobidMedicalReportMain {
     protected static void inferParamsNotSet() {
         String tmpFilePath;
         if (gbdArgs.getPath2grobidHome() == null) {
-            MedicalReportConfiguration medicalReportConfiguration = null;
+            GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
             try {
                 ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-                medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+                grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
             } catch (Exception e) {
                 LOGGER.error("The config file does not appear valid, see resources/config/grobid-medical-report.yaml", e);
             }
 
-            tmpFilePath = medicalReportConfiguration.getGrobidHome();
+            tmpFilePath = grobidMedicalReportConfiguration.getGrobidHome();
 
             if (tmpFilePath == null) {
                 tmpFilePath = new File("grobid-home").getAbsolutePath();
@@ -121,26 +112,26 @@ public class GrobidMedicalReportMain {
     }*/
 
     /**
-     * Init GROBID by loading the configuration and the native libraries.
+     * Init GROBID by loading the configuration and the native libraries in the grobid-home
      * @param grobidHome
      */
     protected static void initGrobid(String grobidHome) {
-        MedicalReportConfiguration medicalReportConfiguration = null;
+        GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
+            grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
         } catch (Exception e) {
             System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
         }
         try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
+            String pGrobidHome = grobidMedicalReportConfiguration.getGrobidHome();
 
             GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
             GrobidProperties.getInstance(grobidHomeFinder);
 
             System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
 
-            for (ModelParameters theModel : medicalReportConfiguration.getModels()) {
+            for (ModelParameters theModel : grobidMedicalReportConfiguration.getModels()) {
                 GrobidProperties.getInstance().addModel(theModel);
             }
 
@@ -167,7 +158,6 @@ public class GrobidMedicalReportMain {
         help.append("-segmentSentences: add sentence segmentation level structures for paragraphs in the TEI XML result, by default no sentence segmentation is done.\n");
         help.append("-s: is the parameter used for process using string as input and not file.\n");
         help.append("-exe: gives the command to execute. The value should be one of these:\n");
-        help.append("\t" + availableCommands + "\n");
         return help.toString();
     }
 

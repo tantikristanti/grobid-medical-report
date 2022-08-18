@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MedicalReportProperties {
+public class GrobidMedicalReportProperties {
     public static final Logger LOGGER = LoggerFactory.getLogger(GrobidProperties.class);
 
     private static String GROBID_MEDICAL_VERSION = null;
@@ -38,7 +38,7 @@ public class MedicalReportProperties {
             synchronized (GrobidProperties.class) {
                 if (GROBID_MEDICAL_VERSION == null) {
                     String grobidMedicalVersion = UNKNOWN_VERSION_STR;
-                    try (InputStream is = MedicalReportProperties.class.getResourceAsStream(GROBID_MEDICAL_VERSION_FILE)) {
+                    try (InputStream is = GrobidMedicalReportProperties.class.getResourceAsStream(GROBID_MEDICAL_VERSION_FILE)) {
                         grobidMedicalVersion = IOUtils.toString(is, "UTF-8");
                     } catch (IOException e) {
                         LOGGER.error("Cannot read Grobid version from resources", e);
