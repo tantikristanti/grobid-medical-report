@@ -10,6 +10,8 @@ import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.exceptions.GrobidException;
+import org.grobid.core.factory.GrobidMedicalPoolingFactory;
+import org.grobid.core.factory.GrobidPoolingFactory;
 import org.grobid.core.utilities.counters.CntManager;
 import org.grobid.core.utilities.counters.impl.CntManagerFactory;
 import org.grobid.core.utilities.crossref.CrossrefClient;
@@ -713,5 +715,9 @@ public class EngineMedical extends Engine {
 
     public EngineMedicalParsers getParsers() {
         return parsers;
+    }
+
+    public static EngineMedical getEngine(boolean preload) {
+        return GrobidMedicalPoolingFactory.getEngineFromPool(preload);
     }
 }

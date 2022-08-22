@@ -7,26 +7,24 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class GrobidMedicalReportProperties {
-    public static final Logger LOGGER = LoggerFactory.getLogger(GrobidProperties.class);
-
+public class GrobidMedicalReportProperties extends GrobidProperties {
+    public static final Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportProperties.class);
     private static String GROBID_MEDICAL_VERSION = null;
-    static final String UNKNOWN_VERSION_STR = "unknown";
     private static final String GROBID_MEDICAL_VERSION_FILE = "/grobid-medical-version.txt";
 
-	public static String get(String key) {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream stream = classLoader.getResourceAsStream("grobid-medical-report.properties");
-		
-		java.util.Properties properties = new java.util.Properties();
-		try {
-			properties.load(stream);
-		} catch (IOException e1) {
-			return null;
-		}
-		
-		return properties.getProperty(key);
-	}
+    public static String get(String key) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = classLoader.getResourceAsStream("grobid-medical-report.properties");
+
+        java.util.Properties properties = new java.util.Properties();
+        try {
+            properties.load(stream);
+        } catch (IOException e1) {
+            return null;
+        }
+
+        return properties.getProperty(key);
+    }
 
     /**
      * Returns the current version of grobid-medical-report
@@ -49,5 +47,4 @@ public class GrobidMedicalReportProperties {
         }
         return GROBID_MEDICAL_VERSION;
     }
-	
 }

@@ -5,9 +5,9 @@ import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorMedic;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.trainer.sax.TEIMedicSaxParser;
+import org.grobid.utility.Utility;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -171,7 +171,8 @@ public class MedicTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        GrobidProperties.getInstance();
+        Utility utility = new Utility();
+        utility.initGrobid(null);
         Trainer trainer = new MedicTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));

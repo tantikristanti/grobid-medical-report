@@ -1,20 +1,15 @@
 package org.grobid.trainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.main.GrobidHomeFinder;
-import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.GrobidMedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.trainer.sax.TEIHeaderMedicalSaxParser;
+import org.grobid.utility.Utility;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 
@@ -118,7 +113,6 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer {
 
             for (File teifile : refFiles) {
                 String name = teifile.getName();
-                //System.out.println(name);
 
                 TEIHeaderMedicalSaxParser parser2 = new TEIHeaderMedicalSaxParser();
                 parser2.setFileName(name);
@@ -130,9 +124,6 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer {
                 par.parse(teifile, parser2);
 
                 ArrayList<String> labeled = parser2.getLabeledResult();
-
-                //System.out.println(labeled);
-                //System.out.println(parser2.getPDFName()+"._");
 
                 File refDir2 = new File(headerPath);
                 String headerFile = null;
@@ -303,30 +294,11 @@ public class HeaderMedicalReportTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        GrobidMedicalReportConfiguration grobidMedicalReportConfiguration = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            grobidMedicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), GrobidMedicalReportConfiguration.class);
-        } catch (Exception e) {
-            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
-        }
-        try {
-            String pGrobidHome = grobidMedicalReportConfiguration.getGrobidHome();
-
-            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
-            GrobidProperties.getInstance(grobidHomeFinder);
-
-            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
-        } catch (final Exception exp) {
-            System.err.println("grobid-medical-report initialisation failed: " + exp);
-            exp.printStackTrace();
-        }
-
-        HeaderMedicalReportTrainer trainer = new HeaderMedicalReportTrainer();
-
+        Utility utility = new Utility();
+        utility.initGrobid(null);
+        Trainer trainer = new HeaderMedicalReportTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));
-
         System.exit(0);
     }
 }

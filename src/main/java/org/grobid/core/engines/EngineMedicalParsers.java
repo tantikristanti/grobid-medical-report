@@ -271,6 +271,12 @@ public class EngineMedicalParsers extends EngineParsers {
             LOGGER.debug("CLOSING addressParser");
         }
 
+        if (organizationParser != null) {
+            organizationParser.close();
+            organizationParser = null;
+            LOGGER.debug("CLOSING organizationParser");
+        }
+
         if (medicParser != null) {
             medicParser.close();
             medicParser = null;

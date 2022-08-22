@@ -20,12 +20,11 @@ import org.grobid.core.lang.Language;
 import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
-import org.grobid.core.utilities.counters.CntManager;
+import org.grobid.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,41 +45,26 @@ import static org.grobid.core.document.TEIFormatter.toISOString;
  */
 public class HeaderMedicalParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalParser.class);
-
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-
     private EngineMedicalParsers parsers;
-
+    private Lexicon lexicon = Lexicon.getInstance();
+    Utility utility = null;
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
-
     // default bins for inter-block spacing
     private static final int NBBINS_SPACE = 5;
-
     // default bins for block character density
     private static final int NBBINS_DENSITY = 5;
-
     // projection scale for line length
     private static final int LINESCALE = 10;
-
-    private Lexicon lexicon = Lexicon.getInstance();
-
     private File tmpPath = null;
 
     public HeaderMedicalParser(EngineMedicalParsers parsers) {
         super(GrobidModels.HEADER_MEDICAL_REPORT);
         this.parsers = parsers;
+        utility.initGrobid(null);
         tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(GrobidMedicalReportProperties.get("grobid.home"))));
     }
-
-    public HeaderMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.HEADER_MEDICAL_REPORT, cntManager);
-        this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(GrobidMedicalReportProperties.get("grobid.home"))));
-    }
-
 
     public Pair<String, Document> processing(File input, String md5Str,
                                              HeaderMedicalItem resHeader,
