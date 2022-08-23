@@ -24,24 +24,15 @@ public class GrobidMedicalReportRestProcessGeneric {
      * @return returns a response object containing the string true if service
      * is alive.
      */
-    public static Response isAlive() {
-        Response response = null;
+    public static String isAlive() {
+        String retVal = "";
         try {
-            LOGGER.debug("Called isAlive()...");
-
-            String retVal = null;
-            try {
-                retVal = Boolean.valueOf(true).toString();
-            } catch (Exception e) {
-                LOGGER.error("grobid-medical-report service is not active. ", e);
-                retVal = Boolean.valueOf(false).toString();
-            }
-            response = Response.status(Status.OK).entity(retVal).build();
+            retVal = Boolean.valueOf(true).toString();
         } catch (Exception e) {
-            LOGGER.error("Exception occurred while check if the service is alive. " + e);
-            response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            LOGGER.error("grobid-medical-report service is not active. ", e);
+            retVal = Boolean.valueOf(false).toString();
         }
-        return response;
+        return retVal;
     }
 
     public static String getVersion() {
@@ -53,19 +44,10 @@ public class GrobidMedicalReportRestProcessGeneric {
      *
      * @return a response object containing a description
      */
-    public Response getDescription() {
-        Response response = null;
-
-        LOGGER.debug("called getDescription_html()...");
-
+    public String getDescription() {
         String htmlCode = "<h4>grobid-medical-report documentation</h4>" +
             "This service provides a RESTful interface for using the grobid-medical-system system. " +
             "grobid-medical-system  extracts data from French medical PDF files.";
-
-        response = Response.status(Status.OK).entity(htmlCode)
-            .type(MediaType.TEXT_HTML).build();
-
-        return response;
+        return htmlCode;
     }
-
 }

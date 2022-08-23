@@ -10,17 +10,23 @@ public interface GrobidMedicalReportPaths {
      */
     String ROOT = "/";
 
-	/**
-	 * path extension for grobid-medical-report adm.
-	 */
-	String PATH_ADM = "/adm";
+    /**
+     * path extension for is alive request.
+     */
+    String PATH_IS_ALIVE = "isalive";
 
-	/**
-	 * path extension for is alive request.
-	 */
-	String PATH_IS_ALIVE = "isalive";
+    /**
+     * path extension for getting version
+     */
+    String PATH_GET_VERSION = "version";
 
-	/**
+    /**
+     * path extension for getting description
+     */
+    String PATH_GET_DESCRIPTION = "grobidMedicalReport";
+
+
+    /**
 	 * path extension for processing document headers.
 	 */
 	String PATH_HEADER = "processHeaderDocument";
@@ -134,16 +140,6 @@ public interface GrobidMedicalReportPaths {
 	 * path extension to update property value.
 	 */
 	String PATH_CHANGE_PROPERTY_VALUE = "changePropertyValue";
-
-	/**
-	 * path extension for getting version
-	 */
-	String PATH_GET_VERSION = "version";
-
-    /**
-     * path extension for getting description
-     */
-    String PATH_GET_DESCRIPTION = "grobidMedicalReport";
 
 	/**
 	 * path to retrieve a model 

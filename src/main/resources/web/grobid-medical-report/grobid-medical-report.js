@@ -105,7 +105,6 @@ var grobid = (function($) {
 
 			$("#divRestI").show();
 			$("#divRestII").hide();
-			$("#divRestIII").hide();
 			$("#divAbout").hide();
 			$("#divInfo").hide();
 			$("#divDemo").hide();
@@ -125,7 +124,6 @@ var grobid = (function($) {
 			$("#divAbout").hide();
 			$("#divRestI").hide();
 			$("#divRestII").hide();
-			$("#divRestIII").hide();
 			$("#divDemo").hide();
 			return false;
 		});
@@ -144,7 +142,6 @@ var grobid = (function($) {
 			$("#divAbout").hide();
 			$("#divRestI").hide();
 			$("#divRestII").show();
-			$("#divRestIII").hide();
 			return false;
 		});
 	});
@@ -978,7 +975,6 @@ var grobid = (function($) {
 		tnCanvasContext.drawImage(canvas, x , y, width, height, 0, 0, width, height);
  		return tnCanvas.toDataURL();
 	}
-
 
 	function setupPatentAnnotations(response) {
 		// we must check/wait that the corresponding PDF page is rendered at this point

@@ -75,7 +75,19 @@ public class GrobidMedicalReportRestService implements GrobidMedicalReportPaths 
     @Produces(MediaType.TEXT_PLAIN)
     @GET
     public Response isAlive() {
-        return Response.status(Response.Status.OK).entity(restProcessGeneric.isAlive()).build();
+        Response response = null;
+        try {
+            response = Response.status(Response.Status.OK)
+                .entity(restProcessGeneric.isAlive())
+                .type(MediaType.TEXT_HTML)
+                .build();
+
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while check if the service is alive. " + e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return response;
+
     }
 
     /**
@@ -85,7 +97,6 @@ public class GrobidMedicalReportRestService implements GrobidMedicalReportPaths 
     @Produces(MediaType.TEXT_PLAIN)
     @GET
     public Response getVersion() {
-
         Response response = null;
         try {
             response = Response.status(Response.Status.OK)
@@ -108,6 +119,19 @@ public class GrobidMedicalReportRestService implements GrobidMedicalReportPaths 
     @Produces(MediaType.TEXT_HTML)
     @GET
     public Response getDescription() {
-        return restProcessGeneric.getDescription();
+
+        Response response = null;
+        try {
+            response = Response.status(Response.Status.OK)
+                .entity(restProcessGeneric.getDescription())
+                .type(MediaType.TEXT_HTML)
+                .build();
+
+        } catch (Exception e) {
+            LOGGER.error("An unexpected exception occurs. ", e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return response;
     }
 }

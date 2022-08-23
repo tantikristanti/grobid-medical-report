@@ -46,12 +46,10 @@
                 <small>
                     <a class="section-active" id="about" href="#">About</a>
                     <span style="padding-left:20px;">&nbsp;</span>
-                    <a class="section-not-active" id="rest" href="#">TEI</a>
+                    <a class="section-not-active" id="rest" href="#">TEI/XML</a>
                     <span style="padding-left:20px;">&nbsp;</span>
                     <a class="section-not-active" id="pdf" href="#">PDF</a>
                     <span style="padding-left:20px;">&nbsp;</span>
-                    <!--a class="section-not-active" id="patent" href="#">Patent</a>
-                    <span style="padding-left:20px;">&nbsp;</span-->
                     <a class="section-not-active" id="info" href="#">Info</a>
                     <span style="padding-left:20px;">&nbsp;</span>
                 </small>
@@ -94,7 +92,7 @@
                             <select id="selectedService">
                                 <optgroup label="--Medical PDF Input--">
                                     <option value="processHeaderDocument" selected>Process Header Document</option>
-                                    <option value="processLeftNoteDocument" selected>Process Left-Note Document</option>
+                                    <option value="processLeftNoteDocument">Process Left-Note Document</option>
                                     <option value="processFullMedicalTextDocument">Process Full Medical Document
                                     </option>
                                     <option value="processFrenchMedicalNER">Process French Medical Terminology Mentions
@@ -109,7 +107,6 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <td><span id="label1">&nbsp;</span></td>
                         <td>
@@ -140,14 +137,12 @@
                                             <i class="icon-file fileupload-exists" style="white-space:normal;"></i>
                                             <span class="fileupload-preview" style="white-space:normal;"></span>
                                         </div>
-                                        <span class="">
-											
-										<span class="btn btn-file" id="btn_block_1">
+                                        <span class="btn btn-file" id="btn_block_1">
 											<span class="fileupload-new" id="labelFile">Select file</span>
 											<span class="fileupload-exists">Change</span>
-											<input id="input" name="input" type="file"/>
+											<input id="input1" name="input" type="file"/>
 										</span>
-										<a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+                                        <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
                                     </div>
                                 </div>
                                 <div id="textInputDiv">
@@ -213,14 +208,14 @@
                                             <i class="icon-file fileupload-exists" style="white-space:normal;"></i>
                                             <span class="fileupload-preview" style="white-space:normal;"></span>
                                         </div>
-                                        <span class="">
-											
-										<span class="btn btn-file">
+                                        <span class=""/>
+
+                                        <span class="btn btn-file">
 											<span class="fileupload-new" id="labelFile2">Select file</span>
 											<span class="fileupload-exists">Change</span>
 											<input id="input2" name="input" type="file"/>
 										</span>
-										<a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+                                        <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
                                     </div>
                                 </div>
                             </div>
