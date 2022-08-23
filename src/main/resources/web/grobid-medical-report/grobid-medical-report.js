@@ -30,14 +30,11 @@ var grobid = (function($) {
 			$('#gbdForm').attr('action', baseUrl);
 		else if (block == 1)
 			$('#gbdForm2').attr('action', baseUrl);
-		else if (block == 2)
-			$('#gbdForm3').attr('action', baseUrl);
 	}
 
 	$(document).ready(function() {
 		$("#subTitle").html("About");
 		$("#divAbout").show();
-		//$("#divAdmin").hide();
 
 		// for TEI-based results
         $("#divRestI").hide();
@@ -45,17 +42,13 @@ var grobid = (function($) {
         // for PDF based results
         $("#divRestII").hide();
 
-        // for patent processing
-        $("#divRestIII").hide();
-
 		$("#divInfo").hide();
 		$('#consolidateBlock').show();
         $("#btn_download").hide();
-        $("#btn_download3").hide();
 
 		createInputFile();
 		createInputFile2();
-		createInputFile3();
+
 		setBaseUrl('processHeaderDocument');
 		block = 0;
 
@@ -69,10 +62,6 @@ var grobid = (function($) {
 			return true;
 		});
 
-		$('#selectedService3').change(function() {
-			processChange();
-			return true;
-		});
 
 		$('#gbdForm').ajaxForm({
             beforeSubmit: ShowRequest1,
@@ -82,31 +71,17 @@ var grobid = (function($) {
         });
 
 		$('#submitRequest2').bind('click', submitQuery2);
-		$('#submitRequest3').bind('click', submitQuery3);
 
 		// bind download buttons with download methods
 		$('#btn_download').bind('click', download);
 		$("#btn_download").hide();
-		$('#btn_download3').bind('click', downloadPatent);
-		$("#btn_download3").hide();
         $('#btn_block_1').bind('click', downloadVisibilty);
-        $('#btn_block_3').bind('click', downloadVisibilty3);
-		//$('#adminForm').attr("action", defineBaseURL("allProperties"));
-		//$('#TabAdminProps').hide();
-		/*$('#adminForm').ajaxForm({
-	        beforeSubmit: adminShowRequest,
-	        success: adminSubmitSuccesful,
-	        error: adminAjaxError,
-	        dataType: "text"
-	        });*/
 
 		$("#about").click(function() {
 			$("#about").attr('class', 'section-active');
 			$("#rest").attr('class', 'section-not-active');
 			$("#pdf").attr('class', 'section-not-active');
-			//$("#admin").attr('class', 'section-not-active');
 			$("#info").attr('class', 'section-not-active');
-			$("#patent").attr('class', 'section-not-active');
 
 			$("#subTitle").html("About");
 			$("#subTitle").show();
@@ -114,8 +89,6 @@ var grobid = (function($) {
 			$("#divAbout").show();
 			$("#divRestI").hide();
 			$("#divRestII").hide();
-			$("#divRestIII").hide();
-			//$("#divAdmin").hide();
 			$("#divInfo").hide();
 			$("#divDemo").hide();
 			return false;
@@ -125,13 +98,9 @@ var grobid = (function($) {
 			$("#pdf").attr('class', 'section-not-active');
 			$("#info").attr('class', 'section-not-active');
 			$("#about").attr('class', 'section-not-active');
-			//$("#admin").attr('class', 'section-not-active');
-			$("#patent").attr('class', 'section-not-active');
 
 			$("#subTitle").hide();
 			block = 0;
-			//$("#subTitle").html("TEI output service");
-			//$("#subTitle").show();
 			processChange();
 
 			$("#divRestI").show();
@@ -139,7 +108,6 @@ var grobid = (function($) {
 			$("#divRestIII").hide();
 			$("#divAbout").hide();
 			$("#divInfo").hide();
-			//$("#divAdmin").hide();
 			$("#divDemo").hide();
 			return false;
 		});
@@ -148,9 +116,7 @@ var grobid = (function($) {
 			$("#info").attr('class', 'section-active');
 			$("#rest").attr('class', 'section-not-active');
 			$("#pdf").attr('class', 'section-not-active');
-			$("#patent").attr('class', 'section-not-active');
 			$("#about").attr('class', 'section-not-active');
-			//$("#admin").attr('class', 'section-not-active');
 
 			$("#subTitle").html("Info");
 			$("#subTitle").show();
@@ -160,52 +126,25 @@ var grobid = (function($) {
 			$("#divRestI").hide();
 			$("#divRestII").hide();
 			$("#divRestIII").hide();
-			//$("#divAdmin").hide();
 			$("#divDemo").hide();
 			return false;
 		});
 		$("#pdf").click(function() {
 			$("#pdf").attr('class', 'section-active');
 			$("#rest").attr('class', 'section-not-active');
-			$("#patent").attr('class', 'section-not-active');
 			$("#about").attr('class', 'section-not-active');
-			//$("#admin").attr('class', 'section-not-active');
 			$("#info").attr('class', 'section-not-active');
 
 			block = 1;
 			setBaseUrl('referenceAnnotations');
 			$("#subTitle").hide();
 			processChange();
-			//$("#subTitle").html("PDF annotation services");
-			//$("#subTitle").show();
 
 			$("#divInfo").hide();
 			$("#divAbout").hide();
 			$("#divRestI").hide();
 			$("#divRestII").show();
 			$("#divRestIII").hide();
-			//$("#divAdmin").hide();
-			return false;
-		});
-		$("#patent").click(function() {
-			$("#patent").attr('class', 'section-active');
-			$("#rest").attr('class', 'section-not-active');
-			$("#pdf").attr('class', 'section-not-active');
-			$("#about").attr('class', 'section-not-active');
-			//$("#admin").attr('class', 'section-not-active');
-			$("#info").attr('class', 'section-not-active');
-
-			block = 2;
-			setBaseUrl('processCitationPatentST36');
-			$("#subTitle").hide();
-			processChange();
-
-			$("#divInfo").hide();
-			$("#divAbout").hide();
-			$("#divRestI").hide();
-			$("#divRestII").hide();
-			$("#divRestIII").show();
-			//$("#divAdmin").hide();
 			return false;
 		});
 	});
@@ -238,11 +177,6 @@ var grobid = (function($) {
 	    return true;
 	}
 
-	function ShowRequest3(formData, jqForm, options) {
-	    $('#requestResult3').html('<font color="grey">Requesting server...</font>');
-	    return true;
-	}
-
 	function AjaxError1(jqXHR, textStatus, errorThrown) {
 		$('#requestResult').html("<font color='red'>Error encountered while requesting the server.<br/>"+jqXHR.responseText+"</font>");
 		responseJson = null;
@@ -265,17 +199,12 @@ var grobid = (function($) {
         return true;
     }
 
-	function AjaxError3(jqXHR, textStatus, errorThrown) {
-		$('#requestResult3').html("<font color='red'>Error encountered while requesting the server.<br/>"+jqXHR.responseText+"</font>");
-		responseJson = null;
-	}
 
 	function htmll(s) {
     	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   	}
 
 	function SubmitSuccesful(responseText, statusText, xhr) {
-		//var selected = $('#selectedService option:selected').attr('value');
 		var display = "<pre class='prettyprint lang-xml' id='xmlCode'>";
 		var testStr = vkbeautify.xml(responseText);
         teiToDownload = responseText;
@@ -291,8 +220,6 @@ var grobid = (function($) {
     function submitQuery2() {
         var selected = $('#selectedService2 option:selected').attr('value');
         if (selected == 'annotatePDF') {
-            // we will have a PDF back
-            //PDFJS.disableWorker = true;
 
             var form = document.getElementById('gbdForm2');
             var formData = new FormData(form);
@@ -315,7 +242,6 @@ var grobid = (function($) {
                             pdfjsframe.contentWindow.PDFViewerApplication.open(pdfAsArray);
                         };
                     } else {
-                        //AjaxError2("Response " + xhr.status + ": " + xhr.responseText);
                         AjaxError2("Response " + xhr.status + ": " );
                     }
                 }
@@ -447,210 +373,6 @@ var grobid = (function($) {
             }
         }
     }
-
-
-	function submitQuery3() {
-		var selected = $('#selectedService3 option:selected').attr('value');
-		if (selected == 'citationPatentPDFAnnotation') {
-			// we will have a PDF back
-			//PDFJS.disableWorker = true;
-
-			var form = document.getElementById('gbdForm3');
-			var formData = new FormData(form);
-			var xhr = new XMLHttpRequest();
-			var url = $('#gbdForm3').attr('action');
-			xhr.responseType = 'arraybuffer';
-			xhr.open('POST', url, true);
-			ShowRequest3();
-			xhr.onreadystatechange = function(e) {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-				    var response = e.target.response;
-				    var pdfAsArray = new Uint8Array(response);
-					// Use PDFJS to render a pdfDocument from pdf array
-					var frame = '<iframe id="pdfViewer" src="resources/pdf.js/web/viewer.html?file=" style="width: 100%; height: 1000px;"></iframe>';
-					$('#requestResult3').html(frame);
-					var pdfjsframe = document.getElementById('pdfViewer');
-					pdfjsframe.onload = function() {
-						pdfjsframe.contentWindow.PDFViewerApplication.open(pdfAsArray);
-					};
-				} else  if (xhr.status != 200) {
-					AjaxError3(xhr);
-				}
-			};
-			xhr.send(formData);  // multipart/form-data
-		} else if (selected == 'citationPatentAnnotations') {
-			// we will have JSON annotations to be layered on the PDF
-
-			// request for the annotation information
-			var form = document.getElementById('gbdForm3');
-			var formData = new FormData(form);
-			var xhr = new XMLHttpRequest();
-			var url = $('#gbdForm3').attr('action');
-			xhr.responseType = 'json';
-			xhr.open('POST', url, true);
-			ShowRequest3();
-
-			var nbPages = -1;
-
-			// display the local PDF
-
-			if ( (document.getElementById("input3").files[0].type == 'application/pdf') ||
-			   	 (document.getElementById("input3").files[0].name.endsWith(".pdf")) ||
-				 (document.getElementById("input3").files[0].name.endsWith(".PDF")) ) {
-                var reader = new FileReader();
-                reader.onloadend = function () {
-					// to avoid cross origin issue
-					//PDFJS.disableWorker = true;
-				    var pdfAsArray = new Uint8Array(reader.result);
-					// Use PDFJS to render a pdfDocument from pdf array
-				    PDFJS.getDocument(pdfAsArray).then(function (pdf) {
-				        // Get div#container and cache it for later use
-			            var container = document.getElementById("requestResult3");
-			            // enable hyperlinks within PDF files.
-			            //var pdfLinkService = new PDFJS.PDFLinkService();
-			            //pdfLinkService.setDocument(pdf, null);
-
-						$('#requestResult3').html('');
-						nbPages = pdf.numPages;
-
-			            // Loop from 1 to total_number_of_pages in PDF document
-			            for (var i = 1; i <= nbPages; i++) {
-
-			                // Get desired page
-			                pdf.getPage(i).then(function(page) {
-
-							  	var div0 = document.createElement("div");
-							  	div0.setAttribute("style", "text-align: center; margin-top: 1cm;");
-			                  	var pageInfo = document.createElement("p");
-			                  	var t = document.createTextNode("page " + (page.pageIndex + 1) + "/" + (nbPages));
-							  	pageInfo.appendChild(t);
-							  	div0.appendChild(pageInfo);
-			                  	container.appendChild(div0);
-
-			                  	var scale = 1.5;
-			                 	var viewport = page.getViewport(scale);
-				                var div = document.createElement("div");
-
-			                  	// Set id attribute with page-#{pdf_page_number} format
-			                  	div.setAttribute("id", "page-" + (page.pageIndex + 1));
-
-			                  	// This will keep positions of child elements as per our needs, and add a light border
-			                  	div.setAttribute("style", "position: relative; border-style: solid; border-width: 1px; border-color: gray;");
-
-			                  	// Append div within div#container
-			                  	container.appendChild(div);
-
-			                  	// Create a new Canvas element
-			                  	var canvas = document.createElement("canvas");
-
-			                  	// Append Canvas within div#page-#{pdf_page_number}
-			                  	div.appendChild(canvas);
-
-			                  	var context = canvas.getContext('2d');
-			                  	canvas.height = viewport.height;
-			                  	canvas.width = viewport.width;
-
-			                  	var renderContext = {
-			                    	canvasContext: context,
-			                  		viewport: viewport
-			                  	};
-
-			                  	// Render PDF page
-			                  	page.render(renderContext).then(function() {
-			                        // Get text-fragments
-			                        return page.getTextContent();
-			                    })
-			                    .then(function(textContent) {
-			                        // Create div which will hold text-fragments
-			                        var textLayerDiv = document.createElement("div");
-
-			                        // Set it's class to textLayer which have required CSS styles
-			                        textLayerDiv.setAttribute("class", "textLayer");
-
-			                        // Append newly created div in `div#page-#{pdf_page_number}`
-			                        div.appendChild(textLayerDiv);
-
-			                        // Create new instance of TextLayerBuilder class
-			                        var textLayer = new TextLayerBuilder({
-			                          textLayerDiv: textLayerDiv,
-			                          pageIndex: page.pageIndex,
-			                          viewport: viewport
-			                        });
-
-			                        // Set text-fragments
-			                        textLayer.setTextContent(textContent);
-
-			                        // Render text-fragments
-			                        textLayer.render();
-			                    });
-			                });
-			            }
-				    });
-				}
-				reader.readAsArrayBuffer(document.getElementById("input3").files[0]);
-			}
-
-			xhr.onreadystatechange = function(e) {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-				    var response = e.target.response;
-				    //var response = JSON.parse(xhr.responseText);
-				 	//console.log(response);
-				    setupPatentAnnotations(response);
-				} else  if (xhr.status != 200) {
-					AjaxError3(xhr);
-				}
-			};
-			xhr.send(formData);
-		} else {
-			// request for extraction, returning TEI result
-			var xhr = new XMLHttpRequest();
-			var url = $('#gbdForm3').attr('action');
-			xhr.responseType = 'xml';
-			xhr.onreadystatechange = function(e) {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-				    var response = e.target.response;
-				    //var response = JSON.parse(xhr.responseText);
-				 	//console.log(response);
-				    SubmitSuccesful3(response);
-				} else if (xhr.status != 200) {
-					AjaxError3(xhr);
-				}
-			};
-
-			if (document.getElementById("input3").files &&
-				document.getElementById("input3").files.length >0 &&
-				!$('#textInputDiv3').is(":visible")) {
-				var formData = new FormData();
-
-				var url = $('#gbdForm3').attr('action');
-
-				var formData = new FormData();
-				formData.append('input', document.getElementById("input3").files[0]);
-
-				if ($("#consolidate3").is(":checked"))
-					formData.append('consolidateCitations', 1);
-				else
-					formData.append('consolidateCitations', 0);
-
-				xhr.open('POST', url, true);
-				ShowRequest3();
-
-				xhr.send(formData);
-			} else if ($('#textInputDiv3').is(":visible")) {
-				var params = 'input='+encodeURIComponent($("#textInputArea3").val());
-				if ($("#consolidate3").is(":checked"))
-					params += '&consolidateCitations=1';
-				else
-					params += '&consolidateCitations=0';
-
-				xhr.open('POST', url, true);
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				ShowRequest3();
-
-				xhr.send(params);
-			}
-		}
-	}
 
 	function setupAnnotations(response) {
 		// we must check/wait that the corresponding PDF page is rendered at this point
@@ -977,9 +699,9 @@ var grobid = (function($) {
 		var width = thePos.w * scale_x;
 		var height = thePos.h * scale_y;
 
-//console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-//console.log('location: ' + canvasHeight + " " + canvasWidth);
-//console.log('location: ' + page_height + " " + page_width);
+        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
+        console.log('location: ' + canvasHeight + " " + canvasWidth);
+        console.log('location: ' + page_height + " " + page_width);*/
 		//make clickable the area
 		var element = document.createElement("a");
 		var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -1023,11 +745,11 @@ var grobid = (function($) {
 					},
 					html: true,
 					container: 'body'
-					//width: newWidth + 'px',
-					//height: newHeight + 'px'
-//					container: canvas,
-					//width: '600px',
-					//height: '100px'
+					/*width: newWidth + 'px',
+					height: newHeight + 'px'
+					container: canvas,
+					width: '600px',
+					height: '100px'*/
     			});
 			}
 		}
@@ -1049,9 +771,9 @@ var grobid = (function($) {
         var width = thePos.w * scale_x;
         var height = thePos.h * scale_y;
 
-//console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-//console.log('location: ' + canvasHeight + " " + canvasWidth);
-//console.log('location: ' + page_height + " " + page_width);
+        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
+        console.log('location: ' + canvasHeight + " " + canvasWidth);
+        console.log('location: ' + page_height + " " + page_width);*/
         //make clickable the area
         var element = document.createElement("a");
         var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -1090,11 +812,11 @@ var grobid = (function($) {
                     },
                     html: true,
                     container: 'body'
-                    //width: newWidth + 'px',
-                    //height: newHeight + 'px'
-//                  container: canvas,
-                    //width: '600px',
-                    //height: '100px'
+                    /*width: newWidth + 'px',
+                    height: newHeight + 'px'
+                    container: canvas,
+                    width: '600px',
+                    height: '100px'*/
                 });
             }
         }
@@ -1116,9 +838,9 @@ var grobid = (function($) {
         var width = thePos.w * scale_x;
         var height = thePos.h * scale_y;
 
-//console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-//console.log('location: ' + canvasHeight + " " + canvasWidth);
-//console.log('location: ' + page_height + " " + page_width);
+        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
+        console.log('location: ' + canvasHeight + " " + canvasWidth);
+        console.log('location: ' + page_height + " " + page_width);*/
         //make clickable the area
         var element = document.createElement("a");
         var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -1157,11 +879,11 @@ var grobid = (function($) {
                     },
                     html: true,
                     container: 'body'
-                    //width: newWidth + 'px',
-                    //height: newHeight + 'px'
-//                  container: canvas,
-                    //width: '600px',
-                    //height: '100px'
+                   /* width: newWidth + 'px',
+                    height: newHeight + 'px'
+                    container: canvas,
+                    width: '600px',
+                    height: '100px'*/
                 });
             }
         }
@@ -1183,9 +905,9 @@ var grobid = (function($) {
         var width = thePos.w * scale_x;
         var height = thePos.h * scale_y;
 
-//console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-//console.log('location: ' + canvasHeight + " " + canvasWidth);
-//console.log('location: ' + page_height + " " + page_width);
+        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
+        console.log('location: ' + canvasHeight + " " + canvasWidth);
+        console.log('location: ' + page_height + " " + page_width);*/
         //make clickable the area
         var element = document.createElement("a");
         var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -1224,29 +946,28 @@ var grobid = (function($) {
                     },
                     html: true,
                     container: 'body'
-                    //width: newWidth + 'px',
-                    //height: newHeight + 'px'
-//                  container: canvas,
-                    //width: '600px',
-                    //height: '100px'
+                    /*width: newWidth + 'px',
+                    height: newHeight + 'px'
+                    container: canvas,
+                    width: '600px',
+                    height: '100px'*/
                 });
             }
         }
         pageDiv.append(element);
     }
 
-
 	/* jquery-based movement to an anchor, without modifying the displayed url and a bit smoother */
 	function goToByScroll(id) {
     	$('html,body').animate({scrollTop: $("#"+id).offset().top},'fast');
 	}
 
-	/* croping an area from a canvas */
+	/* cropping an area from a canvas */
 	function getImagePortion(page, width, height, x, y) {
-//console.log("page: " + page + ", width: " + width + ", height: " + height + ", x: " + x + ", y: " + y);
+        //console.log("page: " + page + ", width: " + width + ", height: " + height + ", x: " + x + ", y: " + y);
 		// get the page div
 		var pageDiv = $('#page-'+page);
-//console.log(page);
+        //console.log(page);
 		// get the source canvas
 		var canvas = pageDiv.children('canvas')[0];
 		// the destination canvas
@@ -1258,17 +979,6 @@ var grobid = (function($) {
  		return tnCanvas.toDataURL();
 	}
 
-	function SubmitSuccesful3(responseText, statusText, xhr) {
-		var display = "<pre class='prettyprint lang-xml' id='xmlCode'>";
-		var testStr = vkbeautify.xml(responseText);
-        teiPatentToDownload = responseText;
-		display += htmll(testStr);
-		display += "</pre>";
-		$('#requestResult3').html(display);
-		window.prettyPrint && prettyPrint();
-		$('#requestResult3').show();
-        $("#btn_download3").show();
-	}
 
 	function setupPatentAnnotations(response) {
 		// we must check/wait that the corresponding PDF page is rendered at this point
@@ -1340,9 +1050,9 @@ var grobid = (function($) {
 		var width = thePos.w * scale_x;
 		var height = thePos.h * scale_y;
 
-//console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-//console.log('location: ' + canvasHeight + " " + canvasWidth);
-//console.log('location: ' + page_height + " " + page_width);
+        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
+        console.log('location: ' + canvasHeight + " " + canvasWidth);
+        console.log('location: ' + page_height + " " + page_width);*/
 		//make clickable the area
 		var element = document.createElement("a");
 		var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -1361,23 +1071,6 @@ var grobid = (function($) {
 			// this is a NPL bibliographical reference
 			// we draw a box
 			element.setAttribute("style", attributes + "border:1px solid; border-color: blue;");
-
-			/*element.setAttribute("data-toggle", "popover");
-			element.setAttribute("data-placement", "top");
-			element.setAttribute("data-content", "content");
-			element.setAttribute("data-trigger", "hover");
-
-			$(element).popover({
-				content:  'content',
-				html: true,
-				container: 'body'
-				//width: newWidth + 'px',
-				//height: newHeight + 'px'
-//					container: canvas,
-				//width: '600px',
-				//height: '100px'
-			});*/
-
 		}
 		pageDiv.append(element);
 	}
@@ -1392,108 +1085,49 @@ var grobid = (function($) {
 		var selected = $('#selectedService option:selected').attr('value');
 		if (block == 1)
 			selected = $('#selectedService2 option:selected').attr('value');
-		else if (block == 2)
-			selected = $('#selectedService3 option:selected').attr('value');
+
 
 		if (selected == 'processHeaderDocument') {
 			createInputFile(selected);
-			$('#consolidateBlock1').show();
-			$('#consolidateBlock2').hide();
-			$('#includeRawAffiliationsBlock').show();
-			$('#includeRawCitationsBlock').hide();
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
 			setBaseUrl('processHeaderDocument');
 		}
-		else if (selected == 'processFulltextDocument') {
-			createInputFile(selected);
-			$('#consolidateBlock1').show();
-			$('#consolidateBlock2').show();
-			$('#includeRawAffiliationsBlock').show();
-			$('#includeRawCitationsBlock').show();
-            $('#segmentSentencesBlock').show();
-            $('#teiCoordinatesBlock').show();
-			setBaseUrl('processFulltextDocument');
-		}
-		else if (selected == 'processDate') {
-			createInputTextArea('date');
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').hide();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').hide();
+		else if (selected == 'processLeftNoteDocument') {
+            createInputFile(selected);
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processDate');
+            setBaseUrl('processLeftNoteDocument');
+        }
+		else if (selected == 'processFullMedicalTextDocument') {
+			createInputFile(selected);
+            $('#segmentSentencesBlock').show();
+            $('#teiCoordinatesBlock').show();
+			setBaseUrl('processFullMedicalTextDocument');
+		}
+		else if (selected == 'processFrenchMedicalNER') {
+            createInputFile(selected);
+            $('#segmentSentencesBlock').hide();
+            $('#teiCoordinatesBlock').hide();
+            setBaseUrl('processFrenchMedicalNER');
+        }
+		else if (selected == 'processDateline') {
+			createInputTextArea('dateline');
+            $('#segmentSentencesBlock').hide();
+            $('#teiCoordinatesBlock').hide();
+			setBaseUrl('processDateline');
 		}
 		else if (selected == 'processHeaderNames') {
 			createInputTextArea('names');
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').hide();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').hide();
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
 			setBaseUrl('processHeaderNames');
 		}
-		else if (selected == 'processCitationNames') {
+		else if (selected == 'processLeftNoteNames') {
 			createInputTextArea('names');
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').hide();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').hide();
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processCitationNames');
-		}
-		else if (selected == 'processReferences') {
-			createInputFile(selected);
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').show();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').show();
-            $('#segmentSentencesBlock').hide();
-            $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processReferences');
-		}
-		else if (selected == 'processAffiliations') {
-			createInputTextArea('affiliations');
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').hide();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').hide();
-            $('#segmentSentencesBlock').hide();
-            $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processAffiliations');
-		}
-		else if (selected == 'processCitation') {
-			createInputTextArea('citations');
-			$('#consolidateBlock1').hide();
-			$('#consolidateBlock2').show();
-			$('#includeRawAffiliationsBlock').hide();
-			$('#includeRawCitationsBlock').hide();
-            $('#segmentSentencesBlock').hide();
-            $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processCitation');
-		}
-		/*else if (selected == 'processCitationPatentTEI') {
-			createInputFile3(selected);
-			$('#consolidateBlock3').show();
-			setBaseUrl('processCitationPatentTEI');
-		}*/
-		else if (selected == 'processCitationPatentST36') {
-			createInputFile3(selected);
-			$('#consolidateBlock3').show();
-			setBaseUrl('processCitationPatentST36');
-		}
-		else if (selected == 'processCitationPatentPDF') {
-			createInputFile3(selected);
-			$('#consolidateBlock3').show();
-			setBaseUrl('processCitationPatentPDF');
-		}
-		else if (selected == 'processCitationPatentTXT') {
-			createInputTextArea3('input');
-			$('#consolidateBlock3').show();
-			setBaseUrl('processCitationPatentTXT');
+			setBaseUrl('processLeftNoteNames');
 		}
 		else if (selected == 'referenceAnnotations') {
 			createInputFile2(selected);
@@ -1507,15 +1141,9 @@ var grobid = (function($) {
             $('#consolidateBlockPDFFig').hide();
 			setBaseUrl('annotatePDF');
 		}
-		else if (selected == 'citationPatentAnnotations') {
-			createInputFile3(selected);
-			$('#consolidateBlock3').show();
-			setBaseUrl('citationPatentAnnotations');
-		}
 	}
 
 	function createInputFile(selected) {
-		//$('#label').html('&nbsp;');
 		$('#textInputDiv').hide();
 		$('#fileInputDiv').show();
 
@@ -1524,7 +1152,6 @@ var grobid = (function($) {
 	}
 
 	function createInputFile2(selected) {
-		//$('#label').html('&nbsp;');
 		$('#textInputDiv2').hide();
 		$('#fileInputDiv2').show();
 
@@ -1532,38 +1159,13 @@ var grobid = (function($) {
 		$('#gbdForm2').attr('method', 'post');
 	}
 
-	function createInputFile3(selected) {
-		//$('#label').html('&nbsp;');
-		$('#textInputDiv3').hide();
-		$('#fileInputDiv3').show();
-
-		$('#gbdForm3').attr('enctype', 'multipart/form-data');
-		$('#gbdForm3').attr('method', 'post');
-	}
-
 	function createInputTextArea(nameInput) {
-		//$('#label').html('&nbsp;');
 		$('#fileInputDiv').hide();
-		//$('#input').remove();
-
-		//$('#field').html('<table><tr><td><textarea class="span7" rows="5" id="input" name="'+nameInput+'" /></td>'+
-		//"<td><span style='padding-left:20px;'>&nbsp;</span></td></tr></table>");
 		$('#textInputArea').attr('name', nameInput);
 		$('#textInputDiv').show();
 
 		$('#gbdForm').attr('enctype', '');
 		$('#gbdForm').attr('method', 'post');
-	}
-
-	function createInputTextArea3(nameInput) {
-		//$('#label').html('&nbsp;');
-		$('#fileInputDiv3').hide();
-
-		$('#textInputArea3').attr('name', nameInput);
-		$('#textInputDiv3').show();
-
-		$('#gbdForm3').attr('enctype', '');
-		$('#gbdForm3').attr('method', 'post');
 	}
 
 	function download(){
@@ -1588,54 +1190,10 @@ var grobid = (function($) {
 			a.click();
 			return true;
 		});
-
-
-		// old method to download but with well formed xm but not beautified
-	    /*var a = document.body.appendChild(
-	        document.createElement("a")
-	    );
-	    a.download = "export.xml";
-	    var xmlData = $.parseXML(teiToDownload);
-
-	    if (window.ActiveXObject){
-	        var xmlString = xmlData.xml;
-	    } else {
-	        var xmlString = (new XMLSerializer()).serializeToString(xmlData);
-	    }
-	    a.href = "data:text/xml," + xmlString; // Grab the HTML
-	    a.click(); // Trigger a click on the element*/
 	}
-
-	function downloadPatent() {
-        var name = "export";
-        if (document.getElementById("input3")
-            && document.getElementById("input3").files.length > 0
-            && document.getElementById("input3").files[0].name) {
-            name = document.getElementById("input3").files[0].name;
-        }
-        var fileName = name + ".tei.xml";
-        var a = document.createElement("a");
-
-
-        var file = new Blob([teiPatentToDownload], {type: 'application/xml'});
-        var fileURL = URL.createObjectURL(file);
-        a.href = fileURL;
-        a.download = fileName;
-
-        document.body.appendChild(a);
-
-        $(a).ready(function () {
-            a.click();
-            return true;
-        });
-
-    }
     })(jQuery);
 
 
 function downloadVisibilty(){
     $("#btn_download").hide();
-}
-function downloadVisibilty3(){
-    $("#btn_download3").hide();
 }
