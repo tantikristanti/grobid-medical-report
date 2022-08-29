@@ -5,9 +5,9 @@ import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.features.FeaturesVectorOrganization;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.trainer.sax.TEIOrganizationSaxParser;
+import org.grobid.utility.Utility;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * A class for training the organization model
- *
+ * <p>
  * Tanti, 2022
  */
 public class OrganizationTrainer extends AbstractTrainer {
@@ -29,8 +29,7 @@ public class OrganizationTrainer extends AbstractTrainer {
     /**
      * Add the selected features to the organization model example set, default
      *
-     * @param corpusDir
-     *            a path where corpus files are located
+     * @param corpusDir a path where corpus files are located
      * @return the total number of used corpus items
      */
     @Override
@@ -41,14 +40,10 @@ public class OrganizationTrainer extends AbstractTrainer {
     /**
      * Add the selected features to the organization model example set
      *
-     * @param corpusDir
-     *            a path where corpus files are located
-     * @param trainingOutputPath
-     *            path where to store the temporary training data
-     * @param evalOutputPath
-     *            path where to store the temporary evaluation data
-     * @param splitRatio
-     *            ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
+     * @param corpusDir          a path where corpus files are located
+     * @param trainingOutputPath path where to store the temporary training data
+     * @param evalOutputPath     path where to store the temporary evaluation data
+     * @param splitRatio         ratio to consider for separating training and evaluation data, e.g. 0.8 for 80%
      * @return the total number of used corpus items
      */
     @Override
@@ -122,10 +117,10 @@ public class OrganizationTrainer extends AbstractTrainer {
                 totalExamples += parser2.nbOrganizations;
 
                 // we can now add the features
-                for(int i=0; i<allTokens.size(); i++) {
+                for (int i = 0; i < allTokens.size(); i++) {
                     // fix the offsets
                     int pos = 0;
-                    for(LayoutToken token : allTokens.get(i)) {
+                    for (LayoutToken token : allTokens.get(i)) {
                         token.setOffset(pos);
                         pos += token.getText().length();
                     }
@@ -140,9 +135,9 @@ public class OrganizationTrainer extends AbstractTrainer {
                         allLabeled.get(i), locationsPositions, titlesPositions, suffixesPositions,
                         emailPositions, urlPositions);
 
-                    if ( (writer2 == null) && (writer3 != null) )
+                    if ((writer2 == null) && (writer3 != null))
                         writer3.write(organization + "\n \n");
-                    if ( (writer2 != null) && (writer3 == null) )
+                    if ((writer2 != null) && (writer3 == null))
                         writer2.write(organization + "\n \n");
                     else {
                         if (Math.random() <= splitRatio)
@@ -176,7 +171,8 @@ public class OrganizationTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        GrobidProperties.getInstance();
+        Utility utility = new Utility();
+        utility.initGrobid(null);
         Trainer trainer = new OrganizationTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));

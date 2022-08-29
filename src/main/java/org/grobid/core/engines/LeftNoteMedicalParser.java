@@ -1,10 +1,10 @@
 package org.grobid.core.engines;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.Medic;
 import org.grobid.core.document.*;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.engines.label.MedicalLabels;
@@ -16,22 +16,24 @@ import org.grobid.core.features.FeaturesVectorLeftNoteMedical;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
+import org.grobid.core.layout.LayoutTokenization;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
 import org.grobid.core.utilities.counters.CntManager;
+import org.grobid.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
-
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * A class to extract the left-note part of medical reports.
@@ -40,72 +42,46 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
  */
 public class LeftNoteMedicalParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeftNoteMedicalParser.class);
-
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-
-    protected EngineMedicalParsers parsers;
-
+    private EngineMedicalParsers parsers;
+    private Lexicon lexicon = Lexicon.getInstance();
+    Utility utility = null;
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
-
     // default bins for inter-block spacing
     private static final int NBBINS_SPACE = 5;
-
     // default bins for block character density
     private static final int NBBINS_DENSITY = 5;
-
     // projection scale for line length
     private static final int LINESCALE = 10;
 
-    private Lexicon lexicon = Lexicon.getInstance();
-
-    private File tmpPath = null;
-
-    public LeftNoteMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
-        this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
+    public LeftNoteMedicalParser() {
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
     }
 
     public LeftNoteMedicalParser(EngineMedicalParsers parsers) {
         super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT);
         this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
+    }
+
+    public LeftNoteMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, cntManager);
+        this.parsers = parsers;
     }
 
     /**
-     * Processing with application of the medical-report segmentation model
+     * Processing left-note after the application of the medical-report segmentation model
      */
-    public Pair<String, Document> processing(File input, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, GrobidAnalysisConfig config) {
-        DocumentSource documentSource = null;
-        try {
-            documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
-            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
-
-            String tei = processingLeftNoteSection(config, doc, resLeftNote, strLeftNote, true);
-            return new ImmutablePair<String, Document>(tei, doc);
-        } finally {
-            if (documentSource != null) {
-                documentSource.close(true, true, true);
-            }
-        }
-    }
-
-    /**
-     * Processing with application of the segmentation model
-     */
-    public Pair<String, Document> processing(File input, String md5Str, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, GrobidAnalysisConfig config) {
+    public Pair<String, Document> processingLeftNote(File input, String md5Str, LeftNoteMedicalItem resLeftNote, GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
             documentSource.setMD5(md5Str);
             // first, parse the document with the segmentation model
-            Document doc = parsers.getSegmentationParser().processing(documentSource, config);
+            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
 
-            // then take only the header and left note parts for further process with this method
-            String tei = processingLeftNoteSection(config, doc, resLeftNote, strLeftNote, true);
+            // then take only the left note parts for further process with this method
+            String tei = processingLeftNoteSection(config, doc, resLeftNote, true);
             return new ImmutablePair<String, Document>(tei, doc);
         } finally {
             if (documentSource != null) {
@@ -117,96 +93,70 @@ public class LeftNoteMedicalParser extends AbstractParser {
     /**
      * Left-Note processing after application of the medical-report segmentation model
      */
-    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, StringBuilder strLeftNote, boolean serialize) {
+    public String processingLeftNoteSection(GrobidAnalysisConfig config, Document doc, LeftNoteMedicalItem resLeftNote, boolean serialize) {
         try {
-            // retrieve only the header (front) part
+            // retrieve only the left-note part
             SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
-            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokenizations for the entire document
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokens of the entire document
 
             if (documentLeftNoteParts != null) {
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
                 String leftNote = featuredLeftNote.getLeft(); // data with features
                 List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight(); // tokens
                 String res = null;
-                if ((leftNote != null) && (leftNote.trim().length() > 0)) {
+                if (StringUtils.isNotBlank(leftNote)) {
+                    // give labels
                     res = label(leftNote);
+
+                    // save the labeled results in POJO
                     resLeftNote = resultExtraction(res, leftNoteTokenization, resLeftNote);
 
-                    // if the Organization model exists
-                        /*if (resLeftNote.getGhu() != null || resLeftNote.getChu() != null || resLeftNote.getDmu() != null ||
-                            resLeftNote.getPole() != null || resLeftNote.getInstitution() != null || resLeftNote.getUniversity() != null ||
-                            resLeftNote.getSite()  != null || resLeftNote.getHospital() != null || resLeftNote.getCenter() != null ||
-                            resLeftNote.getService() != null || resLeftNote.getDepartment() != null|| resLeftNote.getUnit() != null ||
-                            resLeftNote.getSub() != null || resLeftNote.getOrg() != null
-                        ) {
-                        List<LayoutToken> organizationLayoutTokens = resLeftNote.getOrganizationLayoutTokens();
-                        List<List<LayoutToken>> organizationSegments = new ArrayList<>();
-                        if (isNotEmpty(organizationLayoutTokens)) {
-                            List<LayoutToken> currentSegment = new ArrayList<>();
-                            for (LayoutToken theToken : organizationLayoutTokens) {
-                                // split the list of layout tokens when token "\n" is met
-                                if (theToken.getText() != null && theToken.getText().equals("\n")) {
-                                    if (currentSegment.size() > 0)
-                                        organizationSegments.add(currentSegment);
-                                    currentSegment = new ArrayList<>();
-                                } else
-                                    currentSegment.add(theToken);
-                            }
-                            // last segment
-                            if (currentSegment.size() > 0)
-                                organizationSegments.add(currentSegment);
+                    // set the labeled results without any change to the raw text
+                    String strLeftNote = trainingExtraction(res, leftNoteTokenization).toString();
+                    resLeftNote.setRawLeftNote(strLeftNote);
 
-                            for (int k = 0; k < organizationSegments.size(); k++) {
-                                if (organizationSegments.get(k).size() == 0)
-                                    continue;
-                                // further organization processing with the Organization model
-                                List<Organization> localOrganizations = parsers.getOrganizationParser()
-                                    .processingWithLayoutTokens(organizationSegments.get(k));
+                    // take the results of the left-note parsing and complete the items with additional information
+                    if (resLeftNote != null) {
+                        // set the application version
+                        resLeftNote.setAppVersion(GrobidMedicalReportProperties.getVersion());
 
-                                for (Organization organization : localOrganizations) {
-                                    // add new organization
-                                    resLeftNote.addOrganization(organization);
+                        // set the language
+                        String lang = "fr"; // default, it's French
+                        // otherwise, try the language identification from the body part text
+                        StringBuilder textBody = new StringBuilder();
+                        String contentSample = "";
+                        SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+                        if (documentBodyParts != null) {
+                            Pair<String, LayoutTokenization> featSeg = parsers.getFullMedicalTextParser().getBodyTextFeatured(doc, documentBodyParts);
+                            if (featSeg != null) {
+                                String bodytext = featSeg.getLeft(); // body data with features
+                                List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization(); // body tokens
+                                for (LayoutToken token : tokenizationsBody) {
+                                    textBody.append(token.getText());
                                 }
                             }
                         }
-                    }*/
-
-                    // medics processing
-                    if (resLeftNote.getMedics() != null) {
-                        List<LayoutToken> medicLayoutTokens = resLeftNote.getMedicsLayoutTokens();
-                        List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                        if (isNotEmpty(medicLayoutTokens)) {
-                            List<LayoutToken> currentSegment = new ArrayList<>();
-                            for (LayoutToken theToken : medicLayoutTokens) {
-                                // split the list of layout tokens when token "\n" is met
-                                if (theToken.getText() != null && theToken.getText().equals("\n")) {
-                                    if (currentSegment.size() > 0)
-                                        medicSegments.add(currentSegment);
-                                    currentSegment = new ArrayList<>();
-                                } else
-                                    currentSegment.add(theToken);
-                            }
-                            // last segment
-                            if (currentSegment.size() > 0)
-                                medicSegments.add(currentSegment);
-
-                            for (int k = 0; k < medicSegments.size(); k++) {
-                                if (medicSegments.get(k).size() == 0)
-                                    continue;
-                                // further medics processing with the Medic model
-                                Medic localMedics = parsers.getMedicParser()
-                                    .processingWithLayoutTokens(medicSegments.get(k));
-
-                                // add new medic
-                                resLeftNote.addMedic(localMedics);
-                            }
+                        // test only max 200 characters
+                        if (textBody.toString().length() > 200) {
+                            contentSample = textBody.toString().substring(0, 200);
+                        } else {
+                            contentSample = textBody.toString();
                         }
+                        // define the new language if it exists
+                        Language langu = languageUtilities.runLanguageId(contentSample);
+                        if (langu != null) {
+                            doc.setLanguage(lang);
+                        }
+                        doc.setLanguage(lang);
+                        resLeftNote.setLanguage(lang);
+
+                        // set number of pages
+                        resLeftNote.setNbPages(doc.getPages().size());
                     }
                 }
-                if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
+                if (serialize) { // need to set the `serialize` into false for the full text processing for preventing the double process
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
-                    StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(null, resLeftNote, null, config);
-                    tei.append("\t</text>\n");
+                    StringBuilder tei = teiFormatter.toTEILeftNote(resLeftNote, null, config);
                     tei.append("</TEI>\n");
                     return tei.toString();
                 } else
@@ -1228,9 +1178,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 i++;
             }
 
-            if (newLine) {
+            /*if (newLine) {
                 buffer.append("<lb/>");
-            }
+            }*/
 
             String lastTag0 = null;
             if (lastTag != null) {
@@ -1275,7 +1225,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<medic>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<note>", "<note type=\"short\">", addSpace);
@@ -1286,13 +1236,10 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             lastTag = s1;
 
-            if (!st.hasMoreTokens()) {
-                if (lastTag != null) {
-                    testClosingTag(buffer, "", currentTag0);
-                }
+            if (!st.hasMoreTokens() && (lastTag != null)) {
+                testClosingTag(buffer, "", currentTag0);
             }
         }
-
         return buffer;
     }
 
@@ -1367,9 +1314,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 i++;
             }
 
-            if (newLine) {
+            /*if (newLine) {
                 buffer.append("<lb/>");
-            }
+            }*/
 
             String lastTag0 = null;
             if (lastTag != null) {
@@ -1414,7 +1361,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<web>", "<ptr type=\"web\">", addSpace);
             }
             if (!output) {
-                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<person>\n\t<medic>", addSpace);
+                output = writeField(buffer, s1, lastTag0, s2, "<medic>", "<medic>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<note>", "<note type=\"short\">", addSpace);
@@ -1425,14 +1372,27 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             lastTag = s1;
 
-            if (!st.hasMoreTokens()) {
-                if (lastTag != null) {
-                    testClosingTag(buffer, "", currentTag0);
-                }
+            if (!st.hasMoreTokens() && lastTag != null) {
+                testClosingTag(buffer, "", currentTag0);
             }
         }
-
         return buffer;
+    }
+
+    private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
+        // s1 :  the label, s2 : the text
+        boolean result = false;
+        if ((s1.equals(field)) || (s1.equals("I-" + field))) {
+            result = true;
+            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if the tag is the same as the last one, we continue to add the text
+                if (addSpace)
+                    buffer.append(" ").append(s2);
+                else
+                    buffer.append(s2);
+            } else
+                buffer.append("\n\t").append(outField).append(s2); // otherwise, we first add a carriage return before adding the text
+        }
+        return result;
     }
 
     private void testClosingTag(StringBuilder buffer, String currentTag0, String lastTag0) {
@@ -1453,45 +1413,39 @@ public class LeftNoteMedicalParser extends AbstractParser {
             } else if (lastTag0.equals("<web>")) {
                 buffer.append("</ptr>\n");
             } else if (lastTag0.equals("<medic>")) {
-                buffer.append("</medic>\n\t</person>\n");
+                // replace with the result of the medic parser
+                String newData = moreExtraction(buffer, lastTag0);
+                // empty the last buffer and fill with the new data
+                buffer.setLength(0);
+                buffer.append(newData);
+                buffer.append("</medic>\n");
             } else if (lastTag0.equals("<note>")) {
                 buffer.append("</note>\n");
             }
         }
     }
 
-    private boolean writeField(StringBuilder buffer, String s1, String lastTag0, String s2, String field, String outField, boolean addSpace) {
-        // s1 :  the label, s2 : the text
+    private String moreExtraction(StringBuilder buffer, String lastTag0) {
+        String theBufferString = buffer.toString();
 
-        /*// process the medics if the model has achieved the best result
-        List<String> inputs = new ArrayList<String>();
+        // take only the string of the last tag (e.g. the last <medic>)
+        int idxLastMedic = theBufferString.lastIndexOf(lastTag0);
+        String strBeforeInput = theBufferString.substring(0, idxLastMedic + lastTag0.length());
+        String input = theBufferString.substring(idxLastMedic + lastTag0.length());
 
-        if (s1.contains("<medic>")) {
-            inputs.add(s2);
-            s2 = parsers.getMedicParser().trainingExtraction(inputs).toString();
+        StringBuilder newBuffer = new StringBuilder();
+        List<String> inputToBeExtract = new ArrayList<>();
+        if (input != null && lastTag0.equals("<medic>")) {
+            inputToBeExtract.add(input);
+            newBuffer.append(strBeforeInput);
+            // call the medic parser
+            String resMedic = parsers.getMedicParser().trainingExtraction(inputToBeExtract).toString();
+            if (resMedic != null) {
+                newBuffer.append(resMedic);
+            }
         }
-        // process the organization if the model has achieved the best result
-        if (s1.contains("<ghu>") || s1.contains("<chu>") || s1.contains("<dmu>") ||
-            s1.contains("<pole>") || s1.contains("<site>") || s1.contains("<institution>") ||
-            s1.contains("<university>") || s1.contains("<hospital>") || s1.contains("<center>") ||
-            s1.contains("<service>") || s1.contains("<department>") || s1.contains("<unit>") ||
-            s1.contains("<sub>") || s1.contains("<organization>") ) {
-            inputs.add(s2);
-            s2 = parsers.getOrganizationParser().trainingExtraction(inputs).toString();
-        }*/
 
-        boolean result = false;
-        if ((s1.equals(field)) || (s1.equals("I-" + field))) {
-            result = true;
-            if (s1.equals(lastTag0) || (s1).equals("I-" + lastTag0)) { // if the tag is the same as the last one, we continue to add the text
-                if (addSpace)
-                    buffer.append(" ").append(s2);
-                else
-                    buffer.append(s2);
-            } else
-                buffer.append("\n\t").append(outField).append(s2); // otherwise, we first add a carriage return before adding the text
-        }
-        return result;
+        return newBuffer.toString();
     }
 
     @Override
@@ -1581,12 +1535,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
     public Document createTrainingFromPDF(File inputFile,
                                           String pathOutput,
                                           int id) {
-        if (tmpPath == null)
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;
@@ -1617,19 +1565,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             if (documentLeftNoteParts != null) {
                 // these commands are be replace by `List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();`
-                /*List<LayoutToken> tokenizationsLeftNote = new ArrayList<LayoutToken>();
-
-                for (DocumentPiece docPiece : documentLeftNoteParts) {
-                    DocumentPointer dp1 = docPiece.getLeft();
-                    DocumentPointer dp2 = docPiece.getRight();
-
-                    int tokens = dp1.getTokenDocPos();
-                    int tokene = dp2.getTokenDocPos();
-                    for (int i = tokens; i < tokene; i++) {
-                        tokenizationsLeftNote.add(tokenizations.get(i));
-                    }
-                }*/
-
                 Pair<String, List<LayoutToken>> featuredLeftNote = getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
                 String leftNote = featuredLeftNote.getLeft();
                 List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight();
@@ -1689,12 +1624,6 @@ public class LeftNoteMedicalParser extends AbstractParser {
     public Document createBlankTrainingFromPDF(File inputFile,
                                                String pathOutput,
                                                int id) {
-        if (tmpPath == null)
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;
@@ -1814,7 +1743,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
             for (final File file : refFiles) {
                 try {
-                    processing(file, outputDirectory, n);
+                    processingLeftNote(file, outputDirectory, n);
                 } catch (final Exception exp) {
                     LOGGER.error("An error occurred while processing the following pdf: "
                         + file.getPath() + ": " + exp);
@@ -1837,17 +1766,9 @@ public class LeftNoteMedicalParser extends AbstractParser {
      * @param id         id
      */
 
-    public void processing(File inputFile,
-                           String outputFile,
-                           int id) {
-        if (tmpPath == null) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        }
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
-
+    public void processingLeftNote(File inputFile,
+                                   String outputFile,
+                                   int id) {
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;

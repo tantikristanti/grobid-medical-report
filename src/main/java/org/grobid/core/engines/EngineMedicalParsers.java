@@ -158,7 +158,6 @@ public class EngineMedicalParsers extends EngineParsers {
         }
         return organizationParser;
     }
-
     public MedicParser getMedicParser() {
         if (medicParser == null) {
             synchronized (this) {
@@ -269,6 +268,12 @@ public class EngineMedicalParsers extends EngineParsers {
             addressParser.close();
             addressParser = null;
             LOGGER.debug("CLOSING addressParser");
+        }
+
+        if (organizationParser != null) {
+            organizationParser.close();
+            organizationParser = null;
+            LOGGER.debug("CLOSING organizationParser");
         }
 
         if (medicParser != null) {

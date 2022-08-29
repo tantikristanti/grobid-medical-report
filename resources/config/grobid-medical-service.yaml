@@ -1,0 +1,43 @@
+# Configuration file for the grobid-medical-report service
+
+# CORS parameters
+corsAllowedOrigins: "*"
+corsAllowedMethods: "OPTIONS,GET,PUT,POST,DELETE,HEAD"
+corsAllowedHeaders: "X-Requested-With,Content-Type,Accept,Origin"
+
+# beyond the following number of requests, a 503 status will be returned (service unavailable) until enough
+# requests are processed to go beyond the max
+maxAcceptedRequests: 2048
+
+modelPreload: false
+grobidHome: "../grobid-home/"
+tmp: "../grobid-home/tmp"
+
+server:
+  type: custom
+  applicationConnectors:
+  - type: http
+    port: 8090
+  adminConnectors:
+  - type: http
+    port: 8091
+  registerDefaultExceptionMappers: false
+  maxThreads: 128
+  maxQueuedRequests: 2048
+  acceptQueueSize: 2048
+
+logging:
+  level: ERROR
+  appenders:
+  - type: console
+    threshold: ERROR
+    timeZone: UTC
+  - type: file
+    currentLogFilename: logs/grobid-medical-report.log
+    threshold: INFO
+    archive: true
+    archivedLogFilenamePattern: logs/grobid-medical-report.log-%d.log
+    archivedFileCount: 5
+    timeZone: UTC
+
+timeZone: UTC

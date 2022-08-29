@@ -1,32 +1,21 @@
 package org.grobid.trainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.engines.FrenchMedicalNERParser;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.exceptions.GrobidResourceException;
-import org.grobid.core.features.FeatureFactory;
 import org.grobid.core.features.FeaturesVectorMedicalNER;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.lexicon.Lexicon;
 import org.grobid.core.lexicon.MedicalNERLexicon;
-import org.grobid.core.lexicon.MedicalNERLexiconPositionsIndexes;
-import org.grobid.core.main.GrobidHomeFinder;
-import org.grobid.core.utilities.*;
+import org.grobid.core.utilities.OffsetPosition;
 import org.grobid.trainer.sax.FrenchCorpusSaxHandler;
+import org.grobid.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 
 /**
  * For training the French medical NER model
@@ -34,15 +23,11 @@ import java.util.regex.Matcher;
  * Tanti, 2021
  */
 public class FrenchMedicalNERTrainer extends AbstractTrainer {
-
     private static Logger LOGGER = LoggerFactory.getLogger(FrenchMedicalNERTrainer.class);
     protected MedicalNERLexicon medicalNERLexicon = MedicalNERLexicon.getInstance();
     protected Lexicon lexicon = Lexicon.getInstance();
 
     public FrenchMedicalNERTrainer() {
-        // if we train on the French Quaero Corpus
-        //super(GrobidModels.FR_MEDICAL_NER_QUAERO);
-
         super(GrobidModels.FR_MEDICAL_NER);
     }
 
@@ -198,7 +183,8 @@ public class FrenchMedicalNERTrainer extends AbstractTrainer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        GrobidProperties.getInstance();
+        Utility utility = new Utility();
+        utility.initGrobid(null);
         Trainer trainer = new FrenchMedicalNERTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));

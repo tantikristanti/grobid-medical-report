@@ -176,7 +176,6 @@ Anonymized data includes:
 | Email                  | beau.garcon@tnn.aphp.fr | belle.fille@tnn.aphp.fr |
 | Address                | 44000 NANTES            | 38000 GRENOBLE          |
 
-
 ### Generate blank data
 This procedure will also generate new training data for all **grobid-medical-report** models. What distinguishes this procedure from the previous ones is that the TEI/XML files contain unlabeled texts. This procedure is useful if we want to build models from scratch.
 

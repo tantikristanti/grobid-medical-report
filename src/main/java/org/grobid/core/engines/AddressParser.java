@@ -27,6 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/*A class for parsing address
+ *
+ * Tanti, 2022
+ * */
+
 public class AddressParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(AddressParser.class);
     protected EngineMedicalParsers parsers;
@@ -36,13 +41,13 @@ public class AddressParser extends AbstractParser {
         super(GrobidModels.ADDRESS);
     }
 
-    public AddressParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.ADDRESS, cntManager);
+    public AddressParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.ADDRESS);
         this.parsers = parsers;
     }
 
-    public AddressParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.ADDRESS);
+    public AddressParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.ADDRESS, cntManager);
         this.parsers = parsers;
     }
 

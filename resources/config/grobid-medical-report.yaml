@@ -1,7 +1,7 @@
-grobidHome: "../grobid-home/"
+# Configuration file for the grobid-medical-report instance
 
-# path relative to the corpus and template path
-dataPath: "resources/dataset/"
+# grobid-medical-report is a Grobid modul that depends on all of its resources found in grobid/grobid-home (models, lexicon, native libraries)
+grobidHome: "../grobid-home/"
 
 models:
   # we configure here how each sequence labeling model should be implemented
@@ -50,51 +50,6 @@ models:
       epsilon: 0.000001
       window: 30
       nbMaxIterations: 1500
-    delft:
-      # deep learning parameters
-      architecture: "BidLSTM_CRF_FEATURES"
-
-  - name: "fr-medical-ner"
-    engine: "wapiti"
-    wapiti:
-      # wapiti training parameters, they will be used at training time only
-      epsilon: 0.000001
-      window: 20
-      nbMaxIterations: 1000
-    delft:
-      # deep learning parameters
-      architecture: "BidLSTM_CRF_FEATURES"
-  - name: "fr-medical-ner-quaero"
-    engine: "wapiti"
-    wapiti:
-      # wapiti training parameters, they will be used at training time only
-      epsilon: 0.000001
-      window: 20
-      nbMaxIterations: 1000
-    delft:
-      # deep learning parameters
-      architecture: "BidLSTM_CRF_FEATURES"
-
-  - name: "ner"
-    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
-    engine: "wapiti"
-    wapiti:
-      # wapiti training parameters, they will be used at training time only
-      epsilon: 0.000001
-      window: 50
-      nbMaxIterations: 1000
-    delft:
-      # deep learning parameters
-      architecture: "BidLSTM_CRF_FEATURES"
-
-  - name: "nerfr"
-    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
-    engine: "wapiti"
-    wapiti:
-      # wapiti training parameters, they will be used at training time only
-      epsilon: 0.000001
-      window: 20
-      nbMaxIterations: 1000
     delft:
       # deep learning parameters
       architecture: "BidLSTM_CRF_FEATURES"
@@ -163,3 +118,50 @@ models:
     delft:
       # deep learning parameters
       architecture: "BidLSTM_CRF_FEATURES"
+
+  - name: "fr-medical-ner"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
+
+  - name: "fr-medical-ner-quaero"
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
+
+  - name: "ner"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 50
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
+
+  - name: "nerfr"
+    # at this time, must always be CRF wapiti, the input sequence size is too large for a Deep Learning implementation
+    engine: "wapiti"
+    wapiti:
+      # wapiti training parameters, they will be used at training time only
+      epsilon: 0.000001
+      window: 20
+      nbMaxIterations: 1000
+    delft:
+      # deep learning parameters
+      architecture: "BidLSTM_CRF_FEATURES"
+

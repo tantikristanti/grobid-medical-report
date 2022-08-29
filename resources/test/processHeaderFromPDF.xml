@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="fr">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.0.1" name="grobid-medical-report" access="2022-08-29T11:37+0000">
+					<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>
+					<ref target="https://github.com/tantikristanti/grobid-medical-report"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title type="main">COMPTE RENDU OPÉRATOIRE</title>
+				<extent>
+					<measure unit="pages">1</measure>
+				</extent>
+			</titleStmt>
+				<availability>
+					<p>Copyright : ©grobid-medical-report (INRIA-Project)</p>
+				</availability>
+			<publicationStmt>
+				<date type="issued" when="2000-04-29">2000-04-29</date>
+				<publisher>
+					<affiliation>Pôle Femmes -Adolescents -Mères -Enfants SERVICE DE GYNECOLOGIEOBSTETRIQUE ET MEDECINE DE LA REPRODUCTION</affiliation>
+					<address>
+						<addrLine>51, Avenue du Mal de Lattre de Tassigny 94010 CRETEIL Cedex</addrLine>
+					</address>
+				</publisher>
+			</publicationStmt>
+			<sourceDesc>
+				<listPerson type="medics">
+					<medic>
+						<persName>Dr Mathieu MERLIN; Dr Leroy BLANC; Dr Jolie MASSON</persName>
+						<roleName>Opérateur	Assistant	Anesthésiste</roleName>
+					</medic>
+				</listPerson>
+				<listPerson type="patients">
+					<patient>
+						<idType>IPP</idType>
+						<idno>800099001; 231456001</idno>
+						<persName>Madame Abba Voletta DUPONT</persName>
+						<birth when="01/01/1990">01/01/1990</birth>
+						<age>27 ans</age>
+						<address>666, Avenue de la République 94270 LE KREMLIN BICETRE;</address>
+					</patient>
+				</listPerson>
+			</sourceDesc>
+		</fileDesc>
+	</teiHeader>
+</TEI>

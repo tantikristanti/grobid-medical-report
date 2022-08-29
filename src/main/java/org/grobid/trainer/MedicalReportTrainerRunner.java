@@ -1,13 +1,8 @@
 package org.grobid.trainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.main.GrobidHomeFinder;
-import org.grobid.core.main.LibraryLoader;
-import org.grobid.core.utilities.GrobidConfig;
-import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
+import org.grobid.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Training application for training a target model.
- * How to use : gH 1
- *
- *
+ * Training applications.
  */
 public class MedicalReportTrainerRunner {
-
     private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportTrainerRunner.class);
+    private static Utility utility = null;
 
     private static final List<String> models = Arrays.asList("medical-report-segmenter", "full-medical-text", "header-medical-report",
         "left-note-medical-report", "dateline", "fr-medical-ner", "medic", "patient", "organization", "address", "name-person-medical");
@@ -41,45 +33,10 @@ public class MedicalReportTrainerRunner {
                     return t;
                 }
             }
-
             throw new IllegalStateException("Unsupported RunType with ordinal " + i);
         }
     }
 
-    protected static void initProcess(final String path2GbdHome, final String path2GbdProperties) {
-        GrobidProperties.getInstance();
-    }
-
-    /**
-     * Init process with the provided grobid-home or  default value of the grobid home
-     *
-     * @param grobidHome
-     */
-    protected static void initProcess(String grobidHome) {
-        MedicalReportConfiguration medicalReportConfiguration = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-        } catch (Exception e) {
-            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
-        }
-        try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
-
-            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
-            GrobidProperties.getInstance(grobidHomeFinder);
-
-            System.out.println(">>>>>>>> GROBID_HOME=" + GrobidProperties.getInstance().getGrobidHome());
-
-            for (GrobidConfig.ModelParameters theModel : medicalReportConfiguration.getModels())
-                GrobidProperties.getInstance().addModel(theModel);
-
-            LibraryLoader.load();
-        } catch (final Exception exp) {
-            System.err.println("grobid-medical-report initialisation failed: " + exp);
-            exp.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
         if (args.length < 4) {
@@ -92,7 +49,7 @@ public class MedicalReportTrainerRunner {
             throw new IllegalStateException(
                 "Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
-
+        utility = new Utility();
         String path2GbdHome = null;
         Double split = 0.0;
         int numFolds = 0;
@@ -140,18 +97,13 @@ public class MedicalReportTrainerRunner {
                 "Grobid-home path not found.\n Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
 
+        utility.initGrobid(path2GbdHome);
         final String path2GbdProperties = path2GbdHome + File.separator + "config" + File.separator + "grobid.properties";
 
         // setting in grobid
         System.out.println("path2GbdHome=" + path2GbdHome + "   path2GbdProperties=" + path2GbdProperties);
-        initProcess(path2GbdHome, path2GbdProperties);
-
-        // setting in grobid-ner
-        /*System.out.println(grobidHomeFinder);
-        GrobidProperties.getInstance(grobidHomeFinder);*/
 
         String model = args[1];
-
         AbstractTrainer trainer;
 
         if (model.equals("medical-report-segmenter")) {
@@ -161,7 +113,7 @@ public class MedicalReportTrainerRunner {
         } else if (model.equals("header-medical-report")) {
             trainer = new HeaderMedicalReportTrainer();
         } else if (model.equals("left-note-medical-report")) {
-            trainer = new LeftNoteTrainer();
+            trainer = new LeftNoteMedicalTrainer();
         } else if (model.equals("fr-medical-ner")) {
             trainer = new FrenchMedicalNERTrainer();
         } else if (model.equals("dateline")) {
@@ -191,7 +143,7 @@ public class MedicalReportTrainerRunner {
                 System.out.println(AbstractTrainer.runSplitTrainingEvaluation(trainer, split));
                 break;
             case EVAL_N_FOLD:
-                if(numFolds == 0) {
+                if (numFolds == 0) {
                     throw new IllegalArgumentException("N should be > 0");
                 }
                 if (StringUtils.isNotEmpty(outputFilePath)) {
@@ -209,5 +161,4 @@ public class MedicalReportTrainerRunner {
         }
         System.exit(0);
     }
-
 }

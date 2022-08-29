@@ -1,7 +1,7 @@
 # grobid-medical-report :hospital:
 grobid-medical-report is a [GROBID](https://github.com/kermitt2/grobid) module for extracting and restructuring medical reports from raw documents (PDF, text) into encoded documents (XML/TEI). All models built in this module are machine learning models that implement Wapiti CRF as Grobid's default models (it's possible to use deep learning models developed with [DeLFT](https://github.com/kermitt2/delft/) in Grobid as an alternative to the Wapiti CRF).
 
-![FromPDF2TEI](doc/img/PDF2TEI.png)
+![FromPDF2TEI](doc/img/Pdf2Tei.png)
 
 ## Clone and install GROBID
 **grobid-medical-report** is a module of GROBID and therefore the installation of GROBID is required.
@@ -111,6 +111,33 @@ Using these models, we can extract medical documents, in this case in French, wi
 4. In addition to the models for parsing and restructuring, we also provide the `French-medical-NER` model for recognizing medical terminologies found mainly in body parts.
 
 Each of these models can be retrained by using additional data. A more detailed explanation of how to retrain and to evaluate the models can be found in [Train and evaluate the models](doc/Training-the-medical-report-models.md)
+
+## API Services 
+### Web-based application
+A web-based front-end is provided for end-users to be able to use a number of methods and models in an attractive way, in addition to batch commands. To run the service, run the following command:
+
+```
+$ ./gradlew run
+```
+
+Service can be accessed via port 8090 (http://localhost:8090/).
+![FromPDF2TEI](doc/img/grobidMedicalReport.jpg)
+
+1. To check whether the service is up:
+```
+    http://localhost:8090/api/isalive
+    >>> The service will return whether the service is up (true) or not (false)
+```
+
+2. To get the service version and description:
+```
+    http://localhost:8090/api/version 
+    http://localhost:8090/api/grobidMedicalReport     
+```
+![Version](doc/img/versionApi.jpg)
+
+### API RESTful
+More detailed explanations concerning API services provided by grobid-medical-report can be accessed here [API services](doc/API_service.md)
 
 ## Copyright
 This repository was originally prepared for a collaborative project between [INRIA](https://www.inria.fr/) and  [APHP](https://www.aphp.fr/). Original datasets and models containing genuine sensitive data are not possible to share publicly. 

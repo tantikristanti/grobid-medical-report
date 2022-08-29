@@ -40,13 +40,13 @@ public class PersonNameParser extends AbstractParser {
         super(GrobidModels.NAMES_PERSON_MEDICAL);
     }
 
-    public PersonNameParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.NAMES_PERSON_MEDICAL, cntManager);
+    public PersonNameParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.NAMES_PERSON_MEDICAL);
         this.parsers = parsers;
     }
 
-    public PersonNameParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.NAMES_PERSON_MEDICAL);
+    public PersonNameParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.NAMES_PERSON_MEDICAL, cntManager);
         this.parsers = parsers;
     }
 

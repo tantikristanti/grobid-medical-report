@@ -1,6 +1,5 @@
 package org.grobid.core.factory;
 
-import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.EngineMedical;
 
 /**

@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
-import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Date;
 import org.grobid.core.data.*;
 import org.grobid.core.document.*;
@@ -15,17 +14,17 @@ import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.exceptions.GrobidResourceException;
 import org.grobid.core.features.FeatureFactory;
 import org.grobid.core.features.FeaturesVectorHeaderMedical;
-import org.grobid.core.features.FeaturesVectorMedic;
 import org.grobid.core.lang.Language;
 import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
+import org.grobid.core.layout.LayoutTokenization;
 import org.grobid.core.lexicon.Lexicon;
-import org.grobid.core.main.GrobidHomeFinder;
 import org.grobid.core.tokenization.LabeledTokensContainer;
 import org.grobid.core.tokenization.TaggingTokenCluster;
 import org.grobid.core.tokenization.TaggingTokenClusteror;
 import org.grobid.core.utilities.*;
 import org.grobid.core.utilities.counters.CntManager;
+import org.grobid.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.grobid.core.document.TEIFormatter.toISOString;
@@ -46,46 +44,181 @@ import static org.grobid.core.document.TEIFormatter.toISOString;
  */
 public class HeaderMedicalParser extends AbstractParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalParser.class);
-
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
-
     private EngineMedicalParsers parsers;
-
+    private Lexicon lexicon = Lexicon.getInstance();
+    Utility utility = null;
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
-
     // default bins for inter-block spacing
     private static final int NBBINS_SPACE = 5;
-
     // default bins for block character density
     private static final int NBBINS_DENSITY = 5;
-
     // projection scale for line length
     private static final int LINESCALE = 10;
 
-    private Lexicon lexicon = Lexicon.getInstance();
-
-    private File tmpPath = null;
+    public HeaderMedicalParser() {
+        super(GrobidModels.HEADER_MEDICAL_REPORT);
+    }
 
     public HeaderMedicalParser(EngineMedicalParsers parsers) {
         super(GrobidModels.HEADER_MEDICAL_REPORT);
         this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
     public HeaderMedicalParser(EngineMedicalParsers parsers, CntManager cntManager) {
         super(GrobidModels.HEADER_MEDICAL_REPORT, cntManager);
         this.parsers = parsers;
-        tmpPath = GrobidProperties.getTempPath();
-        GrobidProperties.getInstance(new GrobidHomeFinder(Arrays.asList(MedicalReportProperties.get("grobid.home"))));
     }
 
+    /**
+     * Header processing after application of the medical-report segmentation model
+     */
 
-    public Pair<String, Document> processing(File input, String md5Str,
-                                             HeaderMedicalItem resHeader,
-                                             LeftNoteMedicalItem resLeftNote,
-                                             GrobidAnalysisConfig config) {
+    public Pair<String, Document> processingHeader(File input, String md5Str, HeaderMedicalItem resHeader, GrobidAnalysisConfig config) {
+        DocumentSource documentSource = null;
+        try {
+            documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
+            documentSource.setMD5(md5Str);
+            // first, parse the document with the segmentation model
+            Document doc = parsers.getMedicalReportSegmenterParser().processing(documentSource, config);
+
+            // then take only the header part for further process with this method
+            String tei = processingHeaderSection(config, doc, resHeader, true);
+            return new ImmutablePair<String, Document>(tei, doc);
+        } finally {
+            if (documentSource != null) {
+                documentSource.close(true, true, true);
+            }
+        }
+    }
+
+    public String processingHeaderSection(GrobidAnalysisConfig config,
+                                          Document doc,
+                                          HeaderMedicalItem resHeader,
+                                          boolean serialize) {
+        try {
+            // retrieve only the header (front) part
+            SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokens for the entire document
+
+            if (documentHeaderParts != null) {
+                Pair<String, List<LayoutToken>> featuredHeader = getSectionHeaderFeatured(doc, documentHeaderParts);
+                String header = featuredHeader.getLeft(); // header data with features
+                List<LayoutToken> headerTokenization = featuredHeader.getRight(); // tokens
+                String res = null;
+                if (StringUtils.isNotBlank(header)) {
+                    res = label(header);
+                    resHeader = resultExtraction(res, headerTokenization, resHeader);
+
+                    // take the results of the header parsing and complete the header items with additional information (ex.,language, doctype, etc)
+                    if (resHeader != null) {
+                        // set the application version
+                        resHeader.setAppVersion(GrobidMedicalReportProperties.getVersion());
+
+                        // set the language
+                        String lang = "fr"; // default, it's French
+                        // otherwise, try the language identification from the body part text
+                        StringBuilder textBody = new StringBuilder();
+                        String contentSample = "";
+                        SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+                        if (documentBodyParts != null) {
+                            Pair<String, LayoutTokenization> featSeg = parsers.getFullMedicalTextParser().getBodyTextFeatured(doc, documentBodyParts);
+                            if (featSeg != null) {
+                                String bodytext = featSeg.getLeft(); // body data with features
+                                List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization(); // body tokens
+                                for (LayoutToken token : tokenizationsBody) {
+                                    textBody.append(token.getText());
+                                }
+                            }
+                        }
+                        // test only max 200 characters
+                        if (textBody.toString().length() > 200) {
+                            contentSample = textBody.toString().substring(0, 200);
+                        } else {
+                            contentSample = textBody.toString();
+                        }
+                        // define the new language if it exists
+                        Language langu = languageUtilities.runLanguageId(contentSample);
+                        if (langu != null) {
+                            doc.setLanguage(lang);
+                        }
+                        doc.setLanguage(lang);
+                        resHeader.setLanguage(lang);
+
+                        // set number of pages
+                        resHeader.setNbPages(doc.getPages().size());
+
+                        // if the document title, type, place, or date are empty, set them with the data extracted from document dateline
+                        if (resHeader.getDateline() != null) {
+                            // call the dateline parser
+                            Dateline dateline = parsers.getDatelineParser().process(resHeader.getDateline());
+                            if (dateline.getDoctype() != null) {
+                                if (resHeader.getDocumentType() == null) {
+                                    resHeader.setDocumentType(dateline.getDoctype());
+                                }
+                            }
+                            if (dateline.getDate() != null) {
+                                if (resHeader.getDocumentDate() == null) {
+                                    resHeader.setDocumentDate(dateline.getDate());
+                                }
+                            }
+
+                            if (dateline.getPlaceName() != null) {
+                                if (resHeader.getLocation() == null) {
+                                    resHeader.setLocation(dateline.getPlaceName());
+                                }
+                            }
+                        }
+
+                        // normalize the document date to ISO standard date
+                        if (resHeader.getDocumentDate() != null) {
+                            Optional<Date> normalisedDate;
+                            normalisedDate = getNormalizedDate(resHeader.getDocumentDate());
+                            if (normalisedDate.isPresent()) {
+                                resHeader.setDocumentDate(toISOString(normalisedDate.get()));
+                            }
+                        }
+
+                        // medics processing
+                        if (resHeader.getMedics() != null) {
+                            String[] medics = resHeader.getMedics().split(";");
+                            for (String med : medics) {
+                                Medic medic = parsers.getMedicParser().process(med);
+                                // call the medic parser
+                                resHeader.addMedic(medic); // add to the medic list
+                            }
+                        }
+
+                        // patients processing
+                        if (resHeader.getPatients() != null) {
+                            // call the patient parser
+                            Patient patient = parsers.getPatientParser().process(resHeader.getPatients());
+                            resHeader.addPatient(patient); // add to the patient list
+                        }
+                    }
+                }
+                if (serialize) { // need to set the `serialize` into false for the full text processing for preventing the double process
+                    TEIFormatter teiFormatter = new TEIFormatter(doc, null);
+                    StringBuilder tei = teiFormatter.toTEIHeader(resHeader, null, config);
+                    tei.append("</TEI>\n");
+                    return tei.toString();
+                } else
+                    return null;
+            }
+        } catch (Exception e) {
+            throw new GrobidException("An exception occurred while running header medical parser.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Header and left-note processing after application of the medical-report segmentation model
+     */
+    public Pair<String, Document> processingHeaderLeftNote(File input, String md5Str,
+                                                           HeaderMedicalItem resHeader,
+                                                           LeftNoteMedicalItem resLeftNote,
+                                                           GrobidAnalysisConfig config) {
         DocumentSource documentSource = null;
         try {
             documentSource = DocumentSource.fromPdf(input, config.getStartPage(), config.getEndPage());
@@ -103,329 +236,154 @@ public class HeaderMedicalParser extends AbstractParser {
         }
     }
 
-    /**
-     * Header and left-note processing after application of the medical-report segmentation model
-     */
     public String processingHeaderLeftNoteSection(GrobidAnalysisConfig config, Document doc,
                                                   HeaderMedicalItem resHeader,
                                                   LeftNoteMedicalItem resLeftNote,
                                                   boolean serialize) {
         try {
-            // retrieve only the header (front) part
+            // --> retrieve only the header (front) part
             SortedSet<DocumentPiece> documentHeaderParts = doc.getDocumentPart(MedicalLabels.HEADER);
-            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokenizations for the entire document
-            if (documentHeaderParts != null || resLeftNote != null) {
-                if (documentHeaderParts != null) {
-                    Pair<String, List<LayoutToken>> featuredHeader = getSectionHeaderFeatured(doc, documentHeaderParts);
-                    String header = featuredHeader.getLeft(); // header data with features
-                    List<LayoutToken> headerTokenization = featuredHeader.getRight(); // tokenizations of header data
-                    String res = null;
-                    if (StringUtils.isNotBlank(header)) {
-                        res = label(header);
-                        resHeader = resultExtraction(res, headerTokenization, resHeader);
+            List<LayoutToken> tokenizations = doc.getTokenizations(); // tokens of the header part
+            if (documentHeaderParts != null) {
+                Pair<String, List<LayoutToken>> featuredHeader = getSectionHeaderFeatured(doc, documentHeaderParts);
+                String header = featuredHeader.getLeft(); // header data with features
+                List<LayoutToken> headerTokenization = featuredHeader.getRight(); // tokens
+                String res = null;
+                // set the language
+                String lang = "fr"; // default, it's French
+                if (StringUtils.isNotBlank(header)) {
+                    res = label(header);
+                    resHeader = resultExtraction(res, headerTokenization, resHeader);
 
-                        // take the results of the header parsing and complete the header items with additional information (ex.,language, doctype, etc)
-                        if (resHeader != null) {
+                    // take the results of the header parsing and complete the header items with additional information (ex.,language, doctype, etc)
+                    if (resHeader != null) {
+                        // set the application version
+                        resHeader.setAppVersion(GrobidMedicalReportProperties.getVersion());
 
-                            // language identification
-                            StringBuilder contentSample = new StringBuilder();
-                            if (resHeader.getDocumentType() != null) {
-                                contentSample.append(resHeader.getDocumentType());
-                            }
-
-                            if (contentSample.length() < 200) {
-                                // we can exploit more textual content to ensure that the language identification will be
-                                // correct
-                                SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
-                                if (documentBodyParts != null) {
-                                    String stringSample = Document.getTokenizationParts(documentBodyParts, tokenizations)
-                                        .stream().map(LayoutToken::toString)
-                                        .collect(Collectors.joining(" "));
-
-                                    contentSample.append(stringSample);
-                                }
-                            }
-                            Language langu = languageUtilities.runLanguageId(contentSample.toString());
-                            if (langu != null) {
-                                String lang = langu.getLang();
-                                doc.setLanguage(lang);
-                                resHeader.setLanguage(lang);
-                            } else {
-                                resHeader.setLanguage("fr"); // by default, the language is French
-                            }
-
-                            // number of pages
-                            resHeader.setNbPages(doc.getPages().size());
-
-                            // we normalize the document date and set to ISO standard date
-                            if (resHeader.getDocumentDate() != null) {
-                                Optional<Date> normalisedDate = getNormalizedDate(resHeader.getDocumentDate());
-                                if (normalisedDate.isPresent()) {
-                                    resHeader.setNormalizedDocumentDate(normalisedDate.get());
-                                }
-                                // to ISO standard
-                                resHeader.setDocumentDate(toISOString(resHeader.getNormalizedDocumentDate()));
-                            } else if (resHeader.getDateline() != null) { // if the date doesn't exist, we use the information from the dateline
-                                List<LayoutToken> datelineLayoutTokens = resHeader.getDatelinesTokens();
-                                List<List<LayoutToken>> datelineSegments = new ArrayList<>();
-                                if (isNotEmpty(datelineLayoutTokens)) {
-                                    List<LayoutToken> currentSegment = new ArrayList<>();
-                                    for (LayoutToken theToken : datelineLayoutTokens) {
-                                        // split the list of layout tokens when token "\t" is met
-                                        if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                            if (currentSegment.size() > 0)
-                                                datelineSegments.add(currentSegment);
-                                            currentSegment = new ArrayList<>();
-                                        } else
-                                            currentSegment.add(theToken);
-                                    }
-                                    // last segment
-                                    if (currentSegment.size() > 0)
-                                        datelineSegments.add(currentSegment);
-
-                                    for (int k = 0; k < datelineSegments.size(); k++) {
-                                        if (datelineSegments.get(k).size() == 0)
-                                            continue;
-
-                                        // further datelines processing with the Dateline model
-                                        List<Dateline> localDatelines = parsers.getDatelineParser()
-                                            .processingWithLayoutTokens(datelineSegments.get(k));
-                                        for (Dateline dateline : localDatelines) {
-                                            // fill the header items
-                                            if (dateline.getDoctype() != null) {
-                                                resHeader.setDocumentType(dateline.getDoctype());
-                                                // normalization of the date
-                                                if (dateline.getDate() != null) {
-                                                    Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
-                                                    if (normalisedDate.isPresent()) {
-                                                        dateline.setDate(toISOString(normalisedDate.get()));
-                                                    }
-                                                }
-                                            } else if (dateline.getPlaceName() != null) {
-                                                if (resHeader.getLocation() == null) {
-                                                    resHeader.setLocation(dateline.getPlaceName());
-                                                    // normalization of the date
-                                                    if (dateline.getDate() != null) {
-                                                        Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
-                                                        if (normalisedDate.isPresent()) {
-                                                            dateline.setDate(toISOString(normalisedDate.get()));
-                                                        }
-                                                    }
-                                                }
-                                            } else if (dateline.getDate() != null) {
-                                                // normalization of the date
-                                                Optional<Date> normalisedDate = getNormalizedDate(dateline.getDate());
-                                                if (normalisedDate.isPresent()) {
-                                                    dateline.setDate(toISOString(normalisedDate.get()));
-                                                }
-                                            }
-
-                                            // add new dateline to the list of datelines of header item
-                                            resHeader.addDateline(dateline);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // medics processing
-                            if (resHeader.getMedics() != null) {
-                                List<LayoutToken> medicLayoutTokens = resHeader.getMedicsTokens();
-                                List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                                if (isNotEmpty(medicLayoutTokens)) {
-                                    List<LayoutToken> currentSegment = new ArrayList<>();
-                                    for (LayoutToken theToken : medicLayoutTokens) {
-                                        // split the list of layout tokens when token "\t" is met
-                                        if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                            if (currentSegment.size() > 0)
-                                                medicSegments.add(currentSegment);
-                                            currentSegment = new ArrayList<>();
-                                        } else
-                                            currentSegment.add(theToken);
-                                    }
-                                    // last segment
-                                    if (currentSegment.size() > 0)
-                                        medicSegments.add(currentSegment);
-
-                                    for (int k = 0; k < medicSegments.size(); k++) {
-                                        if (medicSegments.get(k).size() == 0)
-                                            continue;
-                                        // further medics processing with the Medic model
-                                        Medic localMedics = parsers.getMedicParser()
-                                            .processingWithLayoutTokens(medicSegments.get(k));
-
-                                        // TBD : remove duplicate names and information related to it
-                                        //see how it works wit PersonMedical.deduplicate()
-                                        // add new medic to the medics item
-                                        resHeader.addMedic(localMedics);
-                                    }
-                                }
-                            }
-
-                            // patients
-                            if (resHeader.getPatients() != null) {
-                                List<LayoutToken> patientLayoutTokens = resHeader.getPatientsTokens();
-                                List<List<LayoutToken>> patientSegments = new ArrayList<>();
-                                if (isNotEmpty(patientLayoutTokens)) {
-                                    List<LayoutToken> currentSegment = new ArrayList<>();
-                                    for (LayoutToken theToken : patientLayoutTokens) {
-                                        // split the list of layout tokens when token "\t" is met
-                                        if (theToken.getText() != null && theToken.getText().equals("\t")) {
-                                            if (currentSegment.size() > 0)
-                                                patientSegments.add(currentSegment);
-                                            currentSegment = new ArrayList<>();
-                                        } else
-                                            currentSegment.add(theToken);
-                                    }
-                                    // last segment
-                                    if (currentSegment.size() > 0)
-                                        patientSegments.add(currentSegment);
-
-                                    for (int k = 0; k < patientSegments.size(); k++) {
-                                        if (patientSegments.get(k).size() == 0)
-                                            continue;
-
-                                        // further patient processing with the Patient model
-                                        Patient localPatients = parsers.getPatientParser()
-                                            .processingWithLayoutTokens(patientSegments.get(k));
-
-                                        // normalization of all birth and death dates of patients
-
-                                        if (localPatients.getDateBirth() != null) {
-
-                                            Optional<Date> normalisedDate = getNormalizedDate(localPatients.getDateBirth());
-                                            if (normalisedDate.isPresent()) {
-                                                localPatients.setDateBirth(toISOString(normalisedDate.get())); // yyyy-mm-dd
-                                            }
-
-                                        }
-                                        if (localPatients.getDateDeath() != null) {
-                                            Optional<Date> normalisedDate = getNormalizedDate(localPatients.getDateDeath());
-                                            if (normalisedDate.isPresent()) {
-                                                localPatients.setDateDeath(toISOString(normalisedDate.get()));
-                                            }
-                                        }
-                                        // TBD : remove duplicate names and information related to it
-                                        //see how it works wit PersonMedical.deduplicate()
-                                        // add new medic to the medics item
-                                        resHeader.addPatient(localPatients);
-                                    }
+                        // otherwise, try the language identification from the body part text
+                        StringBuilder textBody = new StringBuilder();
+                        String contentSample = "";
+                        SortedSet<DocumentPiece> documentBodyParts = doc.getDocumentPart(MedicalLabels.BODY);
+                        if (documentBodyParts != null) {
+                            Pair<String, LayoutTokenization> featSeg = parsers.getFullMedicalTextParser().getBodyTextFeatured(doc, documentBodyParts);
+                            if (featSeg != null) {
+                                String bodytext = featSeg.getLeft(); // body data with features
+                                List<LayoutToken> tokenizationsBody = featSeg.getRight().getTokenization(); // body tokens
+                                for (LayoutToken token : tokenizationsBody) {
+                                    textBody.append(token.getText());
                                 }
                             }
                         }
+                        // test only max 200 characters
+                        if (textBody.toString().length() > 200) {
+                            contentSample = textBody.toString().substring(0, 200);
+                        } else {
+                            contentSample = textBody.toString();
+                        }
+                        // define the new language if it exists
+                        Language langu = languageUtilities.runLanguageId(contentSample);
+                        if (langu != null) {
+                            doc.setLanguage(lang);
+                        }
+                        doc.setLanguage(lang);
+                        resHeader.setLanguage(lang);
+
+                        // set number of pages
+                        resHeader.setNbPages(doc.getPages().size());
+
+                        // if the document title, type, place, or date are empty, set them with the data extracted from document dateline
+                        if (resHeader.getDateline() != null) {
+                            // call the dateline parser
+                            Dateline dateline = parsers.getDatelineParser().process(resHeader.getDateline());
+                            if (dateline.getDoctype() != null) {
+                                if (resHeader.getDocumentType() == null) {
+                                    resHeader.setDocumentType(dateline.getDoctype());
+                                }
+                            }
+                            if (dateline.getDate() != null) {
+                                if (resHeader.getDocumentDate() == null) {
+                                    resHeader.setDocumentDate(dateline.getDate());
+                                }
+                            }
+
+                            if (dateline.getPlaceName() != null) {
+                                if (resHeader.getLocation() == null) {
+                                    resHeader.setLocation(dateline.getPlaceName());
+                                }
+                            }
+                        }
+
+                        // normalize the document date to ISO standard date
+                        if (resHeader.getDocumentDate() != null) {
+                            Optional<Date> normalisedDate;
+                            normalisedDate = getNormalizedDate(resHeader.getDocumentDate());
+                            if (normalisedDate.isPresent()) {
+                                resHeader.setDocumentDate(toISOString(normalisedDate.get()));
+                            }
+                        }
+
+                        // medics processing
+                        if (resHeader.getMedics() != null) {
+                            String[] medics = resHeader.getMedics().split(";");
+                            for (String med : medics) {
+                                Medic medic = parsers.getMedicParser().process(med);
+                                // call the medic parser
+                                resHeader.addMedic(medic); // add to the medic list
+                            }
+                        }
+
+                        // patients processing
+                        if (resHeader.getPatients() != null) {
+                            // call the patient parser
+                            Patient patient = parsers.getPatientParser().process(resHeader.getPatients());
+                            resHeader.addPatient(patient); // add to the patient list
+                        }
                     }
                 }
-                // the left-note information part of medical reports if they exist
-                SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
 
+                // --> retrieve only the left-note part
+                SortedSet<DocumentPiece> documentLeftNoteParts = doc.getDocumentPart(MedicalLabels.LEFTNOTE);
+                tokenizations = doc.getTokenizations(); // tokens of the left-note part
                 if (documentLeftNoteParts != null) {
                     Pair<String, List<LayoutToken>> featuredLeftNote = parsers.getLeftNoteMedicalParser().getSectionLeftNoteFeatured(doc, documentLeftNoteParts);
                     String leftNote = featuredLeftNote.getLeft(); // left note data with features
-                    List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight(); // tokenizations of left note data
+                    List<LayoutToken> leftNoteTokenization = featuredLeftNote.getRight(); // tokens of the left note data
 
                     String labeledLeftNote = null;
                     if ((leftNote != null) && (leftNote.trim().length() > 0)) {
+                        // give labels
                         labeledLeftNote = parsers.getLeftNoteMedicalParser().label(leftNote);
+
+                        // save the labeled results in POJO
                         resLeftNote = parsers.getLeftNoteMedicalParser().resultExtraction(labeledLeftNote, leftNoteTokenization, resLeftNote);
-                        resLeftNote.setRawLeftNote(parsers.getLeftNoteMedicalParser().trainingExtraction(labeledLeftNote, leftNoteTokenization).toString());
 
+                        // set the labeled results without any change to the raw text
+                        String strLeftNote = parsers.getLeftNoteMedicalParser().trainingExtraction(labeledLeftNote, leftNoteTokenization).toString();
+                        resLeftNote.setRawLeftNote(strLeftNote);
+
+                        // take the results of the left-note parsing and complete the items with additional information
                         if (resLeftNote != null) {
-                            // buffer for the medics block
-                            StringBuilder bufferMedic = null;
-                            // we need to rebuild the found string as it appears
-                            String input = "";
-                            int q = 0;
-                            StringTokenizer st = new StringTokenizer(labeledLeftNote, "\n");
-                            while (st.hasMoreTokens() && (q < leftNoteTokenization.size())) {
-                                String line = st.nextToken();
-                                String theTotalTok = leftNoteTokenization.get(q).getText();
-                                String theTok = leftNoteTokenization.get(q).getText();
-                                while (theTok.equals(" ") || theTok.equals("\t") || theTok.equals("\n") || theTok.equals("\r")) {
-                                    q++;
-                                    if ((q > 0) && (q < leftNoteTokenization.size())) {
-                                        theTok = leftNoteTokenization.get(q).getText();
-                                        theTotalTok += theTok;
-                                    }
-                                }
-                                if (line.endsWith("<medic>")) {
-                                    input += theTotalTok;
-                                }
-                                q++;
-                            }
+                            // set the application version
+                            resLeftNote.setAppVersion(GrobidMedicalReportProperties.getVersion());
 
-                            List<String> inputs = new ArrayList<String>();
-                            if (input != null && input.trim().length() > 0) {
-                                inputs.add(input.trim());
-                                bufferMedic = parsers.getMedicParser().trainingExtraction(inputs); //if the models exists already
+                            resLeftNote.setLanguage(lang);
 
-                                // force analyser with English, to avoid bad surprise
-                                List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
-                                List<String> tokenizationMedic = analyzer.tokenize(input);
-                                List<String> medicBlocks = new ArrayList<String>();
-                                if (tokenizationMedic.size() == 0)
-                                    return null;
-                                for (String tok : tokenizationMedic) {
-                                    if (tok.equals("\n")) {
-                                        medicBlocks.add("@newline");
-                                    } else if (!tok.equals(" ")) {
-                                        medicBlocks.add(tok + " <medic>");
-                                    }
-                                }
-
-                                List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
-                                List<OffsetPosition> titlePositions = lexicon.tokenPositionsPersonTitle(tokens);
-                                List<OffsetPosition> suffixPositions = lexicon.tokenPositionsPersonSuffix(tokens);
-                                List<OffsetPosition> emailPositions = lexicon.tokenPositionsEmailPattern(tokens);
-                                List<OffsetPosition> urlPositions = lexicon.tokenPositionsUrlPattern(tokens);
-                                // we write the medic data with features
-                                String featuredMedic = FeaturesVectorMedic.addFeaturesMedic(tokens, null,
-                                    locationPositions, titlePositions, suffixPositions, emailPositions, urlPositions);
-                            }
-
-                            // medics processing
-                            if (resLeftNote.getMedics() != null) {
-                                List<LayoutToken> medicLayoutTokens = resLeftNote.getMedicsLayoutTokens();
-                                List<List<LayoutToken>> medicSegments = new ArrayList<>();
-                                if (isNotEmpty(medicLayoutTokens)) {
-                                    List<LayoutToken> currentSegment = new ArrayList<>();
-                                    for (LayoutToken theToken : medicLayoutTokens) {
-                                        // split the list of layout tokens when token "\n" is met
-                                        if (theToken.getText() != null && theToken.getText().equals("\n")) {
-                                            if (currentSegment.size() > 0)
-                                                medicSegments.add(currentSegment);
-                                            currentSegment = new ArrayList<>();
-                                        } else
-                                            currentSegment.add(theToken);
-                                    }
-                                    // last segment
-                                    if (currentSegment.size() > 0)
-                                        medicSegments.add(currentSegment);
-
-                                    for (int k = 0; k < medicSegments.size(); k++) {
-                                        if (medicSegments.get(k).size() == 0)
-                                            continue;
-                                        // further medics processing with the Medic model
-                                        Medic localMedics = parsers.getMedicParser()
-                                            .processingWithLayoutTokens(medicSegments.get(k));
-
-                                        // add new medic
-                                        resLeftNote.addMedic(localMedics);
-                                    }
-                                }
-                            }
+                            // set number of pages
+                            resLeftNote.setNbPages(doc.getPages().size());
                         }
                     }
                 }
-                if (serialize) { // need to set the serialize into false for the full text processing for preventing the double process
+
+                if (serialize) { // need to set the `serialize` into false for the full text processing for preventing the double process
                     TEIFormatter teiFormatter = new TEIFormatter(doc, null);
                     StringBuilder tei = teiFormatter.toTEIHeaderLeftNote(resHeader, resLeftNote, null, config);
-                    tei.append("\t</text>\n");
                     tei.append("</TEI>\n");
                     return tei.toString();
                 } else
                     return null;
             }
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running header medical parser.", e);
         }
         return null;
     }
@@ -1269,11 +1227,8 @@ public class HeaderMedicalParser extends AbstractParser {
      * @return a medical item
      */
     public HeaderMedicalItem resultExtraction(String result, List<LayoutToken> tokenizations, HeaderMedicalItem medical) {
-
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.HEADER_MEDICAL_REPORT, result, tokenizations);
-
         List<TaggingTokenCluster> clusters = clusteror.cluster();
-
         medical.generalResultMapping(result, tokenizations);
 
         for (TaggingTokenCluster cluster : clusters) {
@@ -1287,111 +1242,107 @@ public class HeaderMedicalParser extends AbstractParser {
             String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
             if (clusterLabel.equals(MedicalLabels.HEADER_DOCNUM)) {
                 if (medical.getDocNum() != null && isDifferentContent(medical.getDocNum(), clusterContent)) {
-                    medical.setDocNum(clusterContent);
+                    medical.setDocumentType(medical.getDocumentType() + "\t" + clusterContent);
                 } else {
                     medical.setDocNum(clusterContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_DOCTYPE)) {
                 if (medical.getDocumentType() != null && isDifferentContent(medical.getDocumentType(), clusterContent)) {
-                    medical.setDocumentType(medical.getDocumentType() + " \n " + clusterContent);
-                } else
-                    medical.setDocumentType(clusterNonDehypenizedContent);
+                    medical.setDocumentType(medical.getDocumentType() + "; " + clusterContent);
+                } else {
+                    medical.setDocumentType(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_TITLE)) {
-                if (medical.getTitle() == null) {
+                if (medical.getTitle() != null && isDifferentContent(medical.getTitle(), clusterContent)) {
+                    medical.setTitle(medical.getTitle() + "; " + clusterContent);
+                } else {
                     medical.setTitle(clusterContent);
-                    List<LayoutToken> tokens = getLayoutTokens(cluster);
-                    medical.addTitleTokens(tokens);
                 }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_DATE)) {
-                if (medical.getDocumentDate() != null && medical.getDocumentDate().length() < clusterNonDehypenizedContent.length())
+                if (medical.getDocumentDate() != null && medical.getDocumentDate().length() < clusterNonDehypenizedContent.length()) {
                     medical.setDocumentDate(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDate() == null)
+                } else if (medical.getDocumentDate() == null) {
                     medical.setDocumentDate(clusterNonDehypenizedContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_TIME)) {
-                if (medical.getDocumentTime() != null)
+                if (medical.getDocumentTime() == null) {
                     medical.setDocumentTime(clusterNonDehypenizedContent);
-                else if (medical.getDocumentDate() == null)
-                    medical.setDocumentDate(clusterNonDehypenizedContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_DATELINE)) {
-                if (medical.getDateline() != null) {
-                    medical.setDateline(medical.getDateline() + "\t" + clusterNonDehypenizedContent);
-                    medical.addDatelinesToken(new LayoutToken("\t", MedicalLabels.HEADER_DATELINE));
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addDatelinesTokens(tokens);
-                } else {
-                    medical.setDateline(clusterNonDehypenizedContent);
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addDatelinesTokens(tokens);
+                // if the variables containing dateline data and token are not empty, then separate them with the new one
+                if (medical.getDateline() != null && isDifferentContent(medical.getDateline(), clusterContent)) {
+                    medical.setDateline(medical.getDateline() + "; " + clusterContent); // add the new data
+                } else { // otherwise, just fill the variables with the new one
+                    medical.setDateline(clusterContent);
                 }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_MEDIC)) {
+                // if the variables containing medic data and token are not empty, then separate them with the new one
                 if (medical.getMedics() != null) {
-                    medical.setMedics(medical.getMedics() + "\t" + clusterNonDehypenizedContent);
-                    medical.addMedicsToken(new LayoutToken("\t", MedicalLabels.HEADER_MEDIC));
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addMedicsTokens(tokens);
-                } else {
-                    medical.setMedics(clusterNonDehypenizedContent);
-
+                    medical.setMedics(medical.getMedics() + "; " + clusterContent); // add the new data
+                    medical.addMedicsToken(new LayoutToken("; ", MedicalLabels.HEADER_MEDIC)); // add the new token
+                } else { // otherwise, just fill the variables with the new one
+                    medical.setMedics(clusterContent);
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addMedicsTokens(tokens);
                 }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_PATIENT)) {
-                if (medical.getPatients() != null) {
-                    medical.setPatients(medical.getPatients() + "\t" + clusterNonDehypenizedContent);
-                    medical.addPatientsToken(new LayoutToken("\t", MedicalLabels.HEADER_PATIENT));
-
-                    List<LayoutToken> tokens = cluster.concatTokens();
-                    medical.addPatientsTokens(tokens);
-                } else {
-                    medical.setPatients(clusterNonDehypenizedContent);
-
+                // if the variables containing patient data and token are not empty, then separate them with the new one
+                if (medical.getPatients() != null && isDifferentContent(medical.getPatients(), clusterContent)) { // make sure accept new different patient
+                    medical.setPatients(medical.getPatients() + "; " + clusterContent); // add the new data
+                    medical.addPatientsToken(new LayoutToken("; ", MedicalLabels.HEADER_PATIENT)); // add the new token
+                } else { // otherwise, just fill the variables with the new one
+                    medical.setPatients(clusterContent);
                     List<LayoutToken> tokens = cluster.concatTokens();
                     medical.addPatientsTokens(tokens);
                 }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_AFFILIATION)) {
-                // affiliation **makers** should be marked SINGLECHAR LINESTART
-                if (medical.getAffiliation() != null) {
-                    medical.setAffiliation(medical.getAffiliation() + " ; " + clusterContent);
-                } else
+                if (medical.getAffiliation() != null && isDifferentContent(medical.getAffiliation(), clusterContent)) {
+                    medical.setAffiliation(medical.getAffiliation() + "; " + clusterContent);
+                } else {
                     medical.setAffiliation(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_ADDRESS)) {
-                if (medical.getAddress() != null) {
-                    medical.setAddress(medical.getAddress() + " " + clusterContent);
-                } else
+                if (medical.getAddress() != null && isDifferentContent(medical.getAddress(), clusterContent)) {
+                    medical.setAddress(medical.getAddress() + "; " + clusterContent);
+                } else {
                     medical.setAddress(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_ORG)) {
-                if (medical.getOrg() != null) {
-                    medical.setOrg(medical.getOrg() + " " + clusterContent);
-                } else
+                if (medical.getOrg() != null && isDifferentContent(medical.getAddress(), clusterContent)) {
+                    medical.setOrg(medical.getOrg() + "; " + clusterContent);
+                } else {
                     medical.setOrg(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_EMAIL)) {
-                if (medical.getEmail() != null) {
-                    medical.setEmail(medical.getEmail() + "\t" + clusterNonDehypenizedContent);
-                } else
-                    medical.setEmail(clusterNonDehypenizedContent);
+                if (medical.getEmail() != null && isDifferentContent(medical.getAddress(), clusterContent)) {
+                    medical.setEmail(medical.getEmail() + "; " + clusterContent);
+                } else {
+                    medical.setEmail(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_PHONE)) {
-                if (medical.getPhone() != null) {
-                    medical.setPhone(medical.getPhone() + clusterNonDehypenizedContent);
-                } else
-                    medical.setPhone(clusterNonDehypenizedContent);
+                if (medical.getPhone() != null && isDifferentContent(medical.getAddress(), clusterContent)) {
+                    medical.setPhone(medical.getPhone() + "; " + clusterContent);
+                } else {
+                    medical.setPhone(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_FAX)) {
-                if (medical.getFax() != null) {
-                    medical.setFax(medical.getFax() + clusterNonDehypenizedContent);
-                } else
-                    medical.setFax(clusterNonDehypenizedContent);
+                if (medical.getFax() != null && isDifferentContent(medical.getAddress(), clusterContent)) {
+                    medical.setFax(medical.getFax() + "; " + clusterContent);
+                } else {
+                    medical.setFax(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_WEB)) {
-                if (medical.getWeb() != null) {
-                    medical.setWeb(medical.getWeb() + clusterNonDehypenizedContent);
-                } else
-                    medical.setWeb(clusterNonDehypenizedContent);
+                if (medical.getWeb() != null && isDifferentContent(medical.getWeb(), clusterContent)) {
+                    medical.setWeb(medical.getWeb() + "; " + clusterContent);
+                } else {
+                    medical.setWeb(clusterContent);
+                }
             } else if (clusterLabel.equals(MedicalLabels.HEADER_NOTE)) {
                 if (medical.getNote() != null) {
                     medical.setNote(medical.getNote() + " " + clusterContent);
-                } else
+                } else {
                     medical.setNote(clusterContent);
+                }
             }
         }
         return medical;
@@ -1892,12 +1843,6 @@ public class HeaderMedicalParser extends AbstractParser {
     public Document createTrainingFromPDF(File inputFile,
                                           String pathOutput,
                                           int id) {
-        if (tmpPath == null)
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;
@@ -1987,12 +1932,6 @@ public class HeaderMedicalParser extends AbstractParser {
     public Document createBlankTrainingFromPDF(File inputFile,
                                                String pathOutput,
                                                int id) {
-        if (tmpPath == null)
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;
@@ -2124,14 +2063,6 @@ public class HeaderMedicalParser extends AbstractParser {
     public void processingHeaderLeftNote(File inputFile,
                                          String outputFile,
                                          int id) {
-        if (tmpPath == null) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path is null.");
-        }
-        if (!tmpPath.exists()) {
-            throw new GrobidResourceException("Cannot process pdf file, because temp path '" +
-                tmpPath.getAbsolutePath() + "' does not exists.");
-        }
-
         DocumentSource documentSource = null;
         Document doc = null;
         GrobidAnalysisConfig config = null;

@@ -1,16 +1,12 @@
 package org.grobid.trainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.engines.EngineMedicalParsers;
 import org.grobid.core.engines.NERParsers;
 import org.grobid.core.exceptions.GrobidException;
-import org.grobid.core.main.GrobidHomeFinder;
-import org.grobid.core.utilities.GrobidProperties;
-import org.grobid.core.utilities.MedicalReportConfiguration;
 import org.grobid.core.utilities.UnicodeUtil;
 import org.grobid.trainer.sax.TEIMedicalReportSegmenterSaxParser;
+import org.grobid.utility.Utility;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -21,7 +17,7 @@ import java.util.StringTokenizer;
 
 /**
  * A class to train and evaluate medical report segmenter model.
- *
+ * <p>
  * Tanti, 2020
  */
 public class MedicalReportSegmenterTrainer extends AbstractTrainer {
@@ -171,7 +167,7 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
                                     so, to help identify the entity type of each token for anonymization purposes, we use grobid-ner.
                                      */
 
-                                    String[] splitLine  = line.split(" ");
+                                    String[] splitLine = line.split(" ");
                                     // we only checked the first and the second tokens as they are used as part of features for the segmentation model
                                     List<String> tokensToBeChecked = Arrays.asList(splitLine[0], splitLine[1]);
                                     String theText = String.join(" ", tokensToBeChecked);
@@ -267,31 +263,11 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
      */
 
     public static void main(String[] args) throws Exception {
-        MedicalReportConfiguration medicalReportConfiguration = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            medicalReportConfiguration = mapper.readValue(new File("resources/config/grobid-medical-report.yaml"), MedicalReportConfiguration.class);
-        } catch(Exception e) {
-            System.err.println("The config file does not appear valid, see resources/config/grobid-medical-report.yaml");
-        }
-        try {
-            String pGrobidHome = medicalReportConfiguration.getGrobidHome();
-            String pGrobidProperties = "../grobid-home/config/grobid.properties";
-
-            GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
-            GrobidProperties.getInstance(grobidHomeFinder);
-
-            System.out.println(">>>>>>>> GROBID_HOME="+GrobidProperties.getInstance().getGrobidHome());
-        } catch (final Exception exp) {
-            System.err.println("grobid-medical-report initialisation failed: " + exp);
-            exp.printStackTrace();
-        }
-
-        MedicalReportSegmenterTrainer trainer = new MedicalReportSegmenterTrainer();
-
+        Utility utility = new Utility();
+        utility.initGrobid(null);
+        Trainer trainer = new MedicalReportSegmenterTrainer();
         AbstractTrainer.runTraining(trainer);
         System.out.println(AbstractTrainer.runEvaluation(trainer));
-
         System.exit(0);
     }
 }
