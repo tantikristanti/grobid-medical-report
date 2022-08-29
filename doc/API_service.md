@@ -36,7 +36,7 @@ The successful operation will return:
 </dateline>
 ```
 
-### /api/processPatient
+### /api/processMedic
 
 Parse a raw patient string and return the extracted patient data.
 
@@ -47,7 +47,7 @@ Parse a raw patient string and return the extracted patient data.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "patient=Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY." localhost:8090/api/processPatient
+$ curl -X POST -d "patient=Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY." localhost:8090/api/processMedic
 ```
 
 The successful operation will return:
