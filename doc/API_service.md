@@ -47,7 +47,7 @@ Parse a raw patient string and return the extracted patient data.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "patient=Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY." localhost:8090/api/processMedic
+$ curl -X POST -d "medic=Chef de Service Pr. Abagael ZOSIMA. Assistant Dr Woody WOOD." localhost:8090/api/processMedic
 ```
 
 The successful operation will return:
@@ -69,7 +69,7 @@ Parse a raw medic string and return the extracted medical personnel.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "medic=Chef de Service Pr. Abagael ZOSIMA. Assistant Dr Woody WOOD." localhost:8090/api/processMedic
+$ curl -X POST -d "patient=Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY." localhost:8090/api/processMedic
 ```
 
 The successful operation will return:
