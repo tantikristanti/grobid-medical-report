@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
+import org.grobid.core.data.Date;
 import org.grobid.core.data.Dateline;
 import org.grobid.core.engines.label.MedicalLabels;
 import org.grobid.core.engines.label.TaggingLabel;
@@ -24,7 +25,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
+
+import static org.grobid.core.document.TEIFormatter.toISOString;
 
 /*A class for parsing dateline
 *
@@ -34,14 +38,14 @@ public class DatelineParser extends AbstractParser {
     private static Logger LOGGER = LoggerFactory.getLogger(DatelineParser.class);
     protected EngineMedicalParsers parsers;
     public Lexicon lexicon = Lexicon.getInstance();
+    private String date = null;
+    private String time = null;
+    private String placeName = null;
+    private String docType = null;
+    private String note = null;
 
     public DatelineParser() {
         super(GrobidModels.DATELINE);
-    }
-
-    public DatelineParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.DATELINE, cntManager);
-        this.parsers = parsers;
     }
 
     public DatelineParser(EngineMedicalParsers parsers) {
@@ -49,10 +53,55 @@ public class DatelineParser extends AbstractParser {
         this.parsers = parsers;
     }
 
+    public DatelineParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.DATELINE, cntManager);
+        this.parsers = parsers;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getPlaceName() {
+        return placeName;
+    }
+
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
+    }
+
+    public String getDocType() {
+        return docType;
+    }
+
+    public void setDocType(String docType) {
+        this.docType = docType;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     /**
      * Processing of datelines in the header part
      */
-    public List<Dateline> process(String input) throws Exception {
+    public Dateline process(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
@@ -62,7 +111,7 @@ public class DatelineParser extends AbstractParser {
         return processing(tokens);
     }
 
-    public List<Dateline> processingWithLayoutTokens(List<LayoutToken> inputs) {
+    public Dateline processingWithLayoutTokens(List<LayoutToken> inputs) {
         return processing(inputs);
     }
 
@@ -72,11 +121,10 @@ public class DatelineParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Dateline entities as POJO.
      */
-    public List<Dateline> processing(List<LayoutToken> tokens) {
+    public Dateline processing(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<Dateline> fullDatelines = new ArrayList<>();
         Dateline dateline = null;
         try {
             List<OffsetPosition> placeNamePositions = lexicon.tokenPositionsLocationNames(tokens);
@@ -104,54 +152,47 @@ public class DatelineParser extends AbstractParser {
                 if (clusterContent.trim().length() == 0)
                     continue;
 
-
                 if (clusterLabel.equals(MedicalLabels.DATELINE_DOCTYPE)) {
                     if (dateline.getDoctype() != null) {
-                        dateline.setDoctype(dateline.getDoctype() + "\t" + clusterContent);
+                        dateline.setDoctype(dateline.getDoctype() + ";\t" + clusterContent);
                     } else {
                         dateline.setDoctype(clusterContent);
                     }
                     dateline.addLayoutTokens(cluster.concatTokens());
                 } else if (clusterLabel.equals(MedicalLabels.DATELINE_PLACE_NAME)) {
                     if (dateline.getPlaceName() != null) {
-                        dateline.setPlaceName(dateline.getPlaceName() + "\t" + clusterContent);
+                        dateline.setPlaceName(dateline.getPlaceName() + ";\t" + clusterContent);
                     } else {
                         dateline.setPlaceName(clusterContent);
                     }
                     dateline.addLayoutTokens(cluster.concatTokens());
                 } else if (clusterLabel.equals(MedicalLabels.DATELINE_NOTE)) {
                     if (dateline.getNote() != null) {
-                        dateline.setNote(dateline.getNote() + "\t" + clusterContent);
+                        dateline.setNote(dateline.getNote() + " " + clusterContent);
                     } else {
                         dateline.setNote(clusterContent);
                     }
                     dateline.addLayoutTokens(cluster.concatTokens());
                 } else if (clusterLabel.equals(MedicalLabels.DATELINE_DATE)) {
                     if (dateline.getDate() != null) {
-                        dateline.setDate(dateline.getDate() + "\t" + clusterContent);
+                        dateline.setDate(dateline.getDate() + ";\t" + clusterContent);
                     } else {
                         dateline.setDate(clusterContent);
                     }
                     dateline.addLayoutTokens(cluster.concatTokens());
                 } else if (clusterLabel.equals(MedicalLabels.DATELINE_TIME)) {
                     if (dateline.getTimeString() != null) {
-                        dateline.setTimeString(dateline.getTimeString() + "\t" + clusterContent);
+                        dateline.setTimeString(dateline.getTimeString() + ";\t" + clusterContent);
                     } else {
                         dateline.setTimeString(clusterContent);
                     }
                     dateline.addLayoutTokens(cluster.concatTokens());
                 }
-
-            }
-            // add the dateline to the list
-            if (dateline.getPlaceName() != null || dateline.getNote() != null ||
-                dateline.getDate() != null || dateline.getTimeString() != null){
-                fullDatelines.add(dateline);
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
-        return fullDatelines;
+        return dateline;
     }
 
     /**
@@ -226,7 +267,7 @@ public class DatelineParser extends AbstractParser {
                         i++;
                     }
                     if (start && (s1 != null)) {
-                        buffer.append("\t<dateline>");
+                        //buffer.append("\t<dateline>");
                         start = false;
                     }
                     // lastTag, lastTag0 (without I-)
@@ -282,7 +323,7 @@ public class DatelineParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    buffer.append("</dateline>\n");
+                    //buffer.append("</dateline>\n");
                 }
             }
         } catch (Exception e) {

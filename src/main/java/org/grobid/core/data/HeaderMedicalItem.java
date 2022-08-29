@@ -37,6 +37,7 @@ public class HeaderMedicalItem {
     private List<LayoutToken> datelinesLayoutTokens = new ArrayList<>();
 
     // information regarding the document
+    private String appVersion = null;
     private String language = null;
     private int nbPages = -1;
     private String document_number = null;
@@ -99,6 +100,14 @@ public class HeaderMedicalItem {
 
     public String getLanguage() {
         return this.language;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     public int getNbPages() {
@@ -458,13 +467,13 @@ public class HeaderMedicalItem {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
                 tei.append("<idno>").append(TextUtilities.HTMLEncode(medic.getIdno())).append("</idno>\n");
             }
-            if (medic.getRole() != null) {
-                TextUtilities.appendN(tei, '\t', nbTag + 2);
-                tei.append("<roleName>").append(TextUtilities.HTMLEncode(medic.getRole())).append("</roleName>\n");
-            }
             if (medic.getPersName() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
                 tei.append("<persName>").append(TextUtilities.HTMLEncode(medic.getPersName())).append("</persName>\n");
+            }
+            if (medic.getRole() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<roleName>").append(TextUtilities.HTMLEncode(medic.getRole())).append("</roleName>\n");
             }
             if (medic.getAffiliation() != null) {
                 TextUtilities.appendN(tei, '\t', nbTag + 2);
@@ -524,58 +533,64 @@ public class HeaderMedicalItem {
     public String toTEIPatientBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
         TextUtilities.appendN(tei, '\t', nbTag);
-        tei.append("<listPerson type=\"patient\">\n");
+        tei.append("<listPerson type=\"patients\">\n");
+        TextUtilities.appendN(tei, '\t', nbTag + 1);
+        tei.append("<patient>").append("\n");
         for (Patient patient : listPatients) {
-            TextUtilities.appendN(tei, '\t', nbTag + 1);
-            if (patient != null) {
-                tei.append("<patient>").append("\n");
-                if (patient.getID() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<idno>").append(TextUtilities.HTMLEncode(patient.getID())).append("</idno>\n");
-                }
-                if (patient.getPersName() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<persName>").append(TextUtilities.HTMLEncode(patient.getPersName())).append("</persName>\n");
-                }
-                if (patient.getSex() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<sex type=\"" + TextUtilities.HTMLEncode(patient.getSex()) + "\">").append(TextUtilities.HTMLEncode(patient.getSex()));
-                    tei.append("</sex>\n");
-                }
-                if (patient.getDateBirth() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<birth when=\">" + TextUtilities.HTMLEncode(patient.getDateBirth()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateBirth()));
-                    tei.append("</birth>\n");
-                }
-                if (patient.getDateDeath() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<death when=\">" + TextUtilities.HTMLEncode(patient.getDateDeath()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateDeath()));
-                    tei.append("</death>\n");
-                }
-                if (patient.getAddress() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<address>").append(TextUtilities.HTMLEncode(patient.getAddress())).append("</address>\n");
-                }
-                if (patient.getCountry() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<country>").append(TextUtilities.HTMLEncode(patient.getCountry())).append("</country>\n");
-                }
-                if (patient.getTown() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<settlement>").append(TextUtilities.HTMLEncode(patient.getTown())).append("</settlement>\n");
-                }
-                if (patient.getPhone() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<phone>").append(TextUtilities.HTMLEncode(patient.getPhone())).append("</phone>\n");
-                }
-                if (patient.getNote() != null) {
-                    TextUtilities.appendN(tei, '\t', nbTag + 2);
-                    tei.append("<note type=\"patient\">").append(TextUtilities.HTMLEncode(patient.getNote())).append("</note>\n");
-                }
-                TextUtilities.appendN(tei, '\t', nbTag + 1);
-                tei.append("</patient>\n");
+            if (patient.getIDType() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<idType>").append(TextUtilities.HTMLEncode(patient.getIDType())).append("</idType>\n");
             }
+            if (patient.getID() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<idno>").append(TextUtilities.HTMLEncode(patient.getID())).append("</idno>\n");
+            }
+            if (patient.getPersName() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<persName>").append(TextUtilities.HTMLEncode(patient.getPersName())).append("</persName>\n");
+            }
+            if (patient.getSex() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<sex type=\"" + TextUtilities.HTMLEncode(patient.getSex()) + "\">").append(TextUtilities.HTMLEncode(patient.getSex()));
+                tei.append("</sex>\n");
+            }
+            if (patient.getDateBirth() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<birth when=\"" + TextUtilities.HTMLEncode(patient.getDateBirth()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateBirth()));
+                tei.append("</birth>\n");
+            }
+            if (patient.getAge() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<age>").append(TextUtilities.HTMLEncode(patient.getAge())).append("</age>\n");
+            }
+            if (patient.getDateDeath() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<death when=\"" + TextUtilities.HTMLEncode(patient.getDateDeath()) + "\">").append(TextUtilities.HTMLEncode(patient.getDateDeath()));
+                tei.append("</death>\n");
+            }
+            if (patient.getAddress() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<address>").append(TextUtilities.HTMLEncode(patient.getAddress())).append("</address>\n");
+            }
+            if (patient.getCountry() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<country>").append(TextUtilities.HTMLEncode(patient.getCountry())).append("</country>\n");
+            }
+            if (patient.getTown() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<settlement>").append(TextUtilities.HTMLEncode(patient.getTown())).append("</settlement>\n");
+            }
+            if (patient.getPhone() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<phone>").append(TextUtilities.HTMLEncode(patient.getPhone())).append("</phone>\n");
+            }
+            if (patient.getNote() != null) {
+                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                tei.append("<note type=\"patient\">").append(TextUtilities.HTMLEncode(patient.getNote())).append("</note>\n");
+            }
+            TextUtilities.appendN(tei, '\t', nbTag + 1);
         }
+        tei.append("</patient>\n");
         TextUtilities.appendN(tei, '\t', nbTag);
         tei.append("</listPerson>\n");
         return tei.toString();

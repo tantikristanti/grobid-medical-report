@@ -112,20 +112,20 @@ public class TEIFormatter {
         return when;
     }
 
-    public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
-                                             LeftNoteMedicalItem leftNoteMedicalItem,
-                                             String defaultPublicationStatement,
-                                             GrobidAnalysisConfig config) {
-        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+    public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
+                                     String defaultPublicationStatement,
+                                     GrobidAnalysisConfig config) {
+        return toTEIHeader(headerItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
     }
 
-    public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
-                                             LeftNoteMedicalItem leftNoteMedicalItem,
-                                             SchemaDeclaration schemaDeclaration,
-                                             String defaultPublicationStatement,
-                                             GrobidAnalysisConfig config) {
+    public StringBuilder toTEIHeader(HeaderMedicalItem headerItem,
+                                     SchemaDeclaration schemaDeclaration,
+                                     String defaultPublicationStatement,
+                                     GrobidAnalysisConfig config) {
         StringBuilder tei = new StringBuilder();
         tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+        // --> schema declaration
         if (config.isWithXslStylesheet()) {
             tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
         }
@@ -135,34 +135,45 @@ public class TEIFormatter {
             // XML schema
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                "xsi:schemaLocation=\"http://www.tei-c.org/ns/1.0 " +
-                SCHEMA_XSD_LOCATION +
-                "\"\n xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
-            //"\n xmlns:mml=\"http://www.w3.org/1998/Math/MathML\">\n");
+                "xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
         } else if (schemaDeclaration == SchemaDeclaration.RNG) {
             // standard RelaxNG
             tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
                 "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
         }
-
         // by default there is no schema association
         if (schemaDeclaration != SchemaDeclaration.XSD) {
             tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
         }
 
-        // opening for the header and left-note parts
+        // --> opening of the header part
+        // firstly, set the language
         if (doc.getLanguage() != null) {
             tei.append("\t<teiHeader xml:lang=\"" + doc.getLanguage() + "\">\n");
         } else {
             tei.append("\t<teiHeader>\n");
         }
 
-        if (headerItem == null)  {
+        // --> encodingDesc contains the application information
+        tei.append("\t\t<encodingDesc>\n");
+        tei.append("\t\t\t<appInfo>\n");
+
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        df.setTimeZone(tz);
+        String dateISOString = df.format(new java.util.Date());
+
+        tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
+            "\" name=\"grobid-medical-report\" access=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
+        tei.append("\t\t\t\t</application>\n");
+        tei.append("\t\t\t</appInfo>\n");
+        tei.append("\t\t</encodingDesc>\n");
+
+        if (headerItem == null) {
             // if the headerItem object is null, we simply create an empty one
             headerItem = new HeaderMedicalItem();
-        } else if (leftNoteMedicalItem == null) {
-            // if the leftNoteMedicalItem object is null, we simply create an empty one
-            leftNoteMedicalItem = new LeftNoteMedicalItem();
         } else {
             tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n");
 
@@ -171,12 +182,11 @@ public class TEIFormatter {
                 tei.append("\t\t\t\t<title type=\"main\">");
                 if (headerItem.getTitle() != null) {
                     tei.append(TextUtilities.HTMLEncode(headerItem.getTitle()));
-                }
-                else if (headerItem.getDocumentType() != null) {
+                } else if (headerItem.getDocumentType() != null) {
                     tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentType()));
                 }
                 tei.append("</title>\n");
-            }else {
+            } else {
                 tei.append("\t\t\t\t<title xsi:nil=\"true\">\n");
             }
 
@@ -189,12 +199,10 @@ public class TEIFormatter {
 
             tei.append("\t\t\t</titleStmt>\n");
 
-            tei.append("\t\t\t\t<availability status=\"unknown\">\n");
-            tei.append("\t\t\t\t\t<p>Copyright : ");
-            tei.append("©Assistance Publique – Hôpitaux de Paris (APHP)" + "</p>\n");
+            tei.append("\t\t\t\t<availability>\n");
+            tei.append("\t\t\t\t\t<p>Copyright : ©grobid-medical-report (INRIA-Project)" + "</p>\n");
             tei.append("\t\t\t\t</availability>\n");
 
-            // the format TEI : https://tei-c.org/release/doc/tei-p5-doc/en/html/HD.html#HD24
             if ((headerItem.getDocNum() != null) ||
                 (headerItem.getLocation() != null) ||
                 (headerItem.getDocumentDate() != null) ||
@@ -211,24 +219,24 @@ public class TEIFormatter {
 
                 // document number
                 if (headerItem.getDocNum() != null) {
-                    tei.append("\t\t\t\t<idno>" + TextUtilities.HTMLEncode(headerItem.getDocNum().replaceAll("\n", " ")) +
+                    tei.append("\t\t\t\t<idno>" +
+                        TextUtilities.HTMLEncode(headerItem.getDocNum()) +
                         "</idno>\n");
                 }
 
                 // place name
                 if (headerItem.getLocation() != null) {
-                    tei.append("\t\t\t\t<pubPlace>" + TextUtilities.HTMLEncode(headerItem.getLocation().replaceAll("\n", "<lb/>")) +
+                    tei.append("\t\t\t\t<pubPlace>" +
+                        TextUtilities.HTMLEncode(headerItem.getLocation().replaceAll(";\t", "<lb/>")) +
                         "</pubPlace>\n");
                 }
 
                 // document date
                 if (headerItem.getDocumentDate() != null && headerItem.getDocumentDate().length() > 0) {
-                    tei.append("\t\t\t\t<date type=\"issued\" when=\"");
-                    tei.append(headerItem.getDocumentDate()).append("\">");
+                    tei.append("\t\t\t\t<date type=\"issued\" when=\"" +
+                        headerItem.getDocumentDate()).append("\">");
                     tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate()));
                     tei.append("</date>\n");
-                } else if (headerItem.getListDatelines() != null) { // otherwise, call the dateline model
-                    tei.append(headerItem.toTEIDatelineBlock(4, config));
                 }
 
                 // document publisher
@@ -237,7 +245,7 @@ public class TEIFormatter {
                     tei.append("\t\t\t\t\t<affiliation>" + TextUtilities.HTMLEncode(headerItem.getAffiliation()));
                     tei.append("</affiliation>\n");
                 }
-                // address if it exists
+                // add the address if it exists
                 if (headerItem.getAddress() != null) {
                     tei.append("\t\t\t\t\t<address>\n");
                     tei.append("\t\t\t\t\t\t<addrLine>" + TextUtilities.HTMLEncode(headerItem.getAddress()));
@@ -268,80 +276,312 @@ public class TEIFormatter {
                 tei.append("\t\t\t</publicationStmt>\n");
             } else {
                 tei.append("\t\t\t<publicationStmt>\n");
-                tei.append("\t\t\t\t<publisher>").append("©Assistance Publique – Hôpitaux de Paris (APHP)").append("</publisher>\n");
-                tei.append("\t\t\t\t<availability status=\"unknown\"><licence/></availability>\n");
+                tei.append("\t\t\t\t<publisher>").append("©grobid-medical-report (INRIA-Project)").append("</publisher>\n");
+                tei.append("\t\t\t\t<availability><licence/></availability>\n");
                 tei.append("\t\t\t</publicationStmt>\n");
             }
             tei.append("\t\t\t<sourceDesc>\n");
 
-            // medics + information related to it
+            // medics information
             if (headerItem.getListMedics() != null) {
                 tei.append(headerItem.toTEIMedicBlock(4, config));
             }
 
+            // patients information
             if (headerItem.getListPatients() != null) {
-                // patients + information related to it
                 tei.append(headerItem.toTEIPatientBlock(4, config));
             }
+            tei.append("\t\t\t</sourceDesc>\n");
+            tei.append("\t\t</fileDesc>\n");
+        }
+        tei.append("\t</teiHeader>\n");
+        return tei;
+    }
 
-            // information concerning organization from the left-note part of the medical reports if they exist
-            if (leftNoteMedicalItem.getRawLeftNote() != null && leftNoteMedicalItem.getRawLeftNote().length() > 0) {
-                //tei.append(leftNoteMedicalItem.toTEILeftNoteBlock(4, config));
+    public StringBuilder toTEILeftNote(LeftNoteMedicalItem leftNoteMedicalItem,
+                                       String defaultPublicationStatement,
+                                       GrobidAnalysisConfig config) {
+        return toTEILeftNote(leftNoteMedicalItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+    }
+
+    public StringBuilder toTEILeftNote(LeftNoteMedicalItem leftNoteMedicalItem,
+                                       SchemaDeclaration schemaDeclaration,
+                                       String defaultPublicationStatement,
+                                       GrobidAnalysisConfig config) {
+        StringBuilder tei = new StringBuilder();
+        tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+        // --> schema declaration
+        if (config.isWithXslStylesheet()) {
+            tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
+        }
+        if (schemaDeclaration == SchemaDeclaration.DTD) {
+            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.XSD) {
+            // XML schema
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+                "xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.RNG) {
+            // standard RelaxNG
+            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
+                "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
+        }
+        // by default there is no schema association
+        if (schemaDeclaration != SchemaDeclaration.XSD) {
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
+        }
+
+        // --> opening of the header part
+        // firstly, set the language
+        if (doc.getLanguage() != null) {
+            tei.append("\t<note place=\"left\" type=\"hospital-structure\" xml:lang=\"" + doc.getLanguage() + "\">\n");
+        } else {
+            tei.append("\t<note>\n");
+        }
+
+        // --> encodingDesc contains the application information
+        tei.append("\t\t<encodingDesc>\n");
+        tei.append("\t\t\t<appInfo>\n");
+
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        df.setTimeZone(tz);
+        String dateISOString = df.format(new java.util.Date());
+
+        tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
+            "\" name=\"grobid-medical-report\" access=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
+        tei.append("\t\t\t\t</application>\n");
+        tei.append("\t\t\t</appInfo>\n");
+        tei.append("\t\t</encodingDesc>\n");
+
+        if (leftNoteMedicalItem == null) {
+            // if the headerItem object is null, we simply create an empty one
+            leftNoteMedicalItem = new LeftNoteMedicalItem();
+        } else {
+            tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n");
+
+            // number of pages
+            if (leftNoteMedicalItem.getNbPages() > 0) {
+                tei.append("\t\t\t\t<extent>\n");
+                tei.append("\t\t\t\t\t<measure unit=\"pages\">" + leftNoteMedicalItem.getNbPages() + "</measure>\n");
+                tei.append("\t\t\t\t</extent>\n");
+            }
+
+            tei.append("\t\t\t</titleStmt>\n");
+            tei.append("\t\t\t\t<availability>\n");
+            tei.append("\t\t\t\t\t<p>Copyright : ©grobid-medical-report (INRIA-Project)" + "</p>\n");
+            tei.append("\t\t\t\t</availability>\n");
+
+            // hospital structure organization information from the left-note part
+            tei.append("\t\t\t<sourceDesc>\n");
+            if (leftNoteMedicalItem.getRawLeftNote() != null) {
                 tei.append("\t\t\t\t<listOrg>");
-                tei.append("\t\t\t\t").append(leftNoteMedicalItem.getRawLeftNote().replaceAll("<lb/>", "").
-                    replaceAll("<person>","<listPerson type=\"medics\">").
-                    replaceAll("<medic>","\t<medic>").
-                    replaceAll("</medic>","</medic>").
-                    replaceAll("</person>","</listPerson>").
-                    replaceAll("\n", "\n\t\t\t\t"));
+                tei.append("\t\t\t\t").append(leftNoteMedicalItem.getRawLeftNote());
                 tei.append("</listOrg>\n");
             }
 
             tei.append("\t\t\t</sourceDesc>\n");
             tei.append("\t\t</fileDesc>\n");
+        }
+        tei.append("\t</note>\n");
+        return tei;
+    }
 
-            // encodingDesc gives info about the producer of the file
-            tei.append("\t\t<encodingDesc>\n");
-            tei.append("\t\t\t<appInfo>\n");
+    public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
+                                             LeftNoteMedicalItem leftNoteMedicalItem,
+                                             String defaultPublicationStatement,
+                                             GrobidAnalysisConfig config) {
+        return toTEIHeaderLeftNote(headerItem, leftNoteMedicalItem, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+    }
 
-            TimeZone tz = TimeZone.getTimeZone("UTC");
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-            df.setTimeZone(tz);
-            String dateISOString = df.format(new java.util.Date());
+    public StringBuilder toTEIHeaderLeftNote(HeaderMedicalItem headerItem,
+                                             LeftNoteMedicalItem leftNoteMedicalItem,
+                                             SchemaDeclaration schemaDeclaration,
+                                             String defaultPublicationStatement,
+                                             GrobidAnalysisConfig config) {
+        StringBuilder tei = new StringBuilder();
+        tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-            tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
-                "\" ident=\"grobid-medical-report\" when=\"" + dateISOString + "\">\n");
-            tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring medical reports into structured XML/TEI encoded documents.</desc>\n");
-            tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
-            tei.append("\t\t\t\t</application>\n");
-            tei.append("\t\t\t</appInfo>\n");
-            tei.append("\t\t</encodingDesc>\n");
+        // --> schema declaration
+        if (config.isWithXslStylesheet()) {
+            tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
+        }
+        if (schemaDeclaration == SchemaDeclaration.DTD) {
+            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.XSD) {
+            // XML schema
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+                "xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.RNG) {
+            // standard RelaxNG
+            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
+                "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
+        }
+        // by default there is no schema association
+        if (schemaDeclaration != SchemaDeclaration.XSD) {
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
+        }
 
-            boolean textClassWritten = false;
+        // --> opening of the header part
+        // firstly, set the language
+        if (doc.getLanguage() != null) {
+            tei.append("\t<teiHeader xml:lang=\"" + doc.getLanguage() + "\">\n");
+        } else {
+            tei.append("\t<teiHeader>\n");
+        }
 
-            tei.append("\t\t<profileDesc>\n");
+        // --> encodingDesc contains the application information
+        tei.append("\t\t<encodingDesc>\n");
+        tei.append("\t\t\t<appInfo>\n");
 
-            if (textClassWritten)
-                tei.append("\t\t\t</textClass>\n");
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        df.setTimeZone(tz);
+        String dateISOString = df.format(new java.util.Date());
 
-            tei.append("\t\t</profileDesc>\n");
+        tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
+            "\" name=\"grobid-medical-report\" access=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
+        tei.append("\t\t\t\t</application>\n");
+        tei.append("\t\t\t</appInfo>\n");
+        tei.append("\t\t</encodingDesc>\n");
+
+        if (headerItem == null) {
+            // if the headerItem object is null, we simply create an empty one
+            headerItem = new HeaderMedicalItem();
+        } else {
+            tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n");
+
+            // document title or document type
+            if ((headerItem.getTitle() != null) || (headerItem.getDocumentType() != null)) {
+                tei.append("\t\t\t\t<title type=\"main\">");
+                if (headerItem.getTitle() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getTitle()));
+                } else if (headerItem.getDocumentType() != null) {
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentType()));
+                }
+                tei.append("</title>\n");
+            } else {
+                tei.append("\t\t\t\t<title xsi:nil=\"true\">\n");
+            }
+
+            // number of pages
+            if (headerItem.getNbPages() > 0) {
+                tei.append("\t\t\t\t<extent>\n");
+                tei.append("\t\t\t\t\t<measure unit=\"pages\">" + headerItem.getNbPages() + "</measure>\n");
+                tei.append("\t\t\t\t</extent>\n");
+            }
+
+            tei.append("\t\t\t</titleStmt>\n");
+
+            tei.append("\t\t\t\t<availability>\n");
+            tei.append("\t\t\t\t\t<p>Copyright : ©grobid-medical-report (INRIA-Project)" + "</p>\n");
+            tei.append("\t\t\t\t</availability>\n");
+
+            if ((headerItem.getDocNum() != null) ||
+                (headerItem.getLocation() != null) ||
+                (headerItem.getDocumentDate() != null) ||
+                (headerItem.getDocumentTime() != null) ||
+                (headerItem.getDateline() != null) ||
+                (headerItem.getAffiliation() != null) ||
+                (headerItem.getAddress() != null) ||
+                (headerItem.getPhone() != null) ||
+                (headerItem.getFax() != null) ||
+                (headerItem.getEmail() != null) ||
+                (headerItem.getWeb() != null)) {
+
+                tei.append("\t\t\t<publicationStmt>\n");
+
+                // document number
+                if (headerItem.getDocNum() != null) {
+                    tei.append("\t\t\t\t<idno>" +
+                        TextUtilities.HTMLEncode(headerItem.getDocNum()) +
+                        "</idno>\n");
+                }
+
+                // place name
+                if (headerItem.getLocation() != null) {
+                    tei.append("\t\t\t\t<pubPlace>" +
+                        TextUtilities.HTMLEncode(headerItem.getLocation().replaceAll(";\t", "<lb/>")) +
+                        "</pubPlace>\n");
+                }
+
+                // document date
+                if (headerItem.getDocumentDate() != null && headerItem.getDocumentDate().length() > 0) {
+                    tei.append("\t\t\t\t<date type=\"issued\" when=\"" +
+                        headerItem.getDocumentDate()).append("\">");
+                    tei.append(TextUtilities.HTMLEncode(headerItem.getDocumentDate()));
+                    tei.append("</date>\n");
+                }
+
+                // document publisher
+                tei.append("\t\t\t\t<publisher>\n");
+                if (headerItem.getAffiliation() != null) {
+                    tei.append("\t\t\t\t\t<affiliation>" + TextUtilities.HTMLEncode(headerItem.getAffiliation()));
+                    tei.append("</affiliation>\n");
+                }
+                // add the address if it exists
+                if (headerItem.getAddress() != null) {
+                    tei.append("\t\t\t\t\t<address>\n");
+                    tei.append("\t\t\t\t\t\t<addrLine>" + TextUtilities.HTMLEncode(headerItem.getAddress()));
+                    tei.append("</addrLine>\n");
+                    tei.append("\t\t\t\t\t</address>\n");
+                }
+                // phone if it exists
+                if (headerItem.getPhone() != null) {
+                    tei.append("\t\t\t\t\t<phone>" + TextUtilities.HTMLEncode(headerItem.getPhone().replaceAll("\t", "; ").replaceAll("\n", " ")));
+                    tei.append("</phone>\n");
+                }
+                // fax if it exists
+                if (headerItem.getFax() != null) {
+                    tei.append("\t\t\t\t\t<fax>" + TextUtilities.HTMLEncode(headerItem.getFax().replaceAll("\t", "; ").replaceAll("\n", " ")));
+                    tei.append("</fax>\n");
+                }
+                // email if it exists
+                if (headerItem.getEmail() != null) {
+                    tei.append("\t\t\t\t\t<email>" + TextUtilities.HTMLEncode(headerItem.getEmail().replaceAll("\n", "")));
+                    tei.append("</email>\n");
+                }
+                // web if it exists
+                if (headerItem.getWeb() != null) {
+                    tei.append("\t\t\t\t\t<ptr type=\"web\">" + TextUtilities.HTMLEncode(headerItem.getWeb().replaceAll("\n", "")));
+                    tei.append("</ptr>\n");
+                }
+                tei.append("\t\t\t\t</publisher>\n");
+                tei.append("\t\t\t</publicationStmt>\n");
+            } else {
+                tei.append("\t\t\t<publicationStmt>\n");
+                tei.append("\t\t\t\t<publisher>").append("©grobid-medical-report (INRIA-Project)").append("</publisher>\n");
+                tei.append("\t\t\t\t<availability><licence/></availability>\n");
+                tei.append("\t\t\t</publicationStmt>\n");
+            }
+            tei.append("\t\t\t<sourceDesc>\n");
+
+            // medics information
+            if (headerItem.getListMedics() != null) {
+                tei.append(headerItem.toTEIMedicBlock(4, config));
+            }
+
+            // hospital structure organization information from the left-note part
+            if (leftNoteMedicalItem.getRawLeftNote() != null) {
+                tei.append("\t\t\t\t<listOrg>");
+                tei.append("\t\t\t\t").append(leftNoteMedicalItem.getRawLeftNote());
+                tei.append("</listOrg>\n");
+            }
+
+            // patients information
+            if (headerItem.getListPatients() != null) {
+                tei.append(headerItem.toTEIPatientBlock(4, config));
+            }
+            tei.append("\t\t\t</sourceDesc>\n");
+            tei.append("\t\t</fileDesc>\n");
         }
         tei.append("\t</teiHeader>\n");
-
-        // output pages dimensions in the case coordinates will also be provided for some structures
-        try {
-            tei = toTEIPages(tei, doc, config);
-        } catch (Exception e) {
-            LOGGER.warn("Problem when serializing page size", e);
-        }
-
-        // opening for the body part
-        if (doc.getLanguage() != null) {
-            tei.append("\t<text xml:lang=\"").append(doc.getLanguage()).append("\">\n");
-        } else {
-            tei.append("\t<text>\n");
-        }
-
         return tei;
     }
 
@@ -369,7 +609,7 @@ public class TEIFormatter {
         buffer = toTEITextPiece(buffer, result, headerItem, true,
             layoutTokenization, figures, tables, markerTypes, doc, config);
 
-        // notes are still in the body
+        // sometimes notes are still found in the body part
         //buffer = toTEINote(buffer, doc, markerTypes, config);
 
         buffer.append("</body>\n");
@@ -547,7 +787,8 @@ public class TEIFormatter {
 
         List<Element> divResults = new ArrayList<>();
 
-        Element curDiv = teiElement("div");
+        //Element curDiv = teiElement("div");
+        Element curDiv = new Element("div");
         if (config.isGenerateTeiIds()) {
             String divID = KeyGen.getKey().substring(0, 7);
             addXmlId(curDiv, "_" + divID);
@@ -565,12 +806,15 @@ public class TEIFormatter {
             Engine.getCntManager().i(clusterLabel);
             if (clusterLabel.equals(MedicalLabels.TITLE)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                Element note = teiElement("title", clusterContent);
+                //Element note = teiElement("title", clusterContent);
+                Element note = new Element("title", clusterContent);
                 curDiv.appendChild(note);
             } else if (clusterLabel.equals(MedicalLabels.SECTION)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                curDiv = teiElement("div");
-                Element head = teiElement("head");
+                /*curDiv = teiElement("div");
+                /Element head = teiElement("head");*/
+                curDiv = new Element("div");
+                Element head = new Element("head");
                 head.addAttribute(new Attribute("level", "1"));
                 // section numbers
                 Pair<String, String> numb = getSectionNumber(clusterContent);
@@ -597,8 +841,10 @@ public class TEIFormatter {
                 divResults.add(curDiv);
             } else if (clusterLabel.equals(MedicalLabels.SUB_SECTION)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                curDiv = teiElement("div");
-                Element head = teiElement("head");
+                /*curDiv = teiElement("div");
+                Element head = teiElement("head");*/
+                curDiv = new Element("div");
+                Element head = new Element("head");
                 head.addAttribute(new Attribute("level", "2"));
                 // section numbers
                 Pair<String, String> numb = getSectionNumber(clusterContent);
@@ -628,7 +874,8 @@ public class TEIFormatter {
                 //curDiv.appendChild(teiElement("item", clusterContent));
                 Element itemNode = teiElement("item", clusterContent);
                 if (!MARKER_LABELS.contains(lastClusterLabel) && (lastClusterLabel != MedicalLabels.ITEM)) {
-                    curList = teiElement("list");
+                    //curList = teiElement("list");
+                    curList = new Element("list");
                     curDiv.appendChild(curList);
                 }
                 if (curList != null) {
@@ -640,7 +887,8 @@ public class TEIFormatter {
                     if (curParagraph != null && config.isWithSentenceSegmentation()) {
                         segmentIntoSentences(curParagraph, curParagraphTokens, config, doc.getLanguage());
                     }
-                    curParagraph = teiElement("p");
+                    //curParagraph = teiElement("p");
+                    curParagraph = new Element("p");
                     if (config.isGenerateTeiIds()) {
                         String divID = KeyGen.getKey().substring(0, 7);
                         addXmlId(curParagraph, "_" + divID);
@@ -684,23 +932,31 @@ public class TEIFormatter {
                 //figureBlock = true;
                 if (curParagraph != null)
                     curParagraph.appendChild(new Text(" "));
-            } if (clusterLabel.equals(MedicalLabels.PATIENT)) {
+            }
+            if (clusterLabel.equals(MedicalLabels.PATIENT)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                Element note = teiElement("patient", clusterContent);
-                curDiv.appendChild(note);
-            } if (clusterLabel.equals(MedicalLabels.MEDIC)) {
+                //Element patient = teiElement("patient", clusterContent);
+                Element patient = new Element("patient");
+                curDiv.appendChild(patient);
+                patient.appendChild(clusterContent);
+            }
+            if (clusterLabel.equals(MedicalLabels.MEDIC)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                Element note = teiElement("medic", clusterContent);
-                curDiv.appendChild(note);
+                //Element medic = teiElement("medic", clusterContent);
+                Element medic = new Element("medic");
+                curDiv.appendChild(medic);
+                medic.appendChild(clusterContent);
             } else if (clusterLabel.equals(MedicalLabels.OTHER)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-                Element note = teiElement("note", clusterContent);
+                //Element note = teiElement("note", clusterContent);
+                Element note = new Element("note");
                 note.addAttribute(new Attribute("type", "other"));
                 if (config.isGenerateTeiIds()) {
                     String divID = KeyGen.getKey().substring(0, 7);
                     addXmlId(note, "_" + divID);
                 }
                 curDiv.appendChild(note);
+                note.appendChild(clusterContent);
             }
 
             lastClusterLabel = cluster.getTaggingLabel();
@@ -1190,5 +1446,87 @@ System.out.println(theSentences.toString());
         buffer.append("\t</facsimile>\n");
 
         return buffer;
+    }
+
+    public StringBuilder toTEIFrenchNER(String resultNER,
+                                        String defaultPublicationStatement,
+                                        GrobidAnalysisConfig config) {
+        return toTEIFrenchNER(resultNER, SchemaDeclaration.XSD, defaultPublicationStatement, config);
+    }
+
+    public StringBuilder toTEIFrenchNER(String resultNER,
+                                        SchemaDeclaration schemaDeclaration,
+                                        String defaultPublicationStatement,
+                                        GrobidAnalysisConfig config) {
+        StringBuilder tei = new StringBuilder();
+        tei.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+        // --> schema declaration
+        if (config.isWithXslStylesheet()) {
+            tei.append("<?xml-stylesheet type=\"text/xsl\" href=\"../jsp/xmlverbatimwrapper.xsl\"?> \n");
+        }
+        if (schemaDeclaration == SchemaDeclaration.DTD) {
+            tei.append("<!DOCTYPE TEI SYSTEM \"" + SCHEMA_DTD_LOCATION + "\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.XSD) {
+            // XML schema
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\" \n" +
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+                "xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+        } else if (schemaDeclaration == SchemaDeclaration.RNG) {
+            // standard RelaxNG
+            tei.append("<?xml-model href=\"" + SCHEMA_RNG_LOCATION +
+                "\" schematypens=\"http://relaxng.org/ns/structure/1.0\"?>\n");
+        }
+        // by default there is no schema association
+        if (schemaDeclaration != SchemaDeclaration.XSD) {
+            tei.append("<TEI xml:space=\"preserve\" xmlns=\"http://www.tei-c.org/ns/1.0\">\n");
+        }
+
+        // --> opening of the header part
+        // firstly, set the language
+        if (doc.getLanguage() != null) {
+            tei.append("\t<text place=\"left\" type=\"hospital-structure\" xml:lang=\"" + doc.getLanguage() + "\">\n");
+        } else {
+            tei.append("\t<text>\n");
+        }
+
+        // --> encodingDesc contains the application information
+        tei.append("\t\t<encodingDesc>\n");
+        tei.append("\t\t\t<appInfo>\n");
+
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        df.setTimeZone(tz);
+        String dateISOString = df.format(new java.util.Date());
+
+        tei.append("\t\t\t\t<application version=\"" + GrobidMedicalReportProperties.getVersion() +
+            "\" name=\"grobid-medical-report\" access=\"" + dateISOString + "\">\n");
+        tei.append("\t\t\t\t\t<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>\n");
+        tei.append("\t\t\t\t\t<ref target=\"https://github.com/tantikristanti/grobid-medical-report\"/>\n");
+        tei.append("\t\t\t\t</application>\n");
+        tei.append("\t\t\t</appInfo>\n");
+        tei.append("\t\t</encodingDesc>\n");
+
+        tei.append("\t\t<fileDesc>\n\t\t\t<titleStmt>\n");
+
+        // number of pages
+        tei.append("\t\t\t\t<extent>\n");
+        tei.append("\t\t\t\t\t<measure unit=\"pages\">" + doc.getPages().size() + "</measure>\n");
+        tei.append("\t\t\t\t</extent>\n");
+
+        tei.append("\t\t\t</titleStmt>\n");
+        tei.append("\t\t\t\t<availability>\n");
+        tei.append("\t\t\t\t\t<p>Copyright : ©grobid-medical-report (INRIA-Project)" + "</p>\n");
+        tei.append("\t\t\t\t</availability>\n");
+
+        // hospital structure organization information from the left-note part
+        tei.append("\t\t\t<sourceDesc>\n");
+        tei.append("\t\t\t\t<listEntity>\n");
+        tei.append("\t\t\t\t\t" + resultNER);
+        tei.append("\t\t\t\t</listEntity>\n");
+        tei.append("\t\t\t</sourceDesc>\n");
+        tei.append("\t\t</fileDesc>\n");
+        tei.append("\t</text>\n");
+        return tei;
     }
 }

@@ -48,7 +48,7 @@
                     <span style="padding-left:20px;">&nbsp;</span>
                     <a class="section-not-active" id="rest" href="#">TEI/XML</a>
                     <span style="padding-left:20px;">&nbsp;</span>
-                    <a class="section-not-active" id="pdf" href="#">PDF</a>
+                    <!--a class="section-not-active" id="pdf" href="#">PDF</--a-->
                     <span style="padding-left:20px;">&nbsp;</span>
                     <a class="section-not-active" id="info" href="#">Info</a>
                     <span style="padding-left:20px;">&nbsp;</span>
@@ -93,16 +93,14 @@
                                 <optgroup label="--Medical PDF Input--">
                                     <option value="processHeaderDocument" selected>Process Header Document</option>
                                     <option value="processLeftNoteDocument">Process Left-Note Document</option>
-                                    <option value="processFullMedicalTextDocument">Process Full Medical Document
-                                    </option>
-                                    <option value="processFrenchMedicalNER">Process French Medical Terminology Mentions
-                                        (NER)
-                                    </option>
+                                    <option value="processFullMedicalText">Process Full Medical Document</option>
+                                    <option value="processFrenchMedicalNER">Process French Medical NER (PDF)</option>
                                 </optgroup>
                                 <optgroup label="--Raw Text Input--">
-                                    <option value="processDateline">Process Dateline</option>
-                                    <option value="processHeaderNames">Process Header Person Names</option>
-                                    <option value="processLeftNoteNames">Process Left-Note Person Names</option>
+                                    <option value="processDateline">Process Datelines</option>
+                                    <option value="processMedic">Process Medics</option>
+                                    <option value="processPatient">Process Patients</option>
+                                    <option value="processNER">Process French Medical NER (Text)</option>
                                 </optgroup>
                             </select>
                         </td>
@@ -162,7 +160,7 @@
                     <tr>
                         <td>&nbsp;</td>
                         <td colspan="2"><input id="submitRequest" type="submit" value="Submit" class="btn btn-success"/>
-                            <input id="btn_download" class="btn" value="Download TEI Result"/></td>
+                            <input id="btn_download" class="btn" value="Download TEI/XML Result"/></td>
                     </tr>
                 </table>
             </form>
@@ -178,7 +176,7 @@
                         <td>
                             <select id="selectedService2">
                                 <optgroup label="JSON-based dynamic layer">
-                                    <option value="referenceAnnotations" selected>PDF reference annotations</option>
+                                    <option value="mentionAnnotations" selected>PDF mention annotations</option>
                                 </optgroup>
                                 <optgroup label="augmented PDF">
                                     <option value="annotatePDF">add layer to PDF</option>
@@ -194,10 +192,6 @@
                         <td><span id="label2">&nbsp;</span></td>
                         <td>
                             <div id="field2">
-                                <label class="checkbox" id="consolidateBlockPDFRef">
-                                    <input type="checkbox" id="consolidate2" name="consolidateCitations" value="1">Consolidate
-                                    references</input>
-                                </label>
                                 <label class="checkbox" id="consolidateBlockPDFFig">
                                     <input type="checkbox" id="consolidate22" name="includeFiguresTables" value="1">Include
                                     figures and tables</input>
@@ -234,7 +228,7 @@
     </div>
 
     <footer>
-        <p><span style="color:#848484;">&copy; grobid-medical-report @2022</span></p>
+        <p><span style="color:#848484;">&copy; grobid-medical-report @2020-2022</span></p>
     </footer>
 </div>
 

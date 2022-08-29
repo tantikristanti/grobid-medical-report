@@ -95,6 +95,8 @@ dependencies {
     implementation "io.prometheus:simpleclient_dropwizard:0.11.0"
     implementation "io.prometheus:simpleclient_servlet:0.11.0"
 
+    testImplementation "io.dropwizard:dropwizard-testing:1.3.17"
+
     implementation "org.apache.pdfbox:pdfbox:2.0.3"
 
     implementation "javax.activation:activation:1.1.1"
@@ -114,6 +116,7 @@ dependencies {
 
 configurations {
     implementation.exclude group: "org.slf4j", module: "slf4j-jdk14"
+    implementation.exclude group: 'log4j', module: "log4j"
 }
 
 configurations.all {
@@ -133,8 +136,11 @@ distZip.enabled = false
 
 // service
 apply plugin: 'application'
+apply plugin: 'jacoco'
+
 application {
     mainClassName = 'org.grobid.service.GrobidMedicalReportServiceApplication'
+    tasks.run.workingDir = rootProject.rootDir
 
     run {
         args = ['server', 'resources/config/grobid-medical-service.yaml']

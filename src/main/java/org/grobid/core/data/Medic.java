@@ -128,14 +128,6 @@ public class Medic {
         this.idno = idno;
     }
 
-    public String getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
     public String getOrgName() {
         return orgName;
     }
@@ -188,5 +180,53 @@ public class Medic {
             layoutTokens = new ArrayList<LayoutToken>();
         }
         layoutTokens.addAll(theTokens);
+    }
+
+    public String toTEI() {
+        String theMedic = "";
+        if (idno != null) {
+            theMedic += "\t<idno>" + idno + "</idno>";
+        }
+        if (roleName != null) {
+            theMedic += "\t<roleName>" + roleName + "</roleName>\n";
+        }
+        if (persName != null) {
+            theMedic += "\t<persName>" + persName + "</persName>\n";
+        }
+        if (affiliation != null) {
+            theMedic += "\t<affiliation>" + affiliation + "</affiliation>\n";
+        }
+        if (orgName != null) {
+            theMedic += "\t<orgName>" + orgName + "</orgName>\n";
+        }
+        if (institution != null) {
+            theMedic += "\t<institution>" + institution + "</institution>\n";
+        }
+        if (address != null) {
+            theMedic += "\t<address>" + address + "</address>\n";
+        }
+        if (country != null) {
+            theMedic += "\t<country>" + country + "</country>\n";
+        }
+        if (town != null) {
+            theMedic += "\t<town>" + town + "</town>\n";
+        }
+        if (email != null) {
+            theMedic += "\t<email>" + email + "</email>\n";
+        }
+        if (fax != null) {
+            theMedic += "\t<fax>" + fax + "</fax>\n";
+        }
+        if (phone != null) {
+            theMedic += "\t<phone>" + phone + "</phone>\n";
+        }
+        if (web != null) {
+            theMedic += "\t<ptr type=\"web\">" + web + "</ptr>\n";
+        }
+        if (note != null) {
+            theMedic += "\t<note type=\"medic\">" + note + "</note>\n";
+        }
+
+        return theMedic;
     }
 }

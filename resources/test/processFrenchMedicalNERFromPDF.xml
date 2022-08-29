@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+	<text>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.0.1" name="grobid-medical-report" access="2022-08-29T09:57+0000">
+					<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>
+					<ref target="https://github.com/tantikristanti/grobid-medical-report"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<extent>
+					<measure unit="pages">1</measure>
+				</extent>
+			</titleStmt>
+				<availability>
+					<p>Copyright : ©grobid-medical-report (INRIA-Project)</p>
+				</availability>
+			<sourceDesc>
+				<listEntity>
+					
+		DIAGNOSTIC :
+		<procedure>Injection in situ</procedure> de <medicament>Methotrexate</medicament> sur <symptom>cicatrice de césarienne</symptom>
+		
+		RAPPEL CLINIQUE :
+		Antécédents :
+		G4P2 (<value>2</value> <procedure>césariennes</procedure>, )
+		
+		Histoire de la maladie :
+		Échographie du <date>10/02</date> (<persName>Dr Martinez</persName>) : <procedure>diagnostic</procedure> de <physiology>grossesse isthmique</physiology> à <value>5</value> <unit>SA</unit> au
+		niveau de la cicatrice de césarienne.
+		<roleName>Patiente</roleName> adressée aux <location>urgences.</location>
+		<symptom>Douleurs pelviennes</symptom> intermittentes en regard de la cicatrice de césarienne.
+		<symptom>Abdomen souple</symptom>.
+		
+		DESCRIPTION DETAILLEE :
+		
+		Gestes effectués :
+		<procedure>Injection in situ</procedure> de <medicament>Methotrexate</medicament>
+		
+		COMPTE RENDU OPÉRATOIRE :
+		Rachi-anesthésie.
+		<roleName>Patiente</roleName> en position gynécologique.
+		Badigeonnage à la <medicament>bétadine</medicament> et pose de champs stériles.
+		<procedure>Sondage vésical</procedure> évacuateur.
+		Repérage à l'<procedure>échographie</procedure> de la <physiology>grossesse ectopique</physiology> sur cicatrice de césarienne.
+		Vérification de l'absence de vaisseaux en regard du point de ponction.
+		Ponction à l'aiguille à l'aide d'un <anatomy>guide</anatomy> et <device>aspiration du sac gestationnel.</device>
+		<procedure>Injection de 120mg</procedure> de <medicament>Methotrexate</medicament> au niveau du sac gestationnel.
+		Suivi à J7 puis toutes les semaines jusqu'à négativation.
+		Anesthésie pratiquée :
+		Rachi-<procedure>anesthésie</procedure>
+		
+		Courrier validé électroniquement par <persName>Docteur Margo COCO</persName> le <date>29/04/2000</date>
+		
+		-<pathology>-------------</pathology>
+		<persName>Docteur Margo COCO</persName>
+						</listEntity>
+			</sourceDesc>
+		</fileDesc>
+	</text>
+</TEI>

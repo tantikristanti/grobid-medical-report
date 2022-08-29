@@ -42,13 +42,13 @@ public class OrganizationParser extends AbstractParser {
         super(GrobidModels.ORGANIZATION);
     }
 
-    public OrganizationParser(EngineMedicalParsers parsers, CntManager cntManager) {
-        super(GrobidModels.ORGANIZATION, cntManager);
+    public OrganizationParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.ORGANIZATION);
         this.parsers = parsers;
     }
 
-    public OrganizationParser(EngineMedicalParsers parsers) {
-        super(GrobidModels.ORGANIZATION);
+    public OrganizationParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.ORGANIZATION, cntManager);
         this.parsers = parsers;
     }
 

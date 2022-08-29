@@ -15,6 +15,7 @@ import org.grobid.core.layout.*;
 import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.LanguageUtilities;
 import org.grobid.core.utilities.TextUtilities;
+import org.grobid.core.utilities.counters.CntManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,8 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MedicalReportSegmenterParser.class);
 
+    private EngineMedicalParsers parsers;
+
     // default bins for relative position
     private static final int NBBINS_POSITION = 12;
 
@@ -77,9 +80,18 @@ public class MedicalReportSegmenterParser extends AbstractParser {
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     private FeatureFactory featureFactory = FeatureFactory.getInstance();
 
-
     public MedicalReportSegmenterParser() {
         super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
+    }
+
+    public MedicalReportSegmenterParser(EngineMedicalParsers parsers) {
+        super(GrobidModels.MEDICAL_REPORT_SEGMENTER);
+        this.parsers = parsers;
+    }
+
+    public MedicalReportSegmenterParser(EngineMedicalParsers parsers, CntManager cntManager) {
+        super(GrobidModels.MEDICAL_REPORT_SEGMENTER, cntManager);
+        this.parsers = parsers;
     }
 
     /**

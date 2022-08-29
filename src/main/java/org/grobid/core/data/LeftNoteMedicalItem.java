@@ -23,14 +23,16 @@ import java.util.TreeMap;
  */
 public class LeftNoteMedicalItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(HeaderMedicalItem.class);
-
     private List<BoundingBox> coordinates = null;
 
     // map of labels (e.g. <affiliation> or <org>) to LayoutToken
     private Map<String, List<LayoutToken>> labeledTokens;
 
     // information regarding the document
+    private String appVersion = null;
     private String language = null;
+
+    private int nbPages = -1;
     private String idno = null;
     private String org = null;
     private String address = null;
@@ -282,8 +284,25 @@ public class LeftNoteMedicalItem {
         return labeledTokens;
     }
 
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
     public String getLanguage() {
         return language;
+    }
+
+    public int getNbPages() {
+        return nbPages;
+    }
+
+    public void setNbPages(int nbPages) {
+        this.nbPages = nbPages;
     }
 
     public String getAddress() {

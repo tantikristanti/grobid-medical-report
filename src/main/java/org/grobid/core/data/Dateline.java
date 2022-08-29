@@ -116,4 +116,25 @@ public class Dateline  {
 
         return result;
     }
+
+    public String toTEI() {
+        String theDateline = "";
+        if (date != null) {
+            theDateline += "\t<date>" + date + "</date>\n";
+        }
+        if (timeString != null) {
+            theDateline += "\t<time>" + timeString + "</time>\n";
+        }
+        if (placeName != null) {
+            theDateline += "\t<placeName>" + placeName + "</placeName>\n";
+        }
+        if (doctype != null) {
+            theDateline += "\t<note type=\"doctype\">" + doctype + "</note>\n";
+        }
+        if (note != null) {
+            theDateline += "\t<note type=\"date\">" + note + "</note>\n";
+        }
+
+        return theDateline;
+    }
 }

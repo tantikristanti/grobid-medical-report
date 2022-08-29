@@ -39,7 +39,7 @@ public class GrobidMedicalReportProperties extends GrobidProperties {
                     try (InputStream is = GrobidMedicalReportProperties.class.getResourceAsStream(GROBID_MEDICAL_VERSION_FILE)) {
                         grobidMedicalVersion = IOUtils.toString(is, "UTF-8");
                     } catch (IOException e) {
-                        LOGGER.error("Cannot read Grobid version from resources", e);
+                        LOGGER.error("Cannot read grobid-medical-report version from resources", e);
                     }
                     GROBID_MEDICAL_VERSION = grobidMedicalVersion;
                 }

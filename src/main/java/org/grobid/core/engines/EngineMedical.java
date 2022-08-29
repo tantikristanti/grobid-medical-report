@@ -3,15 +3,12 @@ package org.grobid.core.engines;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grobid.core.data.HeaderMedicalItem;
-import org.grobid.core.data.LeftNoteMedicalItem;
-import org.grobid.core.data.MedicalDocument;
+import org.grobid.core.data.*;
 import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.exceptions.GrobidException;
 import org.grobid.core.factory.GrobidMedicalPoolingFactory;
-import org.grobid.core.factory.GrobidPoolingFactory;
 import org.grobid.core.utilities.counters.CntManager;
 import org.grobid.core.utilities.counters.impl.CntManagerFactory;
 import org.grobid.core.utilities.crossref.CrossrefClient;
@@ -43,9 +40,186 @@ public class EngineMedical extends Engine {
         super(loadModels);
     }
 
+    public EngineMedicalParsers getParsers() {
+        return parsers;
+    }
+
     /**
-     * Apply a parsing model for the header of a PDF file based on CRF, using
-     * first three pages of the PDF
+     * @return a new engine from GrobidMedicalPoolingFactory if the execution is parallel. Otherwise, return the instance of the engine.
+     */
+    public static EngineMedical getEngine(boolean preload) {
+        return GrobidMedicalPoolingFactory.getEngineFromPool(preload);
+    }
+
+    public static void setCntManager(CntManager cntManager) {
+        EngineMedical.cntManager = cntManager;
+    }
+
+    public static CntManager getCntManager() {
+        return cntManager;
+    }
+
+    /**
+     * Parse a raw string containing datelines.
+     *
+     * @param dateline - the string containing raw datelines.
+     * @return the list of all structured dateline objects recognized in the string.
+     * @throws IOException
+     */
+    public Dateline processDateline(String dateline) throws Exception {
+        Dateline result = parsers.getDatelineParser().process(dateline);
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing datelines.
+     *
+     * @param dateline - the string containing raw dates.
+     * @return the list of all structured dateline objects recognized in the string.
+     * @throws IOException
+     */
+    public String processDatelineAsRaw(String dateline) throws Exception {
+        List<String> inputs = new ArrayList<String>();
+        inputs.add(dateline.trim());
+        String result = parsers.getDatelineParser().trainingExtraction(inputs).toString();
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing medics.
+     *
+     * @param medic - the string containing raw medics.
+     * @return the list of all structured medic objects recognized in the string.
+     * @throws IOException
+     */
+    public Medic processMedic(String medic) throws Exception {
+        Medic result = parsers.getMedicParser().process(medic);
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing medics.
+     *
+     * @param medic - the string containing raw medics.
+     * @return the list of all structured medic objects recognized in the string.
+     * @throws IOException
+     */
+    public String processMedicAsRaw(String medic) throws Exception {
+        List<String> inputs = new ArrayList<String>();
+        inputs.add(medic.trim());
+        String result = parsers.getMedicParser().trainingExtraction(inputs).toString();
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing patients.
+     *
+     * @param patient - the string containing raw patients.
+     * @return the list of all structured patient objects recognized in the string.
+     * @throws IOException
+     */
+    public Patient processPatient(String patient) throws Exception {
+        Patient result = parsers.getPatientParser().process(patient);
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing patients.
+     *
+     * @param patient - the string containing raw patients.
+     * @return the list of all structured patient objects recognized in the string.
+     * @throws IOException
+     */
+    public String processPatientAsRaw(String patient) throws Exception {
+        List<String> inputs = new ArrayList<String>();
+        inputs.add(patient.trim());
+        String result = parsers.getPatientParser().trainingExtraction(inputs).toString();
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing medical terminologies.
+     *
+     * @param text - the string containing raw text.
+     * @return the list of all structured medical terminology objects recognized in the string.
+     * @throws IOException
+     */
+    public List<MedicalEntity> processMedicalNER(String text) throws Exception {
+        List<MedicalEntity> result = parsers.getFrenchMedicalNERParser().extractNER(text);
+        return result;
+    }
+
+    /**
+     * Parse a raw string containing medical terminologies.
+     *
+     * @param text - the string containing raw text.
+     * @return the list of all structured medical terminologies recognized in the string.
+     * @throws IOException
+     */
+    public StringBuilder processMedicalNERAsRaw(String text) throws Exception {
+        StringBuilder result = parsers.getFrenchMedicalNERParser().extractNERToString(text);
+        return result;
+    }
+
+    /**
+     * Apply a CRF header parsing model on PDF file.
+     * Parse only first three pages of the PDF file (normally, header part can be found in the first page of the document)
+     *
+     * @param inputFile   the path of the PDF file to be processed
+     * @param md5Str      MD5 digest of the processed file
+     * @param result      POJO result
+     * @return the TEI representation of the extracted header information
+     */
+    public String processHeader(String inputFile, String md5Str, HeaderMedicalItem result) {
+        // use the Grobid config builder
+        GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
+            .startPage(0)
+            .endPage(2)
+            .build();
+        return processHeader(inputFile, md5Str, config, result);
+    }
+
+    public String processHeader(String inputFile, String md5Str, GrobidAnalysisConfig config, HeaderMedicalItem result) {
+        // if the result is null, continue with a new instance thus the resulting TEI is still delivered
+        if (result == null) {
+            result = new HeaderMedicalItem();
+        }
+        // call the header medical parser
+        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processingHeader(new File(inputFile), md5Str, result, config);
+        return resultTEI.getLeft();
+    }
+
+    /**
+     * Apply a CRF left-note parsing model on PDF file.
+     * Parse only first three pages of the PDF file (normally, structure organization information can be found in the first page of the document)
+     *
+     * @param inputFile   the path of the PDF file to be processed
+     * @param md5Str      MD5 digest of the processed file
+     * @param result      POJO result
+     * @return the TEI representation of the extracted left-note information
+     */
+    public String processLeftNote(String inputFile, String md5Str, LeftNoteMedicalItem result) {
+        // use the Grobid config builder
+        GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
+            .startPage(0)
+            .endPage(2)
+            .build();
+        return processLeftNote(inputFile, md5Str, config, result);
+    }
+
+    public String processLeftNote(String inputFile, String md5Str, GrobidAnalysisConfig config, LeftNoteMedicalItem result) {
+        // if the result is null, continue with a new instance thus the resulting TEI is still delivered
+        if (result == null) {
+            result = new LeftNoteMedicalItem();
+        }
+        // call the left-note medical parser
+        Pair<String, Document> resultTEI = parsers.getLeftNoteMedicalParser().processingLeftNote(new File(inputFile), md5Str, result, config);
+        return resultTEI.getLeft();
+    }
+
+    /**
+     * Apply a CRF header and left-note parsing models on PDF file.
+     * Parse only first three pages of the PDF file (normally, header and left-note information can be found in the first page of the document)
      *
      * @param inputFile      the path of the PDF file to be processed
      * @param resultHeader   result from the header parser
@@ -59,6 +233,7 @@ public class EngineMedical extends Engine {
         LeftNoteMedicalItem resultLeftNote,
         StringBuilder strLeftNote
     ) {
+        // use the Grobid config builder
         GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
             .startPage(0)
             .endPage(2)
@@ -66,15 +241,6 @@ public class EngineMedical extends Engine {
         return processHeaderLeftNoteMedicalReport(inputFile, null, config, resultHeader, resultLeftNote, strLeftNote);
     }
 
-    /**
-     * Apply a parsing model for the header of a PDF file based on CRF, using
-     * dynamic range of pages as header
-     *
-     * @param inputFile    : the path of the PDF file to be processed
-     * @param resultHeader : header item result
-     * @return the TEI representation of the extracted bibliographical
-     * information
-     */
     public String processHeaderLeftNoteMedicalReport(String inputFile, String md5Str, GrobidAnalysisConfig config,
                                                      HeaderMedicalItem resultHeader, LeftNoteMedicalItem resultLeftNote,
                                                      StringBuilder strLeftNote) {
@@ -89,8 +255,31 @@ public class EngineMedical extends Engine {
         if (strLeftNote == null) {
             strLeftNote = new StringBuilder();
         }
-        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processing(new File(inputFile), md5Str, resultHeader, resultLeftNote, config);
+        // call the header medical parser
+        Pair<String, Document> resultTEI = parsers.getHeaderMedicalParser().processingHeaderLeftNote(new File(inputFile), md5Str, resultHeader,resultLeftNote, config);
         return resultTEI.getLeft(); // the left result is the TEI results, while the right one is the Document object result
+    }
+
+    /**
+     * Apply a CRF French NER model on PDF file.
+     *
+     * @param inputFile   the path of the PDF file to be processed
+     * @param md5Str      MD5 digest of the processed file
+     * @return the TEI representation of the extracted French NER information
+     */
+    public String processFrenchNER(String inputFile, String md5Str) {
+        // use the Grobid config builder
+        GrobidAnalysisConfig config = new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
+            .startPage(-1)
+            .endPage(-1)
+            .build();
+        return processFrenchNER(inputFile, md5Str, config);
+    }
+
+    public String processFrenchNER(String inputFile, String md5Str, GrobidAnalysisConfig config) {
+        // call the French medical parser
+        Pair<String, Document> resultTEI = parsers.getFrenchMedicalNERParser().processing(new File(inputFile), md5Str, config);
+        return resultTEI.getLeft();
     }
 
     /**
@@ -653,10 +842,7 @@ public class EngineMedical extends Engine {
     }
 
     /**
-     * //TODO: remove invalid JavaDoc once refactoring is done and tested (left for easier reference)
-     * Parse and convert the current article into TEI, this method performs the
-     * whole parsing and conversion process. If onlyHeader is true, than only
-     * the tei header data will be created.
+     * Parse and convert the current medical document into TEI. This method performs the whole parsing and conversion process.
      *
      * @param inputFile - absolute path to the pdf to be processed
      * @param md5Str    - MD5 digest of the PDF file to be processed
@@ -705,19 +891,8 @@ public class EngineMedical extends Engine {
         parsers.close();
     }
 
-    public static void setCntManager(CntManager cntManager) {
-        EngineMedical.cntManager = cntManager;
-    }
 
-    public static CntManager getCntManager() {
-        return cntManager;
-    }
 
-    public EngineMedicalParsers getParsers() {
-        return parsers;
-    }
 
-    public static EngineMedical getEngine(boolean preload) {
-        return GrobidMedicalPoolingFactory.getEngineFromPool(preload);
-    }
+
 }

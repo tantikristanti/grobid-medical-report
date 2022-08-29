@@ -5,11 +5,6 @@ import org.grobid.core.data.SoftwareInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 public class GrobidMedicalReportRestProcessGeneric {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportRestProcessGeneric.class);

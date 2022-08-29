@@ -6,11 +6,10 @@
 var grobid = (function($) {
 
 	var teiToDownload;
-	var teiPatentToDownload;
 
 	var block = 0;
 
-    var elementCoords = ['s', 'biblStruct', 'persName', 'figure', 'formula', 'head'];
+    var elementCoords = ['s', 'persName', 'figure', 'head'];
 
 	function defineBaseURL(ext) {
 		var baseUrl = null;
@@ -696,9 +695,6 @@ var grobid = (function($) {
 		var width = thePos.w * scale_x;
 		var height = thePos.h * scale_y;
 
-        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-        console.log('location: ' + canvasHeight + " " + canvasWidth);
-        console.log('location: ' + page_height + " " + page_width);*/
 		//make clickable the area
 		var element = document.createElement("a");
 		var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
@@ -976,101 +972,6 @@ var grobid = (function($) {
  		return tnCanvas.toDataURL();
 	}
 
-	function setupPatentAnnotations(response) {
-		// we must check/wait that the corresponding PDF page is rendered at this point
-
-		var json = response;
-		var pageInfo = json.pages;
-
-		var page_height = 0.0;
-		var page_width = 0.0;
-
-		var patents = json.patents;
-		if (patents) {
-			for(var n in patents) {
-				var annotation = patents[n];
-				var pos = annotation.pos;
-				var theUrl = null;
-				if (annotation.url && annotation.url.espacenet)
-					theUrl = annotation.url.espacenet;
-				else if (annotation.url && annotation.url.epoline)
-					theUrl = annotation.url.epoline;
-				pos.forEach(function(thePos, m) {
-					// get page information for the annotation
-					var pageNumber = thePos.p;
-					if (pageInfo[pageNumber-1]) {
-						page_height = pageInfo[pageNumber-1].page_height;
-						page_width = pageInfo[pageNumber-1].page_width;
-					}
-					annotatePatentBib(true, thePos, theUrl, page_height, page_width);
-				});
-			}
-		}
-
-		var refBibs = json.articles;
-		if (refBibs) {
-			for(var n in refBibs) {
-				var annotation = refBibs[n];
-				//var theId = annotation.id;
-				var theUrl = null;
-				var pos = annotation.pos;
-				//if (pos)
-				//	mapRefBibs[theId] = annotation;
-				//for (var m in pos) {
-				pos.forEach(function(thePos, m) {
-					//var thePos = pos[m];
-					// get page information for the annotation
-					var pageNumber = thePos.p;
-					if (pageInfo[pageNumber-1]) {
-						page_height = pageInfo[pageNumber-1].page_height;
-						page_width = pageInfo[pageNumber-1].page_width;
-					}
-					annotatePatentBib(false, thePos, theUrl, page_height);
-				});
-			}
-		}
-	}
-
-	function annotatePatentBib(isPatent, thePos, url, page_height, page_width, theBibPos) {
-		var page = thePos.p;
-		var pageDiv = $('#page-'+page);
-		var canvas = pageDiv.children('canvas').eq(0);
-
-		var canvasHeight = canvas.height();
-		var canvasWidth = canvas.width();
-		var scale_y = canvasHeight / page_height;
-		var scale_x = canvasWidth / page_width;
-
-		var x = thePos.x * scale_x;
-		var y = thePos.y * scale_y;
-		var width = thePos.w * scale_x;
-		var height = thePos.h * scale_y;
-
-        /*console.log('annotate: ' + page + " " + x + " " + y + " " + width + " " + height);
-        console.log('location: ' + canvasHeight + " " + canvasWidth);
-        console.log('location: ' + page_height + " " + page_width);*/
-		//make clickable the area
-		var element = document.createElement("a");
-		var attributes = "display:block; width:"+width+"px; height:"+height+"px; position:absolute; top:"+y+"px; left:"+x+"px;";
-
-		if (patent) {
-			// this is a patent reference
-			// we draw a line
-			if (url) {
-				element.setAttribute("style", attributes + "border:2px; border-style:none none solid none; border-color: blue;");
-				element.setAttribute("href", url);
-				element.setAttribute("target", "_blank");
-			}
-			else
-				element.setAttribute("style", attributes + "border:1px; border-style:none none dotted none; border-color: gray;");
-		} else {
-			// this is a NPL bibliographical reference
-			// we draw a box
-			element.setAttribute("style", attributes + "border:1px solid; border-color: blue;");
-		}
-		pageDiv.append(element);
-	}
-
 	$(document).ready(function() {
 	    $(document).on('shown', '#xmlCode', function(event) {
 	        prettyPrint();
@@ -1081,7 +982,6 @@ var grobid = (function($) {
 		var selected = $('#selectedService option:selected').attr('value');
 		if (block == 1)
 			selected = $('#selectedService2 option:selected').attr('value');
-
 
 		if (selected == 'processHeaderDocument') {
 			createInputFile(selected);
@@ -1095,11 +995,11 @@ var grobid = (function($) {
             $('#teiCoordinatesBlock').hide();
             setBaseUrl('processLeftNoteDocument');
         }
-		else if (selected == 'processFullMedicalTextDocument') {
+		else if (selected == 'processFullMedicalText') {
 			createInputFile(selected);
             $('#segmentSentencesBlock').show();
             $('#teiCoordinatesBlock').show();
-			setBaseUrl('processFullMedicalTextDocument');
+			setBaseUrl('processFullMedicalText');
 		}
 		else if (selected == 'processFrenchMedicalNER') {
             createInputFile(selected);
@@ -1109,31 +1009,41 @@ var grobid = (function($) {
         }
 		else if (selected == 'processDateline') {
 			createInputTextArea('dateline');
+			$('#textInputArea').attr('placeholder', 'Example:\n Paris, le 15.12.2019. Intervention du 01/12/2019.');
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
 			setBaseUrl('processDateline');
 		}
-		else if (selected == 'processHeaderNames') {
-			createInputTextArea('names');
+		else if (selected == 'processMedic') {
+			createInputTextArea('medic');
+			$('#textInputArea').attr('placeholder', 'Example:\n Chef de Service Pr. Abagael ZOSIMA. Assistant Dr Woody WOOD.');
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processHeaderNames');
+			setBaseUrl('processMedic');
 		}
-		else if (selected == 'processLeftNoteNames') {
-			createInputTextArea('names');
+		else if (selected == 'processPatient') {
+			createInputTextArea('patient');
+			$('#textInputArea').attr('placeholder', 'Example:\n Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY.');
             $('#segmentSentencesBlock').hide();
             $('#teiCoordinatesBlock').hide();
-			setBaseUrl('processLeftNoteNames');
+			setBaseUrl('processPatient');
 		}
-		else if (selected == 'referenceAnnotations') {
+		else if (selected == 'processNER') {
+            createInputTextArea('ner');
+            $('#textInputArea').attr('placeholder', 'The text sample can be found here: resources/test/MedicalTextExample.txt');
+            $('#segmentSentencesBlock').hide();
+            $('#teiCoordinatesBlock').hide();
+            setBaseUrl('processNER');
+        }
+		else if (selected == 'mentionAnnotations') {
 			createInputFile2(selected);
-			$('#consolidateBlockPDFRef').show();
+			$('#consolidateBlockPDFRef').hide();
             $('#consolidateBlockPDFFig').show();
-			setBaseUrl('referenceAnnotations');
+			setBaseUrl('mentionAnnotations');
 		}
 		else if (selected == 'annotatePDF') {
 			createInputFile2(selected);
-			$('#consolidateBlockPDFRef').show();
+			$('#consolidateBlockPDFRef').hide();
             $('#consolidateBlockPDFFig').hide();
 			setBaseUrl('annotatePDF');
 		}

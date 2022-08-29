@@ -55,19 +55,19 @@ public class PatientParser extends AbstractParser {
     /**
      * Processing of patients in the header part
      */
-    public Patient processing(String input) throws Exception {
+    public Patient process(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
 
         // for language to English for the analyser to avoid any bad surprises
         List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
-        return processing(tokens);
+        return process(tokens);
     }
 
 
     public Patient processingWithLayoutTokens(List<LayoutToken> inputs) {
-        return processing(inputs);
+        return process(inputs);
     }
 
     /**
@@ -76,11 +76,10 @@ public class PatientParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Patient entities as POJO.
      */
-    public Patient processing(List<LayoutToken> tokens) {
+    public Patient process(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<Patient> fullPatients = new ArrayList<>();
         Patient patient = null;
         try {
             List<OffsetPosition> locationsPositions = lexicon.tokenPositionsLocationNames(tokens);
@@ -112,106 +111,92 @@ public class PatientParser extends AbstractParser {
                 String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
                 if (clusterContent.trim().length() == 0)
                     continue;
-
-                if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
-                    if (patient.getID() != null) {
-                        patient.setID(patient.getID() + "\t" + clusterContent);
+                // we assume there is only one unique patient can be found in the header part of each document (but having different number ID)
+                if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+                    if (patient.getIDType() != null) {
+                        patient.setIDType(patient.getIDType() + "\t" + clusterContent);
                     } else {
-                        patient.setID(clusterContent);
+                        patient.setIDType(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
-                if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+                if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
                     if (patient.getID() != null) {
-                        patient.setID(patient.getID() + "\t" + clusterContent);
+                        patient.setID(patient.getID() + "; " + clusterContent);
                     } else {
                         patient.setID(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
-                    if (patient.getPersName() != null) {
-                        patient.setPersName(patient.getPersName() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getPersName() == null) {
                         patient.setPersName(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
-                    if (patient.getSex() != null) {
-                        patient.setSex(patient.getSex() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getSex() == null) {
                         patient.setSex(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
-                    if (patient.getDateBirth() != null) {
-                        patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getDateBirth() == null) {
                         patient.setDateBirth(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_PLACE_BIRTH)) {
-                    if (patient.getPlaceBirth() != null) {
-                        patient.setPlaceBirth(patient.getPlaceBirth() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getPlaceBirth() == null) {
                         patient.setPlaceBirth(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_AGE)) {
-                    if (patient.getAge() != null) {
-                        patient.setAge(patient.getAge() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getAge() == null) {
                         patient.setAge(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
-                    if (patient.getDateDeath() != null) {
-                        patient.setDateDeath(patient.getDateDeath() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getDateDeath() == null) {
                         patient.setDateDeath(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
-                    if (patient.getAddress() != null) {
-                        patient.setAddress(patient.getAddress() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getAddress() == null) {
                         patient.setAddress(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
-                    if (patient.getCountry() != null) {
-                        patient.setCountry(patient.getCountry() + "\t" + clusterContent);
-                    } else {
+                    if (patient.getCountry() == null) {
                         patient.setCountry(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
                     if (patient.getTown() != null) {
-                        patient.setTown(patient.getTown() + "\t" + clusterContent);
-                    } else {
                         patient.setTown(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
-                    if (patient.getPhone() != null) {
-                        patient.setPhone(patient.getPhone() + "\t" + clusterContent);
+                    if (patient.getPhone() != null &&
+                        isDifferentContent(patient.getPhone(), clusterContent) &&
+                        patient.getPhone().length() < clusterContent.length()) {
+                        patient.setPhone(patient.getPhone() + "; " + clusterContent);
                     } else {
                         patient.setPhone(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_EMAIL)) {
-                    if (patient.getEmail() != null) {
-                        patient.setEmail(patient.getEmail() + "\t" + clusterContent);
+                    if (patient.getEmail() != null &&
+                        isDifferentContent(patient.getEmail(), clusterContent) &&
+                        patient.getEmail().length() < clusterContent.length()) {
+                        patient.setEmail(patient.getEmail() + "; " + clusterContent);
                     } else {
                         patient.setEmail(clusterContent);
                     }
@@ -219,20 +204,38 @@ public class PatientParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                     if (patient.getNote() != null) {
-                        patient.setNote(patient.getNote() + "\t" + clusterContent);
+                        patient.setNote(patient.getNote() + " " + clusterContent);
                     } else {
                         patient.setNote(clusterContent);
                     }
                     patient.addLayoutTokens(cluster.concatTokens());
                 }
-                /*if (patient != null) {
-                    fullPatients.add(patient);
-                }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
         }
         return patient;
+    }
+
+    /**
+     * In the context of field extraction, check if a newly extracted content is not redundant
+     * with the already extracted content
+     */
+    private boolean isDifferentContent(String existingContent, String newContent) {
+        if (existingContent == null) {
+            return true;
+        }
+        if (newContent == null) {
+            return false;
+        }
+        String newContentSimplified = newContent.toLowerCase();
+        newContentSimplified = newContentSimplified.replace(" ", "").trim();
+        String existinContentSimplified = existingContent.toLowerCase();
+        existinContentSimplified = existinContentSimplified.replace(" ", "").trim();
+        if (newContentSimplified.equals(existinContentSimplified))
+            return false;
+        else
+            return true;
     }
 
     /**
@@ -242,9 +245,7 @@ public class PatientParser extends AbstractParser {
      * @param tokenizations list of tokens
      * @return list of patients
      */
-    public List<Patient> resultExtractionLayoutTokens(String result,
-                                                      List<LayoutToken> tokenizations) {
-        List<Patient> patients = new ArrayList<>();
+    public Patient resultExtractionLayoutTokens(String result, List<LayoutToken> tokenizations) {
         Patient patient = new Patient();
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.PATIENT, result, tokenizations);
 
@@ -259,105 +260,91 @@ public class PatientParser extends AbstractParser {
             Engine.getCntManager().i(clusterLabel);
 
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
-            if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
-                if (patient.getID() != null) {
-                    patient.setID(patient.getID() + "\t" + clusterContent);
+            if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+                if (patient.getIDType() != null) {
+                    patient.setIDType(patient.getIDType() + "\t" + clusterContent);
                 } else {
-                    patient.setID(clusterContent);
+                    patient.setIDType(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
-            if (clusterLabel.equals(MedicalLabels.PATIENT_ID_TYPE)) {
+            if (clusterLabel.equals(MedicalLabels.PATIENT_ID)) {
                 if (patient.getID() != null) {
-                    patient.setID(patient.getID() + "\t" + clusterContent);
+                    patient.setID(patient.getID() + "; " + clusterContent);
                 } else {
                     patient.setID(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_NAME)) {
-                if (patient.getPersName() != null) {
-                    patient.setPersName(patient.getPersName() + "\t" + clusterContent);
-                } else {
+                if (patient.getPersName() == null) {
                     patient.setPersName(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_SEX)) {
-                if (patient.getSex() != null) {
-                    patient.setSex(patient.getSex() + "\t" + clusterContent);
-                } else {
+                if (patient.getSex() == null) {
                     patient.setSex(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_BIRTH)) {
-                if (patient.getDateBirth() != null) {
-                    patient.setDateBirth(patient.getDateBirth() + "\t" + clusterContent);
-                } else {
+                if (patient.getDateBirth() == null) {
                     patient.setDateBirth(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_PLACE_BIRTH)) {
-                if (patient.getPlaceBirth() != null) {
-                    patient.setPlaceBirth(patient.getPlaceBirth() + "\t" + clusterContent);
-                } else {
+                if (patient.getPlaceBirth() == null) {
                     patient.setPlaceBirth(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_AGE)) {
-                if (patient.getAge() != null) {
-                    patient.setAge(patient.getAge() + "\t" + clusterContent);
-                } else {
+                if (patient.getAge() == null) {
                     patient.setAge(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_DATE_DEATH)) {
-                if (patient.getDateDeath() != null) {
-                    patient.setDateDeath(patient.getDateDeath() + "\t" + clusterContent);
-                } else {
+                if (patient.getDateDeath() == null) {
                     patient.setDateDeath(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_ADDRESS)) {
-                if (patient.getAddress() != null) {
-                    patient.setAddress(patient.getAddress() + "\t" + clusterContent);
-                } else {
+                if (patient.getAddress() == null) {
                     patient.setAddress(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_COUNTRY)) {
-                if (patient.getCountry() != null) {
-                    patient.setCountry(patient.getCountry() + "\t" + clusterContent);
-                } else {
+                if (patient.getCountry() == null) {
                     patient.setCountry(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_TOWN)) {
                 if (patient.getTown() != null) {
-                    patient.setTown(patient.getTown() + "\t" + clusterContent);
-                } else {
                     patient.setTown(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_PHONE)) {
-                if (patient.getPhone() != null) {
-                    patient.setPhone(patient.getPhone() + "\t" + clusterContent);
+                if (patient.getPhone() != null &&
+                    isDifferentContent(patient.getPhone(), clusterContent) &&
+                    patient.getPhone().length() < clusterContent.length()) {
+                    patient.setPhone(patient.getPhone() + "; " + clusterContent);
                 } else {
                     patient.setPhone(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_EMAIL)) {
-                if (patient.getEmail() != null) {
-                    patient.setEmail(patient.getEmail() + "\t" + clusterContent);
+                if (patient.getEmail() != null &&
+                    isDifferentContent(patient.getEmail(), clusterContent) &&
+                    patient.getEmail().length() < clusterContent.length()) {
+                    patient.setEmail(patient.getEmail() + "; " + clusterContent);
                 } else {
                     patient.setEmail(clusterContent);
                 }
@@ -365,18 +352,14 @@ public class PatientParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.PATIENT_NOTE)) {
                 if (patient.getNote() != null) {
-                    patient.setNote(patient.getNote() + "\t" + clusterContent);
+                    patient.setNote(patient.getNote() + " " + clusterContent);
                 } else {
                     patient.setNote(clusterContent);
                 }
                 patient.addLayoutTokens(cluster.concatTokens());
             }
-
-            if (patient != null) {
-                patients.add(patient);
-            }
         }
-        return patients;
+        return patient;
     }
 
     /**
@@ -463,7 +446,7 @@ public class PatientParser extends AbstractParser {
                     }
 
                     if (start && (s1 != null)) {
-                        buffer.append("\t<patient>");
+                        //buffer.append("\t<patient>");
                         start = false;
                     }
 
@@ -546,7 +529,7 @@ public class PatientParser extends AbstractParser {
                     }
                     currentTag0 = "";
                     testClosingTag(buffer, currentTag0, lastTag0);
-                    buffer.append("</patient>\n");
+                    //buffer.append("</patient>\n");
                 }
             }
 

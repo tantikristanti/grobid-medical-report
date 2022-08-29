@@ -100,5 +100,4 @@ public class GrobidMedicalReportServiceApplication extends Application<GrobidMed
         LOGGER.info("Configuration file: {}", new File(args[1]).getAbsolutePath());
         new GrobidMedicalReportServiceApplication().run(args);
     }
-
 }

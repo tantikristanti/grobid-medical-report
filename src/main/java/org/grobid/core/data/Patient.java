@@ -178,4 +178,52 @@ public class Patient {
         layoutTokens.addAll(theTokens);
     }
 
+    public String toTEI() {
+        String thePatient = "";
+        if (ID != null) {
+            thePatient += "\t<idno>" + ID + "</idno>";
+        }
+        if (IDType != null) {
+            thePatient += "\t<idType>" + IDType + "</idType>";
+        }
+        if (persName != null) {
+            thePatient += "\t<persName>" + persName + "</persName>";
+        }
+        if (sex != null) {
+            thePatient += "\t<sex>" + sex + "</sex>";
+        }
+        if (dateBirth != null) {
+            thePatient += "\t<birthDate>" + dateBirth + "</birthDate>";
+        }
+        if (placeBirth != null) {
+            thePatient += "\t<birthPlace>" + placeBirth + "</birthPlace>";
+        }
+        if (age != null) {
+            thePatient += "\t<age>" + age + "</age>";
+        }
+        if (dateDeath != null) {
+            thePatient += "\t<death>" + dateDeath + "</death>";
+        }
+        if (address != null) {
+            thePatient += "\t<address>" + address + "</address>";
+        }
+        if (country != null) {
+            thePatient += "\t<country>" + country + "</country>";
+        }
+        if (town != null) {
+            thePatient += "\t<settlement>" + town + "</settlement>";
+        }
+        if (phone != null) {
+            thePatient += "\t<phone>" + phone + "</phone>";
+        }
+        if (email != null) {
+            thePatient += "\t<email>" + email + "</email>";
+        }
+        if (note != null) {
+            thePatient += "\t<note type=\"patient\">" + note + "</note>";
+        }
+
+        return thePatient;
+    }
+
 }

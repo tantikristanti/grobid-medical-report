@@ -583,15 +583,7 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
                 if ((start == offsets.start) && (end == offsets.end)) {
                     result = true;
                 }
-            } /*else {
-				int startToken = ((Entity)object).getStartTokenPos();
-				int endToken = ((Entity)object).getEndTokenPos();
-				if ( (startToken != -1) && (endToken != -1) ) {
-					if ( (startToken == startTokenPos) && (endToken == endTokenPos) ) {
-						result = true;
-					}
-				}
-			}*/
+            }
         }
         return result;
     }
@@ -709,19 +701,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         return buffer.toString();
     }
 
-    /**
-     * Export of entity annotation in TEI standoff format
-     */
-    public String toTEI(String id, int n) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("<stf xml:id=\"" + "ner-" + n + "\" type=\"ne\" who=\"nerd\" when=\"\">");
-        buffer.append("<ptr target=\"id," + offsets.start + "," + offsets.end + "\" />");
-        if (type == Medical_NER_Type.LIVING) {
-            buffer.append("<person>" + rawName + "</person>");
-        }
-        buffer.append("</stf>");
-        return buffer.toString();
-    }
 
     public void generalResultMapping(String labeledResult, List<LayoutToken> tokenizations) {
         if (labeledTokens == null)

@@ -14,14 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Training application for training a target model.
- * How to use : gH 1
- *
- *
+ * Training applications.
  */
 public class MedicalReportTrainerRunner {
     private static Logger LOGGER = LoggerFactory.getLogger(MedicalReportTrainerRunner.class);
-    Utility utility = new Utility();
+    private static Utility utility = null;
 
     private static final List<String> models = Arrays.asList("medical-report-segmenter", "full-medical-text", "header-medical-report",
         "left-note-medical-report", "dateline", "fr-medical-ner", "medic", "patient", "organization", "address", "name-person-medical");
@@ -36,7 +33,6 @@ public class MedicalReportTrainerRunner {
                     return t;
                 }
             }
-
             throw new IllegalStateException("Unsupported RunType with ordinal " + i);
         }
     }
@@ -53,7 +49,7 @@ public class MedicalReportTrainerRunner {
             throw new IllegalStateException(
                 "Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
-        Utility utility = null;
+        utility = new Utility();
         String path2GbdHome = null;
         Double split = 0.0;
         int numFolds = 0;
@@ -96,19 +92,18 @@ public class MedicalReportTrainerRunner {
             }
         }
 
-        if (path2GbdHome == null ) {
+        if (path2GbdHome == null) {
             throw new IllegalStateException(
                 "Grobid-home path not found.\n Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
 
+        utility.initGrobid(path2GbdHome);
         final String path2GbdProperties = path2GbdHome + File.separator + "config" + File.separator + "grobid.properties";
 
         // setting in grobid
         System.out.println("path2GbdHome=" + path2GbdHome + "   path2GbdProperties=" + path2GbdProperties);
-        utility.initGrobid(path2GbdHome);
 
         String model = args[1];
-
         AbstractTrainer trainer;
 
         if (model.equals("medical-report-segmenter")) {
@@ -148,7 +143,7 @@ public class MedicalReportTrainerRunner {
                 System.out.println(AbstractTrainer.runSplitTrainingEvaluation(trainer, split));
                 break;
             case EVAL_N_FOLD:
-                if(numFolds == 0) {
+                if (numFolds == 0) {
                     throw new IllegalArgumentException("N should be > 0");
                 }
                 if (StringUtils.isNotEmpty(outputFilePath)) {

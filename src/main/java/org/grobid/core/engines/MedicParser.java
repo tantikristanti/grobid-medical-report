@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -55,19 +54,19 @@ public class MedicParser extends AbstractParser {
     /**
      * Processing of medics
      */
-    public Medic processing(String input) throws Exception {
+    public Medic process(String input) throws Exception {
         if (StringUtils.isEmpty(input)) {
             return null;
         }
 
         // for language to English for the analyser to avoid any bad surprises
         List<LayoutToken> tokens = GrobidAnalyzer.getInstance().tokenizeWithLayoutToken(input, new Language("en", 1.0));
-        return processing(tokens);
+        return process(tokens);
     }
 
 
     public Medic processingWithLayoutTokens(List<LayoutToken> inputs) {
-        return processing(inputs);
+        return process(inputs);
     }
 
     /**
@@ -76,11 +75,10 @@ public class MedicParser extends AbstractParser {
      * @param tokens list of LayoutToken object to process
      * @return List of identified Medic entities as POJO.
      */
-    public Medic processing(List<LayoutToken> tokens) {
+    public Medic process(List<LayoutToken> tokens) {
         if (CollectionUtils.isEmpty(tokens)) {
             return null;
         }
-        List<Medic> fullMedics = new ArrayList<>();
         Medic medic = null;
         try {
             List<OffsetPosition> locationPositions = lexicon.tokenPositionsLocationNames(tokens);
@@ -113,10 +111,10 @@ public class MedicParser extends AbstractParser {
                 String clusterNonDehypenizedContent = LayoutTokensUtil.toText(cluster.concatTokens());
                 if (clusterContent.trim().length() == 0)
                     continue;
-
+                // we assume there are several medics can be found in the header part of each document
                 if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
                     if (medic.getIdno() != null) {
-                        medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+                        medic.setIdno(medic.getIdno() + "; " + clusterContent);
                     } else {
                         medic.setIdno(clusterContent);
                     }
@@ -132,7 +130,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
                     if (medic.getPersName() != null) {
-                        medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+                        medic.setPersName(medic.getPersName() + "; " + clusterContent);
                     } else {
                         medic.setPersName(clusterContent);
                     }
@@ -140,7 +138,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
                     if (medic.getAffiliation() != null) {
-                        medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+                        medic.setAffiliation(medic.getAffiliation() + "; " + clusterContent);
                     } else {
                         medic.setAffiliation(clusterContent);
                     }
@@ -149,7 +147,7 @@ public class MedicParser extends AbstractParser {
                 if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
                     (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
                     if (medic.getOrganisation() != null) {
-                        medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+                        medic.setOrganisation(medic.getOrganisation() + "; " + clusterContent);
                     } else {
                         medic.setOrganisation(clusterContent);
                     }
@@ -157,7 +155,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
                     if (medic.getInstitution() != null) {
-                        medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+                        medic.setInstitution(medic.getInstitution() + "; " + clusterContent);
                     } else {
                         medic.setInstitution(clusterContent);
                     }
@@ -165,7 +163,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
                     if (medic.getAddress() != null) {
-                        medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+                        medic.setAddress(medic.getAddress() + "; " + clusterContent);
                     } else {
                         medic.setAddress(clusterContent);
                     }
@@ -173,7 +171,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
                     if (medic.getCountry() != null) {
-                        medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+                        medic.setCountry(medic.getCountry() + "; " + clusterContent);
                     } else {
                         medic.setCountry(clusterContent);
                     }
@@ -181,7 +179,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
                     if (medic.getTown() != null) {
-                        medic.setTown(medic.getTown() + "\t" + clusterContent);
+                        medic.setTown(medic.getTown() + "; " + clusterContent);
                     } else {
                         medic.setTown(clusterContent);
                     }
@@ -189,7 +187,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
                     if (medic.getEmail() != null) {
-                        medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+                        medic.setEmail(medic.getEmail() + "; " + clusterContent);
                     } else {
                         medic.setEmail(clusterContent);
                     }
@@ -197,7 +195,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
                     if (medic.getPhone() != null) {
-                        medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+                        medic.setPhone(medic.getPhone() + "; " + clusterContent);
                     } else {
                         medic.setPhone(clusterContent);
                     }
@@ -205,7 +203,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
                     if (medic.getFax() != null) {
-                        medic.setFax(medic.getFax() + "\t" + clusterContent);
+                        medic.setFax(medic.getFax() + "; " + clusterContent);
                     } else {
                         medic.setFax(clusterContent);
                     }
@@ -213,7 +211,7 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
                     if (medic.getWeb() != null) {
-                        medic.setWeb(medic.getFax() + "\t" + clusterContent);
+                        medic.setWeb(medic.getFax() + "; " + clusterContent);
                     } else {
                         medic.setWeb(clusterContent);
                     }
@@ -221,15 +219,12 @@ public class MedicParser extends AbstractParser {
                 }
                 if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
                     if (medic.getNote() != null) {
-                        medic.setNote(medic.getNote() + "\t" + clusterContent);
+                        medic.setNote(medic.getNote() + " " + clusterContent);
                     } else {
                         medic.setNote(clusterContent);
                     }
                     medic.addLayoutTokens(cluster.concatTokens());
                 }
-                /*if (medic != null){
-                    fullMedics.add(medic);
-                }*/
             }
         } catch (Exception e) {
             throw new GrobidException("An exception occurred while running Grobid.", e);
@@ -244,9 +239,7 @@ public class MedicParser extends AbstractParser {
      * @param tokenizations list of tokens
      * @return list of medics
      */
-    public List<Medic> resultExtractionLayoutTokens(String result,
-                                                    List<LayoutToken> tokenizations) {
-        List<Medic> medics = new ArrayList<>();
+    public Medic resultExtractionLayoutTokens(String result, List<LayoutToken> tokenizations) {
         Medic medic = new Medic();
         TaggingTokenClusteror clusteror = new TaggingTokenClusteror(GrobidModels.MEDIC, result, tokenizations);
 
@@ -263,7 +256,7 @@ public class MedicParser extends AbstractParser {
             String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
             if (clusterLabel.equals(MedicalLabels.MEDIC_ID)) {
                 if (medic.getIdno() != null) {
-                    medic.setIdno(medic.getIdno() + "\t" + clusterContent);
+                    medic.setIdno(medic.getIdno() + ";\t" + clusterContent);
                 } else {
                     medic.setIdno(clusterContent);
                 }
@@ -271,7 +264,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_ROLE)) {
                 if (medic.getRole() != null) {
-                    medic.setRole(medic.getRole() + "\t" + clusterContent);
+                    medic.setRole(medic.getRole() + ";\t" + clusterContent);
                 } else {
                     medic.setRole(clusterContent);
                 }
@@ -279,7 +272,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_NAME)) {
                 if (medic.getPersName() != null) {
-                    medic.setPersName(medic.getPersName() + "\t" + clusterContent);
+                    medic.setPersName(medic.getPersName() + ";\t" + clusterContent);
                 } else {
                     medic.setPersName(clusterContent);
                 }
@@ -287,7 +280,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_AFFILIATION)) {
                 if (medic.getAffiliation() != null) {
-                    medic.setAffiliation(medic.getAffiliation() + "\t" + clusterContent);
+                    medic.setAffiliation(medic.getAffiliation() + ";\t" + clusterContent);
                 } else {
                     medic.setAffiliation(clusterContent);
                 }
@@ -296,7 +289,7 @@ public class MedicParser extends AbstractParser {
             if (clusterLabel.equals(MedicalLabels.MEDIC_ORGANISATION) || (clusterLabel.equals(MedicalLabels.MEDIC_SERVICE)) ||
                 (clusterLabel.equals(MedicalLabels.MEDIC_CENTER)) || (clusterLabel.equals(MedicalLabels.MEDIC_ADMINISTRATION))) {
                 if (medic.getOrganisation() != null) {
-                    medic.setOrganisation(medic.getOrganisation() + "\t" + clusterContent);
+                    medic.setOrganisation(medic.getOrganisation() + ";\t" + clusterContent);
                 } else {
                     medic.setOrganisation(clusterContent);
                 }
@@ -304,7 +297,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_INSTITUTION)) {
                 if (medic.getInstitution() != null) {
-                    medic.setInstitution(medic.getInstitution() + "\t" + clusterContent);
+                    medic.setInstitution(medic.getInstitution() + ";\t" + clusterContent);
                 } else {
                     medic.setInstitution(clusterContent);
                 }
@@ -312,7 +305,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_ADDRESS)) {
                 if (medic.getAddress() != null) {
-                    medic.setAddress(medic.getAddress() + "\t" + clusterContent);
+                    medic.setAddress(medic.getAddress() + ";\t" + clusterContent);
                 } else {
                     medic.setAddress(clusterContent);
                 }
@@ -320,7 +313,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_COUNTRY)) {
                 if (medic.getCountry() != null) {
-                    medic.setCountry(medic.getCountry() + "\t" + clusterContent);
+                    medic.setCountry(medic.getCountry() + ";\t" + clusterContent);
                 } else {
                     medic.setCountry(clusterContent);
                 }
@@ -328,7 +321,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_TOWN)) {
                 if (medic.getTown() != null) {
-                    medic.setTown(medic.getTown() + "\t" + clusterContent);
+                    medic.setTown(medic.getTown() + ";\t" + clusterContent);
                 } else {
                     medic.setTown(clusterContent);
                 }
@@ -336,7 +329,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_EMAIL)) {
                 if (medic.getEmail() != null) {
-                    medic.setEmail(medic.getEmail() + "\t" + clusterContent);
+                    medic.setEmail(medic.getEmail() + ";\t" + clusterContent);
                 } else {
                     medic.setEmail(clusterContent);
                 }
@@ -344,7 +337,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_PHONE)) {
                 if (medic.getPhone() != null) {
-                    medic.setPhone(medic.getPhone() + "\t" + clusterContent);
+                    medic.setPhone(medic.getPhone() + ";\t" + clusterContent);
                 } else {
                     medic.setPhone(clusterContent);
                 }
@@ -352,7 +345,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_FAX)) {
                 if (medic.getFax() != null) {
-                    medic.setFax(medic.getFax() + "\t" + clusterContent);
+                    medic.setFax(medic.getFax() + ";\t" + clusterContent);
                 } else {
                     medic.setFax(clusterContent);
                 }
@@ -360,7 +353,7 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_WEB)) {
                 if (medic.getWeb() != null) {
-                    medic.setWeb(medic.getFax() + "\t" + clusterContent);
+                    medic.setWeb(medic.getFax() + ";\t" + clusterContent);
                 } else {
                     medic.setWeb(clusterContent);
                 }
@@ -368,17 +361,14 @@ public class MedicParser extends AbstractParser {
             }
             if (clusterLabel.equals(MedicalLabels.MEDIC_NOTE)) {
                 if (medic.getNote() != null) {
-                    medic.setNote(medic.getNote() + "\t" + clusterContent);
+                    medic.setNote(medic.getNote() + ";\t" + clusterContent);
                 } else {
                     medic.setNote(clusterContent);
                 }
                 medic.addLayoutTokens(cluster.concatTokens());
             }
-            if (medic != null) {
-                medics.add(medic);
-            }
         }
-        return medics;
+        return medic;
     }
 
     /**

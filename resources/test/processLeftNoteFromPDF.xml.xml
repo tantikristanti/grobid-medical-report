@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+	<note place="left" type="hospital-structure" xml:lang="fr">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.0.1" name="grobid-medical-report" access="2022-08-29T11:39+0000">
+					<desc>grobid-medical-report is a GROBID (https://github.com/kermitt2/grobid) module for extracting and structuring French medical reports into structured XML/TEI encoded documents.</desc>
+					<ref target="https://github.com/tantikristanti/grobid-medical-report"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<extent>
+					<measure unit="pages">1</measure>
+				</extent>
+			</titleStmt>
+				<availability>
+					<p>Copyright : ©grobid-medical-report (INRIA-Project)</p>
+				</availability>
+			<sourceDesc>
+				<listOrg>				
+	<medic><roleName>Chef de Service</roleName> : <persName>Pr. A. Gautier Pr Robin HOOD</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 56</phone> <persName>Dr Caroline GENTILE</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 57</phone> <persName>Mme Pauline</persName> <roleName>Kinésithérapeute Rééducation périnéale et abdominale</roleName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 59</phone></medic>
+</listOrg>
+			</sourceDesc>
+		</fileDesc>
+	</note>
+</TEI>

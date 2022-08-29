@@ -158,7 +158,6 @@ public class EngineMedicalParsers extends EngineParsers {
         }
         return organizationParser;
     }
-
     public MedicParser getMedicParser() {
         if (medicParser == null) {
             synchronized (this) {
