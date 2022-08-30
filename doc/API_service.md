@@ -5,7 +5,7 @@ The services in this subsection are provided to receive plain text input and sen
 
 Response status codes are:
 
-| HTTP Status code       | Error reason                                                                                                                                                                                       |
+| HTTP Status code       | Signification                                                                                                                                                                                      |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 200                    | Successful operation.                                                                                                                                                                              |
 | 204                    | Process was completed, but no content could be extracted and structured                                                                                                                            |
@@ -25,14 +25,14 @@ Parse a raw dateline string and return the extracted dateline.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "dateline=Intervention du 14/03/2017" localhost:8090/api/processDateline
+$ curl -X POST -d "dateline=Intervention du 14/03/2017. Paris, le 20.9.2018" localhost:8090/api/processDateline
 ```
 
 The successful operation will return:
 
 ```xml
 <dateline>
-    Intervention <date>du 14/03/2017</date>
+    <note type="date">Intervention</note> du <date>14/03/2017</date>. <placeName>Paris</placeName>, le <date>20.9.2018</date>
 </dateline>
 ```
 
@@ -69,14 +69,14 @@ Parse a raw medic string and return the extracted medical personnel.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "patient=Madame Eva GOODRICH. 666, RUE DU MARRANT 92290 CHATENAY MALABRY." localhost:8090/api/processMedic
+$ curl -X POST -d "patient=Madame Eva GOODRICH 666, RUE DU MARRANT 92290 CHATENAY MALABRY" localhost:8090/api/processPatient
 ```
 
 The successful operation will return:
 
 ```xml
 <patient>
-    <persName>Madame Eva GOODRICH.</persName> <address>666, RUE DU MARRANT 92290 CHATENAY MALABRY.</address>
+    <persName>Madame Eva GOODRICH</persName> <address>666, RUE DU MARRANT 92290 CHATENAY MALABRY</address>
 </patient>
 ```
 
@@ -91,14 +91,14 @@ Parse a raw medic string and return the extracted medical personnel.
 For testing the service, we can use the **cURL** command line. For example:
 
 ```console
-$ curl -X POST -d "ner=Patient ayant présenté une arthrite septique du genou droit à Corynebacterium documentée sur fonction de genou traitée par Daptomycine 1500 mg puis relais par Linézolide 600 mg *2." localhost:8090/api/processNER
+$ curl -X POST -d "ner=Madame Renee MASSON ayant présenté une arthrite septique du genou droit à Corynebacterium documentée sur fonction de genou traitée par Daptomycine 1500 mg puis relais par Linézolide 600 mg *2" localhost:8090/api/processNER
 ```
 
 The successful operation will return:
 
 ```xml
 <listEntity>
-    <roleName>Patient</roleName> ayant présenté une <pathology>arthrite septique</pathology> du <anatomy>genou droit</anatomy> à <substance>Corynebacterium</substance> documentée sur fonction de <anatomy>genou</anatomy> traitée par <medicament>Daptomycine 1500 mg</medicament> puis relais par <medicament>Linézolide 600 mg *2.</medicament>
+    <persName>Madame Renee MASSON</persName> ayant présenté une <pathology>arthrite septique</pathology> du <anatomy>genou droit</anatomy> à <substance>Corynebacterium</substance> documentée sur fonction de <anatomy>genou</anatomy> traitée par <medicament>Daptomycine 1500 mg</medicament> puis relais par <medicament>Linézolide 600 mg *2</medicament>
 </listEntity>
 ```
 
@@ -110,7 +110,7 @@ The services in this subsection are provided to receive PDF file input and send 
 
 Response status codes:
 
-|     HTTP Status code | reason                                                                                                                                                                                             |
+|     HTTP Status code | Signification                                                                                                                                                                                             |
 |---                   |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |         200          | Successful operation.                                                                                                                                                                              |
 |         204          | Process was completed, but no content could be extracted and structured                                                                                                                            |
