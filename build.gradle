@@ -8,6 +8,8 @@ buildscript {
     }
     dependencies {
         classpath 'gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.12.0'
+        classpath "gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0"
+        classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
     }
 }
 
@@ -15,6 +17,20 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+task install(dependsOn: publishToMavenLocal)
 
 group = "org.grobid"
 version = '0.0.1'
@@ -365,3 +381,44 @@ task train_french_medical_ner_split(dependsOn: 'classes', type: JavaExec, group:
     args 2, 'fr-medical-ner', '-gH', getArg('gH', '../grobid-home'), '-s', getArg('s', '0.8')
     jvmArgs '-Xmx3072m'
 }
+
+
+jar {
+    from {
+        project.configurations.runtimeClasspath.collect {
+            //it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+shadowJar {
+    archiveClassifier = 'onejar'
+    mergeServiceFiles()
+    zip64 true
+    manifest {
+        attributes 'Main-Class': 'org.grobid.core.main.batch.GrobidMedicalReportMain'
+    }
+    from sourceSets.main.output
+
+    from {
+        project.configurations.runtimeClasspath.collect {
+            //it.isDirectory() ? [] : localLibs.contains(it.getName()) ? zipTree(it) : []
+        }
+    }
+}
+
+artifacts {
+    archives shadowJar
+    archives jar
+}
+
+processResources {
+    filesMatching('grobid-medical-version.txt') {
+        filter {
+            it.replace('project.version', project.property('version'))
+        }
+    }
+}
+
+build.dependsOn project.getSubprojects().collect({ it.getTasks().getByName("build") })
