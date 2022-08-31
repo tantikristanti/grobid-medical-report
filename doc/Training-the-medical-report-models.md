@@ -112,14 +112,31 @@ There are three possibilities for generating new data:
 - Extraction of pseudo data with labels
 - Extraction of original data without labels
 
-### Generate original data with labels 
+### Generate datasets with labels 
+#### --> Datasets for parsing and restructuring models
 For the provided PDF files, this batch command will generate training data for all **grobid-medical-report** models. 
 
 ```bash
-$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTraining
+$  ./gradlew createTraining -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory] 
 ```
 
-This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted files are stored.
+Example:
+```bash
+$ ./gradlew createTraining -PdIn=../pdfExample/ -PdOut=../result
+```
+
+#### --> Datasets for the French medical NER model
+
+```bash
+$  ./gradlew createTrainingFrenchMedicalNER -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory] 
+```
+
+Example:
+```bash
+$ ./gradlew createTrainingFrenchMedicalNER -PdIn=../pdfExample/ -PdOut=../result
+```
+
+These commands require the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted files are stored.
 
 Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
 
@@ -140,19 +157,25 @@ Both steps are performed automatically with the following commands.
 For the provided PDF files, this command will generate reference files for data pseudonymization.
 
 ```bash
-$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createDataAnonymized
+$  ./gradlew createDataAnonymized -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory] 
 ```
 
 This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the reference files are stored.
 
-#### 2. Generate pseudo data
+#### 2. Generate datasets with pseudo data
+##### --> Datasets for parsing and restructuring models
 For the provided PDF files, this batch command will generate pseudo data for all **grobid-medical-report** models.
 
 ```bash
-$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTrainingAnonym
+$  ./gradlew createTrainingAnonym -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory]  
 ```
 
-This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted pseudo data are stored.
+##### --> Datasets for the French medical NER model
+```bash
+$  ./gradlew createTrainingAnonymFrenchMedicalNER -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory]  
+```
+
+These commands require the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted pseudo data are stored.
 
 Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
 
@@ -182,7 +205,7 @@ This procedure will also generate new training data for all **grobid-medical-rep
 For the provided PDF files, this batch command will generate blank training data for all **grobid-medical-report** models.
 
 ```bash
-$  java -Xmx4G -jar build/libs/grobid-medical-report-0.0.1-onejar.jar -gH ../grobid-home -dIn [~/path_to_input_directory/] -dOut [~/path_to_output_directory] -exe createTrainingBlank
+$  ./gradlew createTrainingBlank -PdIn [~/path_to_input_directory/] -PdOut [~/path_to_output_directory] 
 ```
 
 This command requires the definition of input (`-dIn` parameter) and output (`-dOut` parameter) directories. The input directory refers to the directory containing the input PDF files. The output directory refers to the directory where the extracted data are stored.
@@ -190,7 +213,6 @@ This command requires the definition of input (`-dIn` parameter) and output (`-d
 Suppose we want to generate new training data from the Pdf file `File01.pdf`. By using this command, **grobid-medical-report** will call the pre-trained models and will generate two types of files for each model. The types of extracted files can be seen in the following table:
 
 ![createTraining](img/CreateTrainingBlank.png)
-
 
 ## Annotation guidelines
 After generating the new data, the next step before we can use them as train and test datasets is to correct the pre-annotated data (`*.tei.xml`). Guidance on how to correct pre-annotated data can be found here [Annotation guidelines](training/Annotation_guidelines.md).

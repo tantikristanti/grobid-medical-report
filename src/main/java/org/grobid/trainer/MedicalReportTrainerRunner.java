@@ -39,16 +39,19 @@ public class MedicalReportTrainerRunner {
 
 
     public static void main(String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
+            throw new IllegalStateException(
+                "Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home}");
+        }
+
+        // the mode of train and or evaluation
+        RunType mode = RunType.getRunType(Integer.parseInt(args[0]));
+        if ((mode == RunType.SPLIT || mode == RunType.EVAL_N_FOLD) && (args.length < 4)) {
             throw new IllegalStateException(
                 "Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
 
-        RunType mode = RunType.getRunType(Integer.parseInt(args[0]));
-        if ((mode == RunType.SPLIT || mode == RunType.EVAL_N_FOLD) && (args.length < 6)) {
-            throw new IllegalStateException(
-                "Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
-        }
+        // start grobid-home
         utility = new Utility();
         String path2GbdHome = null;
         Double split = 0.0;
@@ -90,11 +93,6 @@ public class MedicalReportTrainerRunner {
                 outputFilePath = args[i + 1];
 
             }
-        }
-
-        if (path2GbdHome == null) {
-            throw new IllegalStateException(
-                "Grobid-home path not found.\n Usage: {" + String.join(", ", options) + "} {" + String.join(", ", models) + "} -gH /path/to/Grobid/home -s { [0.0 - 1.0] - split ratio, optional} -n {[int, num folds for n-fold evaluation, optional]}");
         }
 
         utility.initGrobid(path2GbdHome);

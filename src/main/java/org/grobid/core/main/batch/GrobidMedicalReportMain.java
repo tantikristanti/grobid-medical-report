@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,32 +26,8 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  */
 public class GrobidMedicalReportMain {
     private static Logger LOGGER = LoggerFactory.getLogger(GrobidMedicalReportMain.class);
-    // commands for creating training data (for annotators)
-    private static final String COMMAND_CREATE_TRAINING_BLANK = "createTrainingBlank";
-    private static final String COMMAND_CREATE_TRAINING = "createTraining";
-    private static final String COMMAND_CREATE_DATA_ANONYM = "createDataAnonymized";
-    private static final String COMMAND_CREATE_TRAINING_ANONYM = "createTrainingAnonym";
-    private static final String COMMAND_CREATE_TRAINING_BLANK_FRENCH_MEDICAL_NER = "createTrainingBlankFrenchMedicalNER";
-    private static final String COMMAND_CREATE_TRAINING_FRENCH_MEDICAL_NER = "createTrainingFrenchMedicalNER";
-    private static final String COMMAND_CREATE_TRAINING_ANONYM_FRENCH_MEDICAL_NER = "createTrainingAnonymFrenchMedicalNER";
 
-    // commands for processing the data (for end-users)
-    private static final String COMMAND_PROCESS_HEADER = "processHeader";
-    private static final String COMMAND_PROCESS_FULL_TEXT = "processFullText";
-
-    private static List<String> availableCommands = Arrays.asList(
-        COMMAND_CREATE_TRAINING_BLANK,
-        COMMAND_CREATE_TRAINING,
-        COMMAND_CREATE_DATA_ANONYM,
-        COMMAND_CREATE_TRAINING_ANONYM,
-
-        COMMAND_CREATE_TRAINING_BLANK_FRENCH_MEDICAL_NER,
-        COMMAND_CREATE_TRAINING_FRENCH_MEDICAL_NER,
-        COMMAND_CREATE_TRAINING_ANONYM_FRENCH_MEDICAL_NER,
-
-        COMMAND_PROCESS_HEADER,
-        COMMAND_PROCESS_FULL_TEXT
-    );
+    private static List<String> availableCommands = new ArrayList<>();
 
     /**
      * Arguments of the batch.
@@ -250,7 +227,6 @@ public class GrobidMedicalReportMain {
         gbdArgs = new GrobidMedicalReportMainArgs();
         availableCommands = ProcessEngineMedical.getUsableMethods();
         utility = new Utility();
-
         if (processArgs(args) && (gbdArgs.getProcessMethodName() != null)) {
             inferParamsNotSet();
             if (isNotEmpty(gbdArgs.getPath2grobidHome())) {
