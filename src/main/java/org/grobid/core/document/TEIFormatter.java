@@ -929,18 +929,15 @@ public class TEIFormatter {
                 if (curParagraph != null)
                     curParagraphTokens.addAll(cluster.concatTokens());
             } else if (clusterLabel.equals(MedicalLabels.FIGURE) || clusterLabel.equals(MedicalLabels.TABLE)) {
-                //figureBlock = true;
                 if (curParagraph != null)
                     curParagraph.appendChild(new Text(" "));
-            }
-            if (clusterLabel.equals(MedicalLabels.PATIENT)) {
+            } else if (clusterLabel.equals(MedicalLabels.PATIENT)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 //Element patient = teiElement("patient", clusterContent);
                 Element patient = new Element("patient");
                 curDiv.appendChild(patient);
                 patient.appendChild(clusterContent);
-            }
-            if (clusterLabel.equals(MedicalLabels.MEDIC)) {
+            } else if (clusterLabel.equals(MedicalLabels.MEDIC)) {
                 String clusterContent = LayoutTokensUtil.normalizeDehyphenizeText(cluster.concatTokens());
                 //Element medic = teiElement("medic", clusterContent);
                 Element medic = new Element("medic");
@@ -983,8 +980,8 @@ public class TEIFormatter {
             buffer.append(XmlBuilderUtils.toXml(curDiv));
 
         // we apply some overall cleaning and simplification
-        buffer = TextUtilities.replaceAll(buffer, "</head><head",
-            "</head>\n\t\t\t</div>\n\t\t\t<div>\n\t\t\t\t<head");
+        buffer = TextUtilities.replaceAll(buffer, "\\<\\/head\\>\\<head",
+            "\\<\\/head>\n\t\t\t\\<\\/div\\>\n\t\t\t\\<div>\n\t\t\t\t\\<head");
         buffer = TextUtilities.replaceAll(buffer, "</p>\t\t\t\t<p>", " ");
 
         //TODO: work on reconnection

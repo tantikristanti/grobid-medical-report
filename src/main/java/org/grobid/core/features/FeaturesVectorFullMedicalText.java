@@ -151,21 +151,6 @@ public class FeaturesVectorFullMedicalText {
               res.append(" 0\n");
           */
 
-        if (calloutType != null)
-            res.append(" " + calloutType);
-        else
-            res.append(" UNKNOWN");
-
-        if (calloutKnown)
-            res.append(" 1");
-        else
-            res.append(" 0");
-
-        if (superscript)
-            res.append(" 1");
-        else
-            res.append(" 0");
-
         res.append("\n");
 
         return res.toString();

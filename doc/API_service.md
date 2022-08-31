@@ -18,9 +18,9 @@ Response status codes are:
 
 Parse a raw dateline string and return the extracted dateline.
 
-|   method	|  request type 	  | response type 		 |  parameters 	| requirement  	|   description				|
-|---		|---				  |---					 |---			|---			|--- 						|
-| POST, PUT	| application/x-www-form-urlencoded | application/xml  	| dateline | required	| dateline to be parsed|
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
+|------------|-----------------------------------|--------------------|--------------|----------------|-----------------------|
+| POST, PUT	 | application/x-www-form-urlencoded | application/xml  	 | dateline     | required	      | dateline to be parsed |
 
 For testing the service, we can use the **cURL** command line. For example:
 
@@ -40,7 +40,7 @@ The successful operation will return:
 
 Parse a raw patient string and return the extracted patient data.
 
-|   method	|  request type 	  | response type 		 | parameters 	 | requirement  	| description				      |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---		|---				  |---					 |--------------|---			|----------------------|
 | POST, PUT	| application/x-www-form-urlencoded | application/xml  	| patient      | required	| patient to be parsed |
 
@@ -62,7 +62,7 @@ The successful operation will return:
 
 Parse a raw medic string and return the extracted medical personnel.
 
-|   method	|  request type 	  | response type 		 | parameters 	 | requirement  	| description				      |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---		|---				  |---					 |--------------|---			|----------------------|
 | POST, PUT	| application/x-www-form-urlencoded | application/xml  	| patient      | required	| patient to be parsed |
 
@@ -84,7 +84,7 @@ The successful operation will return:
 
 Parse a raw medic string and return the extracted medical personnel.
 
-|   method	|  request type 	  | response type 		 | parameters 	 | requirement  	| description				  |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---		|---				  |---					 |--------------|---			|------------------|
 | POST, PUT	| application/x-www-form-urlencoded | application/xml  	| ner          | required	| ner to be parsed |
 
@@ -123,7 +123,7 @@ Response status codes:
 
 Extract the header of the input PDF document, normalize it and convert it into a TEI XML format.
 
-|  method   |  request type         |  response type       |  parameters         |  requirement  |  description  |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---        |---                    |---                   |---                  |---            |---            |
 | POST, PUT | `multipart/form-data` | `application/xml`    | `input`             | required      | PDF file to be processed |
 
@@ -217,7 +217,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 
 Extract the header of the input PDF document, normalize it and convert it into a TEI XML format.
 
-|  method   |  request type         |  response type       |  parameters         |  requirement  |  description  |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---        |---                    |---                   |---                  |---            |---            |
 | POST, PUT | `multipart/form-data` | `application/xml`    | `input`             | required      | PDF file to be processed |
 
@@ -297,7 +297,7 @@ The successful operation will return:
 ### /api/processFullMedicalText
 Extract the header of the input PDF document, normalize it and convert it into a TEI XML format.
 
-|  method   |  request type         |  response type       |  parameters         |  requirement  |  description  |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---        |---                    |---                   |---                  |---            |---            |
 | POST, PUT | `multipart/form-data` | `application/xml`    | `input`             | required      | PDF file to be processed |
 
@@ -334,7 +334,7 @@ The successful operation will return:
 <TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xmlns:xlink="http://www.w3.org/1999/xlink">
-	<teiHeader xml:lang="fr">
+    <teiHeader xml:lang="fr">
         <encodingDesc>
             <appInfo>
                 <application version="0.0.1" name="grobid-medical-report" access="2022-08-30T09:01+0000">
@@ -342,8 +342,8 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <ref target="https://github.com/tantikristanti/grobid-medical-report"/>
                 </application>
             </appInfo>
-		</encodingDesc>
-		<fileDesc>
+        </encodingDesc>
+        <fileDesc>
             <titleStmt>
                 <title type="main">COMPTE RENDU OPÉRATOIRE</title>
                 <extent>
@@ -362,15 +362,15 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     </address>
                 </publisher>
             </publicationStmt>
-			<sourceDesc>
-				<listPerson type="medics">
-					<medic>
-						<persName>Dr Mathieu MERLIN; Dr Leroy BLANC; Dr Jolie MASSON</persName>
-						<roleName>Opérateur	Assistant	Anesthésiste</roleName>
-					</medic>
-				</listPerson>
-				<listOrg>				
-	                <medic><roleName>Chef de Service</roleName> : <persName>Pr. A. Gautier Pr Robin HOOD</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 56</phone> <persName>Dr Caroline GENTILE</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 57</phone> <persName>Mme Pauline</persName> <roleName>Kinésithérapeute Rééducation périnéale et abdominale</roleName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 59</phone></medic>
+            <sourceDesc>
+                <listPerson type="medics">
+                    <medic>
+                        <persName>Dr Mathieu MERLIN; Dr Leroy BLANC; Dr Jolie MASSON</persName>
+                        <roleName>Opérateur	Assistant	Anesthésiste</roleName>
+                    </medic>
+                </listPerson>
+                <listOrg>				
+                    <medic><roleName>Chef de Service</roleName> : <persName>Pr. A. Gautier Pr Robin HOOD</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 56</phone> <persName>Dr Caroline GENTILE</persName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 57</phone> <persName>Mme Pauline</persName> <roleName>Kinésithérapeute Rééducation périnéale et abdominale</roleName> <orgName>Secrétariat</orgName> : <phone>01 41 12 34 59</phone></medic>
                 </listOrg>
                 <listPerson type="patients">
                     <patient>
@@ -382,16 +382,41 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                         <address>666, Avenue de la République LE KREMLIN BICETRE;</address>
                     </patient>
                 </listPerson>
-			</sourceDesc>
-		</fileDesc>
-	</teiHeader>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
     <body>
-        <div><head level="1">DIAGNOSTIC :</head><p>Injection in situ de Methotrexate sur cicatrice de césarienne</p></div>
-        <div><head level="1">RAPPEL CLINIQUE :</head></div>
-        <div><head level="2">Antécédents :</head><p>G4P2 (2 césariennes, )</p></div>
-        <div><head level="1">Histoire de la maladie :</head><p>Échographie du 10/02 (</p><medic>Dr Martinez</medic><p>) : diagnostic de grossesse isthmique à 5 SA au niveau de la cicatrice de césarienne. Patiente adressée aux urgences. Douleurs pelviennes intermittentes en regard de la cicatrice de césarienne. Abdomen souple.</p></div>
-        <div><head level="1">DESCRIPTION DETAILLEE :</head><p>Gestes effectués :</p><p>Injection in situ de Methotrexate </p></div>
-        <div><head level="1">COMPTE RENDU OPÉRATOIRE :</head><medic>Docteur Margo COCO</medic><p>le 29/04/2000</p><p>--------------Docteur</p><medic>Margo COCO</medic></div>
+        <div>
+            <head level="1">DIAGNOSTIC :</head>
+            <p>Injection in situ de Methotrexate sur cicatrice de césarienne</p>
+        </div>
+        <div>
+            <head level="1">RAPPEL CLINIQUE :</head>
+        </div>
+        <div>
+            <head level="2">Antécédents :</head>
+            <p>G4P2 (2 césariennes, )</p>
+        </div>
+        <div>
+            <head level="2">Histoire de la maladie :</head>
+            <p>Échographie du 10/02 (</p>
+            <medic>Dr Martinez</medic>
+            <p>) : diagnostic de grossesse isthmique à 5 SA au niveau de la cicatrice de césarienne. Patiente adressée aux urgences. Douleurs pelviennes intermittentes en regard de la cicatrice de césarienne. Abdomen souple.</p>
+        </div>
+        <div>
+            <head level="1">DESCRIPTION DETAILLEE :</head>
+            <p>Gestes effectués :</p>
+            <p>Injection in situ de Methotrexate </p>
+        </div>
+        <div>
+            <head level="1">COMPTE RENDU OPÉRATOIRE :</head>
+            <medic>Docteur Margo COCO</medic>
+            <p>le 29/04/2000</p>
+        </div>
+        <div>
+            <p>______________</p>
+            <medic>Docteur Margo COCO</medic>
+        </div>
     </body>
 </TEI>
 ```
@@ -403,7 +428,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 ### /api/processFrenchMedicalNER
 Extract the header of the input PDF document, normalize it and convert it into a TEI XML format.
 
-|  method   |  request type         |  response type       |  parameters         |  requirement  |  description  |
+| Method	    | Request type 	                    | Response type 		   | Parameters 	 | Requirement  	 | Description				       |
 |---        |---                    |---                   |---                  |---            |---            |
 | POST, PUT | `multipart/form-data` | `application/xml`    | `input`             | required      | PDF file to be processed |
 
@@ -460,40 +485,67 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <sourceDesc>
                 <listEntity>
                     DIAGNOSTIC :
-                    <procedure>Injection in situ</procedure> de <medicament>Methotrexate</medicament> sur <symptom>cicatrice de césarienne</symptom>
-                    
+                    <procedure>Injection in situ</procedure> de
+                    <medicament>Methotrexate</medicament> sur
+                    <symptom>cicatrice de césarienne</symptom>
+
                     RAPPEL CLINIQUE :
                     Antécédents :
-                    G4P2 (<value>2</value> <procedure>césariennes</procedure>, )
-                    
+                    G4P2 (
+                    <value>2</value>
+                    <procedure>césariennes</procedure>, )
+
                     Histoire de la maladie :
-                    Échographie du <date>10/02</date> (<persName>Dr Martinez</persName>) : <procedure>diagnostic</procedure> de <physiology>grossesse isthmique</physiology> à <value>5</value> <unit>SA</unit> au
+                    Échographie du
+                    <date>10/02</date> (
+                    <persName>Dr Martinez</persName>) :
+                    <procedure>diagnostic</procedure> de
+                    <physiology>grossesse isthmique</physiology> à
+                    <value>5</value>
+                    <unit>SA</unit> au
                     niveau de la cicatrice de césarienne.
-                    <roleName>Patiente</roleName> adressée aux <location>urgences.</location>
+
+                    <roleName>Patiente</roleName> adressée aux
+                    <location>urgences.</location>
                     <symptom>Douleurs pelviennes</symptom> intermittentes en regard de la cicatrice de césarienne.
+
                     <symptom>Abdomen souple</symptom>.
-                    
+
                     DESCRIPTION DETAILLEE :
-                    
+
                     Gestes effectués :
-                    <procedure>Injection in situ</procedure> de <medicament>Methotrexate</medicament>
-                    
+
+                    <procedure>Injection in situ</procedure> de
+                    <medicament>Methotrexate</medicament>
+
                     COMPTE RENDU OPÉRATOIRE :
                     Rachi-anesthésie.
+
                     <roleName>Patiente</roleName> en position gynécologique.
-                    Badigeonnage à la <medicament>bétadine</medicament> et pose de champs stériles.
+                    Badigeonnage à la
+                    <medicament>bétadine</medicament> et pose de champs stériles.
+
                     <procedure>Sondage vésical</procedure> évacuateur.
-                    Repérage à l'<procedure>échographie</procedure> de la <physiology>grossesse ectopique</physiology> sur cicatrice de césarienne.
+                    Repérage à l'
+                    <procedure>échographie</procedure> de la
+                    <physiology>grossesse ectopique</physiology> sur cicatrice de césarienne.
                     Vérification de l'absence de vaisseaux en regard du point de ponction.
-                    Ponction à l'aiguille à l'aide d'un <anatomy>guide</anatomy> et <device>aspiration du sac gestationnel.</device>
-                    <procedure>Injection de 120mg</procedure> de <medicament>Methotrexate</medicament> au niveau du sac gestationnel.
+                    Ponction à l'aiguille à l'aide d'un
+                    <anatomy>guide</anatomy> et
+                    <device>aspiration du sac gestationnel.</device>
+                    <procedure>Injection de 120mg</procedure> de
+                    <medicament>Methotrexate</medicament> au niveau du sac gestationnel.
                     Suivi à J7 puis toutes les semaines jusqu'à négativation.
                     Anesthésie pratiquée :
-                    Rachi-<procedure>anesthésie</procedure>
-                    
-                    Courrier validé électroniquement par <persName>Docteur Margo COCO</persName> le <date>29/04/2000</date>
-                    
-                    -<pathology>-------------</pathology>
+                    Rachi-
+                    <procedure>anesthésie</procedure>
+
+                    Courrier validé électroniquement par
+                    <persName>Docteur Margo COCO</persName> le
+                    <date>29/04/2000</date>
+
+                    ______________
+
                     <persName>Docteur Margo COCO</persName>
                 </listEntity>
             </sourceDesc>
