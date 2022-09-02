@@ -1108,7 +1108,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -1173,7 +1173,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for medical model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1323,7 +1323,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for medical model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1514,7 +1514,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
             return buffer;
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
     }
 
@@ -1716,7 +1716,7 @@ public class MedicalReportSegmenterParser extends AbstractParser {
             }
             return buffer;
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
     }
 

@@ -166,7 +166,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 tei.append("</TEI>\n");
             }
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
         return tei.toString();
     }
@@ -1106,7 +1106,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1267,7 +1267,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1370,7 +1370,7 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);

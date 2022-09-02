@@ -136,9 +136,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -184,9 +184,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -232,9 +232,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -280,9 +280,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -328,9 +328,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -376,9 +376,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -424,9 +424,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -472,9 +472,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -520,9 +520,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)
@@ -568,9 +568,9 @@ public class MedicalNERLexicon{
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } catch (IOException e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         } finally {
             try {
                 if (ist != null)

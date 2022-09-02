@@ -1828,7 +1828,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -1912,7 +1912,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for header medical report.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -2049,7 +2049,7 @@ public class HeaderMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 

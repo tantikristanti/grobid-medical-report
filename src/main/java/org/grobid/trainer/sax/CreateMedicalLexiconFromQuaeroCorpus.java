@@ -62,7 +62,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
                 writeToFile(output);
             }
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -128,7 +128,7 @@ public class CreateMedicalLexiconFromQuaeroCorpus {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for header medical report.", e);
         }
     }

@@ -163,7 +163,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
                     return null;
             }
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
         return null;
     }
@@ -1520,7 +1520,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -1603,7 +1603,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for left-note medical report.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -1754,7 +1754,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -1856,7 +1856,7 @@ public class LeftNoteMedicalParser extends AbstractParser {
             writer.close();
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for medical model.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);

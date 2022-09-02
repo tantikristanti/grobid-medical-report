@@ -216,7 +216,7 @@ public class FullMedicalTextTrainer extends AbstractTrainer {
                 os3.close();
             }
         } catch (Exception e) {
-            LOGGER.error("An exception occurred while running Grobid.", e);
+            LOGGER.error("An exception occurred while running grobid-medical-report.", e);
         }
         return totalExamples;
     }

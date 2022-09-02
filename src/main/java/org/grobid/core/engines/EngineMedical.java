@@ -343,7 +343,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -425,7 +425,7 @@ public class EngineMedical extends Engine {
             }
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -490,7 +490,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -565,7 +565,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -633,7 +633,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -698,7 +698,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -772,7 +772,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
@@ -822,7 +822,7 @@ public class EngineMedical extends Engine {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 

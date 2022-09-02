@@ -148,7 +148,7 @@ public class PersonNameMedicalTrainer extends AbstractTrainer {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
         return totalExamples;
     }

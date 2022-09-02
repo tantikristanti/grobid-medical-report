@@ -250,7 +250,7 @@ public class MedicalReportSegmenterTrainer extends AbstractTrainer {
                 os3.close();
             }
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
         return totalExamples;
     }

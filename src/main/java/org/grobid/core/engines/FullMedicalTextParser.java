@@ -201,7 +201,7 @@ public class FullMedicalTextParser extends AbstractParser {
         } catch (GrobidException e) {
             throw e;
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
     }
 
@@ -1215,7 +1215,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
         } catch (
             Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -2333,7 +2333,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
         } catch (
             Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -3142,7 +3142,7 @@ public class FullMedicalTextParser extends AbstractParser {
             }
 
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -3178,21 +3178,22 @@ public class FullMedicalTextParser extends AbstractParser {
                 dataAnonym = lines.collect(Collectors.toList());
             }
 
-            // treat the anonymized data first
             List<String> dataOriginal = new ArrayList<>();
             List<String> dataAnonymized = new ArrayList<>();
-
-            for (int i = 0; i < dataAnonym.size(); i++) {
-                List<String> dataAnonymSplit = Arrays.asList(dataAnonym.get(i).split("\t"));
-                if (dataAnonymSplit.get(0) != null) {
-                    dataOriginal.add(dataAnonymSplit.get(0));
-                } else {
-                    dataOriginal.add("");
-                }
-                if (dataAnonymSplit.get(1) != null) {
-                    dataAnonymized.add(dataAnonymSplit.get(1));
-                } else {
-                    dataAnonymized.add("");
+            if (dataAnonym != null) {
+                // treat the pseudo data first
+                for (int i = 0; i < dataAnonym.size(); i++) {
+                    List<String> dataAnonymSplit = Arrays.asList(dataAnonym.get(i).split("\t"));
+                    if (dataAnonymSplit.get(0) != null) {
+                        dataOriginal.add(dataAnonymSplit.get(0));
+                    } else {
+                        dataOriginal.add("");
+                    }
+                    if (dataAnonymSplit.get(1) != null) {
+                        dataAnonymized.add(dataAnonymSplit.get(1));
+                    } else {
+                        dataAnonymized.add("");
+                    }
                 }
             }
 
@@ -4108,7 +4109,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
         } catch (
             Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid training" +
+            throw new GrobidException("An exception occurred while running grobid-medical-report training" +
                 " data generation for full text.", e);
         } finally {
             DocumentSource.close(documentSource, true, true, true);
@@ -5010,7 +5011,7 @@ public class FullMedicalTextParser extends AbstractParser {
             return buffer;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
     }
 
@@ -5216,7 +5217,7 @@ public class FullMedicalTextParser extends AbstractParser {
             return buffer;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
     }
 
@@ -5905,7 +5906,7 @@ public class FullMedicalTextParser extends AbstractParser {
             //tei.append("\t</text>\n");
             tei.append("</TEI>\n");
         } catch (Exception e) {
-            throw new GrobidException("An exception occurred while running Grobid.", e);
+            throw new GrobidException("An exception occurred while running grobid-medical-report.", e);
         }
         doc.setTei(tei.toString());
     }
@@ -6009,7 +6010,7 @@ public class FullMedicalTextParser extends AbstractParser {
 
             return refFiles.length;
         } catch (final Exception exp) {
-            throw new GrobidException("An exception occurred while running Grobid batch.", exp);
+            throw new GrobidException("An exception occurred while running grobid-medical-report batch.", exp);
         }
     }
 
