@@ -28,6 +28,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     private String dose = null;
     private String email = null;
     private String fax = null;
+    private String idno = null;
+    private String idtype = null;
     private String living = null;
     private String location = null;
     private String measure = null;
@@ -60,6 +62,8 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         DOSE("DOSE"),
         EMAIL("EMAIL"),
         FAX("FAX"),
+        IDTYPE("IDTYPE"),
+        IDNO("IDNO"),
         LIVING("LIVING"),
         LOCATION("LOCATION"),
         MEASURE("MEASURE"),
@@ -226,6 +230,10 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
             this.stringType = "EMAIL";
         } else if (stringType.toUpperCase().contains("FAX")) {
             this.stringType = "FAX";
+        } else if (stringType.toUpperCase().contains("IDTYPE")) {
+            this.stringType = "IDTYPE";
+        } else if (stringType.toUpperCase().contains("IDNO")) {
+            this.stringType = "IDNO";
         } else if (stringType.toUpperCase().contains("LIVING")) {
             this.stringType = "LIVING";
         } else if (stringType.toUpperCase().contains("LOCATION")) {
@@ -316,6 +324,23 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
         this.fax = fax;
     }
 
+
+    public String getIdno() {
+        return idno;
+    }
+
+    public void setIdno(String idno) {
+        this.idno = idno;
+    }
+
+    public String getIdtype() {
+        return idtype;
+    }
+
+    public void setIdtype(String idtype) {
+        this.idtype = idtype;
+    }
+
     public String getLiving() {
         return living;
     }
@@ -323,7 +348,6 @@ public class MedicalEntity implements Comparable<MedicalEntity> {
     public void setLiving(String living) {
         this.living = living;
     }
-
 
     public String getLocation() {
         return location;

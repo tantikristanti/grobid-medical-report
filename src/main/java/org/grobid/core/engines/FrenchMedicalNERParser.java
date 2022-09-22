@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.GrobidModels;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Entity;
-import org.grobid.core.data.LeftNoteMedicalItem;
 import org.grobid.core.data.MedicalEntity;
 import org.grobid.core.data.Sentence;
 import org.grobid.core.document.*;
@@ -616,9 +615,19 @@ public class FrenchMedicalNERParser extends AbstractParser {
                     entity.setEmail(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_FAX)) {
                 if (entity.getFax() != null) {
-                    entity.setFax(entity.getEmail() + "\t" + clusterNonDehypenizedContent);
+                    entity.setFax(entity.getFax() + "\t" + clusterNonDehypenizedContent);
                 } else
                     entity.setFax(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_IDNO)) {
+                if (entity.getIdno() != null) {
+                    entity.setIdno(entity.getIdno() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setIdno(clusterNonDehypenizedContent);
+            } else if (clusterLabel.equals(MedicalLabels.NER_ID_TYPE)) {
+                if (entity.getIdtype() != null) {
+                    entity.setIdtype(entity.getIdtype() + "\t" + clusterNonDehypenizedContent);
+                } else
+                    entity.setIdtype(clusterNonDehypenizedContent);
             } else if (clusterLabel.equals(MedicalLabels.NER_LIVING)) {
                 if (entity.getLiving() != null) {
                     entity.setLiving(entity.getLiving() + "\t" + clusterNonDehypenizedContent);
@@ -1522,6 +1531,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<ENAMEX type=\"fax\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idtype>", "<ENAMEX type=\"idType\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<ENAMEX type=\"idno\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
             }
             if (!output) {
@@ -1704,6 +1719,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<fax>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idtype>", "<idType>", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<idno>", addSpace);
             }
             if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<living>", addSpace);
@@ -1896,6 +1917,12 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 output = writeField(buffer, s1, lastTag0, s2, "<fax>", "<ENAMEX type=\"fax\">", addSpace);
             }
             if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idtype>", "<ENAMEX type=\"idType\">", addSpace);
+            }
+            if (!output) {
+                output = writeField(buffer, s1, lastTag0, s2, "<idno>", "<ENAMEX type=\"idno\">", addSpace);
+            }
+            if (!output) {
                 output = writeField(buffer, s1, lastTag0, s2, "<living>", "<ENAMEX type=\"living\">", addSpace);
             }
             if (!output) {
@@ -1985,6 +2012,10 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<fax>")) {
                 buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<idtype>")) {
+                buffer.append("</ENAMEX>");
+            } else if (lastTag0.equals("<idno>")) {
+                buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<living>")) {
                 buffer.append("</ENAMEX>");
             } else if (lastTag0.equals("<location>")) {
@@ -2044,6 +2075,10 @@ public class FrenchMedicalNERParser extends AbstractParser {
                 buffer.append("</email>");
             } else if (lastTag0.equals("<fax>")) {
                 buffer.append("</fax>");
+            } else if (lastTag0.equals("<idtype>")) {
+                buffer.append("</idType>");
+            } else if (lastTag0.equals("<idno>")) {
+                buffer.append("</idno>");
             } else if (lastTag0.equals("<living>")) {
                 buffer.append("</living>");
             } else if (lastTag0.equals("<location>")) {

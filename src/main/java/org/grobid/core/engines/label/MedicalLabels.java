@@ -164,19 +164,6 @@ public class MedicalLabels extends TaggingLabels {
     // Left-Note Medical Report Model
     public static final TaggingLabel LEFT_NOTE_IDNO = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ID_NUMBER_LABEL);
     public static final TaggingLabel LEFT_NOTE_AFFILIATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, AFFILIATION_LABEL);
-    public static final TaggingLabel LEFT_NOTE_GHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, GHU_LABEL);
-    public static final TaggingLabel LEFT_NOTE_CHU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CHU_LABEL);
-    public static final TaggingLabel LEFT_NOTE_DMU = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DMU_LABEL);
-    public static final TaggingLabel LEFT_NOTE_POLE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, POLE_LABEL);
-    public static final TaggingLabel LEFT_NOTE_SITE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SITE_LABEL);
-    public static final TaggingLabel LEFT_NOTE_INSTITUTION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, INSTITUTION_LABEL);
-    public static final TaggingLabel LEFT_NOTE_UNIVERSITY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, UNIVERSITY_LABEL);
-    public static final TaggingLabel LEFT_NOTE_HOSPITAL = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, HOSPITAL_LABEL);
-    public static final TaggingLabel LEFT_NOTE_CENTER = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, CENTER_LABEL);
-    public static final TaggingLabel LEFT_NOTE_SERVICE = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SERVICE_LABEL);
-    public static final TaggingLabel LEFT_NOTE_DEPARTMENT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, DEPARTMENT_LABEL);
-    public static final TaggingLabel LEFT_NOTE_UNIT = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, UNIT_LABEL);
-    public static final TaggingLabel LEFT_NOTE_SUB = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, SUB_LABEL);
     public static final TaggingLabel LEFT_NOTE_ORGANIZATION = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ORGANIZATION_LABEL);
     public static final TaggingLabel LEFT_NOTE_ADDRESS = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, ADDRESS_LABEL);
     public static final TaggingLabel LEFT_NOTE_COUNTRY = new TaggingLabelImpl(GrobidModels.LEFT_NOTE_MEDICAL_REPORT, COUNTRY_LABEL);
@@ -200,6 +187,7 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel TABLE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, TABLE_LABEL);
     public static final TaggingLabel MEDIC = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, MEDIC_LABEL);
     public static final TaggingLabel PATIENT = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, PATIENT_LABEL);
+    public static final TaggingLabel NOTE = new TaggingLabelImpl(GrobidModels.FULL_MEDICAL_TEXT, NOTE_LABEL);
 
     // Dateline
     public static final TaggingLabel DATELINE_DOCTYPE = new TaggingLabelImpl(GrobidModels.DATELINE, DOCTYPE_LABEL);
@@ -285,6 +273,8 @@ public class MedicalLabels extends TaggingLabels {
     public static final TaggingLabel NER_DOSE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, DOSE_LABEL);
     public static final TaggingLabel NER_EMAIL = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, EMAIL_LABEL);
     public static final TaggingLabel NER_FAX = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, FAX_LABEL);
+    public static final TaggingLabel NER_IDNO = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, ID_NUMBER_LABEL);
+    public static final TaggingLabel NER_ID_TYPE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, ID_TYPELABEL);
     public static final TaggingLabel NER_LIVING = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LIVING_LABEL);
     public static final TaggingLabel NER_LOCATION = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, LOCATION_LABEL);
     public static final TaggingLabel NER_MEASURE = new TaggingLabelImpl(GrobidModels.FR_MEDICAL_NER, MEASURE_LABEL);
@@ -311,7 +301,6 @@ public class MedicalLabels extends TaggingLabels {
         register(HEADER);
         register(HEADNOTE);
         register(FOOTNOTE);
-        register(MARGINNOTE);
         register(LEFTNOTE);
         register(RIGHTNOTE);
         register(BODY);
@@ -321,6 +310,7 @@ public class MedicalLabels extends TaggingLabels {
 
         // header
         register(HEADER_DOCNUM);
+        register(HEADER_DOCTYPE);
         register(HEADER_TITLE);
         register(HEADER_DATE);
         register(HEADER_TIME);
@@ -334,24 +324,11 @@ public class MedicalLabels extends TaggingLabels {
         register(HEADER_PHONE);
         register(HEADER_FAX);
         register(HEADER_WEB);
-        register(HEADER_DOCTYPE);
+        register(HEADER_NOTE);
 
         // left-note
         register(LEFT_NOTE_IDNO);
         register(LEFT_NOTE_AFFILIATION);
-        register(LEFT_NOTE_GHU);
-        register(LEFT_NOTE_CHU);
-        register(LEFT_NOTE_DMU);
-        register(LEFT_NOTE_POLE);
-        register(LEFT_NOTE_SITE);
-        register(LEFT_NOTE_UNIVERSITY);
-        register(LEFT_NOTE_INSTITUTION);
-        register(LEFT_NOTE_HOSPITAL);
-        register(LEFT_NOTE_CENTER);
-        register(LEFT_NOTE_SERVICE);
-        register(LEFT_NOTE_DEPARTMENT);
-        register(LEFT_NOTE_UNIT);
-        register(LEFT_NOTE_SUB);
         register(LEFT_NOTE_ORGANIZATION);
         register(LEFT_NOTE_ADDRESS);
         register(LEFT_NOTE_COUNTRY);
@@ -364,17 +341,18 @@ public class MedicalLabels extends TaggingLabels {
         register(LEFT_NOTE_NOTE);
 
         // full-medical-report
-        register(TABLE_MARKER);
-        register(FIGURE_MARKER);
-        register(PARAGRAPH);
-        register(ITEM);
         register(TITLE);
         register(SECTION);
         register(SUB_SECTION);
+        register(PARAGRAPH);
+        register(ITEM);
         register(FIGURE);
         register(TABLE);
-        register(PATIENT);
+        register(TABLE_MARKER);
+        register(FIGURE_MARKER);
         register(MEDIC);
+        register(PATIENT);
+        register(NOTE);
 
         // dateline
         register(DATELINE_DOCTYPE);
@@ -383,17 +361,28 @@ public class MedicalLabels extends TaggingLabels {
         register(DATELINE_TIME);
         register(DATELINE_NOTE);
 
+        // organization
+        register(ORGANIZATION_NAME);
+        register(ORGANIZATION_ADDRESS);
+        register(ORGANIZATION_COUNTRY);
+        register(ORGANIZATION_TOWN);
+        register(ORGANIZATION_EMAIL);
+        register(ORGANIZATION_PHONE);
+        register(ORGANIZATION_FAX);
+        register(ORGANIZATION_WEB);
+        register(ORGANIZATION_NOTE);
+
         // medic
         register(MEDIC_ID);
         register(MEDIC_ROLE);
         register(MEDIC_NAME);
         register(MEDIC_AFFILIATION);
+        register(MEDIC_ORGANISATION);
+        register(MEDIC_INSTITUTION);
         register(MEDIC_CENTER);
         register(MEDIC_SERVICE);
         register(MEDIC_DEPARTMENT);
         register(MEDIC_ADMINISTRATION);
-        register(MEDIC_ORGANISATION);
-        register(MEDIC_INSTITUTION);
         register(MEDIC_ADDRESS);
         register(MEDIC_COUNTRY);
         register(MEDIC_TOWN);
@@ -405,14 +394,18 @@ public class MedicalLabels extends TaggingLabels {
 
         // patient
         register(PATIENT_ID);
-        register(PATIENT_SEX);
+        register(PATIENT_ID_TYPE);
         register(PATIENT_NAME);
+        register(PATIENT_SEX);
         register(PATIENT_DATE_BIRTH);
+        register(PATIENT_PLACE_BIRTH);
+        register(PATIENT_AGE);
         register(PATIENT_DATE_DEATH);
         register(PATIENT_ADDRESS);
         register(PATIENT_COUNTRY);
         register(PATIENT_TOWN);
         register(PATIENT_PHONE);
+        register(PATIENT_EMAIL);
         register(PATIENT_NOTE);
 
         // address
@@ -437,5 +430,34 @@ public class MedicalLabels extends TaggingLabels {
         register(NAMES_MIDDLENAME);
         register(NAMES_SURNAME);
         register(NAMES_SUFFIX);
+
+        // medical NER
+        register(NER_ANATOMY);
+        register(NER_DATE);
+        register(NER_DEVICE);
+        register(NER_DOSE);
+        register(NER_EMAIL);
+        register(NER_FAX);
+        register(NER_IDNO);
+        register(NER_ID_TYPE);
+        register(NER_LIVING);
+        register(NER_LOCATION);
+        register(NER_MEASURE);
+        register(NER_OBJECT);
+        register(NER_ORG_NAME);
+        register(NER_PATHOLOGY);
+        register(NER_PERSON_NAME);
+        register(NER_PERSON_TYPE);
+        register(NER_PHONE);
+        register(NER_PHYSIOLOGY);
+        register(NER_PROCEDURE);
+        register(NER_MEDICAMENT);
+        register(NER_ROLE_NAME);
+        register(NER_SUBSTANCE);
+        register(NER_SYMPTOM);
+        register(NER_UNIT);
+        register(NER_TIME);
+        register(NER_VALUE);
+        register(NER_WEB);
     }
 }

@@ -123,6 +123,10 @@ public class FrenchCorpusSaxHandler extends DefaultHandler {
                             currentTag = "<dose>";
                         } else if (value.equals("email")) {
                             currentTag = "<email>";
+                        } else if (value.equals("idno")) {
+                            currentTag = "<idno>";
+                        } else if (value.equals("idtype")) {
+                            currentTag = "<idtype>";
                         } else if (value.equals("fax")) {
                             currentTag = "<fax>";
                         } else if (value.equals("living")) {
