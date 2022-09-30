@@ -126,7 +126,7 @@ Service can be accessed via port 8090 (http://localhost:8090/).
 1. To check whether the service is up:
 ```
     http://localhost:8090/api/isalive
-    >>> The service will return whether the service is up (true) or not (false)
+    >>> The service will return whether it's up (true) or not (false)
 ```
 
 2. To get the service version and description:
