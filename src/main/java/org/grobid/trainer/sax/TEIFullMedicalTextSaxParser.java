@@ -144,15 +144,18 @@ public class TEIFullMedicalTextSaxParser extends DefaultHandler {
                             if (value.equals("licence")) {
                                 currentTags.push("<licence>");
                                 currentTag = "<licence>";
-                            } else if (value.equals("note") || value.equals("other")) {
-                                currentTags.push("<note>");
-                                currentTag = "<note>";
+                            } else if (value.equals("signature")) {
+                                currentTags.push("<signature>");
+                                currentTag = "<signature>";
                             } else if (value.equals("medic")) { // the information concerning medics still found in the body
                                 currentTags.push("<medic>");
                                 currentTag = "<medic>";
                             } else if (value.equals("patient")) { // the information concerning patients still found in the body
                                 currentTags.push("<patient>");
                                 currentTag = "<patient>";
+                            } else if (value.equals("note") || value.equals("other")) {
+                                currentTags.push("<note>");
+                                currentTag = "<note>";
                             } else {
                                 logger.error("Invalid attribute value for element note: " + name + "=" + value);
                             }

@@ -25,7 +25,8 @@ For the full-medical-text model, we use the following TEI elements:
 * `<note>` for headnotes and footnotes that can appear in the body part
     * `<note place="headnote">` for the page header note
     * `<note place="footnote">` for the page footer note
-    * `<note type="licence">` for the licence and data access information 
+    * `<note type="licence">` for the licence and data access information
+    * `<note type="signature">` for the signatures
     * `<note type="note">` for other type of notes
 * `<other>` for unknown (yet) part
 

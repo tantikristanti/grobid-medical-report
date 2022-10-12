@@ -4992,6 +4992,10 @@ public class FullMedicalTextParser extends AbstractParser {
                         "<note type=\"licence\">", addSpace, 3, false);
                 }
                 if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<signature>",
+                        "<note type=\"signature\">", addSpace, 3, false);
+                }
+                if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<note>",
                         "<note type=\"note\">", addSpace, 3, false);
                 }
@@ -5198,6 +5202,10 @@ public class FullMedicalTextParser extends AbstractParser {
                         "<note type=\"licence\">", addSpace, 3, false);
                 }
                 if (!output) {
+                    output = writeField(buffer, s1, lastTag0, s2, "<signature>",
+                        "<note type=\"signature\">", addSpace, 3, false);
+                }
+                if (!output) {
                     output = writeField(buffer, s1, lastTag0, s2, "<note>",
                         "<note type=\"note\">", addSpace, 3, false);
                 }
@@ -5401,6 +5409,8 @@ public class FullMedicalTextParser extends AbstractParser {
             } else if (lastTag0.equals("<patient>")) {
                 buffer.append("</note>\n");
             } else if (lastTag0.equals("<licence>")) {
+                buffer.append("</note>\n");
+            } else if (lastTag0.equals("<signature>")) {
                 buffer.append("</note>\n");
             } else if (lastTag0.equals("<note>")) {
                 buffer.append("</note>\n");
